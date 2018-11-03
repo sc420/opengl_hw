@@ -72,6 +72,8 @@ void My_Init() {
 
   // Bind data
 
+  glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
+
   //TODO: Add program manager and buffer manager
   //TODO: delete buffer
 
@@ -96,7 +98,7 @@ void My_Display() {
 
   glUseProgram(program_sin);
 
-  float f_timer_cnt = timer_cnt / 255.0f;
+  float f_timer_cnt = ((5 * timer_cnt) % 255) / 255.0f;
   // TODO: Generate sphere by octahedron
 
   float data[18] = {-0.5f,
@@ -110,17 +112,15 @@ void My_Display() {
                     0.0f,
                     f_timer_cnt,
                     0.0f,
-                    1.0f - f_timer_cnt,
-                    1.0f,
+                    0.0f,
                     f_timer_cnt,
-                    1.0f - f_timer_cnt,
-                    1.0f - f_timer_cnt,
-                    0.0,
-                    f_timer_cnt};
+                    0.0f,
+                    0.0f,
+                    f_timer_cnt,
+                    0.0f,
+                    0.0f};
 
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
-
-  glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
 
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
@@ -135,7 +135,7 @@ void My_Display() {
   //glBufferSubData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
   //glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(proj));
 
-  glDrawArrays(GL_TRIANGLES, 0, 3);
+  glDrawArrays(GL_TRIANGLES, 0, 3); 
 
   glutSwapBuffers();
 }

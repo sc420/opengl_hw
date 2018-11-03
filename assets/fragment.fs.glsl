@@ -18,6 +18,6 @@ void main()
         fragColor = COLOR_RED;
     }
     else {
-      fragColor = COLOR_WHITE;
+      fragColor = vec4(vv3color, 1.0); //COLOR_WHITE;
     }
 }
