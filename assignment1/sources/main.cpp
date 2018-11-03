@@ -74,22 +74,26 @@ void My_Init() {
 
   glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
 
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
+    reinterpret_cast<GLvoid*>(sizeof(float) * 9));
+
   //TODO: Add program manager and buffer manager
   //TODO: delete buffer
 
-  //glGenBuffers(1, &mvp_buffer_hdlr);
-  //glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
+  glGenBuffers(1, &mvp_buffer_hdlr);
+  glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
+
+  glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
 
   //uniform_manager.RegisterProgram(program_sin, "program");
   //uniform_manager.RegisterBuffer(mvp_buffer_hdlr, "mvp");
   //uniform_manager.AssignBindingPoint("program", "Mvp", 0);
   //uniform_manager.BindBufferToBindingPoint(0, "mvp");
 
-  //GLuint block_index = glGetUniformBlockIndex(program_sin, "mvp");
-  //glUniformBlockBinding(program_sin, block_index, 2);
-  //glBindBufferBase(GL_UNIFORM_BUFFER, 2, mvp_buffer_hdlr);
-
-  //glBufferData(GL_UNIFORM_BLOCK, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+  GLuint block_index = glGetUniformBlockIndex(program_sin, "mvp");
+  glUniformBlockBinding(program_sin, block_index, 0);
+  glBindBufferBase(GL_UNIFORM_BUFFER, 0, mvp_buffer_hdlr);
 }
 
 // GLUT callback. Called to draw the scene.
@@ -122,18 +126,14 @@ void My_Display() {
 
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
-    reinterpret_cast<GLvoid*>(sizeof(float) * 9));
-
   glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
 
   glUniformMatrix4fv(um4mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 
-  //glBindBuffer(GL_UNIFORM_BLOCK, mvp_buffer_hdlr);
-  //glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(model));
-  //glBufferSubData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-  //glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(proj));
+  glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
+  glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(model));
+  glBufferSubData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+  glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(proj));
 
   glDrawArrays(GL_TRIANGLES, 0, 3); 
 
@@ -156,8 +156,6 @@ void My_Reshape(int width, int height) {
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
   model = glm::mat4();
-
-  proj = mvp;
 }
 
 void My_Timer(int val) {
