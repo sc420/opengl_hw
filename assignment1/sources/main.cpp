@@ -86,14 +86,16 @@ void My_Init() {
 
   glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
 
-  //uniform_manager.RegisterProgram(program_sin, "program");
-  //uniform_manager.RegisterBuffer(mvp_buffer_hdlr, "mvp");
-  //uniform_manager.AssignBindingPoint("program", "Mvp", 0);
-  //uniform_manager.BindBufferToBindingPoint(0, "mvp");
+  uniform_manager.RegisterProgram(program_sin, "program");
+  uniform_manager.RegisterBuffer(mvp_buffer_hdlr, "mvp_buffer");
+  uniform_manager.AssignBindingPoint("program", "mvp", 0);
+  uniform_manager.BindBufferToBindingPoint(0, "mvp_buffer");
 
-  GLuint block_index = glGetUniformBlockIndex(program_sin, "mvp");
-  glUniformBlockBinding(program_sin, block_index, 0);
-  glBindBufferBase(GL_UNIFORM_BUFFER, 0, mvp_buffer_hdlr);
+  //GLuint block_index = glGetUniformBlockIndex(program_sin, "mvp");
+  //glUniformBlockBinding(program_sin, block_index, 0);
+  //glBindBufferBase(GL_UNIFORM_BUFFER, 0, mvp_buffer_hdlr);
+
+  //printf("block index: %d, program: %d, buffer: %d\n", block_index, program_sin, mvp_buffer_hdlr);
 }
 
 // GLUT callback. Called to draw the scene.

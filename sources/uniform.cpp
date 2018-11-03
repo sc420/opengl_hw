@@ -88,5 +88,5 @@ GLuint UniformManager::get_buffer_hdlr(const std::string &name)
     throw std::runtime_error("Could not find the buffer name '" + name +
       "'");
   }
-  const GLuint buffer_hdlr = buffer_hdlrs_.at(name);
+  return buffer_hdlrs_.at(name);
 }
