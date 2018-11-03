@@ -45,18 +45,20 @@ void UniformManager::AssignBindingPoint(const std::string &program_name,
     std::map<std::string, GLuint> block_to_point;
     binding_points_[program_name] = block_to_point;
   }
-  std::map<std::string, GLuint> &block_to_points = binding_points_.at(program_name);
+  std::map<std::string, GLuint> &block_to_points =
+      binding_points_.at(program_name);
   block_to_points[block_name] = point;
 }
 
 GLuint UniformManager::GetBindingPoint(const std::string &program_name,
                                        const std::string &block_name) {
-  const std::map<std::string, GLuint> &block_to_points = binding_points_.at(program_name);
+  const std::map<std::string, GLuint> &block_to_points =
+      binding_points_.at(program_name);
   return block_to_points.at(block_name);
 }
 
 void UniformManager::BindBufferToBindingPoint(const GLuint point,
-  const std::string &buffer_name) {
+                                              const std::string &buffer_name) {
   // Get buffer handler
   const GLuint buffer_hdlr = get_buffer_hdlr(buffer_name);
   // Bind the buffer to the binding point
@@ -73,20 +75,16 @@ void UniformManager::BindBufferToBindingPoint(const GLuint point,
   glBindBufferRange(GL_UNIFORM_BUFFER, point, buffer_hdlr, offset, size);
 }
 
-GLuint UniformManager::get_program_hdlr(const std::string &name)
-{
+GLuint UniformManager::get_program_hdlr(const std::string &name) {
   if (program_hdlrs_.count(name) == 0) {
-    throw std::runtime_error("Could not find the program name '" +
-      name + "'");
+    throw std::runtime_error("Could not find the program name '" + name + "'");
   }
   return program_hdlrs_.at(name);
 }
 
-GLuint UniformManager::get_buffer_hdlr(const std::string &name)
-{
+GLuint UniformManager::get_buffer_hdlr(const std::string &name) {
   if (buffer_hdlrs_.count(name) == 0) {
-    throw std::runtime_error("Could not find the buffer name '" + name +
-      "'");
+    throw std::runtime_error("Could not find the buffer name '" + name + "'");
   }
   return buffer_hdlrs_.at(name);
 }

@@ -101,6 +101,12 @@ MessageCallback(GLenum source,
   const GLchar* message,
   const void* userParam)
 {
+  /* Filter based on types */
+  // Ignore API_ID_RECOMPILE_FRAGMENT_SHADER
+  if (type == 0x8250) {
+    return;
+  }
+  /* Print the message */
   fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
     (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
     type, severity, message);

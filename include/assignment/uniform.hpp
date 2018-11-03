@@ -1,3 +1,9 @@
+/**
+ * Uniform Manager
+ *
+ * References:
+ * https://github.com/progschj/OpenGL-Examples/blob/master/06instancing3_uniform_buffer.cpp
+ */
 #pragma once
 
 #include <map>
