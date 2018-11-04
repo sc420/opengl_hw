@@ -13,10 +13,9 @@ class VertexSpecManager {
 
   void BindVertexArray(const std::string &name);
 
-  void SpecifyVertexArrayOrg(const GLuint attrib_idx, const GLint size,
+  void SpecifyVertexArrayOrg(const std::string &name, const GLuint attrib_idx, const GLint size,
                              const GLenum type, const GLboolean normalized,
-                             const GLuint relative_ofs,
-                             const std::string &name);
+                             const GLuint relative_ofs);
 
   void AssocVertexAttribToBindingPoint(const std::string &va_name,
                                        const GLuint attrib_idx,

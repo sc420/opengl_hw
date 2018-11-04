@@ -20,12 +20,12 @@ void VertexSpecManager::BindVertexArray(const std::string& name) {
   glBindVertexArray(hdlr);
 }
 
-void VertexSpecManager::SpecifyVertexArrayOrg(const GLuint attrib_idx,
+void VertexSpecManager::SpecifyVertexArrayOrg(const std::string& name,
+  const GLuint attrib_idx,
                                               const GLint size,
                                               const GLenum type,
                                               const GLboolean normalized,
-                                              const GLuint relative_ofs,
-                                              const std::string& name) {
+                                              const GLuint relative_ofs) {
   // Bind the vertex array
   BindVertexArray(name);
   // Enable the generic vertex attribute array

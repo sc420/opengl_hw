@@ -102,6 +102,7 @@ xcopy /D /Y  "$(SolutionDir)assets\*.glsl" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\sources\buffer.cpp" />
     <ClCompile Include="..\sources\common.cpp" />
     <ClCompile Include="..\sources\program.cpp" />
     <ClCompile Include="..\sources\uniform.cpp" />
@@ -114,6 +115,7 @@ xcopy /D /Y  "$(SolutionDir)assets\*.glsl" "$(OutDir)"</Command>
     <None Include="..\assets\vertex.vs.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\assignment\buffer.hpp" />
     <ClInclude Include="..\include\assignment\common.hpp" />
     <ClInclude Include="..\include\assignment\program.hpp" />
     <ClInclude Include="..\include\assignment\shader.hpp" />

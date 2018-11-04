@@ -32,6 +32,7 @@ void UniformManager::AssignUniformBlockToBindingPoint(
   binding_points_[program_name][block_name] = bind_idx;
 }
 
+//TODO: Move to buffer manager
 void UniformManager::BindBufferToBindingPoint(const GLuint bind_idx,
                                               const std::string &buffer_name) {
   // Get buffer handler
@@ -40,6 +41,7 @@ void UniformManager::BindBufferToBindingPoint(const GLuint bind_idx,
   glBindBufferBase(GL_UNIFORM_BUFFER, bind_idx, buffer_hdlr);
 }
 
+//TODO: Move to buffer manager
 void UniformManager::BindBufferToBindingPoint(const GLuint bind_idx,
                                               const std::string &buffer_name,
                                               const GLintptr offset,

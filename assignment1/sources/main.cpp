@@ -86,9 +86,9 @@ void My_Init() {
   vertex_spec_manager.GenVertexArray("vao");
 
   // Bind vertex arrays to buffers
-  vertex_spec_manager.SpecifyVertexArrayOrg(0, 3, GL_FLOAT, GL_FALSE, 0, "vao");
-  vertex_spec_manager.SpecifyVertexArrayOrg(1, 3, GL_FLOAT, GL_FALSE,
-                                            3 * 3 * sizeof(float), "vao");
+  vertex_spec_manager.SpecifyVertexArrayOrg("vao", 0, 3, GL_FLOAT, GL_FALSE, 0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("vao", 1, 3, GL_FLOAT, GL_FALSE,
+                                            3 * 3 * sizeof(float));
   vertex_spec_manager.AssocVertexAttribToBindingPoint("vao", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("vao", 1, 1);
   vertex_spec_manager.BindBufferToBindingPoint("vao", 0, buffer, 0,
