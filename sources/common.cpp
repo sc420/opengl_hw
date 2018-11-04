@@ -11,46 +11,6 @@
 
 #pragma warning(pop)
 
-// Print OpenGL context related information.
-void dumpInfo(void) {
-  printf("Vendor: %s\n", glGetString(GL_VENDOR));
-  printf("Renderer: %s\n", glGetString(GL_RENDERER));
-  printf("Version: %s\n", glGetString(GL_VERSION));
-  printf("GLSL: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-}
-
-void printGLError() {
-  GLenum code = glGetError();
-  switch (code) {
-    case GL_NO_ERROR:
-      std::cout << "GL_NO_ERROR" << std::endl;
-      break;
-    case GL_INVALID_ENUM:
-      std::cout << "GL_INVALID_ENUM" << std::endl;
-      break;
-    case GL_INVALID_VALUE:
-      std::cout << "GL_INVALID_VALUE" << std::endl;
-      break;
-    case GL_INVALID_OPERATION:
-      std::cout << "GL_INVALID_OPERATION" << std::endl;
-      break;
-    case GL_INVALID_FRAMEBUFFER_OPERATION:
-      std::cout << "GL_INVALID_FRAMEBUFFER_OPERATION" << std::endl;
-      break;
-    case GL_OUT_OF_MEMORY:
-      std::cout << "GL_OUT_OF_MEMORY" << std::endl;
-      break;
-    case GL_STACK_UNDERFLOW:
-      std::cout << "GL_STACK_UNDERFLOW" << std::endl;
-      break;
-    case GL_STACK_OVERFLOW:
-      std::cout << "GL_STACK_OVERFLOW" << std::endl;
-      break;
-    default:
-      std::cout << "GL_ERROR" << std::endl;
-  }
-}
-
 texture_data load_png(const char* path) {
   texture_data texture;
   int n;
@@ -74,6 +34,15 @@ texture_data load_png(const char* path) {
     stbi_image_free(data);
   }
   return texture;
+}
+
+void DumpGLInfo(void) {
+  std::cerr << "GL Vendor: " << glGetString(GL_VENDOR) << std::endl;
+  std::cerr << "GL Renderer: " << glGetString(GL_RENDERER) << std::endl;
+  std::cerr << "GL Version: " << glGetString(GL_VERSION) << std::endl;
+  std::cerr << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION)
+            << std::endl;
+  // std::cerr << "GL Extensions: " << glGetString(GL_EXTENSIONS) << std::endl;
 }
 
 void EnableCatchingError() {

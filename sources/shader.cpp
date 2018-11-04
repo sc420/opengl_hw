@@ -42,7 +42,7 @@ GLchar* ShaderManager::LoadShaderSource(const std::string& file) {
   fread(src, sizeof(char), sz, fp);
   src[sz] = '\0';
   fclose(fp);
-  return static_cast<GLchar*>(src);
+  return src;
 }
 
 void ShaderManager::FreeShaderSource(const GLchar* src) { delete src; }
@@ -57,8 +57,8 @@ void ShaderManager::CheckShaderCompilation(const GLuint hdlr) {
     GLint len = 0;
     glGetShaderiv(hdlr, GL_INFO_LOG_LENGTH, &len);
     // Get the log
-    std::string log(static_cast<int>(len), '\0');
-    glGetShaderInfoLog(hdlr, len, &len, static_cast<GLchar*>(&log[0]));
+    std::string log(len, '\0');
+    glGetShaderInfoLog(hdlr, len, &len, &log[0]);
     // Throw an error
     throw std::runtime_error(log);
   }

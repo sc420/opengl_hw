@@ -53,13 +53,9 @@ typedef struct _texture_data {
   unsigned char* data;
 } texture_data;
 
-void dumpInfo(void);
-
-void shaderLog(GLuint shader);
-
-void printGLError();
-
 texture_data load_png(const char* path);
+
+void DumpGLInfo(void);
 
 void EnableCatchingError();
 

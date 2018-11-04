@@ -34,7 +34,7 @@ void UniformManager::AssignBindingPoint(const std::string &program_name,
   // Retrieve the index of a named uniform block
   if (retrieve) {
     block_hdlr = glGetUniformBlockIndex(
-        program_hdlr, static_cast<const GLchar *>(block_name.c_str()));
+        program_hdlr, block_name.c_str());
     std::map<std::string, GLuint> &block_to_idxs = block_idxs_.at(program_name);
     block_to_idxs[block_name] = block_hdlr;
   }

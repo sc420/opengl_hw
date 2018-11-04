@@ -245,7 +245,7 @@ int main(int argc, char* argv[]) {
 #ifdef _MSC_VER
   glewInit();
 #endif
-  // dumpInfo();
+  DumpGLInfo();
   My_Init();
 
   // Create a menu and bind it to mouse right button.

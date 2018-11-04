@@ -48,8 +48,8 @@ void ProgramManager::CheckProgramLinkingStatus(const GLuint hdlr) {
     GLint len;
     glGetProgramiv(hdlr, GL_INFO_LOG_LENGTH, &len);
     // Get the log
-    std::string log(static_cast<int>(len), '\0');
-    glGetProgramInfoLog(hdlr, len, &len, static_cast<GLchar *>(&log[0]));
+    std::string log(len, '\0');
+    glGetProgramInfoLog(hdlr, len, &len, &log[0]);
     // Throw an error
     throw std::runtime_error(log);
   }
