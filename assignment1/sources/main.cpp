@@ -22,10 +22,13 @@ constexpr auto MOUSE_DIV_FACTOR = 300.0f;
  * Transformation
  ******************************************************************************/
 
-// MVP
-glm::mat4 model;
-glm::mat4 view;
-glm::mat4 proj;
+struct Mvp {
+  glm::mat4 model;
+  glm::mat4 view;
+  glm::mat4 proj;
+};
+
+Mvp mvp;
 
 /*******************************************************************************
  * Managers
@@ -78,35 +81,38 @@ void ConfigGL() {
   program_manager.UseProgram("program");
 
   // Create buffers
-  buffer_manager.GenBuffer("buffer");
+  buffer_manager.GenBuffer("va_buffer");
   buffer_manager.GenBuffer("mvp_buffer");
 
   // Create vertex arrays
-  vertex_spec_manager.GenVertexArray("vao");
+  vertex_spec_manager.GenVertexArray("va");
 
   // Bind buffer targets to be repeatedly used later
-  buffer_manager.BindBuffer("buffer", GL_ARRAY_BUFFER);
+  buffer_manager.BindBuffer("va_buffer", GL_ARRAY_BUFFER);
   buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);
 
   // Initialize buffers
-  buffer_manager.InitBuffer("buffer", GL_ARRAY_BUFFER, 18 * sizeof(float), NULL,
+  buffer_manager.InitBuffer("va_buffer", GL_ARRAY_BUFFER, 18 * sizeof(float), NULL,
                             GL_STATIC_DRAW);
   buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
                             3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+
+  // Update buffers
+  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 0, sizeof(Mvp), &mvp);
 
   // Bind uniform blocks to buffers
   uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
   uniform_manager.BindBufferBaseToBindingPoint("mvp_buffer", 0);
 
   // Bind vertex arrays to buffers
-  vertex_spec_manager.SpecifyVertexArrayOrg("vao", 0, 3, GL_FLOAT, GL_FALSE, 0);
-  vertex_spec_manager.SpecifyVertexArrayOrg("vao", 1, 3, GL_FLOAT, GL_FALSE,
+  vertex_spec_manager.SpecifyVertexArrayOrg("va", 0, 3, GL_FLOAT, GL_FALSE, 0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("va", 1, 3, GL_FLOAT, GL_FALSE,
                                             3 * 3 * sizeof(float));
-  vertex_spec_manager.AssocVertexAttribToBindingPoint("vao", 0, 0);
-  vertex_spec_manager.AssocVertexAttribToBindingPoint("vao", 1, 1);
-  vertex_spec_manager.BindBufferToBindingPoint("vao", "buffer", 0, 0,
+  vertex_spec_manager.AssocVertexAttribToBindingPoint("va", 0, 0);
+  vertex_spec_manager.AssocVertexAttribToBindingPoint("va", 1, 1);
+  vertex_spec_manager.BindBufferToBindingPoint("va", "va_buffer", 0, 0,
                                                3 * sizeof(float));
-  vertex_spec_manager.BindBufferToBindingPoint("vao", "buffer", 1, 0,
+  vertex_spec_manager.BindBufferToBindingPoint("va", "va_buffer", 1, 0,
                                                3 * sizeof(float));
 }
 
@@ -124,23 +130,15 @@ void My_Display() {
                     0.0f,        0.6f,  0.0f, f_timer_cnt, 0.0f,  0.0f,
                     f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f};
 
-  buffer_manager.BindBuffer("buffer");
-  buffer_manager.UpdateBuffer("buffer", GL_ARRAY_BUFFER, 0, 18 * sizeof(float),
+  buffer_manager.BindBuffer("va_buffer");
+  buffer_manager.UpdateBuffer("va_buffer", GL_ARRAY_BUFFER, 0, 18 * sizeof(float),
                               data);
 
   buffer_manager.BindBuffer("mvp_buffer");
-  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
-                              0 * sizeof(glm::mat4), sizeof(glm::mat4),
-                              glm::value_ptr(model));
-  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
-                              1 * sizeof(glm::mat4), sizeof(glm::mat4),
-                              glm::value_ptr(view));
-  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
-                              2 * sizeof(glm::mat4), sizeof(glm::mat4),
-                              glm::value_ptr(proj));
+  buffer_manager.UpdateBuffer("mvp_buffer");
 
   /* Draw vertex arrays */
-  vertex_spec_manager.BindVertexArray("vao");
+  vertex_spec_manager.BindVertexArray("va");
   glDrawArrays(GL_TRIANGLES, 0, 3);
 
   /* Swap frame buffers in double buffer mode */
@@ -152,10 +150,10 @@ void My_Reshape(int width, int height) {
 
   glViewport(0, 0, width, height);
 
-  proj = glm::ortho(-1.0f * ratio, 1.0f * ratio, -1.0f, 1.0f);
-  view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-                     glm::vec3(0.0f, 1.0f, 0.0f));
-  model = glm::mat4();
+  mvp.proj = glm::ortho(-1.0f * ratio, 1.0f * ratio, -1.0f, 1.0f);
+  mvp.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+    glm::vec3(0.0f, 1.0f, 0.0f));
+  mvp.model = glm::mat4();
 }
 
 void My_Timer(int val) {
