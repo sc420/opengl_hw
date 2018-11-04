@@ -8,6 +8,8 @@
 
 class ProgramManager {
  public:
+   ProgramManager();
+
   ~ProgramManager();
 
   void RegisterShaderManager(const ShaderManager &shader_manager);

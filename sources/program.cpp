@@ -1,5 +1,9 @@
 #include "assignment/program.hpp"
 
+ProgramManager::ProgramManager(): shader_manager_(nullptr)
+{
+}
+
 ProgramManager::~ProgramManager() {
   // Delete all program objects
   for (const auto &pair : hdlrs_) {

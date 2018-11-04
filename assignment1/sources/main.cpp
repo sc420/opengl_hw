@@ -35,8 +35,8 @@ GLuint program;
  * Buffers
  ******************************************************************************/
 
-GLuint buffer;
-GLuint mvp_buffer_hdlr;
+//GLuint buffer;
+//GLuint mvp_buffer_hdlr;
 
 /*******************************************************************************
  * Transformation
@@ -68,6 +68,7 @@ void My_Init() {
   program_manager.RegisterShaderManager(shader_manager);
   uniform_manager.RegisterProgramManager(program_manager);
   uniform_manager.RegisterBufferManager(buffer_manager);
+  vertex_spec_manager.RegisterBufferManager(buffer_manager); 
 
   // Create shaders
   shader_manager.CreateShader(GL_VERTEX_SHADER, "vertex.vs.glsl",
@@ -87,7 +88,7 @@ void My_Init() {
   buffer_manager.GenBuffer("buffer");
   buffer_manager.BindBuffer("buffer", GL_ARRAY_BUFFER);
 
-  buffer = buffer_manager.GetBufferHdlr("buffer");
+  //buffer = buffer_manager.GetBufferHdlr("buffer");
 
   /*glGenBuffers(1, &buffer);
   glBindBuffer(GL_ARRAY_BUFFER, buffer);*/
@@ -101,9 +102,9 @@ void My_Init() {
                                             3 * 3 * sizeof(float));
   vertex_spec_manager.AssocVertexAttribToBindingPoint("vao", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("vao", 1, 1);
-  vertex_spec_manager.BindBufferToBindingPoint("vao", 0, buffer, 0,
+  vertex_spec_manager.BindBufferToBindingPoint("vao", "buffer", 0, 0,
                                                3 * sizeof(float));
-  vertex_spec_manager.BindBufferToBindingPoint("vao", 1, buffer, 0,
+  vertex_spec_manager.BindBufferToBindingPoint("vao", "buffer", 1, 0,
                                                3 * sizeof(float));
 
   // Initialize buffers
@@ -117,7 +118,7 @@ void My_Init() {
 
   buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
 
-  mvp_buffer_hdlr = buffer_manager.GetBufferHdlr("mvp_buffer");
+  //mvp_buffer_hdlr = buffer_manager.GetBufferHdlr("mvp_buffer");
 
  /* glGenBuffers(1, &mvp_buffer_hdlr);
   glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);

@@ -1,5 +1,9 @@
 #include "assignment/uniform.hpp"
 
+UniformManager::UniformManager(): program_manager_(nullptr), buffer_manager_(nullptr)
+{
+}
+
 void UniformManager::RegisterProgramManager(const ProgramManager & program_manager)
 {
   program_manager_ = &program_manager;

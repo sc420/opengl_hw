@@ -15,6 +15,7 @@
 
 class UniformManager {
 public:
+  UniformManager();
 
   void RegisterProgramManager(const ProgramManager &program_manager);
 

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "assignment/common.hpp"
+#include "assignment/buffer.hpp"
 
 class VertexSpecManager {
  public:
@@ -12,7 +13,11 @@ class VertexSpecManager {
      GLsizei stride;
    };
 
+   VertexSpecManager();
+
   ~VertexSpecManager();
+
+  void RegisterBufferManager(const BufferManager &buffer_manager);
 
   void GenVertexArray(const std::string &name);
 
@@ -27,13 +32,14 @@ class VertexSpecManager {
                                        const GLuint binding_idx);
 
   void BindBufferToBindingPoint(const std::string &va_name,
+                                const std::string &buffer_name,
                                 const GLuint binding_idx,
-                                const GLuint buffer_hdlr, const GLintptr ofs,
+                                const GLintptr ofs,
                                 const GLsizei stride);
 
   void BindBufferToBindingPoint(const std::string &va_name,
-    const GLuint binding_idx,
-    const GLuint buffer_hdlr);
+    const std::string &buffer_name,
+    const GLuint binding_idx);
 
   void DeleteVertexArray(const std::string &name);
 
@@ -43,6 +49,8 @@ class VertexSpecManager {
                                      const GLuint attrib_idx) const;
 
  private:
+   const BufferManager * buffer_manager_;
+
   std::map<std::string, GLuint> hdlrs_;
 
   std::map<std::string, std::map<GLuint, GLuint>> binding_points_;

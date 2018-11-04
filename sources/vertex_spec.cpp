@@ -1,10 +1,19 @@
 #include "assignment/vertex_spec.hpp"
 
+VertexSpecManager::VertexSpecManager(): buffer_manager_(nullptr)
+{
+}
+
 VertexSpecManager::~VertexSpecManager() {
   // Delete all vertex array objects
   for (const auto& pair : hdlrs_) {
     glDeleteVertexArrays(1, &pair.second);
   }
+}
+
+void VertexSpecManager::RegisterBufferManager(const BufferManager & buffer_manager)
+{
+  buffer_manager_ = &buffer_manager;
 }
 
 void VertexSpecManager::GenVertexArray(const std::string& name) {
@@ -51,12 +60,14 @@ void VertexSpecManager::AssocVertexAttribToBindingPoint(
  * https://www.opengl.org/discussion_boards/showthread.php/182043-glVertexAttribFormat-glDrawArrays-issue
  */
 void VertexSpecManager::BindBufferToBindingPoint(const std::string& va_name,
+  const std::string& buffer_name,
   const GLuint binding_idx,
-  const GLuint buffer_hdlr,
   const GLintptr ofs,
   const GLsizei stride) {
   // Bind the vertex array
   BindVertexArray(va_name);
+  // Get the buffer handler
+  const GLuint buffer_hdlr = buffer_manager_->GetBufferHdlr(buffer_name);
   // Bind the buffer to the binding point
   glBindVertexBuffer(binding_idx, buffer_hdlr, ofs, stride);
   // Save the parameters
@@ -64,10 +75,10 @@ void VertexSpecManager::BindBufferToBindingPoint(const std::string& va_name,
   bind_buffer_to_binding_point_prev_params_[va_name][binding_idx] = prev_params;
 }
 
-void VertexSpecManager::BindBufferToBindingPoint(const std::string & va_name, const GLuint binding_idx, const GLuint buffer_hdlr)
+void VertexSpecManager::BindBufferToBindingPoint(const std::string & va_name, const std::string &buffer_name, const GLuint binding_idx)
 {
   const BindBufferToBindingPointPrevParams& prev_params = GetBindBufferToBindingPointPrevParams(va_name, binding_idx);
-  BindBufferToBindingPoint(va_name, binding_idx, buffer_hdlr, prev_params.ofs, prev_params.stride);
+  BindBufferToBindingPoint(va_name, buffer_name, binding_idx, prev_params.ofs, prev_params.stride);
 }
 
 void VertexSpecManager::DeleteVertexArray(const std::string& name) {
