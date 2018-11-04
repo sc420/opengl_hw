@@ -9,12 +9,12 @@
 #include <map>
 #include <string>
 
+#include "assignment/buffer.hpp"
 #include "assignment/common.hpp"
 #include "assignment/program.hpp"
-#include "assignment/buffer.hpp"
 
 class UniformManager {
-public:
+ public:
   UniformManager();
 
   void RegisterProgramManager(const ProgramManager &program_manager);
@@ -22,20 +22,21 @@ public:
   void RegisterBufferManager(const BufferManager &buffer_manager);
 
   void AssignUniformBlockToBindingPoint(const std::string &program_name,
-    const std::string &block_name,
-    const GLuint binding_idx);
+                                        const std::string &block_name,
+                                        const GLuint binding_idx);
 
-  void BindBufferBaseToBindingPoint(
-    const std::string &buffer_name, const GLuint binding_idx) const;
+  void BindBufferBaseToBindingPoint(const std::string &buffer_name,
+                                    const GLuint binding_idx) const;
 
   void BindBufferRangeToBindingPoint(const std::string &buffer_name,
-    const GLuint binding_idx,
-    const GLintptr ofs, const GLsizeiptr size) const;
+                                     const GLuint binding_idx,
+                                     const GLintptr ofs,
+                                     const GLsizeiptr size) const;
 
   GLuint GetUniformBlockBindingPoint(const std::string &program_name,
-    const std::string &block_name) const;
+                                     const std::string &block_name) const;
 
-private:
+ private:
   const ProgramManager *program_manager_;
 
   const BufferManager *buffer_manager_;
@@ -47,6 +48,4 @@ private:
   std::map<std::string, std::map<std::string, GLuint>> block_idxs_;
 
   std::map<std::string, std::map<std::string, GLuint>> binding_points_;
-
-
 };

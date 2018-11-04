@@ -8,7 +8,7 @@
 
 class ProgramManager {
  public:
-   ProgramManager();
+  ProgramManager();
 
   ~ProgramManager();
 
@@ -16,7 +16,8 @@ class ProgramManager {
 
   void CreateProgram(const std::string &program_name);
 
-  void AttachShader(const std::string &program_name, const std::string &shader_name) const;
+  void AttachShader(const std::string &program_name,
+                    const std::string &shader_name) const;
 
   void LinkProgram(const std::string &program_name) const;
 
@@ -27,7 +28,7 @@ class ProgramManager {
   GLuint GetProgramHdlr(const std::string &program_name) const;
 
  private:
-   const ShaderManager * shader_manager_;
+  const ShaderManager *shader_manager_;
 
   std::map<std::string, GLuint> hdlrs_;
 

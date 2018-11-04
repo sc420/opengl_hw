@@ -9,7 +9,8 @@ class ShaderManager {
  public:
   ~ShaderManager();
 
-  void CreateShader(const std::string& shader_name, const GLenum type, const std::string& path);
+  void CreateShader(const std::string& shader_name, const GLenum type,
+                    const std::string& path);
 
   void DeleteShader(const std::string& shader_name) const;
 

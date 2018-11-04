@@ -47,7 +47,7 @@ void InitGLUT(int argc, char* argv[]) {
 
 void InitGLEW() {
   glewInit();
-  //DumpGLInfo();
+  // DumpGLInfo();
 }
 
 void ConfigGL() {
@@ -62,11 +62,13 @@ void ConfigGL() {
   program_manager.RegisterShaderManager(shader_manager);
   uniform_manager.RegisterProgramManager(program_manager);
   uniform_manager.RegisterBufferManager(buffer_manager);
-  vertex_spec_manager.RegisterBufferManager(buffer_manager); 
+  vertex_spec_manager.RegisterBufferManager(buffer_manager);
 
   // Create shaders
-  shader_manager.CreateShader("vertex_shader", GL_VERTEX_SHADER, "vertex.vs.glsl");
-  shader_manager.CreateShader("fragment_shader", GL_FRAGMENT_SHADER, "fragment.fs.glsl");
+  shader_manager.CreateShader("vertex_shader", GL_VERTEX_SHADER,
+                              "vertex.vs.glsl");
+  shader_manager.CreateShader("fragment_shader", GL_FRAGMENT_SHADER,
+                              "fragment.fs.glsl");
 
   // Create programs
   program_manager.CreateProgram("program");
@@ -87,8 +89,10 @@ void ConfigGL() {
   buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);
 
   // Initialize buffers
-  buffer_manager.InitBuffer("buffer", GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
-  buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+  buffer_manager.InitBuffer("buffer", GL_ARRAY_BUFFER, 18 * sizeof(float), NULL,
+                            GL_STATIC_DRAW);
+  buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
+                            3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
 
   // Bind uniform blocks to buffers
   uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
@@ -116,17 +120,24 @@ void My_Display() {
   /* Update buffers */
   // TODO: Generate sphere by octahedron
   float f_timer_cnt = ((5 * timer_cnt) % 255) / 255.0f;
-  float data[18] = { -0.5f,       -0.4f, 0.0f, 0.5f,        -0.4f, 0.0f,
+  float data[18] = {-0.5f,       -0.4f, 0.0f, 0.5f,        -0.4f, 0.0f,
                     0.0f,        0.6f,  0.0f, f_timer_cnt, 0.0f,  0.0f,
-                    f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f };
+                    f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f};
 
   buffer_manager.BindBuffer("buffer");
-  buffer_manager.UpdateBuffer("buffer", GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
+  buffer_manager.UpdateBuffer("buffer", GL_ARRAY_BUFFER, 0, 18 * sizeof(float),
+                              data);
 
   buffer_manager.BindBuffer("mvp_buffer");
-  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(model));
-  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
-  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(proj));
+  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
+                              0 * sizeof(glm::mat4), sizeof(glm::mat4),
+                              glm::value_ptr(model));
+  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
+                              1 * sizeof(glm::mat4), sizeof(glm::mat4),
+                              glm::value_ptr(view));
+  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
+                              2 * sizeof(glm::mat4), sizeof(glm::mat4),
+                              glm::value_ptr(proj));
 
   /* Draw vertex arrays */
   vertex_spec_manager.BindVertexArray("vao");
@@ -241,9 +252,7 @@ void CreateGLUTMenus() {
   glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
-void EnterGLUTLoop() {
-  glutMainLoop();
-}
+void EnterGLUTLoop() { glutMainLoop(); }
 
 int main(int argc, char* argv[]) {
   InitGLUT(argc, argv);

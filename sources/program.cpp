@@ -1,8 +1,6 @@
 #include "assignment/program.hpp"
 
-ProgramManager::ProgramManager(): shader_manager_(nullptr)
-{
-}
+ProgramManager::ProgramManager() : shader_manager_(nullptr) {}
 
 ProgramManager::~ProgramManager() {
   // Delete all program objects
@@ -11,8 +9,8 @@ ProgramManager::~ProgramManager() {
   }
 }
 
-void ProgramManager::RegisterShaderManager(const ShaderManager & shader_manager)
-{
+void ProgramManager::RegisterShaderManager(
+    const ShaderManager &shader_manager) {
   shader_manager_ = &shader_manager;
 }
 
@@ -30,7 +28,7 @@ void ProgramManager::AttachShader(const std::string &program_name,
   glAttachShader(program_hdlr, shader_hdlr);
 }
 
-void ProgramManager::LinkProgram(const std::string &program_name) const  {
+void ProgramManager::LinkProgram(const std::string &program_name) const {
   const GLuint program_hdlr = GetProgramHdlr(program_name);
   glLinkProgram(program_hdlr);
   CheckProgramLinkingStatus(program_hdlr);
@@ -48,12 +46,14 @@ void ProgramManager::DeleteProgram(const std::string &program_name) const {
 
 GLuint ProgramManager::GetProgramHdlr(const std::string &program_name) const {
   if (hdlrs_.count(program_name) == 0) {
-    throw std::runtime_error("Could not find the program name '" + program_name + "'");
+    throw std::runtime_error("Could not find the program name '" +
+                             program_name + "'");
   }
   return hdlrs_.at(program_name);
 }
 
-void ProgramManager::CheckProgramLinkingStatus(const GLuint program_hdlr) const {
+void ProgramManager::CheckProgramLinkingStatus(
+    const GLuint program_hdlr) const {
   GLint status = -1;
   // Get linking status
   glGetProgramiv(program_hdlr, GL_LINK_STATUS, &status);

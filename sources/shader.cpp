@@ -7,13 +7,14 @@ ShaderManager::~ShaderManager() {
   }
 }
 
-void ShaderManager::CreateShader(const std::string& shader_name, const GLenum type, const std::string& path) {
+void ShaderManager::CreateShader(const std::string& shader_name,
+                                 const GLenum type, const std::string& path) {
   // Create a shader object
   const GLuint shader_hdlr = glCreateShader(type);
   // Load the shader source
   std::string src = LoadShaderSource(path);
   // Replace the source code in the shader object
-  const char *str = src.c_str();
+  const char* str = src.c_str();
   glShaderSource(shader_hdlr, 1, &str, NULL);
   // Compile the shader object
   glCompileShader(shader_hdlr);
@@ -30,7 +31,8 @@ void ShaderManager::DeleteShader(const std::string& shader_name) const {
 
 GLuint ShaderManager::GetShaderHdlr(const std::string& shader_name) const {
   if (hdlrs_.count(shader_name) == 0) {
-    throw std::runtime_error("Could not find the shader name '" + shader_name + "'");
+    throw std::runtime_error("Could not find the shader name '" + shader_name +
+                             "'");
   }
   return hdlrs_.at(shader_name);
 }
@@ -47,7 +49,7 @@ std::string ShaderManager::LoadShaderSource(const std::string& file) const {
   return src;
 }
 
-void ShaderManager::CheckShaderCompilation(const GLuint shader_hdlr)const {
+void ShaderManager::CheckShaderCompilation(const GLuint shader_hdlr) const {
   GLint status = -1;
   // Get compilation status
   glGetShaderiv(shader_hdlr, GL_COMPILE_STATUS, &status);

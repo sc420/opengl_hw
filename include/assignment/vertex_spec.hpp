@@ -3,17 +3,17 @@
 #include <map>
 #include <string>
 
-#include "assignment/common.hpp"
 #include "assignment/buffer.hpp"
+#include "assignment/common.hpp"
 
 class VertexSpecManager {
  public:
-   struct BindBufferToBindingPointPrevParams {
-     GLintptr ofs;
-     GLsizei stride;
-   };
+  struct BindBufferToBindingPointPrevParams {
+    GLintptr ofs;
+    GLsizei stride;
+  };
 
-   VertexSpecManager();
+  VertexSpecManager();
 
   ~VertexSpecManager();
 
@@ -23,7 +23,8 @@ class VertexSpecManager {
 
   void BindVertexArray(const std::string &va_name) const;
 
-  void SpecifyVertexArrayOrg(const std::string &va_name, const GLuint attrib_idx, const GLint size,
+  void SpecifyVertexArrayOrg(const std::string &va_name,
+                             const GLuint attrib_idx, const GLint size,
                              const GLenum type, const GLboolean normalized,
                              const GLuint relative_ofs) const;
 
@@ -33,13 +34,12 @@ class VertexSpecManager {
 
   void BindBufferToBindingPoint(const std::string &va_name,
                                 const std::string &buffer_name,
-                                const GLuint binding_idx,
-                                const GLintptr ofs,
+                                const GLuint binding_idx, const GLintptr ofs,
                                 const GLsizei stride);
 
   void BindBufferToBindingPoint(const std::string &va_name,
-    const std::string &buffer_name,
-    const GLuint binding_idx);
+                                const std::string &buffer_name,
+                                const GLuint binding_idx);
 
   void DeleteVertexArray(const std::string &va_name);
 
@@ -49,13 +49,16 @@ class VertexSpecManager {
                                      const GLuint attrib_idx) const;
 
  private:
-   const BufferManager * buffer_manager_;
+  const BufferManager *buffer_manager_;
 
   std::map<std::string, GLuint> hdlrs_;
 
   std::map<std::string, std::map<GLuint, GLuint>> binding_points_;
 
-  std::map<std::string, std::map<GLuint, BindBufferToBindingPointPrevParams>> bind_buffer_to_binding_point_prev_params_;
+  std::map<std::string, std::map<GLuint, BindBufferToBindingPointPrevParams>>
+      bind_buffer_to_binding_point_prev_params_;
 
-  const BindBufferToBindingPointPrevParams &GetBindBufferToBindingPointPrevParams(const std::string &va_name, const GLuint binding_idx) const;
+  const BindBufferToBindingPointPrevParams &
+  GetBindBufferToBindingPointPrevParams(const std::string &va_name,
+                                        const GLuint binding_idx) const;
 };
