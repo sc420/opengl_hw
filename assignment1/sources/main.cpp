@@ -1,6 +1,7 @@
 #pragma warning(push, 0)
 #include "assignment/common.hpp"
 #pragma warning(pop)
+#include "assignment/program.hpp"
 #include "assignment/shader.hpp"
 #include "assignment/uniform.hpp"
 
@@ -51,6 +52,7 @@ glm::mat4 proj;
  * Managers
  ******************************************************************************/
 
+ProgramManager program_manager;
 ShaderManager shader_manager;
 UniformManager uniform_manager;
 
@@ -67,11 +69,14 @@ void My_Init() {
   GLuint vertexShader = shader_manager.GetShaderHdlr("vertex_shader");
   GLuint fragmentShader = shader_manager.GetShaderHdlr("fragment_shader");
 
-  program = glCreateProgram();
-  glAttachShader(program, vertexShader);
-  glAttachShader(program, fragmentShader);
-  glLinkProgram(program);
-  glUseProgram(program);
+  // Create the programs
+  program_manager.CreateProgram("program");
+  program_manager.AttachShader("program", vertexShader);
+  program_manager.AttachShader("program", fragmentShader);
+  program_manager.LinkProgram("program");
+  program_manager.UseProgram("program");
+  program = program_manager.GetProgramHdlr("program");
+
   um4mvp = glGetUniformLocation(program, "um4mvp");
 
   GLuint vao;

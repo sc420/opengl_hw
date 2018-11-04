@@ -103,6 +103,7 @@ xcopy /D /Y  "$(SolutionDir)assets\*.glsl" "$(OutDir)"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\sources\common.cpp" />
+    <ClCompile Include="..\sources\program.cpp" />
     <ClCompile Include="..\sources\uniform.cpp" />
     <ClCompile Include="sources\main.cpp" />
     <ClCompile Include="..\sources\shader.cpp" />
@@ -113,6 +114,7 @@ xcopy /D /Y  "$(SolutionDir)assets\*.glsl" "$(OutDir)"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\assignment\common.hpp" />
+    <ClInclude Include="..\include\assignment\program.hpp" />
     <ClInclude Include="..\include\assignment\shader.hpp" />
     <ClInclude Include="..\include\assignment\uniform.hpp" />
   </ItemGroup>

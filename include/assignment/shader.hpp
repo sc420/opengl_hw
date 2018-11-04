@@ -15,9 +15,9 @@ class ShaderManager {
  private:
   std::map<std::string, GLuint> hdlrs_;
 
-  void CheckShaderCompilation(const GLuint hdlr);
-
   GLchar* LoadShaderSource(const std::string& file);
 
-  void FreeShaderSource(GLchar* src);
+  void FreeShaderSource(const GLchar* src);
+
+  void CheckShaderCompilation(const GLuint hdlr);
 };
