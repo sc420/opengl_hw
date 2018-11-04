@@ -42,6 +42,7 @@ VertexSpecManager vertex_spec_manager;
 
 void InitGLUT(int argc, char* argv[]) {
   glutInit(&argc, argv);
+  glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowPosition(100, 100);
   glutInitWindowSize(600, 600);
@@ -49,7 +50,11 @@ void InitGLUT(int argc, char* argv[]) {
 }
 
 void InitGLEW() {
-  glewInit();
+  GLenum err = glewInit();
+  if (err != GLEW_OK) {
+    std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
+    throw std::runtime_error("Could not initialize GLEW");
+  }
   // DumpGLInfo();
 }
 
@@ -92,13 +97,14 @@ void ConfigGL() {
   buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);
 
   // Initialize buffers
-  buffer_manager.InitBuffer("va_buffer", GL_ARRAY_BUFFER, 18 * sizeof(float), NULL,
-                            GL_STATIC_DRAW);
+  buffer_manager.InitBuffer("va_buffer", GL_ARRAY_BUFFER, 18 * sizeof(float),
+                            NULL, GL_STATIC_DRAW);
   buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
                             3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
 
   // Update buffers
-  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 0, sizeof(Mvp), &mvp);
+  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 0, sizeof(Mvp),
+                              &mvp);
 
   // Bind uniform blocks to buffers
   uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
@@ -116,7 +122,7 @@ void ConfigGL() {
                                                3 * sizeof(float));
 }
 
-void My_Display() {
+void GLUTDisplayCallback() {
   /* Clear frame buffers */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -131,8 +137,8 @@ void My_Display() {
                     f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f};
 
   buffer_manager.BindBuffer("va_buffer");
-  buffer_manager.UpdateBuffer("va_buffer", GL_ARRAY_BUFFER, 0, 18 * sizeof(float),
-                              data);
+  buffer_manager.UpdateBuffer("va_buffer", GL_ARRAY_BUFFER, 0,
+                              18 * sizeof(float), data);
 
   buffer_manager.BindBuffer("mvp_buffer");
   buffer_manager.UpdateBuffer("mvp_buffer");
@@ -145,26 +151,19 @@ void My_Display() {
   glutSwapBuffers();
 }
 
-void My_Reshape(int width, int height) {
+void GLUTReshapeCallback(int width, int height) {
   float ratio = static_cast<float>(width) / static_cast<float>(height);
 
   glViewport(0, 0, width, height);
 
   mvp.proj = glm::ortho(-1.0f * ratio, 1.0f * ratio, -1.0f, 1.0f);
-  mvp.view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-    glm::vec3(0.0f, 1.0f, 0.0f));
+  mvp.view =
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+                  glm::vec3(0.0f, 1.0f, 0.0f));
   mvp.model = glm::mat4();
 }
 
-void My_Timer(int val) {
-  timer_cnt++;
-  glutPostRedisplay();
-  if (timer_enabled) {
-    glutTimerFunc(timer_speed, My_Timer, val);
-  }
-}
-
-void My_Mouse(int button, int state, int x, int y) {
+void GLUTMouseCallback(int button, int state, int x, int y) {
   if (state == GLUT_DOWN) {
     printf("Mouse %d is pressed at (%d, %d)\n", button, x, y);
   } else if (state == GLUT_UP) {
@@ -172,18 +171,18 @@ void My_Mouse(int button, int state, int x, int y) {
   }
 }
 
-void My_Keyboard(unsigned char key, int x, int y) {
+void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   printf("Key %c is pressed at (%d, %d)\n", key, x, y);
   switch (key) {
     case 27:  // Escape
-      exit(0);
+      glutLeaveMainLoop();
       break;
     default:
       break;
   }
 }
 
-void My_SpecialKeys(int key, int x, int y) {
+void GLUTSpecialCallback(int key, int x, int y) {
   switch (key) {
     case GLUT_KEY_F1:
       printf("F1 is pressed at (%d, %d)\n", x, y);
@@ -200,52 +199,70 @@ void My_SpecialKeys(int key, int x, int y) {
   }
 }
 
-void My_Menu(int id) {
+void GLUTTimerCallback(int val) {
+  timer_cnt++;
+  glutPostRedisplay();
+  if (timer_enabled) {
+    glutTimerFunc(timer_speed, GLUTTimerCallback, val);
+  }
+}
+
+void GLUTMainMenuCallback(int id) {
+  switch (id) {
+    case 2:
+      glutChangeToMenuEntry(2, "New label", 2);
+      break;
+    case 3:
+      glutLeaveMainLoop();
+      break;
+    default:
+      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
+                               "'");
+  }
+}
+
+void GLUTTimerMenuCallback(int id) {
   switch (id) {
     case 1:
-      break;
-
-    case 2:
-      glutChangeToMenuEntry(2, "new label", 2);
-      break;
-
-    case 3:
-      exit(0);
-      break;
-
-    case 99:
-      timer_enabled = false;
-      break;
-
-    case 999:
       if (!timer_enabled) {
         timer_enabled = true;
-        glutTimerFunc(timer_speed, My_Timer, 0);
+        glutTimerFunc(timer_speed, GLUTTimerCallback, 0);
       }
       break;
-
-    default:
+    case 2:
+      timer_enabled = false;
       break;
+    default:
+      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
+                               "'");
   }
 }
 
 void RegisterGLUTCallbacks() {
-  glutDisplayFunc(My_Display);
-  glutReshapeFunc(My_Reshape);
-  glutMouseFunc(My_Mouse);
-  glutKeyboardFunc(My_Keyboard);
-  glutSpecialFunc(My_SpecialKeys);
-  glutTimerFunc(timer_speed, My_Timer, 0);
+  glutDisplayFunc(GLUTDisplayCallback);
+  glutReshapeFunc(GLUTReshapeCallback);
+  glutMouseFunc(GLUTMouseCallback);
+  glutKeyboardFunc(GLUTKeyboardCallback);
+  glutSpecialFunc(GLUTSpecialCallback);
+  glutTimerFunc(timer_speed, GLUTTimerCallback, 0);
 }
 
 void CreateGLUTMenus() {
-  int menu_main = glutCreateMenu(My_Menu);
+  int main_menu_hdlr = glutCreateMenu(GLUTMainMenuCallback);
+  int timer_menu_hdlr = glutCreateMenu(GLUTTimerMenuCallback);
 
-  glutSetMenu(menu_main);
+  glutSetMenu(main_menu_hdlr);
 
-  glutAddMenuEntry("Sin shader", 1);
-  glutAddMenuEntry("Brick shader", 2);
+  glutAddSubMenu("Timer", timer_menu_hdlr);
+  glutAddMenuEntry("Change label", 2);
   glutAddMenuEntry("Exit", 3);
+
+  glutSetMenu(timer_menu_hdlr);
+
+  glutAddMenuEntry("Start", 1);
+  glutAddMenuEntry("Stop", 2);
+
+  glutSetMenu(main_menu_hdlr);
 
   glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
@@ -253,11 +270,16 @@ void CreateGLUTMenus() {
 void EnterGLUTLoop() { glutMainLoop(); }
 
 int main(int argc, char* argv[]) {
-  InitGLUT(argc, argv);
-  InitGLEW();
-  ConfigGL();
-  RegisterGLUTCallbacks();
-  CreateGLUTMenus();
-  EnterGLUTLoop();
+  try {
+    InitGLUT(argc, argv);
+    InitGLEW();
+    ConfigGL();
+    RegisterGLUTCallbacks();
+    CreateGLUTMenus();
+    EnterGLUTLoop();
+  } catch (const std::exception& ex) {
+    std::cerr << "Exception: " << ex.what() << std::endl;
+    return 1;
+  }
   return 0;
 }
