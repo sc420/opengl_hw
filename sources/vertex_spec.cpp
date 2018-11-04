@@ -37,14 +37,7 @@ void VertexSpecManager::AssocVertexAttribToBindingPoint(const std::string & va_n
   // Associate the vertex attribute to the binding point
   glVertexAttribBinding(attrib_idx, binding_idx);
   // Save the binding point
-  //TODO: Merge with the code in uniform.cpp
-  if (binding_points_.count(va_name) == 0) {
-    std::map<GLuint, GLuint> attrib_to_points;
-    binding_points_[va_name] = attrib_to_points;
-  }
-  std::map<GLuint, GLuint> &attrib_to_points =
-    binding_points_.at(va_name);
-  attrib_to_points[attrib_idx] = binding_idx;
+  binding_points_[va_name][attrib_idx] = binding_idx;
 }
 
 /*

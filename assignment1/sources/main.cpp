@@ -95,26 +95,6 @@ void My_Init() {
   // Initialize buffers
   glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
 
-
-  //GLuint vao;
-  //glGenVertexArrays(1, &vao);
-  //glBindVertexArray(vao);
-
-  //glEnableVertexAttribArray(0);
-  //glEnableVertexAttribArray(1);
-
-  //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-  //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
-  //  reinterpret_cast<GLvoid*>(sizeof(float) * 9));
-
-  //glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, 0);
-  //glVertexAttribBinding(0, 0);
-  //glBindVertexBuffer(0, buffer, 0, sizeof(float) * 3);
-
-  //glVertexAttribFormat(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9);
-  //glVertexAttribBinding(1, 1);
-  //glBindVertexBuffer(1, buffer, 0, sizeof(float) * 3);
-
   // TODO: Add program manager and buffer manager
   // TODO: Delete buffer
 

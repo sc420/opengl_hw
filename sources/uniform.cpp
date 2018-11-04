@@ -13,40 +13,23 @@ void UniformManager::RegisterBuffer(const GLuint buffer_hdlr,
 void UniformManager::AssignUniformBlockToBindingPoint(const std::string &program_name,
                                         const std::string &block_name,
                                         const GLuint bind_idx) {
-  GLuint block_hdlr = NULL;
   // Get program handler
   const GLuint program_hdlr = get_program_hdlr(program_name);
   // Check whether to retrieve the index of a named uniform block lazily
-  bool retrieve = false;
-  if (block_idxs_.count(program_name) > 0) {
-    const std::map<std::string, GLuint> &block_to_idxs =
-        block_idxs_.at(program_name);
-    if (block_to_idxs.count(block_name) > 0) {
-      block_hdlr = block_to_idxs.at(block_name);
-    } else {
-      retrieve = true;
-    }
-  } else {
-    retrieve = true;
-    std::map<std::string, GLuint> block_to_idxs;
-    block_idxs_[program_name] = block_to_idxs;
+  GLuint block_hdlr = NULL;
+  if (block_idxs_.count(program_name) > 0 && block_idxs_.at(program_name).count(block_name) > 0) {
+    block_hdlr = block_idxs_.at(program_name).at(block_name);
   }
-  // Retrieve the index of a named uniform block
-  if (retrieve) {
+  else {
+    // Retrieve the index of a named uniform block
     block_hdlr = glGetUniformBlockIndex(program_hdlr, block_name.c_str());
-    std::map<std::string, GLuint> &block_to_idxs = block_idxs_.at(program_name);
-    block_to_idxs[block_name] = block_hdlr;
+    // Save the block handler
+    block_idxs_[program_name][block_name] = block_hdlr;
   }
   // Assign the binding point
   glUniformBlockBinding(program_hdlr, block_hdlr, bind_idx);
   // Save the binding point
-  if (binding_points_.count(program_name) == 0) {
-    std::map<std::string, GLuint> block_to_points;
-    binding_points_[program_name] = block_to_points;
-  }
-  std::map<std::string, GLuint> &block_to_points =
-      binding_points_.at(program_name);
-  block_to_points[block_name] = bind_idx;
+  binding_points_[program_name][block_name] = bind_idx;
 }
 
 void UniformManager::BindBufferToBindingPoint(const GLuint bind_idx,
