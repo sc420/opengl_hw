@@ -1,14 +1,14 @@
 #version 410
 
-layout(location = 0) in vec3 iv3vertex;
-layout(location = 1) in vec3 iv3color;
-
 uniform mvp
 {
     mat4 model;
     mat4 view;
     mat4 proj;
 };
+
+layout(location = 0) in vec3 iv3vertex;
+layout(location = 1) in vec3 iv3color;
 
 out vec3 vv3color;
 

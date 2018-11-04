@@ -120,7 +120,7 @@ void My_Display() {
                     f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f };
 
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
-
+  
   glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
 
   glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
