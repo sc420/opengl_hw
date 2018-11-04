@@ -7,6 +7,11 @@ ProgramManager::~ProgramManager() {
   }
 }
 
+void ProgramManager::RegisterShaderManager(const ShaderManager & shader_manager)
+{
+  shader_manager_ = &shader_manager;
+}
+
 void ProgramManager::CreateProgram(const std::string &name) {
   // Create a program object
   const GLuint hdlr = glCreateProgram();
@@ -14,9 +19,10 @@ void ProgramManager::CreateProgram(const std::string &name) {
   hdlrs_[name] = hdlr;
 }
 
-void ProgramManager::AttachShader(const std::string &name,
-                                  const GLuint shader_hdlr) const {
-  const GLuint program_hdlr = GetProgramHdlr(name);
+void ProgramManager::AttachShader(const std::string &program_name,
+                                  const std::string &shader_name) const {
+  const GLuint program_hdlr = GetProgramHdlr(program_name);
+  const GLuint shader_hdlr = shader_manager_->GetShaderHdlr(shader_name);
   glAttachShader(program_hdlr, shader_hdlr);
 }
 

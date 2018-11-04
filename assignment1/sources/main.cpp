@@ -65,6 +65,7 @@ void My_Init() {
   glDepthFunc(GL_LEQUAL);
 
   // Register managers
+  program_manager.RegisterShaderManager(shader_manager);
   uniform_manager.RegisterProgramManager(program_manager);
   uniform_manager.RegisterBufferManager(buffer_manager);
 
@@ -73,13 +74,11 @@ void My_Init() {
                               "vertex_shader");
   shader_manager.CreateShader(GL_FRAGMENT_SHADER, "fragment.fs.glsl",
                               "fragment_shader");
-  GLuint vertexShader = shader_manager.GetShaderHdlr("vertex_shader");
-  GLuint fragmentShader = shader_manager.GetShaderHdlr("fragment_shader");
 
   // Create programs
   program_manager.CreateProgram("program");
-  program_manager.AttachShader("program", vertexShader);
-  program_manager.AttachShader("program", fragmentShader);
+  program_manager.AttachShader("program", "vertex_shader");
+  program_manager.AttachShader("program", "fragment_shader");
   program_manager.LinkProgram("program");
   program_manager.UseProgram("program");
   program = program_manager.GetProgramHdlr("program");
