@@ -16,9 +16,6 @@ GLubyte timer_cnt = 0;
 bool timer_enabled = true;
 unsigned int timer_speed = 16;
 
-glm::mat4 mvp;
-GLuint um4mvp;
-
 /*******************************************************************************
  * Constants
  ******************************************************************************/
@@ -43,7 +40,7 @@ GLuint mvp_buffer_hdlr;
  * Transformation
  ******************************************************************************/
 
- // MVP
+// MVP
 glm::mat4 model;
 glm::mat4 view;
 glm::mat4 proj;
@@ -76,8 +73,6 @@ void My_Init() {
   program_manager.LinkProgram("program");
   program_manager.UseProgram("program");
   program = program_manager.GetProgramHdlr("program");
-
-  um4mvp = glGetUniformLocation(program, "um4mvp");
 
   GLuint vao;
   glGenVertexArrays(1, &vao);
@@ -128,8 +123,6 @@ void My_Display() {
 
   glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
 
-  glUniformMatrix4fv(um4mvp, 1, GL_FALSE, glm::value_ptr(mvp));
-
   glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
   glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4),
     glm::value_ptr(model));
@@ -174,6 +167,13 @@ void My_Mouse(int button, int state, int x, int y) {
 
 void My_Keyboard(unsigned char key, int x, int y) {
     printf("Key %c is pressed at (%d, %d)\n", key, x, y);
+    switch (key) {
+    case 27: // Escape
+      exit(0);
+      break;
+    default:
+      break;
+    }
 }
 
 void My_SpecialKeys(int key, int x, int y) {
@@ -245,7 +245,7 @@ int main(int argc, char* argv[]) {
 #ifdef _MSC_VER
   glewInit();
 #endif
-  DumpGLInfo();
+  //DumpGLInfo();
   My_Init();
 
   // Create a menu and bind it to mouse right button.
