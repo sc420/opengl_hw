@@ -82,6 +82,7 @@ void My_Init() {
 
   // Create buffers
   buffer_manager.GenBuffer("buffer");
+  buffer_manager.BindBuffer("buffer", GL_ARRAY_BUFFER);
 
   buffer = buffer_manager.GetBufferHdlr("buffer");
 
@@ -138,7 +139,7 @@ void My_Display() {
 
   glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);*/
 
-  buffer_manager.BindBuffer("buffer", GL_ARRAY_BUFFER);
+  buffer_manager.BindBuffer("buffer");
 
   buffer_manager.UpdateBuffer("buffer", GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
 
