@@ -1,7 +1,23 @@
 #pragma once
 
-#include "common.hpp"
+#include <map>
+#include <string>
 
-GLchar* LoadShaderSource(const std::string& file);
+#include "assignment/common.hpp"
 
-void FreeShaderSource(GLchar* src);
+class ShaderManager {
+ public:
+  void CreateShader(const GLenum type, const std::string& path,
+                    const std::string& name);
+
+  GLuint GetShaderHdlr(const std::string& name);
+
+ private:
+  std::map<std::string, GLuint> hdlrs_;
+
+  void CheckShaderCompilation(const GLuint hdlr);
+
+  GLchar* LoadShaderSource(const std::string& file);
+
+  void FreeShaderSource(GLchar* src);
+};

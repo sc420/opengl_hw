@@ -8,9 +8,6 @@
     <ClCompile Include="..\sources\shader.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\mvp.cpp">
-      <Filter>sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\sources\uniform.cpp">
       <Filter>sources</Filter>
     </ClCompile>
@@ -36,9 +33,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\assignment\common.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\assignment\mvp.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\assignment\shader.hpp">

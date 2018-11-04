@@ -19,6 +19,13 @@ glm::mat4 mvp;
 GLuint um4mvp;
 
 /*******************************************************************************
+ * Constants
+ ******************************************************************************/
+
+constexpr auto MOUSE_SENSITIVITY = 1.0f;
+constexpr auto MOUSE_DIV_FACTOR = 300.0f;
+
+/*******************************************************************************
  * Programs
  ******************************************************************************/
 
@@ -35,7 +42,7 @@ GLuint mvp_buffer_hdlr;
  * Transformation
  ******************************************************************************/
 
-// MVP
+ // MVP
 glm::mat4 model;
 glm::mat4 view;
 glm::mat4 proj;
@@ -44,30 +51,21 @@ glm::mat4 proj;
  * Managers
  ******************************************************************************/
 
+ShaderManager shader_manager;
 UniformManager uniform_manager;
 
 void My_Init() {
-  // Catch errors
-  glEnable(GL_DEBUG_OUTPUT);
-  glDebugMessageCallback(MessageCallback, 0);
+  EnableCatchingError();
 
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 
-  GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  GLchar* vertexShaderSource = LoadShaderSource("vertex.vs.glsl");
-  GLchar* fragmentShaderSource = LoadShaderSource("fragment.fs.glsl");
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-  FreeShaderSource(vertexShaderSource);
-  FreeShaderSource(fragmentShaderSource);
-
-  glCompileShader(vertexShader);
-  glCompileShader(fragmentShader);
-  shaderLog(vertexShader);
-  shaderLog(fragmentShader);
+  // Create the shaders
+  shader_manager.CreateShader(GL_VERTEX_SHADER, "vertex.vs.glsl", "vertex_shader");
+  shader_manager.CreateShader(GL_FRAGMENT_SHADER, "fragment.fs.glsl", "fragment_shader");
+  GLuint vertexShader = shader_manager.GetShaderHdlr("vertex_shader");
+  GLuint fragmentShader = shader_manager.GetShaderHdlr("fragment_shader");
 
   program = glCreateProgram();
   glAttachShader(program, vertexShader);
@@ -152,8 +150,6 @@ void My_Reshape(int width, int height) {
   // TODO: Use explicit model, view and projection and store in buffer-backed
   // buffer
   proj = glm::ortho(-1 * viewportAspect, 1 * viewportAspect, -1.0f, 1.0f);
-  view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-    glm::vec3(0.0f, 1.0f, 0.0f));
   model = glm::mat4();
 }
 
@@ -175,7 +171,7 @@ void My_Mouse(int button, int state, int x, int y) {
 }
 
 void My_Keyboard(unsigned char key, int x, int y) {
-  printf("Key %c is pressed at (%d, %d)\n", key, x, y);
+    printf("Key %c is pressed at (%d, %d)\n", key, x, y);
 }
 
 void My_SpecialKeys(int key, int x, int y) {

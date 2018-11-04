@@ -19,22 +19,6 @@ void dumpInfo(void) {
   printf("GLSL: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 }
 
-void shaderLog(GLuint shader) {
-  GLint isCompiled = 0;
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
-  if (isCompiled == GL_FALSE) {
-    GLint maxLength = 0;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-
-    // The maxLength includes the NULL character
-    GLchar* errorLog = new GLchar[maxLength];
-    glGetShaderInfoLog(shader, maxLength, &maxLength, &errorLog[0]);
-
-    printf("%s\n", errorLog);
-    delete[] errorLog;
-  }
-}
-
 void printGLError() {
   GLenum code = glGetError();
   switch (code) {
@@ -92,22 +76,22 @@ texture_data load_png(const char* path) {
   return texture;
 }
 
-void GLAPIENTRY
-MessageCallback(GLenum source,
-  GLenum type,
-  GLuint id,
-  GLenum severity,
-  GLsizei length,
-  const GLchar* message,
-  const void* userParam)
-{
+void EnableCatchingError() {
+  glEnable(GL_DEBUG_OUTPUT);
+  glDebugMessageCallback(MessageCallback, 0);
+}
+
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
+                                GLenum severity, GLsizei length,
+                                const GLchar* message, const void* userParam) {
   /* Filter based on types */
   // Ignore API_ID_RECOMPILE_FRAGMENT_SHADER
   if (type == 0x8250) {
     return;
   }
   /* Print the message */
-  fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-    (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
-    type, severity, message);
+  fprintf(stderr,
+          "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+          (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
+          message);
 }

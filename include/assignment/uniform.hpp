@@ -12,25 +12,25 @@
 #include "assignment/common.hpp"
 
 class UniformManager {
-public:
+ public:
   void RegisterProgram(const GLuint program_hdlr, const std::string &name);
 
   void RegisterBuffer(const GLuint buffer_hdlr, const std::string &name);
 
   void AssignBindingPoint(const std::string &program_name,
-    const std::string &block_name, const GLuint point);
+                          const std::string &block_name, const GLuint point);
 
   GLuint GetBindingPoint(const std::string &program_name,
-    const std::string &block_name);
+                         const std::string &block_name);
 
   void BindBufferToBindingPoint(const GLuint point,
-    const std::string &buffer_name);
+                                const std::string &buffer_name);
 
   void BindBufferToBindingPoint(const GLuint point,
-    const std::string &buffer_name,
-    const GLintptr offset, const GLsizeiptr size);
+                                const std::string &buffer_name,
+                                const GLintptr offset, const GLsizeiptr size);
 
-private:
+ private:
   std::map<std::string, GLuint> program_hdlrs_;
 
   std::map<std::string, GLuint> buffer_hdlrs_;

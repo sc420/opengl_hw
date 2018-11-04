@@ -19,7 +19,9 @@
 #define GLM_SWIZZLE
 #include <GLM/glm/glm.hpp>
 #include <GLM/glm/gtc/matrix_transform.hpp>
+#include <GLM/glm/gtc/quaternion.hpp>
 #include <GLM/glm/gtc/type_ptr.hpp>
+#include <GLM/glm/gtx/quaternion.hpp>
 
 #include <algorithm>
 #include <cstdio>
@@ -59,11 +61,8 @@ void printGLError();
 
 texture_data load_png(const char* path);
 
-void GLAPIENTRY
-MessageCallback(GLenum source,
-  GLenum type,
-  GLuint id,
-  GLenum severity,
-  GLsizei length,
-  const GLchar* message,
-  const void* userParam);
+void EnableCatchingError();
+
+void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
+                                GLenum severity, GLsizei length,
+                                const GLchar* message, const void* userParam);

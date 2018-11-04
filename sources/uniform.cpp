@@ -13,7 +13,7 @@ void UniformManager::RegisterBuffer(const GLuint buffer_hdlr,
 void UniformManager::AssignBindingPoint(const std::string &program_name,
                                         const std::string &block_name,
                                         const GLuint point) {
-  GLuint block_hdlr;
+  GLuint block_hdlr = NULL;
   // Get program handler
   const GLuint program_hdlr = get_program_hdlr(program_name);
   // Check whether to retrieve the index of a named uniform block lazily
