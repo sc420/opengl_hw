@@ -1,5 +1,12 @@
 #include "assignment/program.hpp"
 
+ProgramManager::~ProgramManager() {
+  // Delete all program objects
+  for (const auto &pair : hdlrs_) {
+    glDeleteProgram(pair.second);
+  }
+}
+
 void ProgramManager::CreateProgram(const std::string &name) {
   // Create a program object
   const GLuint hdlr = glCreateProgram();

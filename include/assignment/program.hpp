@@ -7,6 +7,8 @@
 
 class ProgramManager {
  public:
+  ~ProgramManager();
+
   void CreateProgram(const std::string &name);
 
   void AttachShader(const std::string &name, const GLuint shader_hdlr);

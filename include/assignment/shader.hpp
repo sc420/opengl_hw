@@ -7,6 +7,8 @@
 
 class ShaderManager {
  public:
+  ~ShaderManager();
+
   void CreateShader(const GLenum type, const std::string& path,
                     const std::string& name);
 

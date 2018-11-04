@@ -1,5 +1,12 @@
 #include "assignment/shader.hpp"
 
+ShaderManager::~ShaderManager() {
+  // Delete all shader objects
+  for (const auto& pair : hdlrs_) {
+    glDeleteShader(pair.second);
+  }
+}
+
 void ShaderManager::CreateShader(const GLenum type, const std::string& path,
                                  const std::string& name) {
   // Create a shader object
