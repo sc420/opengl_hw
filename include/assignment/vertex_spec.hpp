@@ -19,11 +19,11 @@ class VertexSpecManager {
 
   void RegisterBufferManager(const BufferManager &buffer_manager);
 
-  void GenVertexArray(const std::string &name);
+  void GenVertexArray(const std::string &va_name);
 
-  void BindVertexArray(const std::string &name) const;
+  void BindVertexArray(const std::string &va_name) const;
 
-  void SpecifyVertexArrayOrg(const std::string &name, const GLuint attrib_idx, const GLint size,
+  void SpecifyVertexArrayOrg(const std::string &va_name, const GLuint attrib_idx, const GLint size,
                              const GLenum type, const GLboolean normalized,
                              const GLuint relative_ofs) const;
 
@@ -41,9 +41,9 @@ class VertexSpecManager {
     const std::string &buffer_name,
     const GLuint binding_idx);
 
-  void DeleteVertexArray(const std::string &name);
+  void DeleteVertexArray(const std::string &va_name);
 
-  GLuint GetVertexArrayHdlr(const std::string &name) const;
+  GLuint GetVertexArrayHdlr(const std::string &va_name) const;
 
   GLuint GetVertexAttribBindingPoint(const std::string &va_name,
                                      const GLuint attrib_idx) const;

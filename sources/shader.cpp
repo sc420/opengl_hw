@@ -7,33 +7,32 @@ ShaderManager::~ShaderManager() {
   }
 }
 
-void ShaderManager::CreateShader(const GLenum type, const std::string& path,
-                                 const std::string& name) {
+void ShaderManager::CreateShader(const std::string& shader_name, const GLenum type, const std::string& path) {
   // Create a shader object
-  const GLuint hdlr = glCreateShader(type);
+  const GLuint shader_hdlr = glCreateShader(type);
   // Load the shader source
   std::string src = LoadShaderSource(path);
   // Replace the source code in the shader object
   const char *str = src.c_str();
-  glShaderSource(hdlr, 1, &str, NULL);
+  glShaderSource(shader_hdlr, 1, &str, NULL);
   // Compile the shader object
-  glCompileShader(hdlr);
+  glCompileShader(shader_hdlr);
   // Check the compilation status
-  CheckShaderCompilation(hdlr);
+  CheckShaderCompilation(shader_hdlr);
   // Save the handler
-  hdlrs_[name] = hdlr;
+  hdlrs_[shader_name] = shader_hdlr;
 }
 
-void ShaderManager::DeleteShader(const std::string& name) const {
-  const GLuint hdlr = GetShaderHdlr(name);
-  glDeleteShader(hdlr);
+void ShaderManager::DeleteShader(const std::string& shader_name) const {
+  const GLuint shader_hdlr = GetShaderHdlr(shader_name);
+  glDeleteShader(shader_hdlr);
 }
 
-GLuint ShaderManager::GetShaderHdlr(const std::string& name) const {
-  if (hdlrs_.count(name) == 0) {
-    throw std::runtime_error("Could not find the shader name '" + name + "'");
+GLuint ShaderManager::GetShaderHdlr(const std::string& shader_name) const {
+  if (hdlrs_.count(shader_name) == 0) {
+    throw std::runtime_error("Could not find the shader name '" + shader_name + "'");
   }
-  return hdlrs_.at(name);
+  return hdlrs_.at(shader_name);
 }
 
 std::string ShaderManager::LoadShaderSource(const std::string& file) const {
@@ -48,18 +47,18 @@ std::string ShaderManager::LoadShaderSource(const std::string& file) const {
   return src;
 }
 
-void ShaderManager::CheckShaderCompilation(const GLuint hdlr)const {
+void ShaderManager::CheckShaderCompilation(const GLuint shader_hdlr)const {
   GLint status = -1;
   // Get compilation status
-  glGetShaderiv(hdlr, GL_COMPILE_STATUS, &status);
+  glGetShaderiv(shader_hdlr, GL_COMPILE_STATUS, &status);
   // Report the log if compilation is unsuccessful
   if (status == GL_FALSE) {
     // Get the length of the log
     GLint len = 0;
-    glGetShaderiv(hdlr, GL_INFO_LOG_LENGTH, &len);
+    glGetShaderiv(shader_hdlr, GL_INFO_LOG_LENGTH, &len);
     // Get the log
     std::string log(len, '\0');
-    glGetShaderInfoLog(hdlr, len, &len, &log[0]);
+    glGetShaderInfoLog(shader_hdlr, len, &len, &log[0]);
     // Throw an error
     throw std::runtime_error(log);
   }

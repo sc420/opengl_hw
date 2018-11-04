@@ -20,21 +20,21 @@ public:
 
   ~BufferManager();
 
-  void GenBuffer(const std::string &name);
+  void GenBuffer(const std::string &buffer_name);
 
-  void BindBuffer(const std::string &name, const GLenum target);
+  void BindBuffer(const std::string &buffer_name, const GLenum target);
 
-  void BindBuffer(const std::string &name);
+  void BindBuffer(const std::string &buffer_name);
 
-  void InitBuffer(const std::string &name, const GLenum target, const GLsizeiptr size, const GLvoid*data, const GLenum usage);
+  void InitBuffer(const std::string &buffer_name, const GLenum target, const GLsizeiptr size, const GLvoid*data, const GLenum usage);
 
-  void UpdateBuffer(const std::string &name, const GLenum target, const GLintptr ofs, const GLsizeiptr size, const GLvoid *data);
+  void UpdateBuffer(const std::string &buffer_name, const GLenum target, const GLintptr ofs, const GLsizeiptr size, const GLvoid *data);
 
-  void UpdateBuffer(const std::string &name);
+  void UpdateBuffer(const std::string &buffer_name);
 
-  void DeleteBuffer(const std::string &name);
+  void DeleteBuffer(const std::string &buffer_name);
 
-  GLuint GetBufferHdlr(const std::string &name) const;
+  GLuint GetBufferHdlr(const std::string &buffer_name) const;
 
 private:
 
@@ -44,7 +44,7 @@ private:
 
   std::map<std::string, UpdateBufferPrevParams> update_buffer_prev_params_;
 
-  const BindBufferPrevParams &GetBindBufferPrevParams(const std::string &name) const;
+  const BindBufferPrevParams &GetBindBufferPrevParams(const std::string &buffer_name) const;
 
-  const UpdateBufferPrevParams &GetUpdateBufferPrevParams(const std::string &name) const;
+  const UpdateBufferPrevParams &GetUpdateBufferPrevParams(const std::string &buffer_name) const;
 };

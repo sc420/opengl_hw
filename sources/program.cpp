@@ -16,11 +16,11 @@ void ProgramManager::RegisterShaderManager(const ShaderManager & shader_manager)
   shader_manager_ = &shader_manager;
 }
 
-void ProgramManager::CreateProgram(const std::string &name) {
+void ProgramManager::CreateProgram(const std::string &program_name) {
   // Create a program object
-  const GLuint hdlr = glCreateProgram();
+  const GLuint program_hdlr = glCreateProgram();
   // Save the program handler
-  hdlrs_[name] = hdlr;
+  hdlrs_[program_name] = program_hdlr;
 }
 
 void ProgramManager::AttachShader(const std::string &program_name,
@@ -30,41 +30,41 @@ void ProgramManager::AttachShader(const std::string &program_name,
   glAttachShader(program_hdlr, shader_hdlr);
 }
 
-void ProgramManager::LinkProgram(const std::string &name) const  {
-  const GLuint hdlr = GetProgramHdlr(name);
-  glLinkProgram(hdlr);
-  CheckProgramLinkingStatus(hdlr);
+void ProgramManager::LinkProgram(const std::string &program_name) const  {
+  const GLuint program_hdlr = GetProgramHdlr(program_name);
+  glLinkProgram(program_hdlr);
+  CheckProgramLinkingStatus(program_hdlr);
 }
 
-void ProgramManager::UseProgram(const std::string &name) const {
-  const GLuint hdlr = GetProgramHdlr(name);
-  glUseProgram(hdlr);
+void ProgramManager::UseProgram(const std::string &program_name) const {
+  const GLuint program_hdlr = GetProgramHdlr(program_name);
+  glUseProgram(program_hdlr);
 }
 
-void ProgramManager::DeleteProgram(const std::string &name) const {
-  const GLuint hdlr = GetProgramHdlr(name);
-  glDeleteProgram(hdlr);
+void ProgramManager::DeleteProgram(const std::string &program_name) const {
+  const GLuint program_hdlr = GetProgramHdlr(program_name);
+  glDeleteProgram(program_hdlr);
 }
 
-GLuint ProgramManager::GetProgramHdlr(const std::string &name) const {
-  if (hdlrs_.count(name) == 0) {
-    throw std::runtime_error("Could not find the program name '" + name + "'");
+GLuint ProgramManager::GetProgramHdlr(const std::string &program_name) const {
+  if (hdlrs_.count(program_name) == 0) {
+    throw std::runtime_error("Could not find the program name '" + program_name + "'");
   }
-  return hdlrs_.at(name);
+  return hdlrs_.at(program_name);
 }
 
-void ProgramManager::CheckProgramLinkingStatus(const GLuint hdlr) const {
+void ProgramManager::CheckProgramLinkingStatus(const GLuint program_hdlr) const {
   GLint status = -1;
   // Get linking status
-  glGetProgramiv(hdlr, GL_LINK_STATUS, &status);
+  glGetProgramiv(program_hdlr, GL_LINK_STATUS, &status);
   // Report the log if the linking is unsuccessful
   if (status == GL_FALSE) {
     // Get the length of the log
     GLint len;
-    glGetProgramiv(hdlr, GL_INFO_LOG_LENGTH, &len);
+    glGetProgramiv(program_hdlr, GL_INFO_LOG_LENGTH, &len);
     // Get the log
     std::string log(len, '\0');
-    glGetProgramInfoLog(hdlr, len, &len, &log[0]);
+    glGetProgramInfoLog(program_hdlr, len, &len, &log[0]);
     // Throw an error
     throw std::runtime_error(log);
   }

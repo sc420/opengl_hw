@@ -71,10 +71,8 @@ void My_Init() {
   vertex_spec_manager.RegisterBufferManager(buffer_manager); 
 
   // Create shaders
-  shader_manager.CreateShader(GL_VERTEX_SHADER, "vertex.vs.glsl",
-                              "vertex_shader");
-  shader_manager.CreateShader(GL_FRAGMENT_SHADER, "fragment.fs.glsl",
-                              "fragment_shader");
+  shader_manager.CreateShader("vertex_shader", GL_VERTEX_SHADER, "vertex.vs.glsl");
+  shader_manager.CreateShader("fragment_shader", GL_FRAGMENT_SHADER, "fragment.fs.glsl");
 
   // Create programs
   program_manager.CreateProgram("program");
