@@ -1,6 +1,7 @@
 #pragma warning(push, 0)
 #include "assignment/common.hpp"
 #pragma warning(pop)
+#include "assignment/buffer.hpp"
 #include "assignment/program.hpp"
 #include "assignment/shader.hpp"
 #include "assignment/uniform.hpp"
@@ -50,6 +51,7 @@ glm::mat4 proj;
  * Managers
  ******************************************************************************/
 
+BufferManager buffer_manager;
 ProgramManager program_manager;
 ShaderManager shader_manager;
 UniformManager uniform_manager;
@@ -79,8 +81,12 @@ void My_Init() {
   program = program_manager.GetProgramHdlr("program");
 
   // Create buffers
-  glGenBuffers(1, &buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  buffer_manager.GenBuffer("buffer");
+
+  buffer = buffer_manager.GetBufferHdlr("buffer");
+
+  /*glGenBuffers(1, &buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer);*/
 
   // Create vertex arrays
   vertex_spec_manager.GenVertexArray("vao");
@@ -97,7 +103,9 @@ void My_Init() {
                                                3 * sizeof(float));
 
   // Initialize buffers
-  glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
+  //glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
+
+  buffer_manager.InitBuffer("buffer", GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
 
   // TODO: Add program manager and buffer manager
   // TODO: Delete buffer
@@ -126,9 +134,13 @@ void My_Display() {
                     0.0f,        0.6f,  0.0f, f_timer_cnt, 0.0f,  0.0f,
                     f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f};
 
-  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  /*glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
-  glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);*/
+
+  buffer_manager.BindBuffer("buffer", GL_ARRAY_BUFFER);
+
+  buffer_manager.UpdateBuffer("buffer", GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
 
   glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
 

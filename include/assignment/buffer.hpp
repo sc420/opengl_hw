@@ -12,7 +12,7 @@ public:
 
   void GenBuffer(const std::string &name);
 
-  void BindBuffer(const std::string &name);
+  void BindBuffer(const std::string &name, const GLenum target);
 
   void InitBuffer(const std::string &name, const GLenum target, const GLsizeiptr size, const GLvoid*data, const GLenum usage);
 
