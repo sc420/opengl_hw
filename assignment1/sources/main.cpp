@@ -7,16 +7,28 @@
 #include "assignment/uniform.hpp"
 #include "assignment/vertex_spec.hpp"
 
-GLubyte timer_cnt = 0;
-bool timer_enabled = true;
-unsigned int timer_speed = 16;
-
 /*******************************************************************************
  * Constants
  ******************************************************************************/
 
-constexpr auto MOUSE_SENSITIVITY = 1.0f;
-constexpr auto MOUSE_DIV_FACTOR = 300.0f;
+constexpr auto TIMER_INTERVAL = 10;
+
+/*******************************************************************************
+ * Managers
+ ******************************************************************************/
+
+BufferManager buffer_manager;
+ProgramManager program_manager;
+ShaderManager shader_manager;
+UniformManager uniform_manager;
+VertexSpecManager vertex_spec_manager;
+
+/*******************************************************************************
+ * Timer
+ ******************************************************************************/
+
+unsigned int timer_cnt = 0;
+bool timer_enabled = true;
 
 /*******************************************************************************
  * Transformation
@@ -29,16 +41,6 @@ struct Mvp {
 };
 
 Mvp mvp;
-
-/*******************************************************************************
- * Managers
- ******************************************************************************/
-
-BufferManager buffer_manager;
-ProgramManager program_manager;
-ShaderManager shader_manager;
-UniformManager uniform_manager;
-VertexSpecManager vertex_spec_manager;
 
 void InitGLUT(int argc, char* argv[]) {
   glutInit(&argc, argv);
@@ -203,7 +205,7 @@ void GLUTTimerCallback(int val) {
   timer_cnt++;
   glutPostRedisplay();
   if (timer_enabled) {
-    glutTimerFunc(timer_speed, GLUTTimerCallback, val);
+    glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, val);
   }
 }
 
@@ -226,7 +228,7 @@ void GLUTTimerMenuCallback(int id) {
     case 1:
       if (!timer_enabled) {
         timer_enabled = true;
-        glutTimerFunc(timer_speed, GLUTTimerCallback, 0);
+        glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
       }
       break;
     case 2:
@@ -244,7 +246,7 @@ void RegisterGLUTCallbacks() {
   glutMouseFunc(GLUTMouseCallback);
   glutKeyboardFunc(GLUTKeyboardCallback);
   glutSpecialFunc(GLUTSpecialCallback);
-  glutTimerFunc(timer_speed, GLUTTimerCallback, 0);
+  glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
 }
 
 void CreateGLUTMenus() {
