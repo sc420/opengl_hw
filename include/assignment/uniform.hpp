@@ -10,12 +10,18 @@
 #include <string>
 
 #include "assignment/common.hpp"
+#include "assignment/program.hpp"
+#include "assignment/buffer.hpp"
 
 class UniformManager {
  public:
-  void RegisterProgram(const GLuint program_hdlr, const std::string &name);
+  //void RegisterProgram(const GLuint program_hdlr, const std::string &name);
 
-  void RegisterBuffer(const GLuint buffer_hdlr, const std::string &name);
+  //void RegisterBuffer(const GLuint buffer_hdlr, const std::string &name);
+
+  void RegisterProgramManager(const ProgramManager &program_manager);
+
+  void RegisterBufferManager(const BufferManager &buffer_manager);
 
   void AssignUniformBlockToBindingPoint(const std::string &program_name,
                                         const std::string &block_name,
@@ -32,6 +38,10 @@ class UniformManager {
                                      const std::string &block_name);
 
  private:
+   const ProgramManager *program_manager_;
+
+   const BufferManager *buffer_manager_;
+
   std::map<std::string, GLuint> program_hdlrs_;
 
   std::map<std::string, GLuint> buffer_hdlrs_;
@@ -40,7 +50,7 @@ class UniformManager {
 
   std::map<std::string, std::map<std::string, GLuint>> binding_points_;
 
-  GLuint get_program_hdlr(const std::string &name);
+  //GLuint get_program_hdlr(const std::string &name);
 
-  GLuint get_buffer_hdlr(const std::string &name);
+  //GLuint get_buffer_hdlr(const std::string &name);
 };

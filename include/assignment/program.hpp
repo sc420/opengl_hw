@@ -19,7 +19,7 @@ class ProgramManager {
 
   void DeleteProgram(const std::string &name);
 
-  GLuint GetProgramHdlr(const std::string &name);
+  GLuint GetProgramHdlr(const std::string &name) const;
 
  private:
   std::map<std::string, GLuint> hdlrs_;

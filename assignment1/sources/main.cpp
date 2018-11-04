@@ -64,6 +64,10 @@ void My_Init() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 
+  // Register managers
+  uniform_manager.RegisterProgramManager(program_manager);
+  uniform_manager.RegisterBufferManager(buffer_manager);
+
   // Create shaders
   shader_manager.CreateShader(GL_VERTEX_SHADER, "vertex.vs.glsl",
                               "vertex_shader");
@@ -111,13 +115,20 @@ void My_Init() {
   // TODO: Add program manager and buffer manager
   // TODO: Delete buffer
 
-  glGenBuffers(1, &mvp_buffer_hdlr);
+  buffer_manager.GenBuffer("mvp_buffer");
+  buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);
+
+  buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+
+  mvp_buffer_hdlr = buffer_manager.GetBufferHdlr("mvp_buffer");
+
+ /* glGenBuffers(1, &mvp_buffer_hdlr);
   glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
 
-  glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+  glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);*/
 
-  uniform_manager.RegisterProgram(program, "program");
-  uniform_manager.RegisterBuffer(mvp_buffer_hdlr, "mvp_buffer");
+  //uniform_manager.RegisterProgram(program, "program");
+  //uniform_manager.RegisterBuffer(mvp_buffer_hdlr, "mvp_buffer");
   uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
   uniform_manager.BindBufferToBindingPoint(0, "mvp_buffer");
 }
@@ -143,14 +154,20 @@ void My_Display() {
 
   buffer_manager.UpdateBuffer("buffer", GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
 
-  glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
+  //glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
 
-  glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4),
-                  glm::value_ptr(model));
-  glBufferSubData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4),
-                  glm::value_ptr(view));
-  glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::mat4),
-                  glm::value_ptr(proj));
+  //glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4),
+  //                glm::value_ptr(model));
+  //glBufferSubData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4),
+  //                glm::value_ptr(view));
+  //glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::mat4),
+  //                glm::value_ptr(proj));
+
+  buffer_manager.BindBuffer("mvp_buffer");
+
+  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(model));
+  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
+  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(proj));
 
   vertex_spec_manager.BindVertexArray("vao");
 

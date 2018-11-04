@@ -62,7 +62,8 @@ void BufferManager::DeleteBuffer(const std::string & name)
   update_buffer_prev_params_.erase(name);
 }
 
-GLuint BufferManager::GetBufferHdlr(const std::string & name)
+//TODO: Add const qualifer in all classes
+GLuint BufferManager::GetBufferHdlr(const std::string & name) const
 {
   if (hdlrs_.count(name) == 0) {
     throw std::runtime_error("Could not find the buffer name '" + name + "'");

@@ -1,20 +1,30 @@
 #include "assignment/uniform.hpp"
 
-void UniformManager::RegisterProgram(const GLuint program_hdlr,
-                                     const std::string &name) {
-  program_hdlrs_[name] = program_hdlr;
+//void UniformManager::RegisterProgram(const GLuint program_hdlr,
+//                                     const std::string &name) {
+//  program_hdlrs_[name] = program_hdlr;
+//}
+//
+//void UniformManager::RegisterBuffer(const GLuint buffer_hdlr,
+//                                    const std::string &name) {
+//  buffer_hdlrs_[name] = buffer_hdlr;
+//}
+
+void UniformManager::RegisterProgramManager(const ProgramManager & program_manager)
+{
+  program_manager_ = &program_manager;
 }
 
-void UniformManager::RegisterBuffer(const GLuint buffer_hdlr,
-                                    const std::string &name) {
-  buffer_hdlrs_[name] = buffer_hdlr;
+void UniformManager::RegisterBufferManager(const BufferManager & buffer_manager)
+{
+  buffer_manager_ = &buffer_manager;
 }
 
 void UniformManager::AssignUniformBlockToBindingPoint(
     const std::string &program_name, const std::string &block_name,
     const GLuint bind_idx) {
   // Get program handler
-  const GLuint program_hdlr = get_program_hdlr(program_name);
+  const GLuint program_hdlr = program_manager_->GetProgramHdlr(program_name);
   // Check whether to retrieve the index of a named uniform block lazily
   GLuint block_hdlr = NULL;
   if (block_idxs_.count(program_name) > 0 &&
@@ -36,7 +46,7 @@ void UniformManager::AssignUniformBlockToBindingPoint(
 void UniformManager::BindBufferToBindingPoint(const GLuint bind_idx,
                                               const std::string &buffer_name) {
   // Get buffer handler
-  const GLuint buffer_hdlr = get_buffer_hdlr(buffer_name);
+  const GLuint buffer_hdlr = buffer_manager_->GetBufferHdlr(buffer_name);
   // Bind the buffer to the binding point
   glBindBufferBase(GL_UNIFORM_BUFFER, bind_idx, buffer_hdlr);
 }
@@ -47,7 +57,7 @@ void UniformManager::BindBufferToBindingPoint(const GLuint bind_idx,
                                               const GLintptr offset,
                                               const GLsizeiptr size) {
   // Get buffer handler
-  const GLuint buffer_hdlr = get_buffer_hdlr(buffer_name);
+  const GLuint buffer_hdlr = buffer_manager_->GetBufferHdlr(buffer_name);
   // Bind the buffer to the binding point
   glBindBufferRange(GL_UNIFORM_BUFFER, bind_idx, buffer_hdlr, offset, size);
 }
@@ -66,17 +76,17 @@ GLuint UniformManager::GetUniformBlockBindingPoint(
   }
   return block_to_points.at(block_name);
 }
-
-GLuint UniformManager::get_program_hdlr(const std::string &name) {
-  if (program_hdlrs_.count(name) == 0) {
-    throw std::runtime_error("Could not find the program name '" + name + "'");
-  }
-  return program_hdlrs_.at(name);
-}
-
-GLuint UniformManager::get_buffer_hdlr(const std::string &name) {
-  if (buffer_hdlrs_.count(name) == 0) {
-    throw std::runtime_error("Could not find the buffer name '" + name + "'");
-  }
-  return buffer_hdlrs_.at(name);
-}
+//
+//GLuint UniformManager::get_program_hdlr(const std::string &name) {
+//  if (program_hdlrs_.count(name) == 0) {
+//    throw std::runtime_error("Could not find the program name '" + name + "'");
+//  }
+//  return program_hdlrs_.at(name);
+//}
+//
+//GLuint UniformManager::get_buffer_hdlr(const std::string &name) {
+//  if (buffer_hdlrs_.count(name) == 0) {
+//    throw std::runtime_error("Could not find the buffer name '" + name + "'");
+//  }
+//  return buffer_hdlrs_.at(name);
+//}

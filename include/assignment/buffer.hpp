@@ -34,7 +34,7 @@ public:
 
   void DeleteBuffer(const std::string &name);
 
-  GLuint GetBufferHdlr(const std::string &name);
+  GLuint GetBufferHdlr(const std::string &name) const;
 
 private:
 

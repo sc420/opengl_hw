@@ -36,7 +36,7 @@ void ProgramManager::DeleteProgram(const std::string &name) {
   glDeleteProgram(hdlr);
 }
 
-GLuint ProgramManager::GetProgramHdlr(const std::string &name) {
+GLuint ProgramManager::GetProgramHdlr(const std::string &name) const {
   if (hdlrs_.count(name) == 0) {
     throw std::runtime_error("Could not find the program name '" + name + "'");
   }
