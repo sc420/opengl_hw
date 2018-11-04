@@ -130,7 +130,7 @@ void My_Init() {
   //uniform_manager.RegisterProgram(program, "program");
   //uniform_manager.RegisterBuffer(mvp_buffer_hdlr, "mvp_buffer");
   uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
-  uniform_manager.BindBufferToBindingPoint(0, "mvp_buffer");
+  uniform_manager.BindBufferBaseToBindingPoint("mvp_buffer", 0);
 }
 
 // GLUT callback. Called to draw the scene.
