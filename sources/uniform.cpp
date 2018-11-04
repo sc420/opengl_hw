@@ -10,17 +10,17 @@ void UniformManager::RegisterBuffer(const GLuint buffer_hdlr,
   buffer_hdlrs_[name] = buffer_hdlr;
 }
 
-void UniformManager::AssignUniformBlockToBindingPoint(const std::string &program_name,
-                                        const std::string &block_name,
-                                        const GLuint bind_idx) {
+void UniformManager::AssignUniformBlockToBindingPoint(
+    const std::string &program_name, const std::string &block_name,
+    const GLuint bind_idx) {
   // Get program handler
   const GLuint program_hdlr = get_program_hdlr(program_name);
   // Check whether to retrieve the index of a named uniform block lazily
   GLuint block_hdlr = NULL;
-  if (block_idxs_.count(program_name) > 0 && block_idxs_.at(program_name).count(block_name) > 0) {
+  if (block_idxs_.count(program_name) > 0 &&
+      block_idxs_.at(program_name).count(block_name) > 0) {
     block_hdlr = block_idxs_.at(program_name).at(block_name);
-  }
-  else {
+  } else {
     // Retrieve the index of a named uniform block
     block_hdlr = glGetUniformBlockIndex(program_hdlr, block_name.c_str());
     // Save the block handler
@@ -50,15 +50,17 @@ void UniformManager::BindBufferToBindingPoint(const GLuint bind_idx,
   glBindBufferRange(GL_UNIFORM_BUFFER, bind_idx, buffer_hdlr, offset, size);
 }
 
-GLuint UniformManager::GetUniformBlockBindingPoint(const std::string &program_name,
-  const std::string &block_name) {
+GLuint UniformManager::GetUniformBlockBindingPoint(
+    const std::string &program_name, const std::string &block_name) {
   if (binding_points_.count(program_name) == 0) {
-    throw std::runtime_error("Could not find the program name '" + program_name + "'");
+    throw std::runtime_error("Could not find the program name '" +
+                             program_name + "'");
   }
   const std::map<std::string, GLuint> &block_to_points =
-    binding_points_.at(program_name);
+      binding_points_.at(program_name);
   if (block_to_points.count(block_name) == 0) {
-    throw std::runtime_error("Could not find the block name '" + block_name + "'");
+    throw std::runtime_error("Could not find the block name '" + block_name +
+                             "'");
   }
   return block_to_points.at(block_name);
 }

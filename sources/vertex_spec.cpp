@@ -20,18 +20,23 @@ void VertexSpecManager::BindVertexArray(const std::string& name) {
   glBindVertexArray(hdlr);
 }
 
-void VertexSpecManager::SpecifyVertexArrayOrg(const GLuint attrib_idx, const GLint size, const GLenum type, const GLboolean normalized, const GLuint relative_ofs, const std::string & name)
-{ 
-  // Enable the generic vertex attribute array
-  glEnableVertexAttribArray(attrib_idx);
+void VertexSpecManager::SpecifyVertexArrayOrg(const GLuint attrib_idx,
+                                              const GLint size,
+                                              const GLenum type,
+                                              const GLboolean normalized,
+                                              const GLuint relative_ofs,
+                                              const std::string& name) {
   // Bind the vertex array
   BindVertexArray(name);
+  // Enable the generic vertex attribute array
+  glEnableVertexAttribArray(attrib_idx);
   // Specify the organization of the vertex array
   glVertexAttribFormat(attrib_idx, size, type, normalized, relative_ofs);
 }
 
-void VertexSpecManager::AssocVertexAttribToBindingPoint(const std::string & va_name, const GLuint attrib_idx, const GLuint binding_idx)
-{
+void VertexSpecManager::AssocVertexAttribToBindingPoint(
+    const std::string& va_name, const GLuint attrib_idx,
+    const GLuint binding_idx) {
   // Bind the vertex array
   BindVertexArray(va_name);
   // Associate the vertex attribute to the binding point
@@ -45,8 +50,11 @@ void VertexSpecManager::AssocVertexAttribToBindingPoint(const std::string & va_n
  * References:
  * https://www.opengl.org/discussion_boards/showthread.php/182043-glVertexAttribFormat-glDrawArrays-issue
  */
-void VertexSpecManager::BindBufferToBindingPoint(const std::string & va_name, const GLuint binding_idx, const GLuint buffer_hdlr, const GLintptr ofs, const GLsizei stride)
-{
+void VertexSpecManager::BindBufferToBindingPoint(const std::string& va_name,
+                                                 const GLuint binding_idx,
+                                                 const GLuint buffer_hdlr,
+                                                 const GLintptr ofs,
+                                                 const GLsizei stride) {
   // Bind the vertex array
   BindVertexArray(va_name);
   // Bind the buffer to the binding point
@@ -66,15 +74,16 @@ GLuint VertexSpecManager::GetVertexArrayHdlr(const std::string& name) {
   return hdlrs_.at(name);
 }
 
-GLuint VertexSpecManager::GetVertexAttribBindingPoint(const std::string & va_name, const GLuint attrib_idx)
-{
+GLuint VertexSpecManager::GetVertexAttribBindingPoint(
+    const std::string& va_name, const GLuint attrib_idx) {
   if (binding_points_.count(va_name) == 0) {
-    throw std::runtime_error("Could not find the vertex array name '" + va_name + "'");
+    throw std::runtime_error("Could not find the vertex array name '" +
+                             va_name + "'");
   }
-  std::map<GLuint, GLuint> &attrib_to_points =
-    binding_points_.at(va_name);
+  std::map<GLuint, GLuint>& attrib_to_points = binding_points_.at(va_name);
   if (attrib_to_points.count(attrib_idx) == 0) {
-    throw std::runtime_error("Could not find the attribute index '" + std::to_string(attrib_idx) + "'");
+    throw std::runtime_error("Could not find the attribute index '" +
+                             std::to_string(attrib_idx) + "'");
   }
   return attrib_to_points.at(attrib_idx);
 }

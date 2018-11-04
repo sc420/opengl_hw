@@ -18,7 +18,8 @@ class UniformManager {
   void RegisterBuffer(const GLuint buffer_hdlr, const std::string &name);
 
   void AssignUniformBlockToBindingPoint(const std::string &program_name,
-                          const std::string &block_name, const GLuint bind_idx);
+                                        const std::string &block_name,
+                                        const GLuint bind_idx);
 
   void BindBufferToBindingPoint(const GLuint bind_idx,
                                 const std::string &buffer_name);
@@ -28,7 +29,7 @@ class UniformManager {
                                 const GLintptr offset, const GLsizeiptr size);
 
   GLuint GetUniformBlockBindingPoint(const std::string &program_name,
-    const std::string &block_name);
+                                     const std::string &block_name);
 
  private:
   std::map<std::string, GLuint> program_hdlrs_;

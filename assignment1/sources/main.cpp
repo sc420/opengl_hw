@@ -63,8 +63,10 @@ void My_Init() {
   glDepthFunc(GL_LEQUAL);
 
   // Create shaders
-  shader_manager.CreateShader(GL_VERTEX_SHADER, "vertex.vs.glsl", "vertex_shader");
-  shader_manager.CreateShader(GL_FRAGMENT_SHADER, "fragment.fs.glsl", "fragment_shader");
+  shader_manager.CreateShader(GL_VERTEX_SHADER, "vertex.vs.glsl",
+                              "vertex_shader");
+  shader_manager.CreateShader(GL_FRAGMENT_SHADER, "fragment.fs.glsl",
+                              "fragment_shader");
   GLuint vertexShader = shader_manager.GetShaderHdlr("vertex_shader");
   GLuint fragmentShader = shader_manager.GetShaderHdlr("fragment_shader");
 
@@ -82,15 +84,17 @@ void My_Init() {
 
   // Create vertex arrays
   vertex_spec_manager.GenVertexArray("vao");
-  vertex_spec_manager.BindVertexArray("vao"); //TODO: Test if optional
 
   // Bind vertex arrays to buffers
   vertex_spec_manager.SpecifyVertexArrayOrg(0, 3, GL_FLOAT, GL_FALSE, 0, "vao");
-  vertex_spec_manager.SpecifyVertexArrayOrg(1, 3, GL_FLOAT, GL_FALSE, 3 * 3 * sizeof(float), "vao");
+  vertex_spec_manager.SpecifyVertexArrayOrg(1, 3, GL_FLOAT, GL_FALSE,
+                                            3 * 3 * sizeof(float), "vao");
   vertex_spec_manager.AssocVertexAttribToBindingPoint("vao", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("vao", 1, 1);
-  vertex_spec_manager.BindBufferToBindingPoint("vao", 0, buffer, 0, 3 * sizeof(float));
-  vertex_spec_manager.BindBufferToBindingPoint("vao", 1, buffer, 0, 3 * sizeof(float));
+  vertex_spec_manager.BindBufferToBindingPoint("vao", 0, buffer, 0,
+                                               3 * sizeof(float));
+  vertex_spec_manager.BindBufferToBindingPoint("vao", 1, buffer, 0,
+                                               3 * sizeof(float));
 
   // Initialize buffers
   glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
@@ -118,22 +122,24 @@ void My_Display() {
   float f_timer_cnt = ((5 * timer_cnt) % 255) / 255.0f;
   // TODO: Generate sphere by octahedron
 
-  float data[18] = { -0.5f,       -0.4f, 0.0f, 0.5f,        -0.4f, 0.0f,
+  float data[18] = {-0.5f,       -0.4f, 0.0f, 0.5f,        -0.4f, 0.0f,
                     0.0f,        0.6f,  0.0f, f_timer_cnt, 0.0f,  0.0f,
-                    f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f };
+                    f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f};
 
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
-  
+
   glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
 
   glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
 
   glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4),
-    glm::value_ptr(model));
+                  glm::value_ptr(model));
   glBufferSubData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4),
-    glm::value_ptr(view));
+                  glm::value_ptr(view));
   glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::mat4),
-    glm::value_ptr(proj));
+                  glm::value_ptr(proj));
+
+  vertex_spec_manager.BindVertexArray("vao");
 
   glDrawArrays(GL_TRIANGLES, 0, 3);
 
@@ -146,9 +152,8 @@ void My_Reshape(int width, int height) {
   glViewport(0, 0, width, height);
 
   proj = glm::ortho(-1.0f * ratio, 1.0f * ratio, -1.0f, 1.0f);
-  view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f),
-    glm::vec3(0.0f, 0.0f, 0.0f),
-    glm::vec3(0.0f, 1.0f, 0.0f));
+  view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+                     glm::vec3(0.0f, 1.0f, 0.0f));
   model = glm::mat4();
 }
 
@@ -163,67 +168,66 @@ void My_Timer(int val) {
 void My_Mouse(int button, int state, int x, int y) {
   if (state == GLUT_DOWN) {
     printf("Mouse %d is pressed at (%d, %d)\n", button, x, y);
-  }
-  else if (state == GLUT_UP) {
+  } else if (state == GLUT_UP) {
     printf("Mouse %d is released at (%d, %d)\n", button, x, y);
   }
 }
 
 void My_Keyboard(unsigned char key, int x, int y) {
-    printf("Key %c is pressed at (%d, %d)\n", key, x, y);
-    switch (key) {
-    case 27: // Escape
+  printf("Key %c is pressed at (%d, %d)\n", key, x, y);
+  switch (key) {
+    case 27:  // Escape
       exit(0);
       break;
     default:
       break;
-    }
+  }
 }
 
 void My_SpecialKeys(int key, int x, int y) {
   switch (key) {
-  case GLUT_KEY_F1:
-    printf("F1 is pressed at (%d, %d)\n", x, y);
-    break;
-  case GLUT_KEY_PAGE_UP:
-    printf("Page up is pressed at (%d, %d)\n", x, y);
-    break;
-  case GLUT_KEY_LEFT:
-    printf("Left arrow is pressed at (%d, %d)\n", x, y);
-    break;
-  default:
-    printf("Other special key is pressed at (%d, %d)\n", x, y);
-    break;
+    case GLUT_KEY_F1:
+      printf("F1 is pressed at (%d, %d)\n", x, y);
+      break;
+    case GLUT_KEY_PAGE_UP:
+      printf("Page up is pressed at (%d, %d)\n", x, y);
+      break;
+    case GLUT_KEY_LEFT:
+      printf("Left arrow is pressed at (%d, %d)\n", x, y);
+      break;
+    default:
+      printf("Other special key is pressed at (%d, %d)\n", x, y);
+      break;
   }
 }
 
 void My_Menu(int id) {
   switch (id) {
-  case 999:
-    if (!timer_enabled) {
-      timer_enabled = true;
-      glutTimerFunc(timer_speed, My_Timer, 0);
-    }
-    break;
+    case 999:
+      if (!timer_enabled) {
+        timer_enabled = true;
+        glutTimerFunc(timer_speed, My_Timer, 0);
+      }
+      break;
 
-  case 1:
-    glUseProgram(program);
-    break;
+    case 1:
+      glUseProgram(program);
+      break;
 
-  case 2:
-    glutChangeToMenuEntry(2, "new label", 2);
-    break;
+    case 2:
+      glutChangeToMenuEntry(2, "new label", 2);
+      break;
 
-  case 99:
-    timer_enabled = false;
-    break;
+    case 99:
+      timer_enabled = false;
+      break;
 
-  case 3:
-    exit(0);
-    break;
+    case 3:
+      exit(0);
+      break;
 
-  default:
-    break;
+    default:
+      break;
   }
 }
 
@@ -239,7 +243,7 @@ int main(int argc, char* argv[]) {
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 #else
   glutInitDisplayMode(GLUT_3_2_CORE_PROFILE | GLUT_RGBA | GLUT_DOUBLE |
-    GLUT_DEPTH);
+                      GLUT_DEPTH);
 #endif
   glutInitWindowPosition(100, 100);
   glutInitWindowSize(600, 600);
@@ -249,26 +253,26 @@ int main(int argc, char* argv[]) {
 #ifdef _MSC_VER
   glewInit();
 #endif
-  //DumpGLInfo();
+  // DumpGLInfo();
   My_Init();
 
   // Create a menu and bind it to mouse right button.
   ////////////////////////////
   int menu_main = glutCreateMenu(My_Menu);
-  //int menu_timer = glutCreateMenu(My_Menu);
+  // int menu_timer = glutCreateMenu(My_Menu);
 
   glutSetMenu(menu_main);
-  //glutAddSubMenu("Timer", menu_timer);
+  // glutAddSubMenu("Timer", menu_timer);
 
   glutAddMenuEntry("Sin shader", 1);
   glutAddMenuEntry("Brick shader", 2);
   glutAddMenuEntry("Exit", 3);
 
-  //glutSetMenu(menu_timer);
-  //glutAddMenuEntry("Start", MENU_TIMER_START);
-  //glutAddMenuEntry("Stop", MENU_TIMER_STOP);
+  // glutSetMenu(menu_timer);
+  // glutAddMenuEntry("Start", MENU_TIMER_START);
+  // glutAddMenuEntry("Stop", MENU_TIMER_STOP);
 
-  //glutSetMenu(menu_main);
+  // glutSetMenu(menu_main);
   glutAttachMenu(GLUT_RIGHT_BUTTON);
   ////////////////////////////
 
