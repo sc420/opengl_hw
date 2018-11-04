@@ -4,6 +4,7 @@
 #include "assignment/program.hpp"
 #include "assignment/shader.hpp"
 #include "assignment/uniform.hpp"
+#include "assignment/vertex_spec.hpp"
 
 #define MENU_TIMER_START 1
 #define MENU_TIMER_STOP 2
@@ -52,6 +53,7 @@ glm::mat4 proj;
 ProgramManager program_manager;
 ShaderManager shader_manager;
 UniformManager uniform_manager;
+VertexSpecManager vertex_spec_manager;
 
 void My_Init() {
   EnableCatchingError();
@@ -60,13 +62,13 @@ void My_Init() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 
-  // Create the shaders
+  // Create shaders
   shader_manager.CreateShader(GL_VERTEX_SHADER, "vertex.vs.glsl", "vertex_shader");
   shader_manager.CreateShader(GL_FRAGMENT_SHADER, "fragment.fs.glsl", "fragment_shader");
   GLuint vertexShader = shader_manager.GetShaderHdlr("vertex_shader");
   GLuint fragmentShader = shader_manager.GetShaderHdlr("fragment_shader");
 
-  // Create the programs
+  // Create programs
   program_manager.CreateProgram("program");
   program_manager.AttachShader("program", vertexShader);
   program_manager.AttachShader("program", fragmentShader);
@@ -74,26 +76,47 @@ void My_Init() {
   program_manager.UseProgram("program");
   program = program_manager.GetProgramHdlr("program");
 
-  GLuint vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-
+  // Create buffers
   glGenBuffers(1, &buffer);
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
-  // Bind data
+  // Create vertex arrays
+  vertex_spec_manager.GenVertexArray("vao");
+  vertex_spec_manager.BindVertexArray("vao"); //TODO: Test if optional
 
+  // Bind vertex arrays to buffers
+  vertex_spec_manager.SpecifyVertexArrayOrg(0, 3, GL_FLOAT, GL_FALSE, 0, "vao");
+  vertex_spec_manager.SpecifyVertexArrayOrg(1, 3, GL_FLOAT, GL_FALSE, 3 * 3 * sizeof(float), "vao");
+  vertex_spec_manager.AssocVertexAttribToBindingPoint("vao", 0, 0);
+  vertex_spec_manager.AssocVertexAttribToBindingPoint("vao", 1, 1);
+  vertex_spec_manager.BindBufferToBindingPoint("vao", 0, buffer, 0, 3 * sizeof(float));
+  vertex_spec_manager.BindBufferToBindingPoint("vao", 1, buffer, 0, 3 * sizeof(float));
+
+  // Initialize buffers
   glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
-    reinterpret_cast<GLvoid*>(sizeof(float) * 9));
+
+  //GLuint vao;
+  //glGenVertexArrays(1, &vao);
+  //glBindVertexArray(vao);
+
+  //glEnableVertexAttribArray(0);
+  //glEnableVertexAttribArray(1);
+
+  //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0,
+  //  reinterpret_cast<GLvoid*>(sizeof(float) * 9));
+
+  //glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, 0);
+  //glVertexAttribBinding(0, 0);
+  //glBindVertexBuffer(0, buffer, 0, sizeof(float) * 3);
+
+  //glVertexAttribFormat(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9);
+  //glVertexAttribBinding(1, 1);
+  //glBindVertexBuffer(1, buffer, 0, sizeof(float) * 3);
 
   // TODO: Add program manager and buffer manager
-  // TODO: delete buffer
+  // TODO: Delete buffer
 
   glGenBuffers(1, &mvp_buffer_hdlr);
   glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
@@ -102,7 +125,7 @@ void My_Init() {
 
   uniform_manager.RegisterProgram(program, "program");
   uniform_manager.RegisterBuffer(mvp_buffer_hdlr, "mvp_buffer");
-  uniform_manager.AssignBindingPoint("program", "mvp", 0);
+  uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
   uniform_manager.BindBufferToBindingPoint(0, "mvp_buffer");
 }
 
@@ -124,6 +147,7 @@ void My_Display() {
   glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
 
   glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
+
   glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4),
     glm::value_ptr(model));
   glBufferSubData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4),

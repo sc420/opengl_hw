@@ -31,8 +31,7 @@ void ProgramManager::UseProgram(const std::string &name) {
   glUseProgram(hdlr);
 }
 
-void ProgramManager::DeleteProgram(const std::string & name)
-{
+void ProgramManager::DeleteProgram(const std::string &name) {
   const GLuint hdlr = GetProgramHdlr(name);
   glDeleteProgram(hdlr);
 }

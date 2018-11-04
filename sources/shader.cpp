@@ -25,8 +25,7 @@ void ShaderManager::CreateShader(const GLenum type, const std::string& path,
   hdlrs_[name] = hdlr;
 }
 
-void ShaderManager::DeleteShader(const std::string & name)
-{
+void ShaderManager::DeleteShader(const std::string& name) {
   const GLuint hdlr = GetShaderHdlr(name);
   glDeleteShader(hdlr);
 }
