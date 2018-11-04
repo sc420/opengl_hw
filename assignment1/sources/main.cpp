@@ -144,17 +144,14 @@ void My_Display() {
 }
 
 void My_Reshape(int width, int height) {
-  float viewportAspect = (float)width / (float)height;
+  float ratio = static_cast<float>(width) / static_cast<float>(height);
 
   glViewport(0, 0, width, height);
 
-  mvp = glm::ortho(-1 * viewportAspect, 1 * viewportAspect, -1.0f, 1.0f);
-  mvp = mvp * glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f),
+  proj = glm::ortho(-1.0f * ratio, 1.0f * ratio, -1.0f, 1.0f);
+  view = glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f),
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f));
-  // TODO: Use explicit model, view and projection and store in buffer-backed
-  // buffer
-  proj = glm::ortho(-1 * viewportAspect, 1 * viewportAspect, -1.0f, 1.0f);
   model = glm::mat4();
 }
 
@@ -204,8 +201,7 @@ void My_Menu(int id) {
       glutTimerFunc(timer_speed, My_Timer, 0);
     }
     break;
-    // TODO:
-    // New 2 cases for switch shader
+
   case 1:
     glUseProgram(program);
     break;
@@ -260,8 +256,6 @@ int main(int argc, char* argv[]) {
   glutSetMenu(menu_main);
   //glutAddSubMenu("Timer", menu_timer);
 
-  // TODO:
-  // New the menu selection to select which shader you want
   glutAddMenuEntry("Sin shader", 1);
   glutAddMenuEntry("Brick shader", 2);
   glutAddMenuEntry("Exit", 3);
