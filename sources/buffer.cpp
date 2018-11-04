@@ -53,11 +53,13 @@ void BufferManager::UpdateBuffer(const std::string & name)
   UpdateBuffer(name, prev_params.target, prev_params.ofs, prev_params.size, prev_params.data);
 }
 
-//TODO: Remember to delete associated maps in all classes
 void BufferManager::DeleteBuffer(const std::string & name)
 {
   const GLuint hdlr = GetBufferHdlr(name);
   glDeleteBuffers(1, &hdlr);
+  // Delete previous parameters
+  bind_buffer_prev_params_.erase(name);
+  update_buffer_prev_params_.erase(name);
 }
 
 GLuint BufferManager::GetBufferHdlr(const std::string & name)
@@ -72,7 +74,7 @@ GLuint BufferManager::GetBufferHdlr(const std::string & name)
 const BufferManager::BindBufferPrevParams &BufferManager::GetBindBufferPrevParams(const std::string & name)
 {
   if (bind_buffer_prev_params_.count(name) == 0) {
-    throw std::runtime_error("Could not find the previous parameters for buffer '" + name + "'");
+    throw std::runtime_error("Could not find the previous parameters for buffer name '" + name + "'");
   }
   return bind_buffer_prev_params_.at(name);
 }
@@ -80,7 +82,7 @@ const BufferManager::BindBufferPrevParams &BufferManager::GetBindBufferPrevParam
 const BufferManager::UpdateBufferPrevParams & BufferManager::GetUpdateBufferPrevParams(const std::string & name)
 {
   if (update_buffer_prev_params_.count(name) == 0) {
-    throw std::runtime_error("Could not find the previous parameters for buffer '" + name + "'");
+    throw std::runtime_error("Could not find the previous parameters for buffer name '" + name + "'");
   }
   return update_buffer_prev_params_.at(name);
 }
