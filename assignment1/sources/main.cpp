@@ -7,13 +7,6 @@
 #include "assignment/uniform.hpp"
 #include "assignment/vertex_spec.hpp"
 
-#define MENU_TIMER_START 1
-#define MENU_TIMER_STOP 2
-#define MENU_EXIT 3
-
-#define MENU_SHADER_SIN 4
-#define MENU_SHADER_BRICK 5
-
 GLubyte timer_cnt = 0;
 bool timer_enabled = true;
 unsigned int timer_speed = 16;
@@ -24,19 +17,6 @@ unsigned int timer_speed = 16;
 
 constexpr auto MOUSE_SENSITIVITY = 1.0f;
 constexpr auto MOUSE_DIV_FACTOR = 300.0f;
-
-/*******************************************************************************
- * Programs
- ******************************************************************************/
-
-GLuint program;
-
-/*******************************************************************************
- * Buffers
- ******************************************************************************/
-
-//GLuint buffer;
-//GLuint mvp_buffer_hdlr;
 
 /*******************************************************************************
  * Transformation
@@ -57,9 +37,23 @@ ShaderManager shader_manager;
 UniformManager uniform_manager;
 VertexSpecManager vertex_spec_manager;
 
-void My_Init() {
+void InitGLUT(int argc, char* argv[]) {
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+  glutInitWindowPosition(100, 100);
+  glutInitWindowSize(600, 600);
+  glutCreateWindow("Assignment 1");
+}
+
+void InitGLEW() {
+  glewInit();
+  //DumpGLInfo();
+}
+
+void ConfigGL() {
   EnableCatchingError();
 
+  // Configure GL
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
@@ -80,19 +74,25 @@ void My_Init() {
   program_manager.AttachShader("program", "fragment_shader");
   program_manager.LinkProgram("program");
   program_manager.UseProgram("program");
-  program = program_manager.GetProgramHdlr("program");
 
   // Create buffers
   buffer_manager.GenBuffer("buffer");
-  buffer_manager.BindBuffer("buffer", GL_ARRAY_BUFFER);
-
-  //buffer = buffer_manager.GetBufferHdlr("buffer");
-
-  /*glGenBuffers(1, &buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer);*/
+  buffer_manager.GenBuffer("mvp_buffer");
 
   // Create vertex arrays
   vertex_spec_manager.GenVertexArray("vao");
+
+  // Bind buffer targets to be repeatedly used later
+  buffer_manager.BindBuffer("buffer", GL_ARRAY_BUFFER);
+  buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);
+
+  // Initialize buffers
+  buffer_manager.InitBuffer("buffer", GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
+  buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+
+  // Bind uniform blocks to buffers
+  uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
+  uniform_manager.BindBufferBaseToBindingPoint("mvp_buffer", 0);
 
   // Bind vertex arrays to buffers
   vertex_spec_manager.SpecifyVertexArrayOrg("vao", 0, 3, GL_FLOAT, GL_FALSE, 0);
@@ -104,71 +104,35 @@ void My_Init() {
                                                3 * sizeof(float));
   vertex_spec_manager.BindBufferToBindingPoint("vao", "buffer", 1, 0,
                                                3 * sizeof(float));
-
-  // Initialize buffers
-  //glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
-
-  buffer_manager.InitBuffer("buffer", GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
-   
-
-  buffer_manager.GenBuffer("mvp_buffer");
-  buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);
-
-  buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
-
-  //mvp_buffer_hdlr = buffer_manager.GetBufferHdlr("mvp_buffer");
-
- /* glGenBuffers(1, &mvp_buffer_hdlr);
-  glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
-
-  glBufferData(GL_UNIFORM_BUFFER, 3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);*/
-
-  //uniform_manager.RegisterProgram(program, "program");
-  //uniform_manager.RegisterBuffer(mvp_buffer_hdlr, "mvp_buffer");
-  uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
-  uniform_manager.BindBufferBaseToBindingPoint("mvp_buffer", 0);
 }
 
-// GLUT callback. Called to draw the scene.
 void My_Display() {
+  /* Clear frame buffers */
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glUseProgram(program);
+  /* Use the program */
+  program_manager.UseProgram("program");
 
-  float f_timer_cnt = ((5 * timer_cnt) % 255) / 255.0f;
+  /* Update buffers */
   // TODO: Generate sphere by octahedron
-
-  float data[18] = {-0.5f,       -0.4f, 0.0f, 0.5f,        -0.4f, 0.0f,
+  float f_timer_cnt = ((5 * timer_cnt) % 255) / 255.0f;
+  float data[18] = { -0.5f,       -0.4f, 0.0f, 0.5f,        -0.4f, 0.0f,
                     0.0f,        0.6f,  0.0f, f_timer_cnt, 0.0f,  0.0f,
-                    f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f};
-
-  /*glBindBuffer(GL_ARRAY_BUFFER, buffer);
-
-  glBufferSubData(GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);*/
+                    f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f };
 
   buffer_manager.BindBuffer("buffer");
-
   buffer_manager.UpdateBuffer("buffer", GL_ARRAY_BUFFER, 0, 18 * sizeof(float), data);
 
-  //glBindBuffer(GL_UNIFORM_BUFFER, mvp_buffer_hdlr);
-
-  //glBufferSubData(GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4),
-  //                glm::value_ptr(model));
-  //glBufferSubData(GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4),
-  //                glm::value_ptr(view));
-  //glBufferSubData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::mat4),
-  //                glm::value_ptr(proj));
-
   buffer_manager.BindBuffer("mvp_buffer");
-
   buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 0 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(model));
   buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 1 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(view));
   buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(proj));
 
+  /* Draw vertex arrays */
   vertex_spec_manager.BindVertexArray("vao");
-
   glDrawArrays(GL_TRIANGLES, 0, 3);
 
+  /* Swap frame buffers in double buffer mode */
   glutSwapBuffers();
 }
 
@@ -229,6 +193,21 @@ void My_SpecialKeys(int key, int x, int y) {
 
 void My_Menu(int id) {
   switch (id) {
+    case 1:
+      break;
+
+    case 2:
+      glutChangeToMenuEntry(2, "new label", 2);
+      break;
+
+    case 3:
+      exit(0);
+      break;
+
+    case 99:
+      timer_enabled = false;
+      break;
+
     case 999:
       if (!timer_enabled) {
         timer_enabled = true;
@@ -236,85 +215,42 @@ void My_Menu(int id) {
       }
       break;
 
-    case 1:
-      glUseProgram(program);
-      break;
-
-    case 2:
-      glutChangeToMenuEntry(2, "new label", 2);
-      break;
-
-    case 99:
-      timer_enabled = false;
-      break;
-
-    case 3:
-      exit(0);
-      break;
-
     default:
       break;
   }
 }
 
-int main(int argc, char* argv[]) {
-#ifdef __APPLE__
-  // Change working directory to source code path
-  chdir(__FILEPATH__("/../Assets/"));
-#endif
-  // Initialize GLUT and GLEW, then create a window.
-  ////////////////////
-  glutInit(&argc, argv);
-#ifdef _MSC_VER
-  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-#else
-  glutInitDisplayMode(GLUT_3_2_CORE_PROFILE | GLUT_RGBA | GLUT_DOUBLE |
-                      GLUT_DEPTH);
-#endif
-  glutInitWindowPosition(100, 100);
-  glutInitWindowSize(600, 600);
-  glutCreateWindow("Assignment 1");  // You cannot use OpenGL functions before
-                                     // this line; The OpenGL context must be
-                                     // created first by glutCreateWindow()!
-#ifdef _MSC_VER
-  glewInit();
-#endif
-  // DumpGLInfo();
-  My_Init();
-
-  // Create a menu and bind it to mouse right button.
-  ////////////////////////////
-  int menu_main = glutCreateMenu(My_Menu);
-  // int menu_timer = glutCreateMenu(My_Menu);
-
-  glutSetMenu(menu_main);
-  // glutAddSubMenu("Timer", menu_timer);
-
-  glutAddMenuEntry("Sin shader", 1);
-  glutAddMenuEntry("Brick shader", 2);
-  glutAddMenuEntry("Exit", 3);
-
-  // glutSetMenu(menu_timer);
-  // glutAddMenuEntry("Start", MENU_TIMER_START);
-  // glutAddMenuEntry("Stop", MENU_TIMER_STOP);
-
-  // glutSetMenu(menu_main);
-  glutAttachMenu(GLUT_RIGHT_BUTTON);
-  ////////////////////////////
-
-  // Register GLUT callback functions.
-  ///////////////////////////////
+void RegisterGLUTCallbacks() {
   glutDisplayFunc(My_Display);
   glutReshapeFunc(My_Reshape);
   glutMouseFunc(My_Mouse);
   glutKeyboardFunc(My_Keyboard);
   glutSpecialFunc(My_SpecialKeys);
   glutTimerFunc(timer_speed, My_Timer, 0);
-  ///////////////////////////////
+}
 
-  // Enter main event loop.
-  //////////////
+void CreateGLUTMenus() {
+  int menu_main = glutCreateMenu(My_Menu);
+
+  glutSetMenu(menu_main);
+
+  glutAddMenuEntry("Sin shader", 1);
+  glutAddMenuEntry("Brick shader", 2);
+  glutAddMenuEntry("Exit", 3);
+
+  glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
+void EnterGLUTLoop() {
   glutMainLoop();
-  //////////////
+}
+
+int main(int argc, char* argv[]) {
+  InitGLUT(argc, argv);
+  InitGLEW();
+  ConfigGL();
+  RegisterGLUTCallbacks();
+  CreateGLUTMenus();
+  EnterGLUTLoop();
   return 0;
 }
