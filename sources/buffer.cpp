@@ -62,7 +62,6 @@ void BufferManager::DeleteBuffer(const std::string & name)
   update_buffer_prev_params_.erase(name);
 }
 
-//TODO: Add const qualifer in all classes
 GLuint BufferManager::GetBufferHdlr(const std::string & name) const
 {
   if (hdlrs_.count(name) == 0) {
@@ -71,8 +70,7 @@ GLuint BufferManager::GetBufferHdlr(const std::string & name) const
   return hdlrs_.at(name);
 }
 
-//TODO: Change to lowercase for all accessors
-const BufferManager::BindBufferPrevParams &BufferManager::GetBindBufferPrevParams(const std::string & name)
+const BufferManager::BindBufferPrevParams &BufferManager::GetBindBufferPrevParams(const std::string & name) const
 {
   if (bind_buffer_prev_params_.count(name) == 0) {
     throw std::runtime_error("Could not find the previous parameters for buffer name '" + name + "'");
@@ -80,7 +78,7 @@ const BufferManager::BindBufferPrevParams &BufferManager::GetBindBufferPrevParam
   return bind_buffer_prev_params_.at(name);
 }
 
-const BufferManager::UpdateBufferPrevParams & BufferManager::GetUpdateBufferPrevParams(const std::string & name)
+const BufferManager::UpdateBufferPrevParams & BufferManager::GetUpdateBufferPrevParams(const std::string & name) const
 {
   if (update_buffer_prev_params_.count(name) == 0) {
     throw std::runtime_error("Could not find the previous parameters for buffer name '" + name + "'");

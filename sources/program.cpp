@@ -15,23 +15,23 @@ void ProgramManager::CreateProgram(const std::string &name) {
 }
 
 void ProgramManager::AttachShader(const std::string &name,
-                                  const GLuint shader_hdlr) {
+                                  const GLuint shader_hdlr) const {
   const GLuint program_hdlr = GetProgramHdlr(name);
   glAttachShader(program_hdlr, shader_hdlr);
 }
 
-void ProgramManager::LinkProgram(const std::string &name) {
+void ProgramManager::LinkProgram(const std::string &name) const  {
   const GLuint hdlr = GetProgramHdlr(name);
   glLinkProgram(hdlr);
   CheckProgramLinkingStatus(hdlr);
 }
 
-void ProgramManager::UseProgram(const std::string &name) {
+void ProgramManager::UseProgram(const std::string &name) const {
   const GLuint hdlr = GetProgramHdlr(name);
   glUseProgram(hdlr);
 }
 
-void ProgramManager::DeleteProgram(const std::string &name) {
+void ProgramManager::DeleteProgram(const std::string &name) const {
   const GLuint hdlr = GetProgramHdlr(name);
   glDeleteProgram(hdlr);
 }
@@ -43,7 +43,7 @@ GLuint ProgramManager::GetProgramHdlr(const std::string &name) const {
   return hdlrs_.at(name);
 }
 
-void ProgramManager::CheckProgramLinkingStatus(const GLuint hdlr) {
+void ProgramManager::CheckProgramLinkingStatus(const GLuint hdlr) const {
   GLint status = -1;
   // Get linking status
   glGetProgramiv(hdlr, GL_LINK_STATUS, &status);

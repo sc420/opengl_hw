@@ -11,8 +11,6 @@ void main()
     const vec4 COLOR_RED = vec4(1, 0, 0, 1);
     const vec4 COLOR_WHITE = vec4(1, 1, 1, 1);
 
-    //TODO:
-    //Please modify the fragment shader (Brick)
     if (mod(gl_FragCoord.x, STRIDE.x) < BRICK_SIZE.x &&
         mod(gl_FragCoord.y, STRIDE.y) < BRICK_SIZE.y) {
         fragColor = COLOR_RED;

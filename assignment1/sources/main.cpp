@@ -111,9 +111,7 @@ void My_Init() {
   //glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
 
   buffer_manager.InitBuffer("buffer", GL_ARRAY_BUFFER, 18 * sizeof(float), NULL, GL_STATIC_DRAW);
-
-  // TODO: Add program manager and buffer manager
-  // TODO: Delete buffer
+   
 
   buffer_manager.GenBuffer("mvp_buffer");
   buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);

@@ -12,11 +12,10 @@ void ShaderManager::CreateShader(const GLenum type, const std::string& path,
   // Create a shader object
   const GLuint hdlr = glCreateShader(type);
   // Load the shader source
-  const GLchar* source = LoadShaderSource(path);
+  std::string src = LoadShaderSource(path);
   // Replace the source code in the shader object
-  glShaderSource(hdlr, 1, &source, NULL);
-  // Free the shader source
-  FreeShaderSource(source);
+  const char *str = src.c_str();
+  glShaderSource(hdlr, 1, &str, NULL);
   // Compile the shader object
   glCompileShader(hdlr);
   // Check the compilation status
@@ -25,34 +24,31 @@ void ShaderManager::CreateShader(const GLenum type, const std::string& path,
   hdlrs_[name] = hdlr;
 }
 
-void ShaderManager::DeleteShader(const std::string& name) {
+void ShaderManager::DeleteShader(const std::string& name) const {
   const GLuint hdlr = GetShaderHdlr(name);
   glDeleteShader(hdlr);
 }
 
-GLuint ShaderManager::GetShaderHdlr(const std::string& name) {
+GLuint ShaderManager::GetShaderHdlr(const std::string& name) const {
   if (hdlrs_.count(name) == 0) {
     throw std::runtime_error("Could not find the shader name '" + name + "'");
   }
   return hdlrs_.at(name);
 }
 
-GLchar* ShaderManager::LoadShaderSource(const std::string& file) {
+std::string ShaderManager::LoadShaderSource(const std::string& file) const {
   FILE* fp;
   fopen_s(&fp, file.c_str(), "rb");
   fseek(fp, 0, SEEK_END);
   long sz = ftell(fp);
   fseek(fp, 0, SEEK_SET);
-  char* src = new char[sz + 1];
-  fread(src, sizeof(char), sz, fp);
-  src[sz] = '\0';
+  std::string src(sz + 1, '\0');
+  fread(&src[0], sizeof(char), sz, fp);
   fclose(fp);
   return src;
 }
 
-void ShaderManager::FreeShaderSource(const GLchar* src) { delete src; }
-
-void ShaderManager::CheckShaderCompilation(const GLuint hdlr) {
+void ShaderManager::CheckShaderCompilation(const GLuint hdlr)const {
   GLint status = -1;
   // Get compilation status
   glGetShaderiv(hdlr, GL_COMPILE_STATUS, &status);

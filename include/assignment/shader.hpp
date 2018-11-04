@@ -12,16 +12,14 @@ class ShaderManager {
   void CreateShader(const GLenum type, const std::string& path,
                     const std::string& name);
 
-  void DeleteShader(const std::string& name);
+  void DeleteShader(const std::string& name) const;
 
-  GLuint GetShaderHdlr(const std::string& name);
+  GLuint GetShaderHdlr(const std::string& name) const;
 
  private:
   std::map<std::string, GLuint> hdlrs_;
 
-  GLchar* LoadShaderSource(const std::string& file);
+  std::string LoadShaderSource(const std::string& file) const;
 
-  void FreeShaderSource(const GLchar* src);
-
-  void CheckShaderCompilation(const GLuint hdlr);
+  void CheckShaderCompilation(const GLuint hdlr) const;
 };

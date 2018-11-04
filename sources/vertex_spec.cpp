@@ -15,7 +15,7 @@ void VertexSpecManager::GenVertexArray(const std::string& name) {
   hdlrs_[name] = hdlr;
 }
 
-void VertexSpecManager::BindVertexArray(const std::string& name) {
+void VertexSpecManager::BindVertexArray(const std::string& name) const {
   const GLuint hdlr = GetVertexArrayHdlr(name);
   glBindVertexArray(hdlr);
 }
@@ -25,7 +25,7 @@ void VertexSpecManager::SpecifyVertexArrayOrg(const std::string& name,
   const GLint size,
   const GLenum type,
   const GLboolean normalized,
-  const GLuint relative_ofs) {
+  const GLuint relative_ofs) const {
   // Bind the vertex array
   BindVertexArray(name);
   // Enable the generic vertex attribute array
@@ -77,7 +77,7 @@ void VertexSpecManager::DeleteVertexArray(const std::string& name) {
   bind_buffer_to_binding_point_prev_params_.erase(name);
 }
 
-GLuint VertexSpecManager::GetVertexArrayHdlr(const std::string& name) {
+GLuint VertexSpecManager::GetVertexArrayHdlr(const std::string& name)const {
   if (hdlrs_.count(name) == 0) {
     throw std::runtime_error("Could not find the vertex array name '" + name +
       "'");
@@ -86,12 +86,12 @@ GLuint VertexSpecManager::GetVertexArrayHdlr(const std::string& name) {
 }
 
 GLuint VertexSpecManager::GetVertexAttribBindingPoint(
-  const std::string& va_name, const GLuint attrib_idx) {
+  const std::string& va_name, const GLuint attrib_idx) const {
   if (binding_points_.count(va_name) == 0) {
     throw std::runtime_error("Could not find the vertex array name '" +
       va_name + "'");
   }
-  std::map<GLuint, GLuint>& attrib_to_points = binding_points_.at(va_name);
+  const std::map<GLuint, GLuint>& attrib_to_points = binding_points_.at(va_name);
   if (attrib_to_points.count(attrib_idx) == 0) {
     throw std::runtime_error("Could not find the attribute index '" +
       std::to_string(attrib_idx) + "'");
@@ -99,7 +99,7 @@ GLuint VertexSpecManager::GetVertexAttribBindingPoint(
   return attrib_to_points.at(attrib_idx);
 }
 
-const VertexSpecManager::BindBufferToBindingPointPrevParams & VertexSpecManager::GetBindBufferToBindingPointPrevParams(const std::string & va_name, const GLuint binding_idx)
+const VertexSpecManager::BindBufferToBindingPointPrevParams & VertexSpecManager::GetBindBufferToBindingPointPrevParams(const std::string & va_name, const GLuint binding_idx) const
 {
   if (bind_buffer_to_binding_point_prev_params_.count(va_name) == 0) {
     throw std::runtime_error("Could not find the previous parameters for vertex array name '" + va_name + "'");

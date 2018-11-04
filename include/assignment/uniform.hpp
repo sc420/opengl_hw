@@ -25,14 +25,14 @@ public:
     const GLuint binding_idx);
 
   void BindBufferBaseToBindingPoint(
-    const std::string &buffer_name, const GLuint binding_idx);
+    const std::string &buffer_name, const GLuint binding_idx) const;
 
   void BindBufferRangeToBindingPoint(const std::string &buffer_name,
     const GLuint binding_idx,
-    const GLintptr ofs, const GLsizeiptr size);
+    const GLintptr ofs, const GLsizeiptr size) const;
 
   GLuint GetUniformBlockBindingPoint(const std::string &program_name,
-    const std::string &block_name);
+    const std::string &block_name) const;
 
 private:
   const ProgramManager *program_manager_;

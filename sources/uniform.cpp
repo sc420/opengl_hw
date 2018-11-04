@@ -33,7 +33,7 @@ void UniformManager::AssignUniformBlockToBindingPoint(
   binding_points_[program_name][block_name] = binding_idx;
 }
 
-void UniformManager::BindBufferBaseToBindingPoint(const std::string &buffer_name, const GLuint binding_idx) {
+void UniformManager::BindBufferBaseToBindingPoint(const std::string &buffer_name, const GLuint binding_idx) const {
   // Get buffer handler
   const GLuint buffer_hdlr = buffer_manager_->GetBufferHdlr(buffer_name);
   // Bind the buffer to the binding point
@@ -43,7 +43,7 @@ void UniformManager::BindBufferBaseToBindingPoint(const std::string &buffer_name
 void UniformManager::BindBufferRangeToBindingPoint(const std::string &buffer_name,
   const GLuint binding_idx,
   const GLintptr ofs,
-  const GLsizeiptr size) {
+  const GLsizeiptr size) const {
   // Get buffer handler
   const GLuint buffer_hdlr = buffer_manager_->GetBufferHdlr(buffer_name);
   // Bind the buffer to the binding point
@@ -51,7 +51,7 @@ void UniformManager::BindBufferRangeToBindingPoint(const std::string &buffer_nam
 }
 
 GLuint UniformManager::GetUniformBlockBindingPoint(
-  const std::string &program_name, const std::string &block_name) {
+  const std::string &program_name, const std::string &block_name) const {
   if (binding_points_.count(program_name) == 0) {
     throw std::runtime_error("Could not find the program name '" +
       program_name + "'");

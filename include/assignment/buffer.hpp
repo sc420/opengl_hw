@@ -44,7 +44,7 @@ private:
 
   std::map<std::string, UpdateBufferPrevParams> update_buffer_prev_params_;
 
-  const BindBufferPrevParams &GetBindBufferPrevParams(const std::string &name);
+  const BindBufferPrevParams &GetBindBufferPrevParams(const std::string &name) const;
 
-  const UpdateBufferPrevParams &GetUpdateBufferPrevParams(const std::string &name);
+  const UpdateBufferPrevParams &GetUpdateBufferPrevParams(const std::string &name) const;
 };
