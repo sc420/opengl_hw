@@ -17,6 +17,8 @@ class ProgramManager {
 
   void UseProgram(const std::string &name);
 
+  void DeleteProgram(const std::string &name);
+
   GLuint GetProgramHdlr(const std::string &name);
 
  private:

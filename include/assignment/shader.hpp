@@ -12,6 +12,8 @@ class ShaderManager {
   void CreateShader(const GLenum type, const std::string& path,
                     const std::string& name);
 
+  void DeleteShader(const std::string &name);
+
   GLuint GetShaderHdlr(const std::string& name);
 
  private:

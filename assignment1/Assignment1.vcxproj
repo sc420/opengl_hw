@@ -105,6 +105,7 @@ xcopy /D /Y  "$(SolutionDir)assets\*.glsl" "$(OutDir)"</Command>
     <ClCompile Include="..\sources\common.cpp" />
     <ClCompile Include="..\sources\program.cpp" />
     <ClCompile Include="..\sources\uniform.cpp" />
+    <ClCompile Include="..\sources\vertex_spec.cpp" />
     <ClCompile Include="sources\main.cpp" />
     <ClCompile Include="..\sources\shader.cpp" />
   </ItemGroup>
@@ -117,6 +118,7 @@ xcopy /D /Y  "$(SolutionDir)assets\*.glsl" "$(OutDir)"</Command>
     <ClInclude Include="..\include\assignment\program.hpp" />
     <ClInclude Include="..\include\assignment\shader.hpp" />
     <ClInclude Include="..\include\assignment\uniform.hpp" />
+    <ClInclude Include="..\include\assignment\vertex_spec.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

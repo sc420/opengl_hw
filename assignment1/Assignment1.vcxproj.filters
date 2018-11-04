@@ -14,6 +14,9 @@
     <ClCompile Include="..\sources\program.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\sources\vertex_spec.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\fragment.fs.glsl">
@@ -45,6 +48,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\assignment\program.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\assignment\vertex_spec.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

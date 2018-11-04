@@ -25,6 +25,12 @@ void ShaderManager::CreateShader(const GLenum type, const std::string& path,
   hdlrs_[name] = hdlr;
 }
 
+void ShaderManager::DeleteShader(const std::string & name)
+{
+  const GLuint hdlr = GetShaderHdlr(name);
+  glDeleteShader(hdlr);
+}
+
 GLuint ShaderManager::GetShaderHdlr(const std::string& name) {
   if (hdlrs_.count(name) == 0) {
     throw std::runtime_error("Could not find the shader name '" + name + "'");
