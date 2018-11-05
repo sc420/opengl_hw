@@ -20,6 +20,9 @@
     <ClCompile Include="..\sources\buffer.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\sources\object.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\fragment.fs.glsl">
