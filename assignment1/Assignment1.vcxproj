@@ -106,6 +106,7 @@
     <ClCompile Include="..\sources\gl\program.cpp" />
     <ClCompile Include="..\sources\gl\uniform.cpp" />
     <ClCompile Include="..\sources\gl\vertex_spec.cpp" />
+    <ClCompile Include="..\sources\trans\camera.cpp" />
     <ClCompile Include="sources\main.cpp" />
     <ClCompile Include="..\sources\gl\shader.cpp" />
   </ItemGroup>
@@ -121,6 +122,7 @@
     <ClInclude Include="..\include\as\gl\shader.hpp" />
     <ClInclude Include="..\include\as\gl\uniform.hpp" />
     <ClInclude Include="..\include\as\gl\vertex_spec.hpp" />
+    <ClInclude Include="..\include\as\trans\camera.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

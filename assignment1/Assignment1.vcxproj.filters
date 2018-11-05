@@ -2,26 +2,29 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="sources\main.cpp" />
-    <ClCompile Include="..\sources\gl\buffer.cpp">
-      <Filter>sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\sources\common.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\model\loader.cpp">
-      <Filter>sources</Filter>
+    <ClCompile Include="..\sources\gl\buffer.cpp">
+      <Filter>sources\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\sources\gl\program.cpp">
-      <Filter>sources</Filter>
+      <Filter>sources\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\sources\gl\shader.cpp">
-      <Filter>sources</Filter>
+      <Filter>sources\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\sources\gl\uniform.cpp">
-      <Filter>sources</Filter>
+      <Filter>sources\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\sources\gl\vertex_spec.cpp">
-      <Filter>sources</Filter>
+      <Filter>sources\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sources\model\loader.cpp">
+      <Filter>sources\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sources\trans\camera.cpp">
+      <Filter>sources\trans</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -42,28 +45,49 @@
     <Filter Include="include">
       <UniqueIdentifier>{9234ca84-7ae3-4a22-8850-a64d28d34c12}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\gl">
+      <UniqueIdentifier>{596c7477-70a4-4c39-84d2-cb6483a30a62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\model">
+      <UniqueIdentifier>{f573a6d1-118c-427b-ac27-e2ef31841844}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\trans">
+      <UniqueIdentifier>{a0615eae-6957-4368-9fb2-a262bc89330a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\gl">
+      <UniqueIdentifier>{ec19cf54-08c6-48d4-99c9-570566091727}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\model">
+      <UniqueIdentifier>{1aa9c770-ffc8-4fac-88fb-38224f38f25f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\trans">
+      <UniqueIdentifier>{5406f30e-c62b-4d43-b914-56d5cad59dea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\as\gl\buffer.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\as\common.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\as\model\loader.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="..\include\as\gl\buffer.hpp">
+      <Filter>include\gl</Filter>
     </ClInclude>
     <ClInclude Include="..\include\as\gl\program.hpp">
-      <Filter>include</Filter>
+      <Filter>include\gl</Filter>
     </ClInclude>
     <ClInclude Include="..\include\as\gl\shader.hpp">
-      <Filter>include</Filter>
+      <Filter>include\gl</Filter>
     </ClInclude>
     <ClInclude Include="..\include\as\gl\uniform.hpp">
-      <Filter>include</Filter>
+      <Filter>include\gl</Filter>
     </ClInclude>
     <ClInclude Include="..\include\as\gl\vertex_spec.hpp">
-      <Filter>include</Filter>
+      <Filter>include\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\loader.hpp">
+      <Filter>include\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\trans\camera.hpp">
+      <Filter>include\trans</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
