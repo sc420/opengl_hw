@@ -70,10 +70,6 @@ class CameraTrans {
     const glm::mat4 rotate = GetRotateMatrix();
     glm::vec4 rotated_add_dir = rotate * glm::vec4(add_dir, 1.0f);
 
-    std::cerr << add_dir.x << " " << add_dir.y << " " << add_dir.z << '\n';
-    std::cerr << rotated_add_dir.x << " " << rotated_add_dir.y << " "
-              << rotated_add_dir.z << '\n';
-
     // TODO: Fix this with more easy way
     if (add_dir.x > 0.0f) {
       rotated_add_dir.y *= -1.0f;
@@ -626,9 +622,6 @@ void GLUTKeyboardCallback(unsigned char key, int x, int y) {
       break;
     case 27:  // Escape
       glutLeaveMainLoop();
-      break;
-    default:
-      printf("Unrecognized key %c is pressed at (%d, %d)\n", key, x, y);
       break;
   }
 }
