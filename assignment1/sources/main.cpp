@@ -151,13 +151,13 @@ class BodyPartTrans {
   glm::vec3 color;
 };
 
-// Camera transformation
+// Camera transformations
 CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
 
-// Keyboard transformation
+// Keyboard transformations
 bool pressed_keys[256] = {false};
 
-// Mouse transformation
+// Mouse transformations
 bool is_camera_rotating = false;
 int last_motion_x;
 int last_motion_y;
@@ -194,7 +194,7 @@ struct ObjTrans {
 // Global MVP
 GlobalMvp global_mvp;
 
-// Object transformation
+// Object transformations
 ObjTrans obj_trans;
 
 /*******************************************************************************
@@ -293,9 +293,7 @@ void UpdateGlobalMvp() {
 
   global_mvp.proj =
       glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
-
   global_mvp.view = camera_trans.GetTrans();
-
   global_mvp.model = identity;
 }
 
@@ -310,7 +308,7 @@ void InitGLUT(int argc, char *argv[]) {
 }
 
 void InitGLEW() {
-  GLenum err = glewInit();
+  const GLenum err = glewInit();
   if (err != GLEW_OK) {
     std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
     throw std::runtime_error("Could not initialize GLEW");
@@ -722,8 +720,8 @@ void RegisterGLUTCallbacks() {
 }
 
 void CreateGLUTMenus() {
-  int main_menu_hdlr = glutCreateMenu(GLUTMainMenuCallback);
-  int timer_menu_hdlr = glutCreateMenu(GLUTTimerMenuCallback);
+  const int main_menu_hdlr = glutCreateMenu(GLUTMainMenuCallback);
+  const int timer_menu_hdlr = glutCreateMenu(GLUTTimerMenuCallback);
 
   glutSetMenu(main_menu_hdlr);
 
