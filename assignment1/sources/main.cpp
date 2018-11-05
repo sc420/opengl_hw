@@ -12,6 +12,7 @@
  ******************************************************************************/
 
 constexpr auto TIMER_INTERVAL = 10;
+constexpr auto KEYBOARD_KEY_SIZE = 256;
 constexpr auto CAMERA_MOVING_STEP = 0.2f;
 constexpr auto CAMERA_ROTATION_SENSITIVITY = 0.01f;
 constexpr auto CAMERA_ZOOMING_STEP = 5.0f;
@@ -31,6 +32,7 @@ as::VertexSpecManager vertex_spec_manager;
  * Timers
  ******************************************************************************/
 
+// TODO: Use a class
 unsigned int timer_cnt = 0;
 bool timer_enabled = true;
 
@@ -85,12 +87,11 @@ class BodyPartTrans {
 as::CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
 
 // Keyboard transformations
-bool pressed_keys[256] = {false};
+bool pressed_keys[KEYBOARD_KEY_SIZE] = {false};
 
 // Mouse transformations
-bool is_camera_rotating = false;
-int last_motion_x;
-int last_motion_y;
+bool camera_rotating = false;
+glm::vec2 last_mouse_pos;
 
 // Body part transformations
 BodyPartTrans torso_trans;
@@ -553,12 +554,11 @@ void GLUTSpecialCallback(int key, int x, int y) {
 void GLUTMouseCallback(int button, int state, int x, int y) {
   if (state == GLUT_DOWN) {
     if (button == GLUT_LEFT_BUTTON) {
-      last_motion_x = x;
-      last_motion_y = y;
-      is_camera_rotating = true;
+      last_mouse_pos = glm::vec2(x, y);
+      camera_rotating = true;
     }
   } else if (state == GLUT_UP) {
-    is_camera_rotating = false;
+    camera_rotating = false;
   }
 }
 
@@ -571,15 +571,12 @@ void GLUTMouseWheelCallback(int button, int dir, int x, int y) {
 }
 
 void GLUTMotionCallback(int x, int y) {
-  if (is_camera_rotating) {
-    const float x_diff = static_cast<float>(x - last_motion_x);
-    const float y_diff = static_cast<float>(y - last_motion_y);
-
+  if (camera_rotating) {
+    const glm::vec2 mouse_pos = glm::vec2(x, y);
+    const glm::vec2 diff = mouse_pos - last_mouse_pos;
     camera_trans.AddAngle(CAMERA_ROTATION_SENSITIVITY *
-                          glm::vec3(y_diff, x_diff, 0.0f));
-
-    last_motion_x = x;
-    last_motion_y = y;
+                          glm::vec3(diff.y, diff.x, 0.0f));
+    last_mouse_pos = mouse_pos;
   }
 }
 
