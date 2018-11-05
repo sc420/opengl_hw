@@ -14,7 +14,7 @@
 
 constexpr auto TIMER_INTERVAL = 10;
 constexpr auto ROTATION_STEP = 0.1f;
-constexpr auto MOVEMENT_STEP = 0.1f;
+constexpr auto MOVEMENT_STEP = 0.05f;
 
 /*******************************************************************************
  * Managers
@@ -47,26 +47,35 @@ float window_aspect_ratio;
 class BodyPartTrans {
  public:
   BodyPartTrans()
-      : scale(glm::vec3(1.0f)),
-        rot_angle(0.0f),
-        rot_axis(glm::vec3(1.0f, 0.0f, 0.0f)),
-        trans(glm::vec3(0.0f)) {}
+      : pre_translate(glm::vec3(0.0f)),
+        scale(glm::vec3(1.0f)),
+        rotate_angle(0.0f),
+        rotate_axis(glm::vec3(1.0f, 0.0f, 0.0f)),
+        translate(glm::vec3(0.0f)) {}
 
   glm::mat4 GetTrans() const {
     const glm::mat4 identity;
-    return glm::translate(identity, trans) *
-           glm::rotate(identity, rot_angle, rot_axis) *
-           glm::scale(identity, scale);
+    return glm::translate(identity, translate) *
+           glm::rotate(identity, rotate_angle, rotate_axis) *
+           glm::scale(identity, scale) *
+           glm::translate(identity, pre_translate);
   }
 
-  glm::vec3 GetColor() const {
-    return color;
+  glm::mat4 GetTransWithoutScale() const {
+    const glm::mat4 identity;
+    return glm::translate(identity, translate) *
+           glm::rotate(identity, rotate_angle, rotate_axis) *
+           glm::translate(identity, pre_translate);
   }
+
+  glm::vec3 GetColor() const { return color; }
+
+  glm::vec3 pre_translate;
 
   glm::vec3 scale;
-  float rot_angle;
-  glm::vec3 rot_axis;
-  glm::vec3 trans;
+  float rotate_angle;
+  glm::vec3 rotate_axis;
+  glm::vec3 translate;
 
   glm::vec3 color;
 };
@@ -130,13 +139,60 @@ void InitObjectTransformation() {
   // Global rotation degree
   rot_deg = glm::vec3(0.0f);
   // Torso
-  torso_trans.scale = glm::vec3(1.0f, 2.0f, 0.5f);
-  torso_trans.trans = glm::vec3(0.0f);
+  torso_trans.scale = glm::vec3(2.0f, 2.5f, 1.0f);
   torso_trans.color = glm::vec3(0.5f, 0.0f, 0.0f);
   // Head
-  head_trans.scale = glm::vec3(1.2f);
-  head_trans.trans = glm::vec3(0.0f, 1.5f, 0.0f);
+  head_trans.scale = glm::vec3(1.5f);
+  head_trans.translate = glm::vec3(0.0f, 2.2f, 0.0f);
   head_trans.color = glm::vec3(0.0f, 0.5f, 0.0f);
+  // L1 arm
+  l1_arm_trans.pre_translate = glm::vec3(0.0f, -1.0f, 0.0f);
+  l1_arm_trans.scale = glm::vec3(0.8f, 0.5f, 0.8f);
+  l1_arm_trans.rotate_axis = glm::vec3(1.0f, 0.0f, 0.5f);
+  l1_arm_trans.translate = glm::vec3(-1.6f, 1.0f, 0.0f);
+  l1_arm_trans.color = glm::vec3(0.0f, 0.0f, 0.5f);
+  // L2 arm
+  l2_arm_trans.pre_translate = glm::vec3(0.0f, -1.0f, 0.0f);
+  l2_arm_trans.scale = glm::vec3(0.8f, 0.5f, 0.8f);
+  l2_arm_trans.rotate_axis = glm::vec3(1.0f, 0.0f, 0.5f);
+  l2_arm_trans.translate = glm::vec3(-0.1f, -0.2f, 0.0f);
+  l2_arm_trans.color = glm::vec3(0.0f, 0.5f, 0.5f);
+  // R1 arm
+  r1_arm_trans.pre_translate = glm::vec3(0.0f, -1.0f, 0.0f);
+  r1_arm_trans.scale = glm::vec3(0.8f, 0.5f, 0.8f);
+  r1_arm_trans.rotate_axis = glm::vec3(-1.0f, 0.0f, 0.5f);
+  r1_arm_trans.translate = glm::vec3(1.6f, 1.0f, 0.0f);
+  r1_arm_trans.color = glm::vec3(0.0f, 0.0f, 0.5f);
+  // R2 arm
+  r2_arm_trans.pre_translate = glm::vec3(0.0f, -1.0f, 0.0f);
+  r2_arm_trans.scale = glm::vec3(0.8f, 0.5f, 0.8f);
+  r2_arm_trans.rotate_axis = glm::vec3(-1.0f, 0.0f, 0.5f);
+  r2_arm_trans.translate = glm::vec3(0.1f, -0.2f, 0.0f);
+  r2_arm_trans.color = glm::vec3(0.0f, 0.5f, 0.5f);
+  // L1 leg
+  l1_leg_trans.pre_translate = glm::vec3(0.0f, -1.0f, 0.0f);
+  l1_leg_trans.scale = glm::vec3(0.8f, 0.5f, 0.8f);
+  l1_leg_trans.rotate_axis = glm::vec3(1.0f, 0.0f, 0.5f);
+  l1_leg_trans.translate = glm::vec3(-0.5f, -1.5f, 0.0f);
+  l1_leg_trans.color = glm::vec3(0.0f, 0.0f, 0.5f);
+  // L2 leg
+  l2_leg_trans.pre_translate = glm::vec3(0.0f, -1.0f, 0.0f);
+  l2_leg_trans.scale = glm::vec3(0.8f, 0.7f, 0.8f);
+  l2_leg_trans.rotate_axis = glm::vec3(1.0f, 0.0f, 0.5f);
+  l2_leg_trans.translate = glm::vec3(-0.1f, -0.2f, 0.0f);
+  l2_leg_trans.color = glm::vec3(0.0f, 0.5f, 0.5f);
+  // R1 leg
+  r1_leg_trans.pre_translate = glm::vec3(0.0f, -1.0f, 0.0f);
+  r1_leg_trans.scale = glm::vec3(0.8f, 0.5f, 0.8f);
+  r1_leg_trans.rotate_axis = glm::vec3(-1.0f, 0.0f, 0.5f);
+  r1_leg_trans.translate = glm::vec3(0.5f, -1.5f, 0.0f);
+  r1_leg_trans.color = glm::vec3(0.0f, 0.0f, 0.5f);
+  // R2 leg
+  r2_leg_trans.pre_translate = glm::vec3(0.0f, -1.0f, 0.0f);
+  r2_leg_trans.scale = glm::vec3(0.8f, 0.7f, 0.8f);
+  r2_leg_trans.rotate_axis = glm::vec3(-1.0f, 0.0f, 0.5f);
+  r2_leg_trans.translate = glm::vec3(0.1f, -0.2f, 0.0f);
+  r2_leg_trans.color = glm::vec3(0.0f, 0.5f, 0.5f);
 }
 
 void LoadObjects() {
@@ -242,8 +298,8 @@ void ConfigGL() {
 
   /* Initialize buffers */
   // MVP
-  buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, sizeof(GlobalMvp), NULL,
-                            GL_STATIC_DRAW);
+  buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER,
+                            sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
   // Object transformation
   buffer_manager.InitBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER,
                             sizeof(ObjTrans), NULL, GL_STATIC_DRAW);
@@ -259,8 +315,8 @@ void ConfigGL() {
 
   /* Update buffers */
   // MVP
-  buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0, sizeof(GlobalMvp),
-                              &global_mvp);
+  buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0,
+                              sizeof(GlobalMvp), &global_mvp);
   // Object transformation
   buffer_manager.UpdateBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(ObjTrans), &obj_trans);
@@ -348,18 +404,93 @@ void GLUTDisplayCallback() {
 
   /* Draw vertex arrays */
   // Torso
-  torso_trans.rot_angle = static_cast<float>(sin(MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTrans();
   obj_trans.color = torso_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cube_va");
   glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
   // Head
-  obj_trans.trans = torso_trans.GetTrans() * head_trans.GetTrans();
+  obj_trans.trans = torso_trans.GetTransWithoutScale() * head_trans.GetTrans();
   obj_trans.color = head_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("sphere_va");
   glDrawArrays(GL_TRIANGLES, 0, sphere_vertices.size());
+  // L1 arm
+  l1_arm_trans.rotate_angle =
+      static_cast<float>(0.5f * sin(MOVEMENT_STEP * timer_cnt));
+  obj_trans.trans =
+      torso_trans.GetTransWithoutScale() * l1_arm_trans.GetTrans();
+  obj_trans.color = l1_arm_trans.GetColor();
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
+  vertex_spec_manager.BindVertexArray("cylinder_va");
+  glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
+  // L2 arm
+  l2_arm_trans.rotate_angle =
+      static_cast<float>(0.5f * sin(MOVEMENT_STEP * timer_cnt));
+  obj_trans.trans = torso_trans.GetTransWithoutScale() *
+                    l1_arm_trans.GetTransWithoutScale() *
+                    l2_arm_trans.GetTrans();
+  obj_trans.color = l2_arm_trans.GetColor();
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
+  vertex_spec_manager.BindVertexArray("cylinder_va");
+  glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
+  // R1 arm
+  r1_arm_trans.rotate_angle =
+      static_cast<float>(0.5f * sin(MOVEMENT_STEP * timer_cnt));
+  obj_trans.trans =
+      torso_trans.GetTransWithoutScale() * r1_arm_trans.GetTrans();
+  obj_trans.color = r1_arm_trans.GetColor();
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
+  vertex_spec_manager.BindVertexArray("cylinder_va");
+  glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
+  // R2 arm
+  r2_arm_trans.rotate_angle =
+      static_cast<float>(0.5f * sin(MOVEMENT_STEP * timer_cnt));
+  obj_trans.trans = torso_trans.GetTransWithoutScale() *
+                    r1_arm_trans.GetTransWithoutScale() *
+                    r2_arm_trans.GetTrans();
+  obj_trans.color = r2_arm_trans.GetColor();
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
+  vertex_spec_manager.BindVertexArray("cylinder_va");
+  glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
+  // L1 leg
+  l1_leg_trans.rotate_angle =
+      static_cast<float>(-0.5f * sin(MOVEMENT_STEP * timer_cnt));
+  obj_trans.trans =
+      torso_trans.GetTransWithoutScale() * l1_leg_trans.GetTrans();
+  obj_trans.color = l1_leg_trans.GetColor();
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
+  vertex_spec_manager.BindVertexArray("cylinder_va");
+  glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
+  // L2 leg
+  l2_leg_trans.rotate_angle =
+      static_cast<float>(-0.5f * sin(MOVEMENT_STEP * timer_cnt));
+  obj_trans.trans = torso_trans.GetTransWithoutScale() *
+                    l1_leg_trans.GetTransWithoutScale() *
+                    l2_leg_trans.GetTrans();
+  obj_trans.color = l2_leg_trans.GetColor();
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
+  vertex_spec_manager.BindVertexArray("cylinder_va");
+  glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
+  // R1 leg
+  r1_leg_trans.rotate_angle =
+      static_cast<float>(-0.5f * sin(MOVEMENT_STEP * timer_cnt));
+  obj_trans.trans =
+      torso_trans.GetTransWithoutScale() * r1_leg_trans.GetTrans();
+  obj_trans.color = r1_leg_trans.GetColor();
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
+  vertex_spec_manager.BindVertexArray("cylinder_va");
+  glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
+  // R2 leg
+  r2_leg_trans.rotate_angle =
+      static_cast<float>(-0.5f * sin(MOVEMENT_STEP * timer_cnt));
+  obj_trans.trans = torso_trans.GetTransWithoutScale() *
+                    r1_leg_trans.GetTransWithoutScale() *
+                    r2_leg_trans.GetTrans();
+  obj_trans.color = r2_leg_trans.GetColor();
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
+  vertex_spec_manager.BindVertexArray("cylinder_va");
+  glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
 
   /* Swap frame buffers in double buffer mode */
   glutSwapBuffers();
