@@ -15,6 +15,7 @@
 constexpr auto TIMER_INTERVAL = 10;
 constexpr auto CAMERA_MOVING_STEP = 0.2f;
 constexpr auto CAMERA_ROTATION_STEP = 0.05f;
+constexpr auto CAMERA_ROTATION_MOUSE_SENSITIVITY = 0.01f;
 constexpr auto ROBOT_MOVEMENT_STEP = 0.05f;
 
 /*******************************************************************************
@@ -48,29 +49,30 @@ float window_aspect_ratio;
 class CameraTrans {
 public:
   CameraTrans(const glm::vec3 &init_pos, const glm::vec3 &init_angle): 
-    pos(init_pos), angle(init_angle) {}
+    init_pos(init_pos), init_angle(init_angle), pos(init_pos), angle(init_angle) {}
 
+  glm::vec3 init_pos;
+  glm::vec3 init_angle;
   glm::vec3 pos;
   // (x, y, z) = (pitch, yaw, roll)
   glm::vec3 angle;
 
-  glm::mat4 GetViewTrans() const {
-    //const glm::mat4 rotate_trans = glm::toMat4(glm::quat(rotate));
-    //const glm::vec4 rotated_dir = rotate_trans * glm::vec4(dir, 1.0f);
-    //const glm::vec3 center = glm::vec3(eye.x + rotated_dir.x, eye.y + rotated_dir.y, eye.z + rotated_dir.z);
-    //const glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-    //return glm::lookAt(eye, center, up);
-
+  glm::mat4 GetTrans() const {
     const glm::mat4 identity;
     // Calculate rotation
-    glm::quat pitch = glm::angleAxis(angle.x, glm::vec3(1, 0, 0));
-    glm::quat yaw = glm::angleAxis(angle.y, glm::vec3(0, 1, 0));
-    glm::quat roll = glm::angleAxis(angle.z, glm::vec3(0, 0, 1));
-    glm::quat orientation = glm::normalize(pitch * yaw * roll);
-    glm::mat4 rotate = glm::toMat4(orientation);
+    const glm::quat pitch = glm::angleAxis(angle.x, glm::vec3(1, 0, 0));
+    const glm::quat yaw = glm::angleAxis(angle.y, glm::vec3(0, 1, 0));
+    const glm::quat roll = glm::angleAxis(angle.z, glm::vec3(0, 0, 1));
+    const glm::quat orientation = glm::normalize(pitch * yaw * roll);
+    const glm::mat4 rotate = glm::toMat4(orientation);
     // Calculate translation
-    glm::mat4 translate = glm::translate(identity, -1.0f * pos);
+    const glm::mat4 translate = glm::translate(identity, -1.0f * pos);
     return rotate * translate;
+  }
+
+  void ResetTrans() {
+    pos = init_pos;
+    angle = init_angle;
   }
 };
 
@@ -114,8 +116,14 @@ class BodyPartTrans {
 // Camera transformation
 CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
 
+// Keyboard transformation
+bool is_key_pressed = false;
+unsigned char pressed_key;
+
 // Mouse transformation
 bool is_camera_rotating = false;
+int last_motion_x;
+int last_motion_y;
 
 // Body part transformations
 BodyPartTrans torso_trans;
@@ -249,24 +257,19 @@ void UpdateGlobalMvp() {
   global_mvp.proj =
       glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
 
-  //const glm::mat4 look_at_trans = glm::lookAt(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-  //  glm::vec3(0.0f, 1.0f, 0.0f));
-  //const glm::mat4 camera_rotate_trans = glm::toMat4(glm::quat(camera_rotate));
-  //global_mvp.view = look_at_trans * camera_rotate_trans;
-  global_mvp.view = camera_trans.GetViewTrans();
+  global_mvp.view = camera_trans.GetTrans();
 
   // Make the robot walk
   const float model_translate_y = static_cast<float>(0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   const float model_translate_z = 0.5f * ROBOT_MOVEMENT_STEP * (timer_cnt - 10);
   glm::mat4 model_translate = glm::translate(identity, glm::vec3(0.0f, model_translate_y, model_translate_z));
   global_mvp.model = model_translate;
-
-  global_mvp.model = identity;
 }
 
 void InitGLUT(int argc, char* argv[]) {
   glutInit(&argc, argv);
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+  glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowPosition(100, 100);
   glutInitWindowSize(600, 600);
@@ -551,42 +554,54 @@ void GLUTReshapeCallback(int width, int height) {
 
 void GLUTMouseCallback(int button, int state, int x, int y) {
   if (state == GLUT_DOWN) {
-    printf("Mouse %d is pressed at (%d, %d)\n", button, x, y);
+    if (button == GLUT_LEFT_BUTTON) {
+      last_motion_x = x;
+      last_motion_y = y;
+      is_camera_rotating = true;
+    }
   } else if (state == GLUT_UP) {
-    printf("Mouse %d is released at (%d, %d)\n", button, x, y);
+    is_camera_rotating = false;
+  }
+}
+
+void GLUTMotionCallback(int x, int y) {
+  if (is_camera_rotating) {
+    int x_diff = x - last_motion_x;
+    int y_diff = y - last_motion_y;
+
+    camera_trans.angle.x += CAMERA_ROTATION_MOUSE_SENSITIVITY * y_diff;
+    camera_trans.angle.y += CAMERA_ROTATION_MOUSE_SENSITIVITY * x_diff;
+
+    last_motion_x = x;
+    last_motion_y = y;
   }
 }
 
 void GLUTKeyboardCallback(unsigned char key, int x, int y) {
-  printf("Key %c is pressed at (%d, %d)\n", key, x, y);
   switch (key) {
     case 'w':
-      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(0.0, 0.0f, -1.0f);
-      UpdateGlobalMvp();
-      break;
     case 's':
-      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(0.0f, 0.0f, 1.0f);
-      UpdateGlobalMvp();
-      break;
     case 'a':
-      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(-1.0f, 0.0f, 0.0f);
-      UpdateGlobalMvp();
-      break;
     case 'd':
-      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(1.0f, 0.0f, 0.0f);
-      UpdateGlobalMvp();
+      is_key_pressed = true;
+      pressed_key = key;
       break;
     case 'r':
-      // Reset global rotation
-      camera_trans.angle = glm::vec3(0.0f);
+      // Reset camera transformation
+      camera_trans.ResetTrans();
       UpdateGlobalMvp();
       break;
     case 27:  // Escape
       glutLeaveMainLoop();
       break;
     default:
+      printf("Unrecognized key %c is pressed at (%d, %d)\n", key, x, y);
       break;
   }
+}
+
+void GLUTKeyboardUpCallback(unsigned char key, int x, int y) {
+  is_key_pressed = false;
 }
 
 void GLUTSpecialCallback(int key, int x, int y) {
@@ -607,7 +622,31 @@ void GLUTSpecialCallback(int key, int x, int y) {
 }
 
 void GLUTTimerCallback(int val) {
+  // Increment the counter
   timer_cnt++;
+
+  // Update camera transformation
+  if (is_key_pressed) {
+    switch (pressed_key) {
+    case 'w':
+      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(0.0, 0.0f, -1.0f);
+      UpdateGlobalMvp();
+      break;
+    case 's':
+      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(0.0f, 0.0f, 1.0f);
+      UpdateGlobalMvp();
+      break;
+    case 'a':
+      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(-1.0f, 0.0f, 0.0f);
+      UpdateGlobalMvp();
+      break;
+    case 'd':
+      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(1.0f, 0.0f, 0.0f);
+      UpdateGlobalMvp();
+      break;
+    }
+  }
+
   glutPostRedisplay();
   if (timer_enabled) {
     glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, val);
@@ -649,7 +688,9 @@ void RegisterGLUTCallbacks() {
   glutDisplayFunc(GLUTDisplayCallback);
   glutReshapeFunc(GLUTReshapeCallback);
   glutMouseFunc(GLUTMouseCallback);
+  glutMotionFunc(GLUTMotionCallback);
   glutKeyboardFunc(GLUTKeyboardCallback);
+  glutKeyboardUpFunc(GLUTKeyboardUpCallback);
   glutSpecialFunc(GLUTSpecialCallback);
   glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
 }
