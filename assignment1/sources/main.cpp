@@ -5,6 +5,7 @@
 #include "as/gl/uniform.hpp"
 #include "as/gl/vertex_spec.hpp"
 #include "as/model/loader.hpp"
+#include "as/trans/camera.hpp"
 
 /*******************************************************************************
  * Constants
@@ -42,58 +43,6 @@ float window_aspect_ratio;
 /*******************************************************************************
  * Object Transformations (Object states)
  ******************************************************************************/
-
-// Camera transformation declaration
-class CameraTrans {
- public:
-  CameraTrans(const glm::vec3 &init_pos, const glm::vec3 &init_angle)
-      : init_pos(init_pos),
-        init_angle(init_angle),
-        pos(init_pos),
-        angle(init_angle) {}
-
-  glm::mat4 GetTrans() const {
-    const glm::mat4 identity;
-    // Calculate rotation
-    const glm::mat4 rotate = GetRotateMatrix();
-    // Calculate translation
-    const glm::mat4 translate = glm::translate(identity, -1.0f * pos);
-    // Return transformation matrix
-    return rotate * translate;
-  }
-
-  void AddPos(const glm::vec3 &add_pos) { pos += add_pos; }
-
-  void AddPosFromCurAngle(const glm::vec3 &add_dir) {
-    const glm::mat4 rotate = GetRotateMatrix();
-    const glm::vec4 rotated_add_dir =
-        glm::transpose(rotate) * glm::vec4(add_dir, 1.0f);
-    pos += glm::vec3(rotated_add_dir);
-  }
-
-  void AddAngle(const glm::vec3 &add_angle) { angle += add_angle; }
-
-  void ResetTrans() {
-    pos = init_pos;
-    angle = init_angle;
-  }
-
- private:
-  const glm::vec3 init_pos;
-  const glm::vec3 init_angle;
-  glm::vec3 pos;
-  // (x, y, z) = (pitch, yaw, roll)
-  glm::vec3 angle;
-
-  glm::mat4 GetRotateMatrix() const {
-    const glm::quat pitch =
-        glm::angleAxis(angle.x, glm::vec3(1.0f, 0.0f, 0.0f));
-    const glm::quat yaw = glm::angleAxis(angle.y, glm::vec3(0.0f, 1.0f, 0.0f));
-    const glm::quat roll = glm::angleAxis(angle.z, glm::vec3(0.0f, 0.0f, 1.0f));
-    const glm::quat orientation = glm::normalize(pitch * yaw * roll);
-    return glm::toMat4(orientation);
-  }
-};
 
 // Body part transformation declaration
 class BodyPartTrans {
@@ -133,7 +82,7 @@ class BodyPartTrans {
 };
 
 // Camera transformations
-CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
+as::CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
 
 // Keyboard transformations
 bool pressed_keys[256] = {false};
@@ -632,22 +581,22 @@ void GLUTTimerCallback(int val) {
 
   // Update camera transformation
   if (pressed_keys['w']) {
-    camera_trans.AddPosFromCurAngle(CAMERA_MOVING_STEP *
+    camera_trans.AddEye(CAMERA_MOVING_STEP *
                                     glm::vec3(0.0, 0.0f, -1.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['s']) {
-    camera_trans.AddPosFromCurAngle(CAMERA_MOVING_STEP *
+    camera_trans.AddEye(CAMERA_MOVING_STEP *
                                     glm::vec3(0.0, 0.0f, 1.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['a']) {
-    camera_trans.AddPosFromCurAngle(CAMERA_MOVING_STEP *
+    camera_trans.AddEye(CAMERA_MOVING_STEP *
                                     glm::vec3(-1.0, 0.0f, 0.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['d']) {
-    camera_trans.AddPosFromCurAngle(CAMERA_MOVING_STEP *
+    camera_trans.AddEye(CAMERA_MOVING_STEP *
                                     glm::vec3(1.0, 0.0f, 0.0f));
     UpdateGlobalMvp();
   }
