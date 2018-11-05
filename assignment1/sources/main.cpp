@@ -13,8 +13,9 @@
  ******************************************************************************/
 
 constexpr auto TIMER_INTERVAL = 10;
-constexpr auto ROTATION_STEP = 0.1f;
-constexpr auto MOVEMENT_STEP = 0.05f;
+constexpr auto CAMERA_MOVING_STEP = 0.2f;
+constexpr auto CAMERA_ROTATION_STEP = 0.05f;
+constexpr auto ROBOT_MOVEMENT_STEP = 0.05f;
 
 /*******************************************************************************
  * Managers
@@ -43,8 +44,35 @@ float window_aspect_ratio;
  * Object Transformations (Object states)
  ******************************************************************************/
 
- // Camera transformation
-glm::vec3 camera_rotate;
+ // Camera transformation declaration
+class CameraTrans {
+public:
+  CameraTrans(const glm::vec3 &init_pos, const glm::vec3 &init_angle): 
+    pos(init_pos), angle(init_angle) {}
+
+  glm::vec3 pos;
+  // (x, y, z) = (pitch, yaw, roll)
+  glm::vec3 angle;
+
+  glm::mat4 GetViewTrans() const {
+    //const glm::mat4 rotate_trans = glm::toMat4(glm::quat(rotate));
+    //const glm::vec4 rotated_dir = rotate_trans * glm::vec4(dir, 1.0f);
+    //const glm::vec3 center = glm::vec3(eye.x + rotated_dir.x, eye.y + rotated_dir.y, eye.z + rotated_dir.z);
+    //const glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+    //return glm::lookAt(eye, center, up);
+
+    const glm::mat4 identity;
+    // Calculate rotation
+    glm::quat pitch = glm::angleAxis(angle.x, glm::vec3(1, 0, 0));
+    glm::quat yaw = glm::angleAxis(angle.y, glm::vec3(0, 1, 0));
+    glm::quat roll = glm::angleAxis(angle.z, glm::vec3(0, 0, 1));
+    glm::quat orientation = glm::normalize(pitch * yaw * roll);
+    glm::mat4 rotate = glm::toMat4(orientation);
+    // Calculate translation
+    glm::mat4 translate = glm::translate(identity, -1.0f * pos);
+    return rotate * translate;
+  }
+};
 
 // Body part transformation declaration
 class BodyPartTrans {
@@ -82,6 +110,12 @@ class BodyPartTrans {
 
   glm::vec3 color;
 };
+
+// Camera transformation
+CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
+
+// Mouse transformation
+bool is_camera_rotating = false;
 
 // Body part transformations
 BodyPartTrans torso_trans;
@@ -136,8 +170,6 @@ std::vector<glm::vec3> sphere_colors;
 size_t sphere_vertices_mem_sz;
 
 void InitObjectTransformation() {
-  // Camera transformation
-  camera_rotate = glm::vec3(0.0f);
   // Torso
   torso_trans.rotate_axis = glm::vec3(0.0f, 0.0f, 1.0f);
   torso_trans.scale = glm::vec3(2.0f, 2.5f, 1.0f);
@@ -217,14 +249,15 @@ void UpdateGlobalMvp() {
   global_mvp.proj =
       glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
 
-  const glm::mat4 look_at_trans = glm::lookAt(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-    glm::vec3(0.0f, 1.0f, 0.0f));
-  const glm::mat4 camera_rotate_trans = glm::toMat4(glm::quat(camera_rotate));
-  global_mvp.view = look_at_trans * camera_rotate_trans;
+  //const glm::mat4 look_at_trans = glm::lookAt(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+  //  glm::vec3(0.0f, 1.0f, 0.0f));
+  //const glm::mat4 camera_rotate_trans = glm::toMat4(glm::quat(camera_rotate));
+  //global_mvp.view = look_at_trans * camera_rotate_trans;
+  global_mvp.view = camera_trans.GetViewTrans();
 
   // Make the robot walk
-  const float model_translate_y = static_cast<float>(0.1f * sin(MOVEMENT_STEP * timer_cnt));
-  const float model_translate_z = 0.5f * MOVEMENT_STEP * (timer_cnt - 10);
+  const float model_translate_y = static_cast<float>(0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  const float model_translate_z = 0.5f * ROBOT_MOVEMENT_STEP * (timer_cnt - 10);
   glm::mat4 model_translate = glm::translate(identity, glm::vec3(0.0f, model_translate_y, model_translate_z));
   global_mvp.model = model_translate;
 
@@ -414,14 +447,14 @@ void GLUTDisplayCallback() {
 
   /* Draw vertex arrays */
   // Torso
-  torso_trans.rotate_angle = static_cast<float>(0.1f * sin(MOVEMENT_STEP * timer_cnt));
+  torso_trans.rotate_angle = static_cast<float>(0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTrans();
   obj_trans.color = torso_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cube_va");
   glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
   // Head
-  head_trans.translate.x = static_cast<float>(-0.1f * sin(MOVEMENT_STEP * timer_cnt));
+  head_trans.translate.x = static_cast<float>(-0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() * head_trans.GetTrans();
   obj_trans.color = head_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
@@ -429,7 +462,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, sphere_vertices.size());
   // L1 arm
   l1_arm_trans.rotate_angle =
-      static_cast<float>(0.3f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
       torso_trans.GetTransWithoutScale() * l1_arm_trans.GetTrans();
   obj_trans.color = l1_arm_trans.GetColor();
@@ -438,7 +471,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // L2 arm
   l2_arm_trans.rotate_angle =
-      static_cast<float>(0.5f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() *
                     l1_arm_trans.GetTransWithoutScale() *
                     l2_arm_trans.GetTrans();
@@ -448,7 +481,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R1 arm
   r1_arm_trans.rotate_angle =
-      static_cast<float>(0.3f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
       torso_trans.GetTransWithoutScale() * r1_arm_trans.GetTrans();
   obj_trans.color = r1_arm_trans.GetColor();
@@ -457,7 +490,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R2 arm
   r2_arm_trans.rotate_angle =
-      static_cast<float>(0.5f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() *
                     r1_arm_trans.GetTransWithoutScale() *
                     r2_arm_trans.GetTrans();
@@ -467,7 +500,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // L1 leg
   l1_leg_trans.rotate_angle =
-      static_cast<float>(-0.3f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(-0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
       torso_trans.GetTransWithoutScale() * l1_leg_trans.GetTrans();
   obj_trans.color = l1_leg_trans.GetColor();
@@ -476,7 +509,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // L2 leg
   l2_leg_trans.rotate_angle =
-      static_cast<float>(-0.5f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(-0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() *
                     l1_leg_trans.GetTransWithoutScale() *
                     l2_leg_trans.GetTrans();
@@ -486,7 +519,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R1 leg
   r1_leg_trans.rotate_angle =
-      static_cast<float>(-0.3f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(-0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
       torso_trans.GetTransWithoutScale() * r1_leg_trans.GetTrans();
   obj_trans.color = r1_leg_trans.GetColor();
@@ -495,7 +528,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R2 leg
   r2_leg_trans.rotate_angle =
-      static_cast<float>(-0.5f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(-0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() *
                     r1_leg_trans.GetTransWithoutScale() *
                     r2_leg_trans.GetTrans();
@@ -528,24 +561,24 @@ void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   printf("Key %c is pressed at (%d, %d)\n", key, x, y);
   switch (key) {
     case 'w':
-      camera_rotate += ROTATION_STEP * glm::vec3(-1.0, 0.0f, 0.0f);
+      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(0.0, 0.0f, -1.0f);
       UpdateGlobalMvp();
       break;
     case 's':
-      camera_rotate += ROTATION_STEP * glm::vec3(1.0f, 0.0f, 0.0f);
+      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(0.0f, 0.0f, 1.0f);
       UpdateGlobalMvp();
       break;
     case 'a':
-      camera_rotate += ROTATION_STEP * glm::vec3(0.0f, -1.0f, 0.0f);
+      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(-1.0f, 0.0f, 0.0f);
       UpdateGlobalMvp();
       break;
     case 'd':
-      camera_rotate += ROTATION_STEP * glm::vec3(0.0f, 1.0f, 0.0f);
+      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(1.0f, 0.0f, 0.0f);
       UpdateGlobalMvp();
       break;
     case 'r':
       // Reset global rotation
-      camera_rotate = glm::vec3(0.0f);
+      camera_trans.angle = glm::vec3(0.0f);
       UpdateGlobalMvp();
       break;
     case 27:  // Escape
