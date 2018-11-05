@@ -111,31 +111,22 @@ void ConfigGL() {
   program_manager.UseProgram("program");
 
   /* Create buffers */
-  // va
-  //buffer_manager.GenBuffer("va_buffer");
   // MVP
   buffer_manager.GenBuffer("mvp_buffer");
   // Head
   buffer_manager.GenBuffer("head_buffer");
 
   /* Create vertex arrays */
-  // va
-  //vertex_spec_manager.GenVertexArray("va");
   // Head
   vertex_spec_manager.GenVertexArray("head_va");
 
   /* Bind buffer targets to be repeatedly used later */
-  // VA
-  //buffer_manager.BindBuffer("va_buffer", GL_ARRAY_BUFFER);
   // MVP
   buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);
   // Head
   buffer_manager.BindBuffer("head_buffer", GL_ARRAY_BUFFER);
 
   /* Initialize buffers */
-  // va
-  //buffer_manager.InitBuffer("va_buffer", GL_ARRAY_BUFFER, 18 * sizeof(float),
-  //                          NULL, GL_STATIC_DRAW);
   // MVP
   buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
                             3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
@@ -155,16 +146,6 @@ void ConfigGL() {
   uniform_manager.BindBufferBaseToBindingPoint("mvp_buffer", 0);
 
   /* Bind vertex arrays to buffers */
-  // va
-  //vertex_spec_manager.SpecifyVertexArrayOrg("va", 0, 3, GL_FLOAT, GL_FALSE, 0);
-  //vertex_spec_manager.SpecifyVertexArrayOrg("va", 1, 3, GL_FLOAT, GL_FALSE,
-  //                                          3 * 3 * sizeof(float));
-  //vertex_spec_manager.AssocVertexAttribToBindingPoint("va", 0, 0);
-  //vertex_spec_manager.AssocVertexAttribToBindingPoint("va", 1, 1);
-  //vertex_spec_manager.BindBufferToBindingPoint("va", "va_buffer", 0, 0,
-  //                                             3 * sizeof(float));
-  //vertex_spec_manager.BindBufferToBindingPoint("va", "va_buffer", 1, 0,
-  //                                             3 * sizeof(float));
   // Head
   vertex_spec_manager.SpecifyVertexArrayOrg("head_va", 0, 3, GL_FLOAT, GL_FALSE, 0);
   vertex_spec_manager.SpecifyVertexArrayOrg("head_va", 1, 3, GL_FLOAT, GL_FALSE, 0);
@@ -184,15 +165,6 @@ void GLUTDisplayCallback() {
   program_manager.UseProgram("program");
   
   /* Update buffers */
-  // va
-  //float f_timer_cnt = ((5 * timer_cnt) % 255) / 255.0f;
-  //float data[18] = {-0.5f,       -0.4f, 0.0f, 0.5f,        -0.4f, 0.0f,
-  //                  0.0f,        0.6f,  0.0f, f_timer_cnt, 0.0f,  0.0f,
-  //                  f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f};
-  //buffer_manager.BindBuffer("va_buffer");
-  //buffer_manager.UpdateBuffer("va_buffer", GL_ARRAY_BUFFER, 0,
-  //                            18 * sizeof(float), data);
-
   // MVP
   buffer_manager.BindBuffer("mvp_buffer");
   buffer_manager.UpdateBuffer("mvp_buffer");
@@ -202,9 +174,6 @@ void GLUTDisplayCallback() {
   buffer_manager.UpdateBuffer("head_buffer");
 
   /* Draw vertex arrays */
-  // va
-  //vertex_spec_manager.BindVertexArray("va");
-  //glDrawArrays(GL_TRIANGLES, 0, 3);
   // Head
   vertex_spec_manager.BindVertexArray("head_va");
   glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
