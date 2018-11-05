@@ -13,8 +13,8 @@
 
 constexpr auto TIMER_INTERVAL = 10;
 constexpr auto CAMERA_MOVING_STEP = 0.2f;
-constexpr auto CAMERA_ROTATION_STEP = 0.05f;
-constexpr auto CAMERA_ROTATION_MOUSE_SENSITIVITY = 0.01f;
+constexpr auto CAMERA_ROTATION_SENSITIVITY = 0.01f;
+constexpr auto CAMERA_ZOOMING_STEP = 5.0f;
 constexpr auto ROBOT_MOVEMENT_STEP = 0.05f;
 
 /*******************************************************************************
@@ -515,31 +515,6 @@ void GLUTReshapeCallback(int width, int height) {
   UpdateGlobalMvp();
 }
 
-void GLUTMouseCallback(int button, int state, int x, int y) {
-  if (state == GLUT_DOWN) {
-    if (button == GLUT_LEFT_BUTTON) {
-      last_motion_x = x;
-      last_motion_y = y;
-      is_camera_rotating = true;
-    }
-  } else if (state == GLUT_UP) {
-    is_camera_rotating = false;
-  }
-}
-
-void GLUTMotionCallback(int x, int y) {
-  if (is_camera_rotating) {
-    const float x_diff = static_cast<float>(x - last_motion_x);
-    const float y_diff = static_cast<float>(y - last_motion_y);
-
-    camera_trans.AddAngle(CAMERA_ROTATION_MOUSE_SENSITIVITY *
-                          glm::vec3(y_diff, x_diff, 0.0f));
-
-    last_motion_x = x;
-    last_motion_y = y;
-  }
-}
-
 void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   pressed_keys[key] = true;
   switch (key) {
@@ -575,29 +550,58 @@ void GLUTSpecialCallback(int key, int x, int y) {
   }
 }
 
+void GLUTMouseCallback(int button, int state, int x, int y) {
+  if (state == GLUT_DOWN) {
+    if (button == GLUT_LEFT_BUTTON) {
+      last_motion_x = x;
+      last_motion_y = y;
+      is_camera_rotating = true;
+    }
+  } else if (state == GLUT_UP) {
+    is_camera_rotating = false;
+  }
+}
+
+void GLUTMouseWheelCallback(int button, int dir, int x, int y) {
+  if (dir > 0) {
+    camera_trans.AddEye(CAMERA_ZOOMING_STEP * glm::vec3(0.0f, 0.0f, -1.0f));
+  } else {
+    camera_trans.AddEye(CAMERA_ZOOMING_STEP * glm::vec3(0.0f, 0.0f, 1.0f));
+  }
+}
+
+void GLUTMotionCallback(int x, int y) {
+  if (is_camera_rotating) {
+    const float x_diff = static_cast<float>(x - last_motion_x);
+    const float y_diff = static_cast<float>(y - last_motion_y);
+
+    camera_trans.AddAngle(CAMERA_ROTATION_SENSITIVITY *
+                          glm::vec3(y_diff, x_diff, 0.0f));
+
+    last_motion_x = x;
+    last_motion_y = y;
+  }
+}
+
 void GLUTTimerCallback(int val) {
   // Increment the counter
   timer_cnt++;
 
   // Update camera transformation
   if (pressed_keys['w']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP *
-                                    glm::vec3(0.0, 0.0f, -1.0f));
+    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0, 0.0f, -1.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['s']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP *
-                                    glm::vec3(0.0, 0.0f, 1.0f));
+    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0, 0.0f, 1.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['a']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP *
-                                    glm::vec3(-1.0, 0.0f, 0.0f));
+    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(-1.0, 0.0f, 0.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['d']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP *
-                                    glm::vec3(1.0, 0.0f, 0.0f));
+    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(1.0, 0.0f, 0.0f));
     UpdateGlobalMvp();
   }
 
@@ -641,11 +645,12 @@ void GLUTTimerMenuCallback(int id) {
 void RegisterGLUTCallbacks() {
   glutDisplayFunc(GLUTDisplayCallback);
   glutReshapeFunc(GLUTReshapeCallback);
-  glutMouseFunc(GLUTMouseCallback);
-  glutMotionFunc(GLUTMotionCallback);
   glutKeyboardFunc(GLUTKeyboardCallback);
   glutKeyboardUpFunc(GLUTKeyboardUpCallback);
   glutSpecialFunc(GLUTSpecialCallback);
+  glutMouseFunc(GLUTMouseCallback);
+  glutMouseWheelFunc(GLUTMouseWheelCallback);
+  glutMotionFunc(GLUTMotionCallback);
   glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
 }
 
