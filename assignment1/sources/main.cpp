@@ -59,10 +59,16 @@ class BodyPartTrans {
            glm::scale(identity, scale);
   }
 
+  glm::vec3 GetColor() const {
+    return color;
+  }
+
   glm::vec3 scale;
   float rot_angle;
   glm::vec3 rot_axis;
   glm::vec3 trans;
+
+  glm::vec3 color;
 };
 
 // Global rotation degree
@@ -70,6 +76,7 @@ glm::vec3 rot_deg;
 
 // Body part transformations
 BodyPartTrans torso_trans;
+BodyPartTrans head_trans;
 BodyPartTrans l1_arm_trans;
 BodyPartTrans l2_arm_trans;
 BodyPartTrans r1_arm_trans;
@@ -84,7 +91,7 @@ BodyPartTrans r2_leg_trans;
  ******************************************************************************/
 
 // Global MVP declaration
-struct Mvp {
+struct GlobalMvp {
   glm::mat4 model;
   glm::mat4 view;
   glm::mat4 proj;
@@ -97,7 +104,7 @@ struct ObjTrans {
 };
 
 // Global MVP
-Mvp mvp;
+GlobalMvp global_mvp;
 
 // Object transformation
 ObjTrans obj_trans;
@@ -124,7 +131,12 @@ void InitObjectTransformation() {
   rot_deg = glm::vec3(0.0f);
   // Torso
   torso_trans.scale = glm::vec3(1.0f, 2.0f, 0.5f);
-  torso_trans.trans = glm::vec3(0.0f, 1.0f, 0.0f);
+  torso_trans.trans = glm::vec3(0.0f);
+  torso_trans.color = glm::vec3(0.5f, 0.0f, 0.0f);
+  // Head
+  head_trans.scale = glm::vec3(1.2f);
+  head_trans.trans = glm::vec3(0.0f, 1.5f, 0.0f);
+  head_trans.color = glm::vec3(0.0f, 0.5f, 0.0f);
 }
 
 void LoadObjects() {
@@ -142,13 +154,13 @@ void LoadObjects() {
   sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
 }
 
-void UpdateMvp() {
-  mvp.proj =
+void UpdateGlobalMvp() {
+  global_mvp.proj =
       glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
-  mvp.view =
-      glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+  global_mvp.view =
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f, 0.0f, 0.0f),
                   glm::vec3(0.0f, 1.0f, 0.0f));
-  mvp.model = glm::toMat4(glm::quat(rot_deg));
+  global_mvp.model = glm::toMat4(glm::quat(rot_deg));
 }
 
 void InitGLUT(int argc, char* argv[]) {
@@ -198,7 +210,7 @@ void ConfigGL() {
 
   /* Create buffers */
   // MVP
-  buffer_manager.GenBuffer("mvp_buffer");
+  buffer_manager.GenBuffer("global_mvp_buffer");
   // Object transformation
   buffer_manager.GenBuffer("obj_trans_buffer");
   // Cube
@@ -218,7 +230,7 @@ void ConfigGL() {
 
   /* Bind buffer targets to be repeatedly used later */
   // MVP
-  buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);
+  buffer_manager.BindBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER);
   // Object transformation
   buffer_manager.BindBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER);
   // Cube
@@ -230,7 +242,7 @@ void ConfigGL() {
 
   /* Initialize buffers */
   // MVP
-  buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER, sizeof(Mvp), NULL,
+  buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, sizeof(GlobalMvp), NULL,
                             GL_STATIC_DRAW);
   // Object transformation
   buffer_manager.InitBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER,
@@ -247,8 +259,8 @@ void ConfigGL() {
 
   /* Update buffers */
   // MVP
-  buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 0, sizeof(Mvp),
-                              &mvp);
+  buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0, sizeof(GlobalMvp),
+                              &global_mvp);
   // Object transformation
   buffer_manager.UpdateBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(ObjTrans), &obj_trans);
@@ -276,8 +288,8 @@ void ConfigGL() {
 
   /* Bind uniform blocks to buffers */
   // MVP
-  uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
-  uniform_manager.BindBufferBaseToBindingPoint("mvp_buffer", 0);
+  uniform_manager.AssignUniformBlockToBindingPoint("program", "global_mvp", 0);
+  uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
   // Object transformation
   uniform_manager.AssignUniformBlockToBindingPoint("program", "obj_trans", 1);
   uniform_manager.BindBufferBaseToBindingPoint("obj_trans_buffer", 1);
@@ -329,7 +341,7 @@ void GLUTDisplayCallback() {
 
   /* Update buffers */
   // MVP
-  buffer_manager.UpdateBuffer("mvp_buffer");
+  buffer_manager.UpdateBuffer("global_mvp_buffer");
 
   // Object transformation
   buffer_manager.UpdateBuffer("obj_trans_buffer");
@@ -337,11 +349,17 @@ void GLUTDisplayCallback() {
   /* Draw vertex arrays */
   // Torso
   torso_trans.rot_angle = static_cast<float>(sin(MOVEMENT_STEP * timer_cnt));
-  obj_trans.color = glm::vec3(0.5f, 0.0f, 0.0f);
   obj_trans.trans = torso_trans.GetTrans();
+  obj_trans.color = torso_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cube_va");
   glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
+  // Head
+  obj_trans.trans = torso_trans.GetTrans() * head_trans.GetTrans();
+  obj_trans.color = head_trans.GetColor();
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
+  vertex_spec_manager.BindVertexArray("sphere_va");
+  glDrawArrays(GL_TRIANGLES, 0, sphere_vertices.size());
 
   /* Swap frame buffers in double buffer mode */
   glutSwapBuffers();
@@ -352,7 +370,7 @@ void GLUTReshapeCallback(int width, int height) {
 
   glViewport(0, 0, width, height);
 
-  UpdateMvp();
+  UpdateGlobalMvp();
 }
 
 void GLUTMouseCallback(int button, int state, int x, int y) {
@@ -368,24 +386,24 @@ void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   switch (key) {
     case 'w':
       rot_deg += ROTATION_STEP * glm::vec3(-1.0, 0.0f, 0.0f);
-      UpdateMvp();
+      UpdateGlobalMvp();
       break;
     case 's':
       rot_deg += ROTATION_STEP * glm::vec3(1.0f, 0.0f, 0.0f);
-      UpdateMvp();
+      UpdateGlobalMvp();
       break;
     case 'a':
       rot_deg += ROTATION_STEP * glm::vec3(0.0f, -1.0f, 0.0f);
-      UpdateMvp();
+      UpdateGlobalMvp();
       break;
     case 'd':
       rot_deg += ROTATION_STEP * glm::vec3(0.0f, 1.0f, 0.0f);
-      UpdateMvp();
+      UpdateGlobalMvp();
       break;
     case 'r':
       // Reset global rotation
       rot_deg = glm::vec3(0.0f);
-      UpdateMvp();
+      UpdateGlobalMvp();
       break;
     case 27:  // Escape
       glutLeaveMainLoop();

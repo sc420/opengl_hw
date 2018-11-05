@@ -1,6 +1,6 @@
 #version 410
 
-uniform mvp
+uniform global_mvp
 {
   mat4 model;
   mat4 view;
