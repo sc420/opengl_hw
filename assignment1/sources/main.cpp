@@ -2,11 +2,11 @@
 #include "assignment/common.hpp"
 #pragma warning(pop)
 #include "assignment/buffer.hpp"
+#include "assignment/object.hpp"
 #include "assignment/program.hpp"
 #include "assignment/shader.hpp"
 #include "assignment/uniform.hpp"
 #include "assignment/vertex_spec.hpp"
-#include "assignment/object.hpp"
 
 /*******************************************************************************
  * Constants
@@ -81,9 +81,7 @@ void InitGLEW() {
   // DumpGLInfo();
 }
 
-void InitTransformation() {
-  rot_deg = glm::vec3(0.0f, 0.0f, 0.0f);
-}
+void InitTransformation() { rot_deg = glm::vec3(0.0f, 0.0f, 0.0f); }
 
 void LoadObjects() {
   // Cube
@@ -154,31 +152,46 @@ void ConfigGL() {
   buffer_manager.BindBuffer("cylinder_buffer", GL_ARRAY_BUFFER);
   // Sphere
   buffer_manager.BindBuffer("sphere_buffer", GL_ARRAY_BUFFER);
-  
+
   /* Initialize buffers */
   // MVP
   buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
                             3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
   // Cube
-  buffer_manager.InitBuffer("cube_buffer", GL_ARRAY_BUFFER, 2 * cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+  buffer_manager.InitBuffer("cube_buffer", GL_ARRAY_BUFFER,
+                            2 * cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
   // Cylinder
-  buffer_manager.InitBuffer("cylinder_buffer", GL_ARRAY_BUFFER, 2 * cylinder_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+  buffer_manager.InitBuffer("cylinder_buffer", GL_ARRAY_BUFFER,
+                            2 * cylinder_vertices_mem_sz, NULL, GL_STATIC_DRAW);
   // Sphere
-  buffer_manager.InitBuffer("sphere_buffer", GL_ARRAY_BUFFER, 2 * sphere_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+  buffer_manager.InitBuffer("sphere_buffer", GL_ARRAY_BUFFER,
+                            2 * sphere_vertices_mem_sz, NULL, GL_STATIC_DRAW);
 
   /* Update buffers */
   // MVP
   buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 0, sizeof(Mvp),
                               &mvp);
   // Cube
-  buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER, 0 * cube_vertices_mem_sz, cube_vertices_mem_sz, cube_vertices.data());
-  buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER, 1 * cube_vertices_mem_sz, cube_vertices_mem_sz, cube_colors.data());
+  buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER,
+                              0 * cube_vertices_mem_sz, cube_vertices_mem_sz,
+                              cube_vertices.data());
+  buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER,
+                              1 * cube_vertices_mem_sz, cube_vertices_mem_sz,
+                              cube_colors.data());
   // Cylinder
-  buffer_manager.UpdateBuffer("cylinder_buffer", GL_ARRAY_BUFFER, 0 * cylinder_vertices_mem_sz, cylinder_vertices_mem_sz, cylinder_vertices.data());
-  buffer_manager.UpdateBuffer("cylinder_buffer", GL_ARRAY_BUFFER, 1 * cylinder_vertices_mem_sz, cylinder_vertices_mem_sz, cylinder_colors.data());
+  buffer_manager.UpdateBuffer(
+      "cylinder_buffer", GL_ARRAY_BUFFER, 0 * cylinder_vertices_mem_sz,
+      cylinder_vertices_mem_sz, cylinder_vertices.data());
+  buffer_manager.UpdateBuffer("cylinder_buffer", GL_ARRAY_BUFFER,
+                              1 * cylinder_vertices_mem_sz,
+                              cylinder_vertices_mem_sz, cylinder_colors.data());
   // Sphere
-  buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER, 0 * sphere_vertices_mem_sz, sphere_vertices_mem_sz, sphere_vertices.data());
-  buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER, 1 * sphere_vertices_mem_sz, sphere_vertices_mem_sz, sphere_colors.data());
+  buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER,
+                              0 * sphere_vertices_mem_sz,
+                              sphere_vertices_mem_sz, sphere_vertices.data());
+  buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER,
+                              1 * sphere_vertices_mem_sz,
+                              sphere_vertices_mem_sz, sphere_colors.data());
 
   /* Bind uniform blocks to buffers */
   uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
@@ -186,32 +199,40 @@ void ConfigGL() {
 
   /* Bind vertex arrays to buffers */
   // Cube
-  vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 0, 3, GL_FLOAT, GL_FALSE, 0);
-  vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 1, 3, GL_FLOAT, GL_FALSE, 0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 0, 3, GL_FLOAT, GL_FALSE,
+                                            0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 1, 3, GL_FLOAT, GL_FALSE,
+                                            0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cube_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cube_va", 1, 1);
   vertex_spec_manager.BindBufferToBindingPoint("cube_va", "cube_buffer", 0, 0,
-    sizeof(glm::vec3));
-  vertex_spec_manager.BindBufferToBindingPoint("cube_va", "cube_buffer", 1, cube_vertices_mem_sz,
-    sizeof(glm::vec3));
+                                               sizeof(glm::vec3));
+  vertex_spec_manager.BindBufferToBindingPoint(
+      "cube_va", "cube_buffer", 1, cube_vertices_mem_sz, sizeof(glm::vec3));
   // Cylinder
-  vertex_spec_manager.SpecifyVertexArrayOrg("cylinder_va", 0, 3, GL_FLOAT, GL_FALSE, 0);
-  vertex_spec_manager.SpecifyVertexArrayOrg("cylinder_va", 1, 3, GL_FLOAT, GL_FALSE, 0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("cylinder_va", 0, 3, GL_FLOAT,
+                                            GL_FALSE, 0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("cylinder_va", 1, 3, GL_FLOAT,
+                                            GL_FALSE, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cylinder_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cylinder_va", 1, 1);
-  vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer", 0, 0,
-    sizeof(glm::vec3));
-  vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer", 1, cylinder_vertices_mem_sz,
-    sizeof(glm::vec3));
+  vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer",
+                                               0, 0, sizeof(glm::vec3));
+  vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer",
+                                               1, cylinder_vertices_mem_sz,
+                                               sizeof(glm::vec3));
   // Sphere
-  vertex_spec_manager.SpecifyVertexArrayOrg("sphere_va", 0, 3, GL_FLOAT, GL_FALSE, 0);
-  vertex_spec_manager.SpecifyVertexArrayOrg("sphere_va", 1, 3, GL_FLOAT, GL_FALSE, 0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("sphere_va", 0, 3, GL_FLOAT,
+                                            GL_FALSE, 0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("sphere_va", 1, 3, GL_FLOAT,
+                                            GL_FALSE, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("sphere_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("sphere_va", 1, 1);
-  vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 0, 0,
-    sizeof(glm::vec3));
-  vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 1, sphere_vertices_mem_sz,
-    sizeof(glm::vec3));
+  vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 0,
+                                               0, sizeof(glm::vec3));
+  vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 1,
+                                               sphere_vertices_mem_sz,
+                                               sizeof(glm::vec3));
 }
 
 void GLUTDisplayCallback() {
@@ -220,26 +241,26 @@ void GLUTDisplayCallback() {
 
   /* Use the program */
   program_manager.UseProgram("program");
-  
+
   /* Update buffers */
   // MVP
   buffer_manager.BindBuffer("mvp_buffer");
   buffer_manager.UpdateBuffer("mvp_buffer");
 
   //// Cube
-  //buffer_manager.BindBuffer("cube_buffer");
-  //buffer_manager.UpdateBuffer("cube_buffer");
+  // buffer_manager.BindBuffer("cube_buffer");
+  // buffer_manager.UpdateBuffer("cube_buffer");
 
   /* Draw vertex arrays */
   // Cube
   vertex_spec_manager.BindVertexArray("cube_va");
   glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
   // Cylinder
-  //vertex_spec_manager.BindVertexArray("cylinder_va");
-  //glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
+  // vertex_spec_manager.BindVertexArray("cylinder_va");
+  // glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // Sphere
-  //vertex_spec_manager.BindVertexArray("sphere_va");
-  //glDrawArrays(GL_TRIANGLES, 0, sphere_vertices.size());
+  // vertex_spec_manager.BindVertexArray("sphere_va");
+  // glDrawArrays(GL_TRIANGLES, 0, sphere_vertices.size());
 
   /* Swap frame buffers in double buffer mode */
   glutSwapBuffers();
@@ -250,9 +271,10 @@ void GLUTReshapeCallback(int width, int height) {
 
   glViewport(0, 0, width, height);
 
-  //constexpr float WIDTH = 10.0f;
-  //constexpr float HEIGHT = 10.0f;
-  //mvp.proj = glm::ortho(-1.0f * WIDTH * ratio, WIDTH * ratio, -1.0f * HEIGHT, HEIGHT);
+  // constexpr float WIDTH = 10.0f;
+  // constexpr float HEIGHT = 10.0f;
+  // mvp.proj = glm::ortho(-1.0f * WIDTH * ratio, WIDTH * ratio, -1.0f * HEIGHT,
+  // HEIGHT);
   mvp.proj = glm::perspective(glm::radians(45.0f), ratio, 0.1f, 100.0f);
   mvp.view =
       glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, -1.0f),
