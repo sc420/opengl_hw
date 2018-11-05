@@ -32,7 +32,6 @@ as::VertexSpecManager vertex_spec_manager;
  * Timers
  ******************************************************************************/
 
-// TODO: Use a class
 unsigned int timer_cnt = 0;
 bool timer_enabled = true;
 
