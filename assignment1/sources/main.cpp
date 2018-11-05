@@ -68,26 +68,9 @@ class CameraTrans {
 
   void AddPosFromCurAngle(const glm::vec3 &add_dir) {
     const glm::mat4 rotate = GetRotateMatrix();
-    glm::vec4 rotated_add_dir = rotate * glm::vec4(add_dir, 1.0f);
-
-    // TODO: Fix this with more easy way
-    if (add_dir.x > 0.0f) {
-      rotated_add_dir.y *= -1.0f;
-      rotated_add_dir.z *= -1.0f;
-    } else if (add_dir.x < 0.0f) {
-      rotated_add_dir.y *= -1.0f;
-      rotated_add_dir.z *= -1.0f;
-    }
-
-    if (add_dir.z > 0.0f) {
-      rotated_add_dir.x *= -1.0f;
-      rotated_add_dir.y *= -1.0f;
-    } else if (add_dir.z < 0.0f) {
-      rotated_add_dir.x *= -1.0f;
-      rotated_add_dir.y *= -1.0f;
-    }
-
-    pos += glm::vec3(rotated_add_dir.x, rotated_add_dir.y, rotated_add_dir.z);
+    const glm::vec4 rotated_add_dir =
+        glm::transpose(rotate) * glm::vec4(add_dir, 1.0f);
+    pos += glm::vec3(rotated_add_dir);
   }
 
   void AddAngle(const glm::vec3 &add_angle) { angle += add_angle; }
