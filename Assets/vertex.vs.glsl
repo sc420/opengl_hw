@@ -13,13 +13,13 @@ uniform obj_trans
   vec3 color;
 };
 
-layout(location = 0) in vec3 iv3vertex;
-layout(location = 1) in vec3 iv3color;
+layout(location = 0) in vec3 in_vertex;
+layout(location = 1) in vec3 in_color;
 
-out vec3 vv3color;
+out vec3 vs_color;
 
 void main()
 {
-  gl_Position = proj * view * model * vec4(iv3vertex, 1);
-  vv3color = iv3color;
+  gl_Position = proj * view * model * trans * vec4(in_vertex, 1.0f);
+  vs_color = (in_color + color) / 2.0f;
 }
