@@ -139,6 +139,7 @@ void InitObjectTransformation() {
   // Global rotation degree
   rot_deg = glm::vec3(0.0f);
   // Torso
+  torso_trans.rotate_axis = glm::vec3(0.0f, 0.0f, 1.0f);
   torso_trans.scale = glm::vec3(2.0f, 2.5f, 1.0f);
   torso_trans.color = glm::vec3(0.5f, 0.0f, 0.0f);
   // Head
@@ -404,12 +405,14 @@ void GLUTDisplayCallback() {
 
   /* Draw vertex arrays */
   // Torso
+  torso_trans.rotate_angle = static_cast<float>(0.1f * sin(MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTrans();
   obj_trans.color = torso_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cube_va");
   glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
   // Head
+  head_trans.translate.x = static_cast<float>(-0.1f * sin(MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() * head_trans.GetTrans();
   obj_trans.color = head_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
@@ -417,7 +420,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, sphere_vertices.size());
   // L1 arm
   l1_arm_trans.rotate_angle =
-      static_cast<float>(0.5f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(0.3f * sin(MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
       torso_trans.GetTransWithoutScale() * l1_arm_trans.GetTrans();
   obj_trans.color = l1_arm_trans.GetColor();
@@ -436,7 +439,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R1 arm
   r1_arm_trans.rotate_angle =
-      static_cast<float>(0.5f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(0.3f * sin(MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
       torso_trans.GetTransWithoutScale() * r1_arm_trans.GetTrans();
   obj_trans.color = r1_arm_trans.GetColor();
@@ -455,7 +458,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // L1 leg
   l1_leg_trans.rotate_angle =
-      static_cast<float>(-0.5f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(-0.3f * sin(MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
       torso_trans.GetTransWithoutScale() * l1_leg_trans.GetTrans();
   obj_trans.color = l1_leg_trans.GetColor();
@@ -474,7 +477,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R1 leg
   r1_leg_trans.rotate_angle =
-      static_cast<float>(-0.5f * sin(MOVEMENT_STEP * timer_cnt));
+      static_cast<float>(-0.3f * sin(MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
       torso_trans.GetTransWithoutScale() * r1_leg_trans.GetTrans();
   obj_trans.color = r1_leg_trans.GetColor();
