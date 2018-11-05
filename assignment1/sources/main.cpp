@@ -14,6 +14,7 @@
 
 constexpr auto TIMER_INTERVAL = 10;
 constexpr auto ROTATION_STEP = 0.1f;
+constexpr auto MOVEMENT_STEP = 0.1f;
 
 /*******************************************************************************
  * Managers
@@ -26,33 +27,80 @@ UniformManager uniform_manager;
 VertexSpecManager vertex_spec_manager;
 
 /*******************************************************************************
- * Timer
+ * Timers
  ******************************************************************************/
 
 unsigned int timer_cnt = 0;
 bool timer_enabled = true;
 
 /*******************************************************************************
- * Transformation
+ * Window
  ******************************************************************************/
 
-// Global MVP
+float window_aspect_ratio;
+
+/*******************************************************************************
+ * Object Transformations (Object states)
+ ******************************************************************************/
+
+// Body part transformation declaration
+class BodyPartTrans {
+ public:
+  BodyPartTrans()
+      : scale(glm::vec3(1.0f)),
+        rot_angle(0.0f),
+        rot_axis(glm::vec3(1.0f, 0.0f, 0.0f)),
+        trans(glm::vec3(0.0f)) {}
+
+  glm::mat4 GetTrans() const {
+    const glm::mat4 identity;
+    return glm::translate(identity, trans) *
+           glm::rotate(identity, rot_angle, rot_axis) *
+           glm::scale(identity, scale);
+  }
+
+  glm::vec3 scale;
+  float rot_angle;
+  glm::vec3 rot_axis;
+  glm::vec3 trans;
+};
+
+// Global rotation degree
+glm::vec3 rot_deg;
+
+// Body part transformations
+BodyPartTrans torso_trans;
+BodyPartTrans l1_arm_trans;
+BodyPartTrans l2_arm_trans;
+BodyPartTrans r1_arm_trans;
+BodyPartTrans r2_arm_trans;
+BodyPartTrans l1_leg_trans;
+BodyPartTrans l2_leg_trans;
+BodyPartTrans r1_leg_trans;
+BodyPartTrans r2_leg_trans;
+
+/*******************************************************************************
+ * GL Transformations (Feed to GL)
+ ******************************************************************************/
+
+// Global MVP declaration
 struct Mvp {
   glm::mat4 model;
   glm::mat4 view;
   glm::mat4 proj;
 };
 
-// Object transformation
+// Object transformation declaration
 struct ObjTrans {
   glm::mat4 trans;
   glm::vec3 color;
 };
 
+// Global MVP
 Mvp mvp;
-ObjTrans obj_trans;
 
-glm::vec3 rot_deg;
+// Object transformation
+ObjTrans obj_trans;
 
 /*******************************************************************************
  * Objects
@@ -71,6 +119,38 @@ std::vector<glm::vec3> sphere_vertices;
 std::vector<glm::vec3> sphere_colors;
 size_t sphere_vertices_mem_sz;
 
+void InitObjectTransformation() {
+  // Global rotation degree
+  rot_deg = glm::vec3(0.0f);
+  // Torso
+  torso_trans.scale = glm::vec3(1.0f, 2.0f, 0.5f);
+  torso_trans.trans = glm::vec3(0.0f, 1.0f, 0.0f);
+}
+
+void LoadObjects() {
+  // Cube
+  TinyobjLoadObj("cube.obj", cube_vertices);
+  cube_colors.assign(cube_vertices.size(), glm::vec3(1.0f, 0.0f, 0.0f));
+  cube_vertices_mem_sz = cube_vertices.size() * sizeof(glm::vec3);
+  // Cylinder
+  TinyobjLoadObj("cylinder.obj", cylinder_vertices);
+  cylinder_colors.assign(cylinder_vertices.size(), glm::vec3(0.0f, 1.0f, 0.0f));
+  cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(glm::vec3);
+  // Sphere
+  TinyobjLoadObj("sphere.obj", sphere_vertices);
+  sphere_colors.assign(sphere_vertices.size(), glm::vec3(0.0f, 0.0f, 1.0f));
+  sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
+}
+
+void UpdateMvp() {
+  mvp.proj =
+      glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
+  mvp.view =
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+                  glm::vec3(0.0f, 1.0f, 0.0f));
+  mvp.model = glm::toMat4(glm::quat(rot_deg));
+}
+
 void InitGLUT(int argc, char* argv[]) {
   glutInit(&argc, argv);
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
@@ -87,23 +167,6 @@ void InitGLEW() {
     throw std::runtime_error("Could not initialize GLEW");
   }
   // DumpGLInfo();
-}
-
-void InitTransformation() { rot_deg = glm::vec3(0.0f); }
-
-void LoadObjects() {
-  // Cube
-  TinyobjLoadObj("cube.obj", cube_vertices);
-  cube_colors.assign(cube_vertices.size(), glm::vec3(1.0f, 0.0f, 0.0f));
-  cube_vertices_mem_sz = cube_vertices.size() * sizeof(glm::vec3);
-  // Cylinder
-  TinyobjLoadObj("cylinder.obj", cylinder_vertices);
-  cylinder_colors.assign(cylinder_vertices.size(), glm::vec3(0.0f, 1.0f, 0.0f));
-  cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(glm::vec3);
-  // Sphere
-  TinyobjLoadObj("sphere.obj", sphere_vertices);
-  sphere_colors.assign(sphere_vertices.size(), glm::vec3(0.0f, 1.0f, 0.0f));
-  sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
 }
 
 void ConfigGL() {
@@ -266,42 +329,30 @@ void GLUTDisplayCallback() {
 
   /* Update buffers */
   // MVP
-  buffer_manager.BindBuffer("mvp_buffer");
   buffer_manager.UpdateBuffer("mvp_buffer");
 
   // Object transformation
-  buffer_manager.BindBuffer("obj_trans_buffer");
   buffer_manager.UpdateBuffer("obj_trans_buffer");
 
   /* Draw vertex arrays */
-  // Cube
+  // Torso
+  torso_trans.rot_angle = static_cast<float>(sin(MOVEMENT_STEP * timer_cnt));
+  obj_trans.color = glm::vec3(0.5f, 0.0f, 0.0f);
+  obj_trans.trans = torso_trans.GetTrans();
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cube_va");
   glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
-  // Cylinder
-  // vertex_spec_manager.BindVertexArray("cylinder_va");
-  // glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
-  // Sphere
-  // vertex_spec_manager.BindVertexArray("sphere_va");
-  // glDrawArrays(GL_TRIANGLES, 0, sphere_vertices.size());
 
   /* Swap frame buffers in double buffer mode */
   glutSwapBuffers();
 }
 
 void GLUTReshapeCallback(int width, int height) {
-  const float ratio = static_cast<float>(width) / static_cast<float>(height);
+  window_aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
 
   glViewport(0, 0, width, height);
 
-  // constexpr float WIDTH = 10.0f;
-  // constexpr float HEIGHT = 10.0f;
-  // mvp.proj = glm::ortho(-1.0f * WIDTH * ratio, WIDTH * ratio, -1.0f * HEIGHT,
-  // HEIGHT);
-  mvp.proj = glm::perspective(glm::radians(45.0f), ratio, 0.1f, 100.0f);
-  mvp.view =
-      glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, -1.0f),
-                  glm::vec3(0.0f, 1.0f, 0.0f));
-  mvp.model = glm::toMat4(glm::quat(rot_deg));
+  UpdateMvp();
 }
 
 void GLUTMouseCallback(int button, int state, int x, int y) {
@@ -317,19 +368,24 @@ void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   switch (key) {
     case 'w':
       rot_deg += ROTATION_STEP * glm::vec3(-1.0, 0.0f, 0.0f);
-      mvp.model = glm::toMat4(glm::quat(rot_deg));
+      UpdateMvp();
       break;
     case 's':
       rot_deg += ROTATION_STEP * glm::vec3(1.0f, 0.0f, 0.0f);
-      mvp.model = glm::toMat4(glm::quat(rot_deg));
+      UpdateMvp();
       break;
     case 'a':
       rot_deg += ROTATION_STEP * glm::vec3(0.0f, -1.0f, 0.0f);
-      mvp.model = glm::toMat4(glm::quat(rot_deg));
+      UpdateMvp();
       break;
     case 'd':
       rot_deg += ROTATION_STEP * glm::vec3(0.0f, 1.0f, 0.0f);
-      mvp.model = glm::toMat4(glm::quat(rot_deg));
+      UpdateMvp();
+      break;
+    case 'r':
+      // Reset global rotation
+      rot_deg = glm::vec3(0.0f);
+      UpdateMvp();
       break;
     case 27:  // Escape
       glutLeaveMainLoop();
@@ -428,10 +484,10 @@ void EnterGLUTLoop() { glutMainLoop(); }
 
 int main(int argc, char* argv[]) {
   try {
+    InitObjectTransformation();
+    LoadObjects();
     InitGLUT(argc, argv);
     InitGLEW();
-    InitTransformation();
-    LoadObjects();
     ConfigGL();
     RegisterGLUTCallbacks();
     CreateGLUTMenus();
