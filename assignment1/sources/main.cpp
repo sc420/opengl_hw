@@ -36,13 +36,21 @@ bool timer_enabled = true;
  * Transformation
  ******************************************************************************/
 
+// Global MVP
 struct Mvp {
   glm::mat4 model;
   glm::mat4 view;
   glm::mat4 proj;
 };
 
+// Object transformation
+struct ObjTrans {
+  glm::mat4 trans;
+  glm::vec3 color;
+};
+
 Mvp mvp;
+ObjTrans obj_trans;
 
 glm::vec3 rot_deg;
 
@@ -81,7 +89,7 @@ void InitGLEW() {
   // DumpGLInfo();
 }
 
-void InitTransformation() { rot_deg = glm::vec3(0.0f, 0.0f, 0.0f); }
+void InitTransformation() { rot_deg = glm::vec3(0.0f); }
 
 void LoadObjects() {
   // Cube
@@ -128,6 +136,8 @@ void ConfigGL() {
   /* Create buffers */
   // MVP
   buffer_manager.GenBuffer("mvp_buffer");
+  // Object transformation
+  buffer_manager.GenBuffer("obj_trans_buffer");
   // Cube
   buffer_manager.GenBuffer("cube_buffer");
   // Cylinder
@@ -146,6 +156,8 @@ void ConfigGL() {
   /* Bind buffer targets to be repeatedly used later */
   // MVP
   buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);
+  // Object transformation
+  buffer_manager.BindBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER);
   // Cube
   buffer_manager.BindBuffer("cube_buffer", GL_ARRAY_BUFFER);
   // Cylinder
@@ -155,8 +167,11 @@ void ConfigGL() {
 
   /* Initialize buffers */
   // MVP
-  buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
-                            3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+  buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER, sizeof(Mvp), NULL,
+                            GL_STATIC_DRAW);
+  // Object transformation
+  buffer_manager.InitBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER,
+                            sizeof(ObjTrans), NULL, GL_STATIC_DRAW);
   // Cube
   buffer_manager.InitBuffer("cube_buffer", GL_ARRAY_BUFFER,
                             2 * cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
@@ -171,6 +186,9 @@ void ConfigGL() {
   // MVP
   buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 0, sizeof(Mvp),
                               &mvp);
+  // Object transformation
+  buffer_manager.UpdateBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER, 0,
+                              sizeof(ObjTrans), &obj_trans);
   // Cube
   buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER,
                               0 * cube_vertices_mem_sz, cube_vertices_mem_sz,
@@ -194,8 +212,12 @@ void ConfigGL() {
                               sphere_vertices_mem_sz, sphere_colors.data());
 
   /* Bind uniform blocks to buffers */
+  // MVP
   uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
   uniform_manager.BindBufferBaseToBindingPoint("mvp_buffer", 0);
+  // Object transformation
+  uniform_manager.AssignUniformBlockToBindingPoint("program", "obj_trans", 1);
+  uniform_manager.BindBufferBaseToBindingPoint("obj_trans_buffer", 1);
 
   /* Bind vertex arrays to buffers */
   // Cube
@@ -247,9 +269,9 @@ void GLUTDisplayCallback() {
   buffer_manager.BindBuffer("mvp_buffer");
   buffer_manager.UpdateBuffer("mvp_buffer");
 
-  //// Cube
-  // buffer_manager.BindBuffer("cube_buffer");
-  // buffer_manager.UpdateBuffer("cube_buffer");
+  // Object transformation
+  buffer_manager.BindBuffer("obj_trans_buffer");
+  buffer_manager.UpdateBuffer("obj_trans_buffer");
 
   /* Draw vertex arrays */
   // Cube
