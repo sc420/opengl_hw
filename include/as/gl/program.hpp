@@ -3,8 +3,10 @@
 #include <map>
 #include <string>
 
-#include "assignment/common.hpp"
-#include "assignment/shader.hpp"
+#include "as/common.hpp"
+#include "as/gl/shader.hpp"
+
+namespace as {
 
 class ProgramManager {
  public:
@@ -34,3 +36,5 @@ class ProgramManager {
 
   void CheckProgramLinkingStatus(const GLuint program_hdlr) const;
 };
+
+}  // namespace as

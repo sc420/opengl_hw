@@ -1,26 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="sources\main.cpp" />
+    <ClCompile Include="..\sources\gl\buffer.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
     <ClCompile Include="..\sources\common.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="sources\main.cpp" />
-    <ClCompile Include="..\sources\shader.cpp">
+    <ClCompile Include="..\sources\model\loader.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\uniform.cpp">
+    <ClCompile Include="..\sources\gl\program.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\program.cpp">
+    <ClCompile Include="..\sources\gl\shader.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\vertex_spec.cpp">
+    <ClCompile Include="..\sources\gl\uniform.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\buffer.cpp">
-      <Filter>sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\sources\object.cpp">
+    <ClCompile Include="..\sources\gl\vertex_spec.cpp">
       <Filter>sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -44,25 +44,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\assignment\common.hpp">
+    <ClInclude Include="..\include\as\gl\buffer.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\assignment\shader.hpp">
+    <ClInclude Include="..\include\as\common.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\assignment\uniform.hpp">
+    <ClInclude Include="..\include\as\model\loader.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\assignment\program.hpp">
+    <ClInclude Include="..\include\as\gl\program.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\assignment\vertex_spec.hpp">
+    <ClInclude Include="..\include\as\gl\shader.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\assignment\buffer.hpp">
+    <ClInclude Include="..\include\as\gl\uniform.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\assignment\object.hpp">
+    <ClInclude Include="..\include\as\gl\vertex_spec.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,20 +1,20 @@
-#include "assignment/vertex_spec.hpp"
+#include "as/gl/vertex_spec.hpp"
 
-VertexSpecManager::VertexSpecManager() : buffer_manager_(nullptr) {}
+as::VertexSpecManager::VertexSpecManager() : buffer_manager_(nullptr) {}
 
-VertexSpecManager::~VertexSpecManager() {
+as::VertexSpecManager::~VertexSpecManager() {
   // Delete all vertex array objects
   for (const auto& pair : hdlrs_) {
     glDeleteVertexArrays(1, &pair.second);
   }
 }
 
-void VertexSpecManager::RegisterBufferManager(
+void as::VertexSpecManager::RegisterBufferManager(
     const BufferManager& buffer_manager) {
   buffer_manager_ = &buffer_manager;
 }
 
-void VertexSpecManager::GenVertexArray(const std::string& va_name) {
+void as::VertexSpecManager::GenVertexArray(const std::string& va_name) {
   // Generate a vertex array object
   GLuint va_hdlr;
   glGenVertexArrays(1, &va_hdlr);
@@ -22,17 +22,15 @@ void VertexSpecManager::GenVertexArray(const std::string& va_name) {
   hdlrs_[va_name] = va_hdlr;
 }
 
-void VertexSpecManager::BindVertexArray(const std::string& va_name) const {
+void as::VertexSpecManager::BindVertexArray(const std::string& va_name) const {
   const GLuint va_hdlr = GetVertexArrayHdlr(va_name);
   glBindVertexArray(va_hdlr);
 }
 
-void VertexSpecManager::SpecifyVertexArrayOrg(const std::string& va_name,
-                                              const GLuint attrib_idx,
-                                              const GLint size,
-                                              const GLenum type,
-                                              const GLboolean normalized,
-                                              const GLuint relative_ofs) const {
+void as::VertexSpecManager::SpecifyVertexArrayOrg(
+    const std::string& va_name, const GLuint attrib_idx, const GLint size,
+    const GLenum type, const GLboolean normalized,
+    const GLuint relative_ofs) const {
   // Bind the vertex array
   BindVertexArray(va_name);
   // Enable the generic vertex attribute array
@@ -41,7 +39,7 @@ void VertexSpecManager::SpecifyVertexArrayOrg(const std::string& va_name,
   glVertexAttribFormat(attrib_idx, size, type, normalized, relative_ofs);
 }
 
-void VertexSpecManager::AssocVertexAttribToBindingPoint(
+void as::VertexSpecManager::AssocVertexAttribToBindingPoint(
     const std::string& va_name, const GLuint attrib_idx,
     const GLuint binding_idx) {
   // Bind the vertex array
@@ -57,11 +55,9 @@ void VertexSpecManager::AssocVertexAttribToBindingPoint(
  * References:
  * https://www.opengl.org/discussion_boards/showthread.php/182043-glVertexAttribFormat-glDrawArrays-issue
  */
-void VertexSpecManager::BindBufferToBindingPoint(const std::string& va_name,
-                                                 const std::string& buffer_name,
-                                                 const GLuint binding_idx,
-                                                 const GLintptr ofs,
-                                                 const GLsizei stride) {
+void as::VertexSpecManager::BindBufferToBindingPoint(
+    const std::string& va_name, const std::string& buffer_name,
+    const GLuint binding_idx, const GLintptr ofs, const GLsizei stride) {
   // Bind the vertex array
   BindVertexArray(va_name);
   // Get the buffer handler
@@ -73,23 +69,24 @@ void VertexSpecManager::BindBufferToBindingPoint(const std::string& va_name,
   bind_buffer_to_binding_point_prev_params_[va_name][binding_idx] = prev_params;
 }
 
-void VertexSpecManager::BindBufferToBindingPoint(const std::string& va_name,
-                                                 const std::string& buffer_name,
-                                                 const GLuint binding_idx) {
+void as::VertexSpecManager::BindBufferToBindingPoint(
+    const std::string& va_name, const std::string& buffer_name,
+    const GLuint binding_idx) {
   const BindBufferToBindingPointPrevParams& prev_params =
       GetBindBufferToBindingPointPrevParams(va_name, binding_idx);
   BindBufferToBindingPoint(va_name, buffer_name, binding_idx, prev_params.ofs,
                            prev_params.stride);
 }
 
-void VertexSpecManager::DeleteVertexArray(const std::string& va_name) {
+void as::VertexSpecManager::DeleteVertexArray(const std::string& va_name) {
   const GLuint va_hdlr = GetVertexArrayHdlr(va_name);
   glDeleteVertexArrays(1, &va_hdlr);
   // Delete previous parameters
   bind_buffer_to_binding_point_prev_params_.erase(va_name);
 }
 
-GLuint VertexSpecManager::GetVertexArrayHdlr(const std::string& va_name) const {
+GLuint as::VertexSpecManager::GetVertexArrayHdlr(
+    const std::string& va_name) const {
   if (hdlrs_.count(va_name) == 0) {
     throw std::runtime_error("Could not find the vertex array name '" +
                              va_name + "'");
@@ -97,7 +94,7 @@ GLuint VertexSpecManager::GetVertexArrayHdlr(const std::string& va_name) const {
   return hdlrs_.at(va_name);
 }
 
-GLuint VertexSpecManager::GetVertexAttribBindingPoint(
+GLuint as::VertexSpecManager::GetVertexAttribBindingPoint(
     const std::string& va_name, const GLuint attrib_idx) const {
   if (binding_points_.count(va_name) == 0) {
     throw std::runtime_error("Could not find the vertex array name '" +
@@ -112,8 +109,8 @@ GLuint VertexSpecManager::GetVertexAttribBindingPoint(
   return attrib_to_points.at(attrib_idx);
 }
 
-const VertexSpecManager::BindBufferToBindingPointPrevParams&
-VertexSpecManager::GetBindBufferToBindingPointPrevParams(
+const as::VertexSpecManager::BindBufferToBindingPointPrevParams&
+as::VertexSpecManager::GetBindBufferToBindingPointPrevParams(
     const std::string& va_name, const GLuint binding_idx) const {
   if (bind_buffer_to_binding_point_prev_params_.count(va_name) == 0) {
     throw std::runtime_error(

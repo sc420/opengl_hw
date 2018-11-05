@@ -1,12 +1,12 @@
 #pragma warning(push, 0)
-#include "assignment/common.hpp"
+#include "as/common.hpp"
 #pragma warning(pop)
-#include "assignment/buffer.hpp"
-#include "assignment/object.hpp"
-#include "assignment/program.hpp"
-#include "assignment/shader.hpp"
-#include "assignment/uniform.hpp"
-#include "assignment/vertex_spec.hpp"
+#include "as/gl/buffer.hpp"
+#include "as/gl/program.hpp"
+#include "as/gl/shader.hpp"
+#include "as/gl/uniform.hpp"
+#include "as/gl/vertex_spec.hpp"
+#include "as/model/loader.hpp"
 
 /*******************************************************************************
  * Constants
@@ -22,11 +22,11 @@ constexpr auto ROBOT_MOVEMENT_STEP = 0.05f;
  * Managers
  ******************************************************************************/
 
-BufferManager buffer_manager;
-ProgramManager program_manager;
-ShaderManager shader_manager;
-UniformManager uniform_manager;
-VertexSpecManager vertex_spec_manager;
+as::BufferManager buffer_manager;
+as::ProgramManager program_manager;
+as::ShaderManager shader_manager;
+as::UniformManager uniform_manager;
+as::VertexSpecManager vertex_spec_manager;
 
 /*******************************************************************************
  * Timers
@@ -258,15 +258,15 @@ void InitObjectTransformation() {
 
 void LoadObjects() {
   // Cube
-  TinyobjLoadObj("cube.obj", cube_vertices);
+  as::LoadObjByTinyobj("cube.obj", cube_vertices);
   cube_colors.assign(cube_vertices.size(), glm::vec3(1.0f, 0.0f, 0.0f));
   cube_vertices_mem_sz = cube_vertices.size() * sizeof(glm::vec3);
   // Cylinder
-  TinyobjLoadObj("cylinder.obj", cylinder_vertices);
+  as::LoadObjByTinyobj("cylinder.obj", cylinder_vertices);
   cylinder_colors.assign(cylinder_vertices.size(), glm::vec3(0.0f, 1.0f, 0.0f));
   cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(glm::vec3);
   // Sphere
-  TinyobjLoadObj("sphere.obj", sphere_vertices);
+  as::LoadObjByTinyobj("sphere.obj", sphere_vertices);
   sphere_colors.assign(sphere_vertices.size(), glm::vec3(0.0f, 0.0f, 1.0f));
   sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
 }
@@ -296,11 +296,11 @@ void InitGLEW() {
     std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
     throw std::runtime_error("Could not initialize GLEW");
   }
-  // DumpGLInfo();
+  // as::DumpGLInfo();
 }
 
 void ConfigGL() {
-  EnableCatchingError();
+  as::EnableCatchingGLError();
 
   /* Configure GL */
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);

@@ -1,14 +1,15 @@
-#include "assignment/shader.hpp"
+#include "as/gl/shader.hpp"
 
-ShaderManager::~ShaderManager() {
+as::ShaderManager::~ShaderManager() {
   // Delete all shader objects
   for (const auto& pair : hdlrs_) {
     glDeleteShader(pair.second);
   }
 }
 
-void ShaderManager::CreateShader(const std::string& shader_name,
-                                 const GLenum type, const std::string& path) {
+void as::ShaderManager::CreateShader(const std::string& shader_name,
+                                     const GLenum type,
+                                     const std::string& path) {
   // Create a shader object
   const GLuint shader_hdlr = glCreateShader(type);
   // Load the shader source
@@ -24,12 +25,12 @@ void ShaderManager::CreateShader(const std::string& shader_name,
   hdlrs_[shader_name] = shader_hdlr;
 }
 
-void ShaderManager::DeleteShader(const std::string& shader_name) const {
+void as::ShaderManager::DeleteShader(const std::string& shader_name) const {
   const GLuint shader_hdlr = GetShaderHdlr(shader_name);
   glDeleteShader(shader_hdlr);
 }
 
-GLuint ShaderManager::GetShaderHdlr(const std::string& shader_name) const {
+GLuint as::ShaderManager::GetShaderHdlr(const std::string& shader_name) const {
   if (hdlrs_.count(shader_name) == 0) {
     throw std::runtime_error("Could not find the shader name '" + shader_name +
                              "'");
@@ -37,7 +38,7 @@ GLuint ShaderManager::GetShaderHdlr(const std::string& shader_name) const {
   return hdlrs_.at(shader_name);
 }
 
-std::string ShaderManager::LoadShaderSource(const std::string& file) const {
+std::string as::ShaderManager::LoadShaderSource(const std::string& file) const {
   FILE* fp;
   fopen_s(&fp, file.c_str(), "rb");
   fseek(fp, 0, SEEK_END);
@@ -49,7 +50,7 @@ std::string ShaderManager::LoadShaderSource(const std::string& file) const {
   return src;
 }
 
-void ShaderManager::CheckShaderCompilation(const GLuint shader_hdlr) const {
+void as::ShaderManager::CheckShaderCompilation(const GLuint shader_hdlr) const {
   GLint status = -1;
   // Get compilation status
   glGetShaderiv(shader_hdlr, GL_COMPILE_STATUS, &status);

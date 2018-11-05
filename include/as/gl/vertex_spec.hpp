@@ -3,9 +3,10 @@
 #include <map>
 #include <string>
 
-#include "assignment/buffer.hpp"
-#include "assignment/common.hpp"
+#include "as/common.hpp"
+#include "as/gl/buffer.hpp"
 
+namespace as {
 class VertexSpecManager {
  public:
   struct BindBufferToBindingPointPrevParams {
@@ -62,3 +63,4 @@ class VertexSpecManager {
   GetBindBufferToBindingPointPrevParams(const std::string &va_name,
                                         const GLuint binding_idx) const;
 };
+}  // namespace as

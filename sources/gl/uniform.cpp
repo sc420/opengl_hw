@@ -1,19 +1,19 @@
-#include "assignment/uniform.hpp"
+#include "as/gl/uniform.hpp"
 
-UniformManager::UniformManager()
+as::UniformManager::UniformManager()
     : program_manager_(nullptr), buffer_manager_(nullptr) {}
 
-void UniformManager::RegisterProgramManager(
+void as::UniformManager::RegisterProgramManager(
     const ProgramManager &program_manager) {
   program_manager_ = &program_manager;
 }
 
-void UniformManager::RegisterBufferManager(
+void as::UniformManager::RegisterBufferManager(
     const BufferManager &buffer_manager) {
   buffer_manager_ = &buffer_manager;
 }
 
-void UniformManager::AssignUniformBlockToBindingPoint(
+void as::UniformManager::AssignUniformBlockToBindingPoint(
     const std::string &program_name, const std::string &block_name,
     const GLuint binding_idx) {
   // Get program handler
@@ -35,7 +35,7 @@ void UniformManager::AssignUniformBlockToBindingPoint(
   binding_points_[program_name][block_name] = binding_idx;
 }
 
-void UniformManager::BindBufferBaseToBindingPoint(
+void as::UniformManager::BindBufferBaseToBindingPoint(
     const std::string &buffer_name, const GLuint binding_idx) const {
   // Get buffer handler
   const GLuint buffer_hdlr = buffer_manager_->GetBufferHdlr(buffer_name);
@@ -43,7 +43,7 @@ void UniformManager::BindBufferBaseToBindingPoint(
   glBindBufferBase(GL_UNIFORM_BUFFER, binding_idx, buffer_hdlr);
 }
 
-void UniformManager::BindBufferRangeToBindingPoint(
+void as::UniformManager::BindBufferRangeToBindingPoint(
     const std::string &buffer_name, const GLuint binding_idx,
     const GLintptr ofs, const GLsizeiptr size) const {
   // Get buffer handler
@@ -52,7 +52,7 @@ void UniformManager::BindBufferRangeToBindingPoint(
   glBindBufferRange(GL_UNIFORM_BUFFER, binding_idx, buffer_hdlr, ofs, size);
 }
 
-GLuint UniformManager::GetUniformBlockBindingPoint(
+GLuint as::UniformManager::GetUniformBlockBindingPoint(
     const std::string &program_name, const std::string &block_name) const {
   if (binding_points_.count(program_name) == 0) {
     throw std::runtime_error("Could not find the program name '" +

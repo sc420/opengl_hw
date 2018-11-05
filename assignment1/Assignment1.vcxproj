@@ -100,27 +100,27 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\sources\buffer.cpp" />
+    <ClCompile Include="..\sources\gl\buffer.cpp" />
     <ClCompile Include="..\sources\common.cpp" />
-    <ClCompile Include="..\sources\object.cpp" />
-    <ClCompile Include="..\sources\program.cpp" />
-    <ClCompile Include="..\sources\uniform.cpp" />
-    <ClCompile Include="..\sources\vertex_spec.cpp" />
+    <ClCompile Include="..\sources\model\loader.cpp" />
+    <ClCompile Include="..\sources\gl\program.cpp" />
+    <ClCompile Include="..\sources\gl\uniform.cpp" />
+    <ClCompile Include="..\sources\gl\vertex_spec.cpp" />
     <ClCompile Include="sources\main.cpp" />
-    <ClCompile Include="..\sources\shader.cpp" />
+    <ClCompile Include="..\sources\gl\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\assets\fragment.fs.glsl" />
     <None Include="..\assets\vertex.vs.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\assignment\buffer.hpp" />
-    <ClInclude Include="..\include\assignment\common.hpp" />
-    <ClInclude Include="..\include\assignment\object.hpp" />
-    <ClInclude Include="..\include\assignment\program.hpp" />
-    <ClInclude Include="..\include\assignment\shader.hpp" />
-    <ClInclude Include="..\include\assignment\uniform.hpp" />
-    <ClInclude Include="..\include\assignment\vertex_spec.hpp" />
+    <ClInclude Include="..\include\as\gl\buffer.hpp" />
+    <ClInclude Include="..\include\as\common.hpp" />
+    <ClInclude Include="..\include\as\model\loader.hpp" />
+    <ClInclude Include="..\include\as\gl\program.hpp" />
+    <ClInclude Include="..\include\as\gl\shader.hpp" />
+    <ClInclude Include="..\include\as\gl\uniform.hpp" />
+    <ClInclude Include="..\include\as\gl\vertex_spec.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

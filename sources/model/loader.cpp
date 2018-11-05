@@ -1,6 +1,7 @@
-#include "assignment/object.hpp"
+#include "as/model/loader.hpp"
 
-void TinyobjLoadObj(const std::string &path, std::vector<glm::vec3> &vertices) {
+void as::LoadObjByTinyobj(const std::string &path,
+                          std::vector<glm::vec3> &vertices) {
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> materials;

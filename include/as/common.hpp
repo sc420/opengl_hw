@@ -45,7 +45,7 @@
        .c_str())
 #endif
 
-#define deg2rad(x) ((x) * ((3.1415926f) / (180.0f)))
+namespace as {
 
 typedef struct _texture_data {
   _texture_data() : width(0), height(0), data(0) {}
@@ -58,8 +58,5 @@ texture_data load_png(const char* path);
 
 void DumpGLInfo(void);
 
-void EnableCatchingError();
-
-void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
-                                GLenum severity, GLsizei length,
-                                const GLchar* message, const void* userParam);
+void EnableCatchingGLError();
+}  // namespace as

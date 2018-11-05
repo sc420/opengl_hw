@@ -3,8 +3,9 @@
 #include <map>
 #include <string>
 
-#include "assignment/common.hpp"
+#include "as/common.hpp"
 
+namespace as {
 class ShaderManager {
  public:
   ~ShaderManager();
@@ -23,3 +24,4 @@ class ShaderManager {
 
   void CheckShaderCompilation(const GLuint shader_hdlr) const;
 };
+}  // namespace as

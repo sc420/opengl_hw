@@ -3,8 +3,9 @@
 #include <map>
 #include <string>
 
-#include "assignment/common.hpp"
+#include "as/common.hpp"
 
+namespace as {
 class BufferManager {
  public:
   struct BindBufferPrevParams {
@@ -53,3 +54,4 @@ class BufferManager {
   const UpdateBufferPrevParams &GetUpdateBufferPrevParams(
       const std::string &buffer_name) const;
 };
+}  // namespace as

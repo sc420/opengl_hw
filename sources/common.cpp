@@ -1,5 +1,5 @@
 #pragma warning(push, 0)
-#include "assignment/common.hpp"
+#include "as/common.hpp"
 
 // Load tinyobjloader
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -11,7 +11,23 @@
 
 #pragma warning(pop)
 
-texture_data load_png(const char* path) {
+void GLAPIENTRY GLMessageCallback(GLenum source, GLenum type, GLuint id,
+                                  GLenum severity, GLsizei length,
+                                  const GLchar* message,
+                                  const void* userParam) {
+  /* Filter based on types */
+  // Ignore API_ID_RECOMPILE_FRAGMENT_SHADER
+  if (type == 0x8250) {
+    return;
+  }
+  /* Print the message */
+  fprintf(stderr,
+          "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+          (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
+          message);
+}
+
+as::texture_data as::load_png(const char* path) {
   texture_data texture;
   int n;
   stbi_uc* data = stbi_load(path, &texture.width, &texture.height, &n, 4);
@@ -36,7 +52,7 @@ texture_data load_png(const char* path) {
   return texture;
 }
 
-void DumpGLInfo(void) {
+void as::DumpGLInfo(void) {
   std::cerr << "GL Vendor: " << glGetString(GL_VENDOR) << std::endl;
   std::cerr << "GL Renderer: " << glGetString(GL_RENDERER) << std::endl;
   std::cerr << "GL Version: " << glGetString(GL_VERSION) << std::endl;
@@ -45,22 +61,7 @@ void DumpGLInfo(void) {
   // std::cerr << "GL Extensions: " << glGetString(GL_EXTENSIONS) << std::endl;
 }
 
-void EnableCatchingError() {
+void as::EnableCatchingGLError() {
   glEnable(GL_DEBUG_OUTPUT);
-  glDebugMessageCallback(MessageCallback, 0);
-}
-
-void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id,
-                                GLenum severity, GLsizei length,
-                                const GLchar* message, const void* userParam) {
-  /* Filter based on types */
-  // Ignore API_ID_RECOMPILE_FRAGMENT_SHADER
-  if (type == 0x8250) {
-    return;
-  }
-  /* Print the message */
-  fprintf(stderr,
-          "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-          (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
-          message);
+  glDebugMessageCallback(GLMessageCallback, 0);
 }

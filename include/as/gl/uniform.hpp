@@ -9,10 +9,11 @@
 #include <map>
 #include <string>
 
-#include "assignment/buffer.hpp"
-#include "assignment/common.hpp"
-#include "assignment/program.hpp"
+#include "as/common.hpp"
+#include "as/gl/buffer.hpp"
+#include "as/gl/program.hpp"
 
+namespace as {
 class UniformManager {
  public:
   UniformManager();
@@ -49,3 +50,4 @@ class UniformManager {
 
   std::map<std::string, std::map<std::string, GLuint>> binding_points_;
 };
+}  // namespace as
