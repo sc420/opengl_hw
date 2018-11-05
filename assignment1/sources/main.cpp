@@ -1,6 +1,4 @@
-#pragma warning(push, 0)
 #include "as/common.hpp"
-#pragma warning(pop)
 #include "as/gl/buffer.hpp"
 #include "as/gl/program.hpp"
 #include "as/gl/shader.hpp"

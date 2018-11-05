@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <vector>
-
 #include <TinyOBJ/tiny_obj_loader.h>
 
 #include "as/common.hpp"

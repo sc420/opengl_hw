@@ -1,5 +1,6 @@
-#pragma warning(push, 0)
 #include "as/common.hpp"
+
+#pragma warning(push, 0)
 
 // Load tinyobjloader
 #define TINYOBJLOADER_IMPLEMENTATION

@@ -24,9 +24,8 @@
 #include <GLM/glm/gtx/quaternion.hpp>
 
 #include <algorithm>
-#include <cstdio>
-#include <cstring>
 #include <iostream>
+#include <map>
 #include <stdexcept>
 #include <string>
 #include <vector>

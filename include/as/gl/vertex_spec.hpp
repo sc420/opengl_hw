@@ -1,8 +1,5 @@
 #pragma once
 
-#include <map>
-#include <string>
-
 #include "as/common.hpp"
 #include "as/gl/buffer.hpp"
 
