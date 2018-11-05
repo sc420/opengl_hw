@@ -43,6 +43,9 @@ float window_aspect_ratio;
  * Object Transformations (Object states)
  ******************************************************************************/
 
+ // Camera transformation
+glm::vec3 camera_rotate;
+
 // Body part transformation declaration
 class BodyPartTrans {
  public:
@@ -79,9 +82,6 @@ class BodyPartTrans {
 
   glm::vec3 color;
 };
-
-// Global rotation degree
-glm::vec3 rot_deg;
 
 // Body part transformations
 BodyPartTrans torso_trans;
@@ -136,8 +136,8 @@ std::vector<glm::vec3> sphere_colors;
 size_t sphere_vertices_mem_sz;
 
 void InitObjectTransformation() {
-  // Global rotation degree
-  rot_deg = glm::vec3(0.0f);
+  // Camera transformation
+  camera_rotate = glm::vec3(0.0f);
   // Torso
   torso_trans.rotate_axis = glm::vec3(0.0f, 0.0f, 1.0f);
   torso_trans.scale = glm::vec3(2.0f, 2.5f, 1.0f);
@@ -212,12 +212,23 @@ void LoadObjects() {
 }
 
 void UpdateGlobalMvp() {
+  const glm::mat4 identity;
+
   global_mvp.proj =
       glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
-  global_mvp.view =
-      glm::lookAt(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-                  glm::vec3(0.0f, 1.0f, 0.0f));
-  global_mvp.model = glm::toMat4(glm::quat(rot_deg));
+
+  const glm::mat4 look_at_trans = glm::lookAt(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+    glm::vec3(0.0f, 1.0f, 0.0f));
+  const glm::mat4 camera_rotate_trans = glm::toMat4(glm::quat(camera_rotate));
+  global_mvp.view = look_at_trans * camera_rotate_trans;
+
+  // Make the robot walk
+  const float model_translate_y = static_cast<float>(0.1f * sin(MOVEMENT_STEP * timer_cnt));
+  const float model_translate_z = 0.5f * MOVEMENT_STEP * (timer_cnt - 10);
+  glm::mat4 model_translate = glm::translate(identity, glm::vec3(0.0f, model_translate_y, model_translate_z));
+  global_mvp.model = model_translate;
+
+  global_mvp.model = identity;
 }
 
 void InitGLUT(int argc, char* argv[]) {
@@ -266,7 +277,7 @@ void ConfigGL() {
   program_manager.UseProgram("program");
 
   /* Create buffers */
-  // MVP
+  // Global MVP
   buffer_manager.GenBuffer("global_mvp_buffer");
   // Object transformation
   buffer_manager.GenBuffer("obj_trans_buffer");
@@ -286,7 +297,7 @@ void ConfigGL() {
   vertex_spec_manager.GenVertexArray("sphere_va");
 
   /* Bind buffer targets to be repeatedly used later */
-  // MVP
+  // Global MVP
   buffer_manager.BindBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER);
   // Object transformation
   buffer_manager.BindBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER);
@@ -298,7 +309,7 @@ void ConfigGL() {
   buffer_manager.BindBuffer("sphere_buffer", GL_ARRAY_BUFFER);
 
   /* Initialize buffers */
-  // MVP
+  // Global MVP
   buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER,
                             sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
   // Object transformation
@@ -315,7 +326,7 @@ void ConfigGL() {
                             2 * sphere_vertices_mem_sz, NULL, GL_STATIC_DRAW);
 
   /* Update buffers */
-  // MVP
+  // Global MVP
   buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(GlobalMvp), &global_mvp);
   // Object transformation
@@ -344,7 +355,7 @@ void ConfigGL() {
                               sphere_vertices_mem_sz, sphere_colors.data());
 
   /* Bind uniform blocks to buffers */
-  // MVP
+  // Global MVP
   uniform_manager.AssignUniformBlockToBindingPoint("program", "global_mvp", 0);
   uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
   // Object transformation
@@ -397,11 +408,9 @@ void GLUTDisplayCallback() {
   program_manager.UseProgram("program");
 
   /* Update buffers */
-  // MVP
+  // Global MVP
+  UpdateGlobalMvp();
   buffer_manager.UpdateBuffer("global_mvp_buffer");
-
-  // Object transformation
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
 
   /* Draw vertex arrays */
   // Torso
@@ -519,24 +528,24 @@ void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   printf("Key %c is pressed at (%d, %d)\n", key, x, y);
   switch (key) {
     case 'w':
-      rot_deg += ROTATION_STEP * glm::vec3(-1.0, 0.0f, 0.0f);
+      camera_rotate += ROTATION_STEP * glm::vec3(-1.0, 0.0f, 0.0f);
       UpdateGlobalMvp();
       break;
     case 's':
-      rot_deg += ROTATION_STEP * glm::vec3(1.0f, 0.0f, 0.0f);
+      camera_rotate += ROTATION_STEP * glm::vec3(1.0f, 0.0f, 0.0f);
       UpdateGlobalMvp();
       break;
     case 'a':
-      rot_deg += ROTATION_STEP * glm::vec3(0.0f, -1.0f, 0.0f);
+      camera_rotate += ROTATION_STEP * glm::vec3(0.0f, -1.0f, 0.0f);
       UpdateGlobalMvp();
       break;
     case 'd':
-      rot_deg += ROTATION_STEP * glm::vec3(0.0f, 1.0f, 0.0f);
+      camera_rotate += ROTATION_STEP * glm::vec3(0.0f, 1.0f, 0.0f);
       UpdateGlobalMvp();
       break;
     case 'r':
       // Reset global rotation
-      rot_deg = glm::vec3(0.0f);
+      camera_rotate = glm::vec3(0.0f);
       UpdateGlobalMvp();
       break;
     case 27:  // Escape
@@ -575,7 +584,7 @@ void GLUTTimerCallback(int val) {
 void GLUTMainMenuCallback(int id) {
   switch (id) {
     case 2:
-      glutChangeToMenuEntry(2, "New label", 2);
+      glutChangeToMenuEntry(2, "New Label", 2);
       break;
     case 3:
       glutLeaveMainLoop();
@@ -619,7 +628,7 @@ void CreateGLUTMenus() {
   glutSetMenu(main_menu_hdlr);
 
   glutAddSubMenu("Timer", timer_menu_hdlr);
-  glutAddMenuEntry("Change label", 2);
+  glutAddMenuEntry("Change Label", 2);
   glutAddMenuEntry("Exit", 3);
 
   glutSetMenu(timer_menu_hdlr);
