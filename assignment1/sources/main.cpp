@@ -45,34 +45,76 @@ float window_aspect_ratio;
  * Object Transformations (Object states)
  ******************************************************************************/
 
- // Camera transformation declaration
+// Camera transformation declaration
 class CameraTrans {
-public:
-  CameraTrans(const glm::vec3 &init_pos, const glm::vec3 &init_angle): 
-    init_pos(init_pos), init_angle(init_angle), pos(init_pos), angle(init_angle) {}
-
-  glm::vec3 init_pos;
-  glm::vec3 init_angle;
-  glm::vec3 pos;
-  // (x, y, z) = (pitch, yaw, roll)
-  glm::vec3 angle;
+ public:
+  CameraTrans(const glm::vec3 &init_pos, const glm::vec3 &init_angle)
+      : init_pos(init_pos),
+        init_angle(init_angle),
+        pos(init_pos),
+        angle(init_angle) {}
 
   glm::mat4 GetTrans() const {
     const glm::mat4 identity;
     // Calculate rotation
-    const glm::quat pitch = glm::angleAxis(angle.x, glm::vec3(1, 0, 0));
-    const glm::quat yaw = glm::angleAxis(angle.y, glm::vec3(0, 1, 0));
-    const glm::quat roll = glm::angleAxis(angle.z, glm::vec3(0, 0, 1));
-    const glm::quat orientation = glm::normalize(pitch * yaw * roll);
-    const glm::mat4 rotate = glm::toMat4(orientation);
+    const glm::mat4 rotate = GetRotateMatrix();
     // Calculate translation
     const glm::mat4 translate = glm::translate(identity, -1.0f * pos);
+    // Return transformation matrix
     return rotate * translate;
   }
+
+  void AddPos(const glm::vec3 &add_pos) { pos += add_pos; }
+
+  void AddPosFromCurAngle(const glm::vec3 &add_dir) {
+    const glm::mat4 rotate = GetRotateMatrix();
+    glm::vec4 rotated_add_dir = rotate * glm::vec4(add_dir, 1.0f);
+
+    std::cerr << add_dir.x << " " << add_dir.y << " " << add_dir.z << '\n';
+    std::cerr << rotated_add_dir.x << " " << rotated_add_dir.y << " "
+              << rotated_add_dir.z << '\n';
+
+    // TODO: Fix this with more easy way
+    if (add_dir.x > 0.0f) {
+      rotated_add_dir.y *= -1.0f;
+      rotated_add_dir.z *= -1.0f;
+    } else if (add_dir.x < 0.0f) {
+      rotated_add_dir.y *= -1.0f;
+      rotated_add_dir.z *= -1.0f;
+    }
+
+    if (add_dir.z > 0.0f) {
+      rotated_add_dir.x *= -1.0f;
+      rotated_add_dir.y *= -1.0f;
+    } else if (add_dir.z < 0.0f) {
+      rotated_add_dir.x *= -1.0f;
+      rotated_add_dir.y *= -1.0f;
+    }
+
+    pos += glm::vec3(rotated_add_dir.x, rotated_add_dir.y, rotated_add_dir.z);
+  }
+
+  void AddAngle(const glm::vec3 &add_angle) { angle += add_angle; }
 
   void ResetTrans() {
     pos = init_pos;
     angle = init_angle;
+  }
+
+ private:
+  const glm::vec3 init_pos;
+  const glm::vec3 init_angle;
+  glm::vec3 pos;
+  // (x, y, z) = (pitch, yaw, roll)
+  glm::vec3 angle;
+
+  glm::mat4 GetRotateMatrix() const {
+    const glm::quat pitch =
+        glm::angleAxis(angle.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    const glm::quat yaw = glm::angleAxis(angle.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    const glm::quat roll = glm::angleAxis(angle.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    const glm::quat orientation = glm::normalize(pitch * yaw * roll);
+    return glm::toMat4(orientation);
   }
 };
 
@@ -117,8 +159,7 @@ class BodyPartTrans {
 CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
 
 // Keyboard transformation
-bool is_key_pressed = false;
-unsigned char pressed_key;
+bool pressed_keys[256] = {false};
 
 // Mouse transformation
 bool is_camera_rotating = false;
@@ -259,14 +300,10 @@ void UpdateGlobalMvp() {
 
   global_mvp.view = camera_trans.GetTrans();
 
-  // Make the robot walk
-  const float model_translate_y = static_cast<float>(0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  const float model_translate_z = 0.5f * ROBOT_MOVEMENT_STEP * (timer_cnt - 10);
-  glm::mat4 model_translate = glm::translate(identity, glm::vec3(0.0f, model_translate_y, model_translate_z));
-  global_mvp.model = model_translate;
+  global_mvp.model = identity;
 }
 
-void InitGLUT(int argc, char* argv[]) {
+void InitGLUT(int argc, char *argv[]) {
   glutInit(&argc, argv);
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
   glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
@@ -450,14 +487,16 @@ void GLUTDisplayCallback() {
 
   /* Draw vertex arrays */
   // Torso
-  torso_trans.rotate_angle = static_cast<float>(0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  torso_trans.rotate_angle =
+      static_cast<float>(0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTrans();
   obj_trans.color = torso_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cube_va");
   glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
   // Head
-  head_trans.translate.x = static_cast<float>(-0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  head_trans.translate.x =
+      static_cast<float>(-0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() * head_trans.GetTrans();
   obj_trans.color = head_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
@@ -566,11 +605,11 @@ void GLUTMouseCallback(int button, int state, int x, int y) {
 
 void GLUTMotionCallback(int x, int y) {
   if (is_camera_rotating) {
-    int x_diff = x - last_motion_x;
-    int y_diff = y - last_motion_y;
+    float x_diff = static_cast<float>(x - last_motion_x);
+    float y_diff = static_cast<float>(y - last_motion_y);
 
-    camera_trans.angle.x += CAMERA_ROTATION_MOUSE_SENSITIVITY * y_diff;
-    camera_trans.angle.y += CAMERA_ROTATION_MOUSE_SENSITIVITY * x_diff;
+    camera_trans.AddAngle(CAMERA_ROTATION_MOUSE_SENSITIVITY *
+                          glm::vec3(y_diff, x_diff, 0.0f));
 
     last_motion_x = x;
     last_motion_y = y;
@@ -578,14 +617,8 @@ void GLUTMotionCallback(int x, int y) {
 }
 
 void GLUTKeyboardCallback(unsigned char key, int x, int y) {
+  pressed_keys[key] = true;
   switch (key) {
-    case 'w':
-    case 's':
-    case 'a':
-    case 'd':
-      is_key_pressed = true;
-      pressed_key = key;
-      break;
     case 'r':
       // Reset camera transformation
       camera_trans.ResetTrans();
@@ -601,7 +634,7 @@ void GLUTKeyboardCallback(unsigned char key, int x, int y) {
 }
 
 void GLUTKeyboardUpCallback(unsigned char key, int x, int y) {
-  is_key_pressed = false;
+  pressed_keys[key] = false;
 }
 
 void GLUTSpecialCallback(int key, int x, int y) {
@@ -626,25 +659,25 @@ void GLUTTimerCallback(int val) {
   timer_cnt++;
 
   // Update camera transformation
-  if (is_key_pressed) {
-    switch (pressed_key) {
-    case 'w':
-      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(0.0, 0.0f, -1.0f);
-      UpdateGlobalMvp();
-      break;
-    case 's':
-      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(0.0f, 0.0f, 1.0f);
-      UpdateGlobalMvp();
-      break;
-    case 'a':
-      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(-1.0f, 0.0f, 0.0f);
-      UpdateGlobalMvp();
-      break;
-    case 'd':
-      camera_trans.pos += CAMERA_MOVING_STEP * glm::vec3(1.0f, 0.0f, 0.0f);
-      UpdateGlobalMvp();
-      break;
-    }
+  if (pressed_keys['w']) {
+    camera_trans.AddPosFromCurAngle(CAMERA_MOVING_STEP *
+                                    glm::vec3(0.0, 0.0f, -1.0f));
+    UpdateGlobalMvp();
+  }
+  if (pressed_keys['s']) {
+    camera_trans.AddPosFromCurAngle(CAMERA_MOVING_STEP *
+                                    glm::vec3(0.0, 0.0f, 1.0f));
+    UpdateGlobalMvp();
+  }
+  if (pressed_keys['a']) {
+    camera_trans.AddPosFromCurAngle(CAMERA_MOVING_STEP *
+                                    glm::vec3(-1.0, 0.0f, 0.0f));
+    UpdateGlobalMvp();
+  }
+  if (pressed_keys['d']) {
+    camera_trans.AddPosFromCurAngle(CAMERA_MOVING_STEP *
+                                    glm::vec3(1.0, 0.0f, 0.0f));
+    UpdateGlobalMvp();
   }
 
   glutPostRedisplay();
@@ -717,7 +750,7 @@ void CreateGLUTMenus() {
 
 void EnterGLUTLoop() { glutMainLoop(); }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   try {
     InitObjectTransformation();
     LoadObjects();
@@ -727,7 +760,7 @@ int main(int argc, char* argv[]) {
     RegisterGLUTCallbacks();
     CreateGLUTMenus();
     EnterGLUTLoop();
-  } catch (const std::exception& ex) {
+  } catch (const std::exception &ex) {
     std::cerr << "Exception: " << ex.what() << std::endl;
     return 1;
   }
