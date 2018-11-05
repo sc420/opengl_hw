@@ -599,8 +599,8 @@ void GLUTMouseCallback(int button, int state, int x, int y) {
 
 void GLUTMotionCallback(int x, int y) {
   if (is_camera_rotating) {
-    float x_diff = static_cast<float>(x - last_motion_x);
-    float y_diff = static_cast<float>(y - last_motion_y);
+    const float x_diff = static_cast<float>(x - last_motion_x);
+    const float y_diff = static_cast<float>(y - last_motion_y);
 
     camera_trans.AddAngle(CAMERA_ROTATION_MOUSE_SENSITIVITY *
                           glm::vec3(y_diff, x_diff, 0.0f));
