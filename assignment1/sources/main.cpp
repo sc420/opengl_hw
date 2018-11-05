@@ -6,12 +6,14 @@
 #include "assignment/shader.hpp"
 #include "assignment/uniform.hpp"
 #include "assignment/vertex_spec.hpp"
+#include "assignment/object.hpp"
 
 /*******************************************************************************
  * Constants
  ******************************************************************************/
 
 constexpr auto TIMER_INTERVAL = 10;
+constexpr auto ROTATION_STEP = 0.1f;
 
 /*******************************************************************************
  * Managers
@@ -42,6 +44,16 @@ struct Mvp {
 
 Mvp mvp;
 
+glm::vec3 rot_deg;
+
+/*******************************************************************************
+ * Objects
+ ******************************************************************************/
+
+std::vector<glm::vec3> cube_vertices;
+std::vector<glm::vec3> cube_colors;
+size_t cube_vertices_mem_sz;
+
 void InitGLUT(int argc, char* argv[]) {
   glutInit(&argc, argv);
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
@@ -60,59 +72,90 @@ void InitGLEW() {
   // DumpGLInfo();
 }
 
+void InitTransformation() {
+  rot_deg = glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
+void LoadObjects() {
+  TinyobjLoadObj("cube.obj", cube_vertices);
+  // All red colors
+  cube_colors.assign(cube_vertices.size(), glm::vec3(1.0f, 0.0f, 0.0f));
+  cube_vertices_mem_sz = cube_vertices.size() * sizeof(glm::vec3);
+}
+
 void ConfigGL() {
   EnableCatchingError();
 
-  // Configure GL
+  /* Configure GL */
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 
-  // Register managers
+  /* Register managers */
   program_manager.RegisterShaderManager(shader_manager);
   uniform_manager.RegisterProgramManager(program_manager);
   uniform_manager.RegisterBufferManager(buffer_manager);
   vertex_spec_manager.RegisterBufferManager(buffer_manager);
 
-  // Create shaders
+  /* Create shaders */
   shader_manager.CreateShader("vertex_shader", GL_VERTEX_SHADER,
                               "vertex.vs.glsl");
   shader_manager.CreateShader("fragment_shader", GL_FRAGMENT_SHADER,
                               "fragment.fs.glsl");
 
-  // Create programs
+  /* Create programs */
   program_manager.CreateProgram("program");
   program_manager.AttachShader("program", "vertex_shader");
   program_manager.AttachShader("program", "fragment_shader");
   program_manager.LinkProgram("program");
   program_manager.UseProgram("program");
 
-  // Create buffers
+  /* Create buffers */
+  // va
   buffer_manager.GenBuffer("va_buffer");
+  // MVP
   buffer_manager.GenBuffer("mvp_buffer");
+  // Head
+  buffer_manager.GenBuffer("head_buffer");
 
-  // Create vertex arrays
+  /* Create vertex arrays */
+  // va
   vertex_spec_manager.GenVertexArray("va");
+  // Head
+  vertex_spec_manager.GenVertexArray("head_va");
 
-  // Bind buffer targets to be repeatedly used later
+  /* Bind buffer targets to be repeatedly used later */
+  // VA
   buffer_manager.BindBuffer("va_buffer", GL_ARRAY_BUFFER);
+  // MVP
   buffer_manager.BindBuffer("mvp_buffer", GL_UNIFORM_BUFFER);
+  // Head
+  buffer_manager.BindBuffer("head_buffer", GL_ARRAY_BUFFER);
 
-  // Initialize buffers
+  /* Initialize buffers */
+  // va
   buffer_manager.InitBuffer("va_buffer", GL_ARRAY_BUFFER, 18 * sizeof(float),
                             NULL, GL_STATIC_DRAW);
+  // MVP
   buffer_manager.InitBuffer("mvp_buffer", GL_UNIFORM_BUFFER,
                             3 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+  // Head
+  buffer_manager.InitBuffer("head_buffer", GL_ARRAY_BUFFER, 2 * cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
 
-  // Update buffers
+  /* Update buffers */
+  // MVP
   buffer_manager.UpdateBuffer("mvp_buffer", GL_UNIFORM_BUFFER, 0, sizeof(Mvp),
                               &mvp);
+  // Head
+  buffer_manager.UpdateBuffer("head_buffer", GL_ARRAY_BUFFER, 0 * cube_vertices_mem_sz, cube_vertices_mem_sz, cube_vertices.data());
+  buffer_manager.UpdateBuffer("head_buffer", GL_ARRAY_BUFFER, 1 * cube_vertices_mem_sz, cube_vertices_mem_sz, cube_colors.data());
 
-  // Bind uniform blocks to buffers
+  /* Bind uniform blocks to buffers */
   uniform_manager.AssignUniformBlockToBindingPoint("program", "mvp", 0);
   uniform_manager.BindBufferBaseToBindingPoint("mvp_buffer", 0);
 
-  // Bind vertex arrays to buffers
+  /* Bind vertex arrays to buffers */
+  // va
   vertex_spec_manager.SpecifyVertexArrayOrg("va", 0, 3, GL_FLOAT, GL_FALSE, 0);
   vertex_spec_manager.SpecifyVertexArrayOrg("va", 1, 3, GL_FLOAT, GL_FALSE,
                                             3 * 3 * sizeof(float));
@@ -122,6 +165,15 @@ void ConfigGL() {
                                                3 * sizeof(float));
   vertex_spec_manager.BindBufferToBindingPoint("va", "va_buffer", 1, 0,
                                                3 * sizeof(float));
+  // Head
+  vertex_spec_manager.SpecifyVertexArrayOrg("head_va", 0, sizeof(glm::vec3), GL_FLOAT, GL_FALSE, 0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("head_va", 1, sizeof(glm::vec3), GL_FLOAT, GL_FALSE, cube_vertices_mem_sz);
+  vertex_spec_manager.AssocVertexAttribToBindingPoint("head_va", 0, 0);
+  vertex_spec_manager.AssocVertexAttribToBindingPoint("head_va", 1, 1);
+  vertex_spec_manager.BindBufferToBindingPoint("head_va", "head_buffer", 0, 0,
+    sizeof(glm::vec3));
+  vertex_spec_manager.BindBufferToBindingPoint("head_va", "head_buffer", 1, 0,
+    sizeof(glm::vec3));
 }
 
 void GLUTDisplayCallback() {
@@ -130,24 +182,32 @@ void GLUTDisplayCallback() {
 
   /* Use the program */
   program_manager.UseProgram("program");
-
+  
   /* Update buffers */
-  // TODO: Generate sphere by octahedron
+  // va
   float f_timer_cnt = ((5 * timer_cnt) % 255) / 255.0f;
   float data[18] = {-0.5f,       -0.4f, 0.0f, 0.5f,        -0.4f, 0.0f,
                     0.0f,        0.6f,  0.0f, f_timer_cnt, 0.0f,  0.0f,
                     f_timer_cnt, 0.0f,  0.0f, f_timer_cnt, 0.0f,  0.0f};
-
   buffer_manager.BindBuffer("va_buffer");
   buffer_manager.UpdateBuffer("va_buffer", GL_ARRAY_BUFFER, 0,
                               18 * sizeof(float), data);
 
+  // MVP
   buffer_manager.BindBuffer("mvp_buffer");
   buffer_manager.UpdateBuffer("mvp_buffer");
 
+  // Head
+  buffer_manager.BindBuffer("head_buffer");
+  buffer_manager.UpdateBuffer("head_buffer");
+
   /* Draw vertex arrays */
-  vertex_spec_manager.BindVertexArray("va");
-  glDrawArrays(GL_TRIANGLES, 0, 3);
+  // va
+  //vertex_spec_manager.BindVertexArray("va");
+  //glDrawArrays(GL_TRIANGLES, 0, 3);
+  // Head
+  vertex_spec_manager.BindVertexArray("head_va");
+  glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
 
   /* Swap frame buffers in double buffer mode */
   glutSwapBuffers();
@@ -158,11 +218,14 @@ void GLUTReshapeCallback(int width, int height) {
 
   glViewport(0, 0, width, height);
 
-  mvp.proj = glm::ortho(-1.0f * ratio, 1.0f * ratio, -1.0f, 1.0f);
+  //constexpr float WIDTH = 10.0f;
+  //constexpr float HEIGHT = 10.0f;
+  //mvp.proj = glm::ortho(-1.0f * WIDTH * ratio, WIDTH * ratio, -1.0f * HEIGHT, HEIGHT);
+  mvp.proj = glm::perspective(glm::radians(45.0f), ratio, 0.1f, 100.0f);
   mvp.view =
-      glm::lookAt(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+      glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, -1.0f),
                   glm::vec3(0.0f, 1.0f, 0.0f));
-  mvp.model = glm::mat4();
+  mvp.model = glm::toMat4(glm::quat(rot_deg));
 }
 
 void GLUTMouseCallback(int button, int state, int x, int y) {
@@ -176,6 +239,22 @@ void GLUTMouseCallback(int button, int state, int x, int y) {
 void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   printf("Key %c is pressed at (%d, %d)\n", key, x, y);
   switch (key) {
+    case 'w':
+      rot_deg += ROTATION_STEP * glm::vec3(-1.0, 0.0f, 0.0f);
+      mvp.model = glm::toMat4(glm::quat(rot_deg));
+      break;
+    case 's':
+      rot_deg += ROTATION_STEP * glm::vec3(1.0f, 0.0f, 0.0f);
+      mvp.model = glm::toMat4(glm::quat(rot_deg));
+      break;
+    case 'a':
+      rot_deg += ROTATION_STEP * glm::vec3(0.0f, -1.0f, 0.0f);
+      mvp.model = glm::toMat4(glm::quat(rot_deg));
+      break;
+    case 'd':
+      rot_deg += ROTATION_STEP * glm::vec3(0.0f, 1.0f, 0.0f);
+      mvp.model = glm::toMat4(glm::quat(rot_deg));
+      break;
     case 27:  // Escape
       glutLeaveMainLoop();
       break;
@@ -275,6 +354,8 @@ int main(int argc, char* argv[]) {
   try {
     InitGLUT(argc, argv);
     InitGLEW();
+    InitTransformation();
+    LoadObjects();
     ConfigGL();
     RegisterGLUTCallbacks();
     CreateGLUTMenus();

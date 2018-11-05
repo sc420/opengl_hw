@@ -29,6 +29,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #ifdef _MSC_VER
 #define __FILENAME__ \

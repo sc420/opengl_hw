@@ -67,8 +67,7 @@
       </AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /D /Y  "$(SolutionDir)assets\*.dll" "$(OutDir)"
-xcopy /D /Y  "$(SolutionDir)assets\*.glsl" "$(OutDir)"</Command>
+      <Command>xcopy /D /Y  "$(SolutionDir)assets\*.*" "$(OutDir)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy DLLs and GLSLs to output directory</Message>
@@ -94,8 +93,7 @@ xcopy /D /Y  "$(SolutionDir)assets\*.glsl" "$(OutDir)"</Command>
       </AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /D /Y  "$(SolutionDir)assets\*.dll" "$(OutDir)"
-xcopy /D /Y  "$(SolutionDir)assets\*.glsl" "$(OutDir)"</Command>
+      <Command>xcopy /D /Y  "$(SolutionDir)assets\*.*" "$(OutDir)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy DLLs and GLSLs to output directory</Message>
@@ -117,6 +115,7 @@ xcopy /D /Y  "$(SolutionDir)assets\*.glsl" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="..\include\assignment\buffer.hpp" />
     <ClInclude Include="..\include\assignment\common.hpp" />
+    <ClInclude Include="..\include\assignment\object.hpp" />
     <ClInclude Include="..\include\assignment\program.hpp" />
     <ClInclude Include="..\include\assignment\shader.hpp" />
     <ClInclude Include="..\include\assignment\uniform.hpp" />

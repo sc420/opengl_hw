@@ -59,5 +59,8 @@
     <ClInclude Include="..\include\assignment\buffer.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\assignment\object.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
