@@ -70,7 +70,7 @@
       <Command>xcopy /D /Y  "$(SolutionDir)assets\*.*" "$(OutDir)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy DLLs and GLSLs to output directory</Message>
+      <Message>Copy assets to output directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -96,7 +96,7 @@
       <Command>xcopy /D /Y  "$(SolutionDir)assets\*.*" "$(OutDir)"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy DLLs and GLSLs to output directory</Message>
+      <Message>Copy assets to output directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
