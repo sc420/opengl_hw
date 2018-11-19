@@ -52,5 +52,5 @@ glm::mat4 as::CameraTrans::GetRotateMatrix() const {
   const glm::quat yaw = glm::angleAxis(angle_.y, glm::vec3(0.0f, 1.0f, 0.0f));
   const glm::quat roll = glm::angleAxis(angle_.z, glm::vec3(0.0f, 0.0f, 1.0f));
   const glm::quat orientation = glm::normalize(pitch * yaw * roll);
-  return glm::toMat4(orientation);
+  return glm::mat4_cast(orientation);
 }
