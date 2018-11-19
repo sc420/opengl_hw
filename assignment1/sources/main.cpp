@@ -56,7 +56,7 @@ class BodyPartTrans {
         translate(glm::vec3(0.0f)) {}
 
   glm::mat4 GetTrans() const {
-    const glm::mat4 identity;
+    const glm::mat4 identity(1.0f);
     return glm::translate(identity, translate) *
            glm::rotate(identity, rotate_angle, rotate_axis) *
            glm::scale(identity, scale) *
@@ -64,7 +64,7 @@ class BodyPartTrans {
   }
 
   glm::mat4 GetTransWithoutScale() const {
-    const glm::mat4 identity;
+    const glm::mat4 identity(1.0f);
     return glm::translate(identity, translate) *
            glm::rotate(identity, rotate_angle, rotate_axis) *
            glm::translate(identity, pre_translate);
@@ -219,8 +219,7 @@ void LoadObjects() {
 }
 
 void UpdateGlobalMvp() {
-  const glm::mat4 identity;
-
+  const glm::mat4 identity(1.0f);
   global_mvp.proj =
       glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
   global_mvp.view = camera_trans.GetTrans();

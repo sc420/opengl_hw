@@ -1,27 +1,15 @@
 #pragma once
 
-#ifdef _MSC_VER
-#include <GLEW/glew.h>
+/*******************************************************************************
+ * Link .lib Files
+ ******************************************************************************/
 
-#include <FreeGLUT/freeglut.h>
-#include <direct.h>
-#else
-#include <GLUT/glut.h>
-#include <OpenGL/gl3.h>
-#include <unistd.h>
-#endif
-
-#ifdef _MSC_VER
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "freeglut.lib")
-#endif
 
-#define GLM_SWIZZLE
-#include <GLM/glm/glm.hpp>
-#include <GLM/glm/gtc/matrix_transform.hpp>
-#include <GLM/glm/gtc/quaternion.hpp>
-#include <GLM/glm/gtc/type_ptr.hpp>
-#include <GLM/glm/gtx/quaternion.hpp>
+/*******************************************************************************
+ * Include Standard Libraries
+ ******************************************************************************/
 
 #include <algorithm>
 #include <iostream>
@@ -30,19 +18,28 @@
 #include <string>
 #include <vector>
 
-#ifdef _MSC_VER
-#define __FILENAME__ \
-  (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
-#define __FILEPATH__(x)                                                       \
-  ((std::string(__FILE__).substr(0, std::string(__FILE__).rfind('\\')) + (x)) \
-       .c_str())
-#else
-#define __FILENAME__ \
-  (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
-#define __FILEPATH__(x)                                                      \
-  ((std::string(__FILE__).substr(0, std::string(__FILE__).rfind('/')) + (x)) \
-       .c_str())
-#endif
+/*******************************************************************************
+* Include GL Libraries
+******************************************************************************/
+
+// OpenGL loading library
+#include <glew/glew.h>
+
+// Crossplatform windowing and keyboard/mouse handler
+#include <freeglut/freeglut.h>
+
+// Cross-platform C++ mathematics library
+#define GLM_SWIZZLE
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
+
+/*******************************************************************************
+* Declarations
+******************************************************************************/
 
 namespace as {
 

@@ -102,19 +102,19 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\sources\gl\buffer.cpp" />
-    <ClCompile Include="..\sources\common.cpp" />
-    <ClCompile Include="..\sources\model\loader.cpp" />
-    <ClCompile Include="..\sources\gl\program.cpp" />
-    <ClCompile Include="..\sources\gl\uniform.cpp" />
-    <ClCompile Include="..\sources\gl\vertex_spec.cpp" />
-    <ClCompile Include="..\sources\trans\camera.cpp" />
+    <ClCompile Include="..\src\gl\buffer.cpp" />
+    <ClCompile Include="..\src\common.cpp" />
+    <ClCompile Include="..\src\model\loader.cpp" />
+    <ClCompile Include="..\src\gl\program.cpp" />
+    <ClCompile Include="..\src\gl\uniform.cpp" />
+    <ClCompile Include="..\src\gl\vertex_spec.cpp" />
+    <ClCompile Include="..\src\trans\camera.cpp" />
     <ClCompile Include="sources\main.cpp" />
-    <ClCompile Include="..\sources\gl\shader.cpp" />
+    <ClCompile Include="..\src\gl\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\assets\fragment.fs.glsl" />
-    <None Include="..\assets\vertex.vs.glsl" />
+    <None Include="assets\fragment.fs.glsl" />
+    <None Include="assets\vertex.vs.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\as\gl\buffer.hpp" />

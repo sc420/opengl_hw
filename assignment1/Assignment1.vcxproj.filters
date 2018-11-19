@@ -2,45 +2,42 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="sources\main.cpp" />
-    <ClCompile Include="..\sources\common.cpp">
-      <Filter>sources</Filter>
+    <ClCompile Include="..\src\common.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\gl\buffer.cpp">
-      <Filter>sources\gl</Filter>
+    <ClCompile Include="..\src\trans\camera.cpp">
+      <Filter>src\trans</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\gl\program.cpp">
-      <Filter>sources\gl</Filter>
+    <ClCompile Include="..\src\model\loader.cpp">
+      <Filter>src\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\gl\shader.cpp">
-      <Filter>sources\gl</Filter>
+    <ClCompile Include="..\src\gl\buffer.cpp">
+      <Filter>src\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\gl\uniform.cpp">
-      <Filter>sources\gl</Filter>
+    <ClCompile Include="..\src\gl\program.cpp">
+      <Filter>src\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\gl\vertex_spec.cpp">
-      <Filter>sources\gl</Filter>
+    <ClCompile Include="..\src\gl\shader.cpp">
+      <Filter>src\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\model\loader.cpp">
-      <Filter>sources\model</Filter>
+    <ClCompile Include="..\src\gl\uniform.cpp">
+      <Filter>src\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\sources\trans\camera.cpp">
-      <Filter>sources\trans</Filter>
+    <ClCompile Include="..\src\gl\vertex_spec.cpp">
+      <Filter>src\gl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\assets\fragment.fs.glsl">
+    <None Include="assets\fragment.fs.glsl">
       <Filter>assets</Filter>
     </None>
-    <None Include="..\assets\vertex.vs.glsl">
+    <None Include="assets\vertex.vs.glsl">
       <Filter>assets</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="assets">
       <UniqueIdentifier>{9dda94c8-3a6f-4562-90fe-5ceface38c32}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="sources">
-      <UniqueIdentifier>{bcc2fea6-cd53-450f-917b-563a4cf5ab55}</UniqueIdentifier>
     </Filter>
     <Filter Include="include">
       <UniqueIdentifier>{9234ca84-7ae3-4a22-8850-a64d28d34c12}</UniqueIdentifier>
@@ -54,13 +51,16 @@
     <Filter Include="include\trans">
       <UniqueIdentifier>{a0615eae-6957-4368-9fb2-a262bc89330a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="sources\gl">
+    <Filter Include="src">
+      <UniqueIdentifier>{bcc2fea6-cd53-450f-917b-563a4cf5ab55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gl">
       <UniqueIdentifier>{ec19cf54-08c6-48d4-99c9-570566091727}</UniqueIdentifier>
     </Filter>
-    <Filter Include="sources\model">
+    <Filter Include="src\model">
       <UniqueIdentifier>{1aa9c770-ffc8-4fac-88fb-38224f38f25f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="sources\trans">
+    <Filter Include="src\trans">
       <UniqueIdentifier>{5406f30e-c62b-4d43-b914-56d5cad59dea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
