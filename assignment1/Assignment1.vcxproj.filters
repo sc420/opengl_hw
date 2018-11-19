@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="sources\main.cpp" />
     <ClCompile Include="..\src\common.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -26,6 +25,7 @@
     <ClCompile Include="..\src\gl\vertex_spec.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\fragment.fs.glsl">

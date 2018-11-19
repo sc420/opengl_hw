@@ -109,7 +109,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
     <ClCompile Include="..\src\gl\uniform.cpp" />
     <ClCompile Include="..\src\gl\vertex_spec.cpp" />
     <ClCompile Include="..\src\trans\camera.cpp" />
-    <ClCompile Include="sources\main.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="..\src\gl\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
