@@ -1,8 +1,84 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Assignment2\src</Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{9dda94c8-3a6f-4562-90fe-5ceface38c32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{9234ca84-7ae3-4a22-8850-a64d28d34c12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{bcc2fea6-cd53-450f-917b-563a4cf5ab55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gl">
+      <UniqueIdentifier>{ec19cf54-08c6-48d4-99c9-570566091727}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\model">
+      <UniqueIdentifier>{1aa9c770-ffc8-4fac-88fb-38224f38f25f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\trans">
+      <UniqueIdentifier>{5406f30e-c62b-4d43-b914-56d5cad59dea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assignment2">
+      <UniqueIdentifier>{34fd948e-325d-4a05-afc5-c0b3b3a147d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assignment2\src">
+      <UniqueIdentifier>{241569b9-b50d-4433-9131-99752bf77d8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\as">
+      <UniqueIdentifier>{5f4bd6d1-1813-4da7-b9c2-530d4145604c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\as\gl">
+      <UniqueIdentifier>{596c7477-70a4-4c39-84d2-cb6483a30a62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\as\model">
+      <UniqueIdentifier>{f573a6d1-118c-427b-ac27-e2ef31841844}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\as\trans">
+      <UniqueIdentifier>{a0615eae-6957-4368-9fb2-a262bc89330a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets\shaders">
+      <UniqueIdentifier>{4a8aa88a-0207-4dd4-9e2f-f34d3a505d1c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\as\gl\buffer.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\program.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\shader.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\uniform.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\vertex_spec.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\loader.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\trans\camera.hpp">
+      <Filter>include\as\trans</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\common.hpp">
+      <Filter>include\as</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\common.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\common.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\trans\camera.cpp">
+      <Filter>src\trans</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\loader.cpp">
+      <Filter>src\model</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gl\buffer.cpp">
       <Filter>src\gl</Filter>
@@ -19,48 +95,16 @@
     <ClCompile Include="..\src\gl\vertex_spec.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\model\loader.cpp">
-      <Filter>src\model</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\trans\camera.cpp">
-      <Filter>src\trans</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Assignment2\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\fragment.frag">
+    <CopyFileToFolders Include="assets\shaders\fragment.frag">
       <Filter>assets\shaders</Filter>
-    </None>
-    <None Include="assets\vertex.vert">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\vertex.vert">
       <Filter>assets\shaders</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="assets">
-      <UniqueIdentifier>{9dda94c8-3a6f-4562-90fe-5ceface38c32}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{bcc2fea6-cd53-450f-917b-563a4cf5ab55}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Assignment2">
-      <UniqueIdentifier>{34fd948e-325d-4a05-afc5-c0b3b3a147d9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Assignment2\src">
-      <UniqueIdentifier>{241569b9-b50d-4433-9131-99752bf77d8a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\gl">
-      <UniqueIdentifier>{ec19cf54-08c6-48d4-99c9-570566091727}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\model">
-      <UniqueIdentifier>{1aa9c770-ffc8-4fac-88fb-38224f38f25f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\trans">
-      <UniqueIdentifier>{5406f30e-c62b-4d43-b914-56d5cad59dea}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="assets\shaders">
-      <UniqueIdentifier>{e403d4b1-ff84-4e9e-80d1-2e6e09e0ad55}</UniqueIdentifier>
-    </Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

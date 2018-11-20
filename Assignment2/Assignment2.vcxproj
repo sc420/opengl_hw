@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="15.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{4FDD4209-9B6C-4C9C-8E2D-EAB449D959BD}</ProjectGuid>
     <RootNamespace>Assignment2</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
@@ -42,20 +41,16 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -68,7 +63,6 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
@@ -77,6 +71,32 @@
     <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
+xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy dependencies to output directory</Message>
+    </PostBuildEvent>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -93,29 +113,11 @@
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
-xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
+xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy dependencies to output directory</Message>
     </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <ConformanceMode>true</ConformanceMode>
-    </ClCompile>
-    <PostBuildEvent>
-      <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
-xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Copy dependencies to output directory</Message>
-    </PostBuildEvent>
-    <Link>
-      <SubSystem>Console</SubSystem>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -124,6 +126,14 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Message>Copy dependencies to output directory</Message>
+      <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
+xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -137,8 +147,25 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Message>Copy dependencies to output directory</Message>
+      <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
+xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\as\common.hpp" />
+    <ClInclude Include="..\include\as\gl\buffer.hpp" />
+    <ClInclude Include="..\include\as\gl\common.hpp" />
+    <ClInclude Include="..\include\as\gl\program.hpp" />
+    <ClInclude Include="..\include\as\gl\shader.hpp" />
+    <ClInclude Include="..\include\as\gl\uniform.hpp" />
+    <ClInclude Include="..\include\as\gl\vertex_spec.hpp" />
+    <ClInclude Include="..\include\as\model\loader.hpp" />
+    <ClInclude Include="..\include\as\trans\camera.hpp" />
+  </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp" />
     <ClCompile Include="..\src\gl\buffer.cpp" />
@@ -163,6 +190,4 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
     </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
 </Project>
