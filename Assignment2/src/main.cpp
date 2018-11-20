@@ -601,19 +601,27 @@ void GLUTTimerCallback(int val) {
 
   // Update camera transformation
   if (pressed_keys['w']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0, 0.0f, -1.0f));
+    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0f, 0.0f, -1.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['s']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0, 0.0f, 1.0f));
+    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0f, 0.0f, 1.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['a']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(-1.0, 0.0f, 0.0f));
+    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(-1.0f, 0.0f, 0.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['d']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(1.0, 0.0f, 0.0f));
+    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(1.0f, 0.0f, 0.0f));
+    UpdateGlobalMvp();
+  }
+  if (pressed_keys['z']) {
+    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0f, 1.0f, 0.0f));
+    UpdateGlobalMvp();
+  }
+  if (pressed_keys['x']) {
+    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0f, -1.0f, 0.0f));
     UpdateGlobalMvp();
   }
 
