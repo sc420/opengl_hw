@@ -32,10 +32,18 @@ unsigned int timer_cnt = 0;
 bool timer_enabled = true;
 
 /*******************************************************************************
- * Window
+ * User Interface States
  ******************************************************************************/
 
+// Window states
 float window_aspect_ratio;
+
+// Keyboard states
+bool pressed_keys[KEYBOARD_KEY_SIZE] = { false };
+
+// Mouse states
+bool camera_rotating = false;
+glm::vec2 last_mouse_pos;
 
 /*******************************************************************************
  * Object Transformations (Object states)
@@ -80,13 +88,6 @@ class BodyPartTrans {
 
 // Camera transformations
 as::CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
-
-// Keyboard transformations
-bool pressed_keys[KEYBOARD_KEY_SIZE] = {false};
-
-// Mouse transformations
-bool camera_rotating = false;
-glm::vec2 last_mouse_pos;
 
 // Body part transformations
 BodyPartTrans torso_trans;
@@ -139,6 +140,33 @@ size_t cylinder_vertices_mem_sz;
 std::vector<glm::vec3> sphere_vertices;
 std::vector<glm::vec3> sphere_colors;
 size_t sphere_vertices_mem_sz;
+
+/*******************************************************************************
+ * GL Initialization Methods
+ ******************************************************************************/
+
+void InitGLUT(int argc, char *argv[]) {
+  glutInit(&argc, argv);
+  glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+  glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
+  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+  glutInitWindowPosition(100, 100);
+  glutInitWindowSize(600, 600);
+  glutCreateWindow("Assignment 1");
+}
+
+void InitGLEW() {
+  const GLenum err = glewInit();
+  if (err != GLEW_OK) {
+    std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
+    throw std::runtime_error("Could not initialize GLEW");
+  }
+  // as::PrintGLContextInfo();
+}
+
+/*******************************************************************************
+ * Model Handlers
+ ******************************************************************************/
 
 void InitObjectTransformation() {
   // Torso
@@ -214,32 +242,9 @@ void LoadObjects() {
   sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
 }
 
-void UpdateGlobalMvp() {
-  const glm::mat4 identity(1.0f);
-  global_mvp.proj =
-      glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
-  global_mvp.view = camera_trans.GetTrans();
-  global_mvp.model = identity;
-}
-
-void InitGLUT(int argc, char *argv[]) {
-  glutInit(&argc, argv);
-  glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
-  glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
-  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitWindowPosition(100, 100);
-  glutInitWindowSize(600, 600);
-  glutCreateWindow("Assignment 1");
-}
-
-void InitGLEW() {
-  const GLenum err = glewInit();
-  if (err != GLEW_OK) {
-    std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
-    throw std::runtime_error("Could not initialize GLEW");
-  }
-  // as::PrintGLContextInfo();
-}
+/*******************************************************************************
+ * GL Context Configuration
+ ******************************************************************************/
 
 void ConfigGL() {
   as::EnableCatchingGLError();
@@ -391,6 +396,22 @@ void ConfigGL() {
                                                sphere_vertices_mem_sz,
                                                sizeof(glm::vec3));
 }
+
+/*******************************************************************************
+ * GL Transformation Handling Methods
+ ******************************************************************************/
+
+void UpdateGlobalMvp() {
+  const glm::mat4 identity(1.0f);
+  global_mvp.proj =
+    glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
+  global_mvp.view = camera_trans.GetTrans();
+  global_mvp.model = identity;
+}
+
+/*******************************************************************************
+ * GLUT Callbacks
+ ******************************************************************************/
 
 void GLUTDisplayCallback() {
   /* Clear frame buffers */
@@ -633,6 +654,10 @@ void GLUTTimerMenuCallback(int id) {
   }
 }
 
+/*******************************************************************************
+ * GLUT Handlers
+ ******************************************************************************/
+
 void RegisterGLUTCallbacks() {
   glutDisplayFunc(GLUTDisplayCallback);
   glutReshapeFunc(GLUTReshapeCallback);
@@ -666,6 +691,10 @@ void CreateGLUTMenus() {
 }
 
 void EnterGLUTLoop() { glutMainLoop(); }
+
+/*******************************************************************************
+ * Entry Point
+ ******************************************************************************/
 
 int main(int argc, char *argv[]) {
   try {
