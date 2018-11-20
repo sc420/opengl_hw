@@ -41,29 +41,29 @@ float window_aspect_ratio;
  * Object Transformations (Object states)
  ******************************************************************************/
 
-// Body part transformation declaration
+ // Body part transformation declaration
 class BodyPartTrans {
- public:
+public:
   BodyPartTrans()
-      : pre_translate(glm::vec3(0.0f)),
-        scale(glm::vec3(1.0f)),
-        rotate_angle(0.0f),
-        rotate_axis(glm::vec3(1.0f, 0.0f, 0.0f)),
-        translate(glm::vec3(0.0f)) {}
+    : pre_translate(glm::vec3(0.0f)),
+    scale(glm::vec3(1.0f)),
+    rotate_angle(0.0f),
+    rotate_axis(glm::vec3(1.0f, 0.0f, 0.0f)),
+    translate(glm::vec3(0.0f)) {}
 
   glm::mat4 GetTrans() const {
     const glm::mat4 identity(1.0f);
     return glm::translate(identity, translate) *
-           glm::rotate(identity, rotate_angle, rotate_axis) *
-           glm::scale(identity, scale) *
-           glm::translate(identity, pre_translate);
+      glm::rotate(identity, rotate_angle, rotate_axis) *
+      glm::scale(identity, scale) *
+      glm::translate(identity, pre_translate);
   }
 
   glm::mat4 GetTransWithoutScale() const {
     const glm::mat4 identity(1.0f);
     return glm::translate(identity, translate) *
-           glm::rotate(identity, rotate_angle, rotate_axis) *
-           glm::translate(identity, pre_translate);
+      glm::rotate(identity, rotate_angle, rotate_axis) *
+      glm::translate(identity, pre_translate);
   }
 
   glm::vec3 GetColor() const { return color; }
@@ -82,7 +82,7 @@ class BodyPartTrans {
 as::CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
 
 // Keyboard transformations
-bool pressed_keys[KEYBOARD_KEY_SIZE] = {false};
+bool pressed_keys[KEYBOARD_KEY_SIZE] = { false };
 
 // Mouse transformations
 bool camera_rotating = false;
@@ -104,7 +104,7 @@ BodyPartTrans r2_leg_trans;
  * GL Transformations (Feed to GL)
  ******************************************************************************/
 
-// Global MVP declaration
+ // Global MVP declaration
 struct GlobalMvp {
   glm::mat4 model;
   glm::mat4 view;
@@ -127,7 +127,7 @@ ObjTrans obj_trans;
  * Objects
  ******************************************************************************/
 
-// Cube
+ // Cube
 std::vector<glm::vec3> cube_vertices;
 std::vector<glm::vec3> cube_colors;
 size_t cube_vertices_mem_sz;
@@ -201,15 +201,15 @@ void InitObjectTransformation() {
 
 void LoadObjects() {
   // Cube
-  as::LoadObjByTinyobj("cube.obj", cube_vertices);
+  as::LoadObjByTinyobj("models/cube.obj", cube_vertices);
   cube_colors.assign(cube_vertices.size(), glm::vec3(1.0f, 0.0f, 0.0f));
   cube_vertices_mem_sz = cube_vertices.size() * sizeof(glm::vec3);
   // Cylinder
-  as::LoadObjByTinyobj("cylinder.obj", cylinder_vertices);
+  as::LoadObjByTinyobj("models/cylinder.obj", cylinder_vertices);
   cylinder_colors.assign(cylinder_vertices.size(), glm::vec3(0.0f, 1.0f, 0.0f));
   cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(glm::vec3);
   // Sphere
-  as::LoadObjByTinyobj("sphere.obj", sphere_vertices);
+  as::LoadObjByTinyobj("models/sphere.obj", sphere_vertices);
   sphere_colors.assign(sphere_vertices.size(), glm::vec3(0.0f, 0.0f, 1.0f));
   sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
 }
@@ -217,7 +217,7 @@ void LoadObjects() {
 void UpdateGlobalMvp() {
   const glm::mat4 identity(1.0f);
   global_mvp.proj =
-      glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
+    glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
   global_mvp.view = camera_trans.GetTrans();
   global_mvp.model = identity;
 }
@@ -238,7 +238,7 @@ void InitGLEW() {
     std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
     throw std::runtime_error("Could not initialize GLEW");
   }
-  // as::DumpGLInfo();
+  // as::PrintGLContextInfo();
 }
 
 void ConfigGL() {
@@ -257,9 +257,9 @@ void ConfigGL() {
 
   /* Create shaders */
   shader_manager.CreateShader("vertex_shader", GL_VERTEX_SHADER,
-                              "vertex.vs.glsl");
+    "shaders/vertex.vert");
   shader_manager.CreateShader("fragment_shader", GL_FRAGMENT_SHADER,
-                              "fragment.fs.glsl");
+    "shaders/fragment.frag");
 
   /* Create programs */
   program_manager.CreateProgram("program");
@@ -303,48 +303,48 @@ void ConfigGL() {
   /* Initialize buffers */
   // Global MVP
   buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER,
-                            sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
+    sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
   // Object transformation
   buffer_manager.InitBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER,
-                            sizeof(ObjTrans), NULL, GL_STATIC_DRAW);
+    sizeof(ObjTrans), NULL, GL_STATIC_DRAW);
   // Cube
   buffer_manager.InitBuffer("cube_buffer", GL_ARRAY_BUFFER,
-                            2 * cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+    2 * cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
   // Cylinder
   buffer_manager.InitBuffer("cylinder_buffer", GL_ARRAY_BUFFER,
-                            2 * cylinder_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+    2 * cylinder_vertices_mem_sz, NULL, GL_STATIC_DRAW);
   // Sphere
   buffer_manager.InitBuffer("sphere_buffer", GL_ARRAY_BUFFER,
-                            2 * sphere_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+    2 * sphere_vertices_mem_sz, NULL, GL_STATIC_DRAW);
 
   /* Update buffers */
   // Global MVP
   buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0,
-                              sizeof(GlobalMvp), &global_mvp);
+    sizeof(GlobalMvp), &global_mvp);
   // Object transformation
   buffer_manager.UpdateBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER, 0,
-                              sizeof(ObjTrans), &obj_trans);
+    sizeof(ObjTrans), &obj_trans);
   // Cube
   buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER,
-                              0 * cube_vertices_mem_sz, cube_vertices_mem_sz,
-                              cube_vertices.data());
+    0 * cube_vertices_mem_sz, cube_vertices_mem_sz,
+    cube_vertices.data());
   buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER,
-                              1 * cube_vertices_mem_sz, cube_vertices_mem_sz,
-                              cube_colors.data());
+    1 * cube_vertices_mem_sz, cube_vertices_mem_sz,
+    cube_colors.data());
   // Cylinder
   buffer_manager.UpdateBuffer(
-      "cylinder_buffer", GL_ARRAY_BUFFER, 0 * cylinder_vertices_mem_sz,
-      cylinder_vertices_mem_sz, cylinder_vertices.data());
+    "cylinder_buffer", GL_ARRAY_BUFFER, 0 * cylinder_vertices_mem_sz,
+    cylinder_vertices_mem_sz, cylinder_vertices.data());
   buffer_manager.UpdateBuffer("cylinder_buffer", GL_ARRAY_BUFFER,
-                              1 * cylinder_vertices_mem_sz,
-                              cylinder_vertices_mem_sz, cylinder_colors.data());
+    1 * cylinder_vertices_mem_sz,
+    cylinder_vertices_mem_sz, cylinder_colors.data());
   // Sphere
   buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER,
-                              0 * sphere_vertices_mem_sz,
-                              sphere_vertices_mem_sz, sphere_vertices.data());
+    0 * sphere_vertices_mem_sz,
+    sphere_vertices_mem_sz, sphere_vertices.data());
   buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER,
-                              1 * sphere_vertices_mem_sz,
-                              sphere_vertices_mem_sz, sphere_colors.data());
+    1 * sphere_vertices_mem_sz,
+    sphere_vertices_mem_sz, sphere_colors.data());
 
   /* Bind uniform blocks to buffers */
   // Global MVP
@@ -357,39 +357,39 @@ void ConfigGL() {
   /* Bind vertex arrays to buffers */
   // Cube
   vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 0, 3, GL_FLOAT, GL_FALSE,
-                                            0);
+    0);
   vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 1, 3, GL_FLOAT, GL_FALSE,
-                                            0);
+    0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cube_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cube_va", 1, 1);
   vertex_spec_manager.BindBufferToBindingPoint("cube_va", "cube_buffer", 0, 0,
-                                               sizeof(glm::vec3));
+    sizeof(glm::vec3));
   vertex_spec_manager.BindBufferToBindingPoint(
-      "cube_va", "cube_buffer", 1, cube_vertices_mem_sz, sizeof(glm::vec3));
+    "cube_va", "cube_buffer", 1, cube_vertices_mem_sz, sizeof(glm::vec3));
   // Cylinder
   vertex_spec_manager.SpecifyVertexArrayOrg("cylinder_va", 0, 3, GL_FLOAT,
-                                            GL_FALSE, 0);
+    GL_FALSE, 0);
   vertex_spec_manager.SpecifyVertexArrayOrg("cylinder_va", 1, 3, GL_FLOAT,
-                                            GL_FALSE, 0);
+    GL_FALSE, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cylinder_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cylinder_va", 1, 1);
   vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer",
-                                               0, 0, sizeof(glm::vec3));
+    0, 0, sizeof(glm::vec3));
   vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer",
-                                               1, cylinder_vertices_mem_sz,
-                                               sizeof(glm::vec3));
+    1, cylinder_vertices_mem_sz,
+    sizeof(glm::vec3));
   // Sphere
   vertex_spec_manager.SpecifyVertexArrayOrg("sphere_va", 0, 3, GL_FLOAT,
-                                            GL_FALSE, 0);
+    GL_FALSE, 0);
   vertex_spec_manager.SpecifyVertexArrayOrg("sphere_va", 1, 3, GL_FLOAT,
-                                            GL_FALSE, 0);
+    GL_FALSE, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("sphere_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("sphere_va", 1, 1);
   vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 0,
-                                               0, sizeof(glm::vec3));
+    0, sizeof(glm::vec3));
   vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 1,
-                                               sphere_vertices_mem_sz,
-                                               sizeof(glm::vec3));
+    sphere_vertices_mem_sz,
+    sizeof(glm::vec3));
 }
 
 void GLUTDisplayCallback() {
@@ -407,7 +407,7 @@ void GLUTDisplayCallback() {
   /* Draw vertex arrays */
   // Torso
   torso_trans.rotate_angle =
-      static_cast<float>(0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+    static_cast<float>(0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTrans();
   obj_trans.color = torso_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
@@ -415,7 +415,7 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
   // Head
   head_trans.translate.x =
-      static_cast<float>(-0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+    static_cast<float>(-0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() * head_trans.GetTrans();
   obj_trans.color = head_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
@@ -423,76 +423,76 @@ void GLUTDisplayCallback() {
   glDrawArrays(GL_TRIANGLES, 0, sphere_vertices.size());
   // L1 arm
   l1_arm_trans.rotate_angle =
-      static_cast<float>(0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+    static_cast<float>(0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
-      torso_trans.GetTransWithoutScale() * l1_arm_trans.GetTrans();
+    torso_trans.GetTransWithoutScale() * l1_arm_trans.GetTrans();
   obj_trans.color = l1_arm_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // L2 arm
   l2_arm_trans.rotate_angle =
-      static_cast<float>(0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+    static_cast<float>(0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() *
-                    l1_arm_trans.GetTransWithoutScale() *
-                    l2_arm_trans.GetTrans();
+    l1_arm_trans.GetTransWithoutScale() *
+    l2_arm_trans.GetTrans();
   obj_trans.color = l2_arm_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R1 arm
   r1_arm_trans.rotate_angle =
-      static_cast<float>(0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+    static_cast<float>(0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
-      torso_trans.GetTransWithoutScale() * r1_arm_trans.GetTrans();
+    torso_trans.GetTransWithoutScale() * r1_arm_trans.GetTrans();
   obj_trans.color = r1_arm_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R2 arm
   r2_arm_trans.rotate_angle =
-      static_cast<float>(0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+    static_cast<float>(0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() *
-                    r1_arm_trans.GetTransWithoutScale() *
-                    r2_arm_trans.GetTrans();
+    r1_arm_trans.GetTransWithoutScale() *
+    r2_arm_trans.GetTrans();
   obj_trans.color = r2_arm_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // L1 leg
   l1_leg_trans.rotate_angle =
-      static_cast<float>(-0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+    static_cast<float>(-0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
-      torso_trans.GetTransWithoutScale() * l1_leg_trans.GetTrans();
+    torso_trans.GetTransWithoutScale() * l1_leg_trans.GetTrans();
   obj_trans.color = l1_leg_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // L2 leg
   l2_leg_trans.rotate_angle =
-      static_cast<float>(-0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+    static_cast<float>(-0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() *
-                    l1_leg_trans.GetTransWithoutScale() *
-                    l2_leg_trans.GetTrans();
+    l1_leg_trans.GetTransWithoutScale() *
+    l2_leg_trans.GetTrans();
   obj_trans.color = l2_leg_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R1 leg
   r1_leg_trans.rotate_angle =
-      static_cast<float>(-0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+    static_cast<float>(-0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans =
-      torso_trans.GetTransWithoutScale() * r1_leg_trans.GetTrans();
+    torso_trans.GetTransWithoutScale() * r1_leg_trans.GetTrans();
   obj_trans.color = r1_leg_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R2 leg
   r2_leg_trans.rotate_angle =
-      static_cast<float>(-0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+    static_cast<float>(-0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
   obj_trans.trans = torso_trans.GetTransWithoutScale() *
-                    r1_leg_trans.GetTransWithoutScale() *
-                    r2_leg_trans.GetTrans();
+    r1_leg_trans.GetTransWithoutScale() *
+    r2_leg_trans.GetTrans();
   obj_trans.color = r2_leg_trans.GetColor();
   buffer_manager.UpdateBuffer("obj_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
@@ -513,14 +513,14 @@ void GLUTReshapeCallback(int width, int height) {
 void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   pressed_keys[key] = true;
   switch (key) {
-    case 'r':
-      // Reset camera transformation
-      camera_trans.ResetTrans();
-      UpdateGlobalMvp();
-      break;
-    case 27:  // Escape
-      glutLeaveMainLoop();
-      break;
+  case 'r':
+    // Reset camera transformation
+    camera_trans.ResetTrans();
+    UpdateGlobalMvp();
+    break;
+  case 27:  // Escape
+    glutLeaveMainLoop();
+    break;
   }
 }
 
@@ -530,18 +530,18 @@ void GLUTKeyboardUpCallback(unsigned char key, int x, int y) {
 
 void GLUTSpecialCallback(int key, int x, int y) {
   switch (key) {
-    case GLUT_KEY_F1:
-      printf("F1 is pressed at (%d, %d)\n", x, y);
-      break;
-    case GLUT_KEY_PAGE_UP:
-      printf("Page up is pressed at (%d, %d)\n", x, y);
-      break;
-    case GLUT_KEY_LEFT:
-      printf("Left arrow is pressed at (%d, %d)\n", x, y);
-      break;
-    default:
-      printf("Other special key is pressed at (%d, %d)\n", x, y);
-      break;
+  case GLUT_KEY_F1:
+    printf("F1 is pressed at (%d, %d)\n", x, y);
+    break;
+  case GLUT_KEY_PAGE_UP:
+    printf("Page up is pressed at (%d, %d)\n", x, y);
+    break;
+  case GLUT_KEY_LEFT:
+    printf("Left arrow is pressed at (%d, %d)\n", x, y);
+    break;
+  default:
+    printf("Other special key is pressed at (%d, %d)\n", x, y);
+    break;
   }
 }
 
@@ -551,7 +551,8 @@ void GLUTMouseCallback(int button, int state, int x, int y) {
       last_mouse_pos = glm::vec2(x, y);
       camera_rotating = true;
     }
-  } else if (state == GLUT_UP) {
+  }
+  else if (state == GLUT_UP) {
     camera_rotating = false;
   }
 }
@@ -559,7 +560,8 @@ void GLUTMouseCallback(int button, int state, int x, int y) {
 void GLUTMouseWheelCallback(int button, int dir, int x, int y) {
   if (dir > 0) {
     camera_trans.AddEye(CAMERA_ZOOMING_STEP * glm::vec3(0.0f, 0.0f, -1.0f));
-  } else {
+  }
+  else {
     camera_trans.AddEye(CAMERA_ZOOMING_STEP * glm::vec3(0.0f, 0.0f, 1.0f));
   }
 }
@@ -569,7 +571,7 @@ void GLUTMotionCallback(int x, int y) {
     const glm::vec2 mouse_pos = glm::vec2(x, y);
     const glm::vec2 diff = mouse_pos - last_mouse_pos;
     camera_trans.AddAngle(CAMERA_ROTATION_SENSITIVITY *
-                          glm::vec3(diff.y, diff.x, 0.0f));
+      glm::vec3(diff.y, diff.x, 0.0f));
     last_mouse_pos = mouse_pos;
   }
 }
@@ -604,32 +606,32 @@ void GLUTTimerCallback(int val) {
 
 void GLUTMainMenuCallback(int id) {
   switch (id) {
-    case 2:
-      glutChangeToMenuEntry(2, "New Label", 2);
-      break;
-    case 3:
-      glutLeaveMainLoop();
-      break;
-    default:
-      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
-                               "'");
+  case 2:
+    glutChangeToMenuEntry(2, "New Label", 2);
+    break;
+  case 3:
+    glutLeaveMainLoop();
+    break;
+  default:
+    throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
+      "'");
   }
 }
 
 void GLUTTimerMenuCallback(int id) {
   switch (id) {
-    case 1:
-      if (!timer_enabled) {
-        timer_enabled = true;
-        glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
-      }
-      break;
-    case 2:
-      timer_enabled = false;
-      break;
-    default:
-      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
-                               "'");
+  case 1:
+    if (!timer_enabled) {
+      timer_enabled = true;
+      glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
+    }
+    break;
+  case 2:
+    timer_enabled = false;
+    break;
+  default:
+    throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
+      "'");
   }
 }
 
@@ -677,7 +679,8 @@ int main(int argc, char *argv[]) {
     RegisterGLUTCallbacks();
     CreateGLUTMenus();
     EnterGLUTLoop();
-  } catch (const std::exception &ex) {
+  }
+  catch (const std::exception &ex) {
     std::cerr << "Exception: " << ex.what() << std::endl;
     return 1;
   }

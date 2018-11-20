@@ -113,8 +113,16 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
     <ClCompile Include="..\src\gl\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\fragment.fs.glsl" />
-    <None Include="assets\vertex.vs.glsl" />
+    <CopyFileToFolders Include="assets\shaders\fragment.frag">
+      <FileType>Document</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/shaders</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\vertex.vert">
+      <FileType>Document</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/shaders</DestinationFolders>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\as\gl\buffer.hpp" />

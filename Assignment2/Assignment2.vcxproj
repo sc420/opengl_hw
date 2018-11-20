@@ -89,6 +89,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
@@ -112,6 +113,9 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
     <PostBuildEvent>
       <Message>Copy dependencies to output directory</Message>
     </PostBuildEvent>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -147,8 +151,16 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\fragment.fs.glsl" />
-    <None Include="assets\vertex.vs.glsl" />
+    <CopyFileToFolders Include="assets\shaders\fragment.frag">
+      <FileType>Document</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/shaders</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\vertex.vert">
+      <FileType>Document</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/shaders</DestinationFolders>
+    </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

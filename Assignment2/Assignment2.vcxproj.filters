@@ -30,11 +30,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\fragment.fs.glsl">
-      <Filter>assets</Filter>
+    <None Include="assets\fragment.frag">
+      <Filter>assets\shaders</Filter>
     </None>
-    <None Include="assets\vertex.vs.glsl">
-      <Filter>assets</Filter>
+    <None Include="assets\vertex.vert">
+      <Filter>assets\shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +58,9 @@
     </Filter>
     <Filter Include="src\trans">
       <UniqueIdentifier>{5406f30e-c62b-4d43-b914-56d5cad59dea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets\shaders">
+      <UniqueIdentifier>{e403d4b1-ff84-4e9e-80d1-2e6e09e0ad55}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

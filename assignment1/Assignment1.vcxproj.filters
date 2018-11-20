@@ -30,14 +30,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\fragment.fs.glsl">
-      <Filter>assets</Filter>
-    </None>
-    <None Include="assets\vertex.vs.glsl">
-      <Filter>assets</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="assets">
       <UniqueIdentifier>{9dda94c8-3a6f-4562-90fe-5ceface38c32}</UniqueIdentifier>
     </Filter>
@@ -74,6 +66,9 @@
     <Filter Include="include\as\trans">
       <UniqueIdentifier>{a0615eae-6957-4368-9fb2-a262bc89330a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="assets\shaders">
+      <UniqueIdentifier>{4a8aa88a-0207-4dd4-9e2f-f34d3a505d1c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\as\gl\buffer.hpp">
@@ -103,5 +98,13 @@
     <ClInclude Include="..\include\as\gl\common.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="assets\shaders\fragment.frag">
+      <Filter>assets\shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\vertex.vert">
+      <Filter>assets\shaders</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

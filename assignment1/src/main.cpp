@@ -201,15 +201,15 @@ void InitObjectTransformation() {
 
 void LoadObjects() {
   // Cube
-  as::LoadObjByTinyobj("cube.obj", cube_vertices);
+  as::LoadObjByTinyobj("models/cube.obj", cube_vertices);
   cube_colors.assign(cube_vertices.size(), glm::vec3(1.0f, 0.0f, 0.0f));
   cube_vertices_mem_sz = cube_vertices.size() * sizeof(glm::vec3);
   // Cylinder
-  as::LoadObjByTinyobj("cylinder.obj", cylinder_vertices);
+  as::LoadObjByTinyobj("models/cylinder.obj", cylinder_vertices);
   cylinder_colors.assign(cylinder_vertices.size(), glm::vec3(0.0f, 1.0f, 0.0f));
   cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(glm::vec3);
   // Sphere
-  as::LoadObjByTinyobj("sphere.obj", sphere_vertices);
+  as::LoadObjByTinyobj("models/sphere.obj", sphere_vertices);
   sphere_colors.assign(sphere_vertices.size(), glm::vec3(0.0f, 0.0f, 1.0f));
   sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
 }
@@ -238,7 +238,7 @@ void InitGLEW() {
     std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
     throw std::runtime_error("Could not initialize GLEW");
   }
-  // as::DumpGLInfo();
+  // as::PrintGLContextInfo();
 }
 
 void ConfigGL() {
@@ -257,9 +257,9 @@ void ConfigGL() {
 
   /* Create shaders */
   shader_manager.CreateShader("vertex_shader", GL_VERTEX_SHADER,
-                              "vertex.vs.glsl");
+                              "shaders/vertex.vert");
   shader_manager.CreateShader("fragment_shader", GL_FRAGMENT_SHADER,
-                              "fragment.fs.glsl");
+                              "shaders/fragment.frag");
 
   /* Create programs */
   program_manager.CreateProgram("program");

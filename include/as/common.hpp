@@ -25,7 +25,7 @@
 // OpenGL loading library
 #include <glew/glew.h>
 
-// Crossplatform windowing and keyboard/mouse handler
+// Cross-platform windowing and keyboard/mouse handler
 #include <freeglut/freeglut.h>
 
 // Cross-platform C++ mathematics library
@@ -49,7 +49,8 @@ typedef struct _texture_data {
 
 texture_data load_png(const char* path);
 
-void DumpGLInfo(void);
+void PrintGLContextInfo(const bool print_entensions = false,
+                        const bool print_supported_glsl_versions = false);
 
 void EnableCatchingGLError();
 }  // namespace as
