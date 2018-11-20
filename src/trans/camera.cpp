@@ -10,7 +10,7 @@ as::CameraTrans::CameraTrans(const glm::vec3 &init_pos,
 glm::mat4 as::CameraTrans::GetTrans() const {
   const glm::mat4 identity(1.0f);
   // Calculate rotation
-  const glm::mat4 rotate = GetRotateMatrix();
+  const glm::mat4 rotate = GetRotationMatrix();
   // Calculate translation
   const glm::mat4 translate = glm::translate(identity, -1.0f * eye_);
   // Return transformation matrix
@@ -22,7 +22,7 @@ void as::CameraTrans::AddEyeAxisAligned(const glm::vec3 &add_pos) {
 }
 
 void as::CameraTrans::AddEye(const glm::vec3 &add_dir) {
-  const glm::mat4 rotate = GetRotateMatrix();
+  const glm::mat4 rotate = GetRotationMatrix();
   const glm::vec4 rotated_add_dir =
       glm::transpose(rotate) * glm::vec4(add_dir, 1.0f);
   eye_ += glm::vec3(rotated_add_dir);
@@ -47,7 +47,7 @@ void as::CameraTrans::ResetTrans() {
   angle_ = init_angle_;
 }
 
-glm::mat4 as::CameraTrans::GetRotateMatrix() const {
+glm::mat4 as::CameraTrans::GetRotationMatrix() const {
   const glm::quat pitch = glm::angleAxis(angle_.x, glm::vec3(1.0f, 0.0f, 0.0f));
   const glm::quat yaw = glm::angleAxis(angle_.y, glm::vec3(0.0f, 1.0f, 0.0f));
   const glm::quat roll = glm::angleAxis(angle_.z, glm::vec3(0.0f, 0.0f, 1.0f));

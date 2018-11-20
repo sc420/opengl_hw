@@ -30,6 +30,6 @@ class CameraTrans {
   // (x, y, z) = (pitch, yaw, roll)
   glm::vec3 angle_;
 
-  glm::mat4 GetRotateMatrix() const;
+  glm::mat4 GetRotationMatrix() const;
 };
 }  // namespace as
