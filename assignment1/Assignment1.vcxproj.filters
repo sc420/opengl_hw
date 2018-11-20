@@ -100,5 +100,8 @@
     <ClInclude Include="..\include\as\common.hpp">
       <Filter>include\as</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\gl\common.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

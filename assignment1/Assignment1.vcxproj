@@ -119,6 +119,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)"</Command>
   <ItemGroup>
     <ClInclude Include="..\include\as\gl\buffer.hpp" />
     <ClInclude Include="..\include\as\common.hpp" />
+    <ClInclude Include="..\include\as\gl\common.hpp" />
     <ClInclude Include="..\include\as\model\loader.hpp" />
     <ClInclude Include="..\include\as\gl\program.hpp" />
     <ClInclude Include="..\include\as\gl\shader.hpp" />

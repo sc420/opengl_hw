@@ -1,9 +1,5 @@
 #include "as/common.hpp"
-#include "as/gl/buffer.hpp"
-#include "as/gl/program.hpp"
-#include "as/gl/shader.hpp"
-#include "as/gl/uniform.hpp"
-#include "as/gl/vertex_spec.hpp"
+#include "as/gl/common.hpp"
 #include "as/model/loader.hpp"
 #include "as/trans/camera.hpp"
 
