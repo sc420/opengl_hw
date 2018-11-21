@@ -250,16 +250,21 @@ void InitModelTransformation() {
 }
 
 void LoadModels() {
+  std::vector<glm::vec3> normals;
+  std::vector<glm::vec2> tex_coords;
   // Cube
-  as::LoadModelByTinyobj("assets/models/cube.obj", cube_vertices);
+  as::LoadModelByTinyobj("assets/models/cube.obj", cube_vertices, normals,
+                         tex_coords);
   cube_colors.assign(cube_vertices.size(), glm::vec3(1.0f, 0.0f, 0.0f));
   cube_vertices_mem_sz = cube_vertices.size() * sizeof(glm::vec3);
   // Cylinder
-  as::LoadModelByTinyobj("assets/models/cylinder.obj", cylinder_vertices);
+  as::LoadModelByTinyobj("assets/models/cylinder.obj", cylinder_vertices,
+                         normals, tex_coords);
   cylinder_colors.assign(cylinder_vertices.size(), glm::vec3(0.0f, 1.0f, 0.0f));
   cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(glm::vec3);
   // Sphere
-  as::LoadModelByTinyobj("assets/models/sphere.obj", sphere_vertices);
+  as::LoadModelByTinyobj("assets/models/sphere.obj", sphere_vertices, normals,
+                         tex_coords);
   sphere_colors.assign(sphere_vertices.size(), glm::vec3(0.0f, 0.0f, 1.0f));
   sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
 }
