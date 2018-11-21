@@ -141,17 +141,20 @@ Textures textures;
  * Models
  ******************************************************************************/
 
+// Vertex declaration
+struct Vertex {
+  glm::vec3 pos;
+  glm::vec3 color;
+};
+
 // Cube
-std::vector<glm::vec3> cube_vertices;
-std::vector<glm::vec3> cube_colors;
+std::vector<Vertex> cube_vertices;
 size_t cube_vertices_mem_sz;
 // Cylinder
-std::vector<glm::vec3> cylinder_vertices;
-std::vector<glm::vec3> cylinder_colors;
+std::vector<Vertex> cylinder_vertices;
 size_t cylinder_vertices_mem_sz;
 // Sphere
-std::vector<glm::vec3> sphere_vertices;
-std::vector<glm::vec3> sphere_colors;
+std::vector<Vertex> sphere_vertices;
 size_t sphere_vertices_mem_sz;
 
 /*******************************************************************************
@@ -250,23 +253,36 @@ void InitModelTransformation() {
 }
 
 void LoadModels() {
+  std::vector<glm::vec3> positions;
   std::vector<glm::vec3> normals;
   std::vector<glm::vec2> tex_coords;
   // Cube
-  as::LoadModelByTinyobj("assets/models/cube.obj", cube_vertices, normals,
+  as::LoadModelByTinyobj("assets/models/cube.obj", positions, normals,
                          tex_coords);
-  cube_colors.assign(cube_vertices.size(), glm::vec3(1.0f, 0.0f, 0.0f));
-  cube_vertices_mem_sz = cube_vertices.size() * sizeof(glm::vec3);
+  cube_vertices.clear();
+  for (const glm::vec3 pos : positions) {
+    Vertex vertex = {pos, glm::vec3(1.0f, 0.0f, 0.0f)};
+    cube_vertices.push_back(vertex);
+  }
+  cube_vertices_mem_sz = cube_vertices.size() * sizeof(Vertex);
   // Cylinder
-  as::LoadModelByTinyobj("assets/models/cylinder.obj", cylinder_vertices,
-                         normals, tex_coords);
-  cylinder_colors.assign(cylinder_vertices.size(), glm::vec3(0.0f, 1.0f, 0.0f));
-  cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(glm::vec3);
-  // Sphere
-  as::LoadModelByTinyobj("assets/models/sphere.obj", sphere_vertices, normals,
+  as::LoadModelByTinyobj("assets/models/cylinder.obj", positions, normals,
                          tex_coords);
-  sphere_colors.assign(sphere_vertices.size(), glm::vec3(0.0f, 0.0f, 1.0f));
-  sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
+  cylinder_vertices.clear();
+  for (const glm::vec3 pos : positions) {
+    Vertex vertex = {pos, glm::vec3(0.0f, 1.0f, 0.0f)};
+    cylinder_vertices.push_back(vertex);
+  }
+  cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(Vertex);
+  // Sphere
+  as::LoadModelByTinyobj("assets/models/sphere.obj", positions, normals,
+                         tex_coords);
+  sphere_vertices.clear();
+  for (const glm::vec3 pos : positions) {
+    Vertex vertex = {pos, glm::vec3(0.0f, 0.0f, 1.0f)};
+    sphere_vertices.push_back(vertex);
+  }
+  sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(Vertex);
 }
 
 void LoadTextures() {
@@ -359,13 +375,13 @@ void ConfigGL() {
                             sizeof(ModelTrans), NULL, GL_STATIC_DRAW);
   // Cube
   buffer_manager.InitBuffer("cube_buffer", GL_ARRAY_BUFFER,
-                            2 * cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+                            cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
   // Cylinder
   buffer_manager.InitBuffer("cylinder_buffer", GL_ARRAY_BUFFER,
-                            2 * cylinder_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+                            cylinder_vertices_mem_sz, NULL, GL_STATIC_DRAW);
   // Sphere
   buffer_manager.InitBuffer("sphere_buffer", GL_ARRAY_BUFFER,
-                            2 * sphere_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+                            sphere_vertices_mem_sz, NULL, GL_STATIC_DRAW);
 
   /* Initialize textures */
   // Metal
@@ -380,26 +396,15 @@ void ConfigGL() {
   buffer_manager.UpdateBuffer("model_trans_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(ModelTrans), &model_trans);
   // Cube
-  buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER,
-                              0 * cube_vertices_mem_sz, cube_vertices_mem_sz,
-                              cube_vertices.data());
-  buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER,
-                              1 * cube_vertices_mem_sz, cube_vertices_mem_sz,
-                              cube_colors.data());
+  buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER, 0,
+                              cube_vertices_mem_sz, cube_vertices.data());
   // Cylinder
-  buffer_manager.UpdateBuffer(
-      "cylinder_buffer", GL_ARRAY_BUFFER, 0 * cylinder_vertices_mem_sz,
-      cylinder_vertices_mem_sz, cylinder_vertices.data());
-  buffer_manager.UpdateBuffer("cylinder_buffer", GL_ARRAY_BUFFER,
-                              1 * cylinder_vertices_mem_sz,
-                              cylinder_vertices_mem_sz, cylinder_colors.data());
+  buffer_manager.UpdateBuffer("cylinder_buffer", GL_ARRAY_BUFFER, 0,
+                              cylinder_vertices_mem_sz,
+                              cylinder_vertices.data());
   // Sphere
-  buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER,
-                              0 * sphere_vertices_mem_sz,
+  buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER, 0,
                               sphere_vertices_mem_sz, sphere_vertices.data());
-  buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER,
-                              1 * sphere_vertices_mem_sz,
-                              sphere_vertices_mem_sz, sphere_colors.data());
 
   /* Update textures */
   // Metal
@@ -424,10 +429,10 @@ void ConfigGL() {
                                             0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cube_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cube_va", 1, 1);
-  vertex_spec_manager.BindBufferToBindingPoint("cube_va", "cube_buffer", 0, 0,
-                                               sizeof(glm::vec3));
   vertex_spec_manager.BindBufferToBindingPoint(
-      "cube_va", "cube_buffer", 1, cube_vertices_mem_sz, sizeof(glm::vec3));
+      "cube_va", "cube_buffer", 0, offsetof(Vertex, pos), sizeof(Vertex));
+  vertex_spec_manager.BindBufferToBindingPoint(
+      "cube_va", "cube_buffer", 1, offsetof(Vertex, color), sizeof(Vertex));
   // Cylinder
   vertex_spec_manager.SpecifyVertexArrayOrg("cylinder_va", 0, 3, GL_FLOAT,
                                             GL_FALSE, 0);
@@ -436,10 +441,11 @@ void ConfigGL() {
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cylinder_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cylinder_va", 1, 1);
   vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer",
-                                               0, 0, sizeof(glm::vec3));
+                                               0, offsetof(Vertex, pos),
+                                               sizeof(Vertex));
   vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer",
-                                               1, cylinder_vertices_mem_sz,
-                                               sizeof(glm::vec3));
+                                               1, offsetof(Vertex, color),
+                                               sizeof(Vertex));
   // Sphere
   vertex_spec_manager.SpecifyVertexArrayOrg("sphere_va", 0, 3, GL_FLOAT,
                                             GL_FALSE, 0);
@@ -447,11 +453,10 @@ void ConfigGL() {
                                             GL_FALSE, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("sphere_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("sphere_va", 1, 1);
-  vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 0,
-                                               0, sizeof(glm::vec3));
-  vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 1,
-                                               sphere_vertices_mem_sz,
-                                               sizeof(glm::vec3));
+  vertex_spec_manager.BindBufferToBindingPoint(
+      "sphere_va", "sphere_buffer", 0, offsetof(Vertex, pos), sizeof(Vertex));
+  vertex_spec_manager.BindBufferToBindingPoint(
+      "sphere_va", "sphere_buffer", 1, offsetof(Vertex, color), sizeof(Vertex));
 }
 
 /*******************************************************************************
