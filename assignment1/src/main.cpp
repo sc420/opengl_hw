@@ -410,10 +410,10 @@ void ConfigGL() {
 
   /* Bind uniform blocks to buffers */
   // Global MVP
-  uniform_manager.AssignUniformBlockToBindingPoint("program", "global_mvp", 0);
+  uniform_manager.AssignUniformBlockToBindingPoint("program", "GlobalMvp", 0);
   uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
   // Model transformation
-  uniform_manager.AssignUniformBlockToBindingPoint("program", "model_trans", 1);
+  uniform_manager.AssignUniformBlockToBindingPoint("program", "ModelTrans", 1);
   uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
 
   /* Bind vertex arrays to buffers */
