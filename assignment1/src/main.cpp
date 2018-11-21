@@ -21,6 +21,7 @@ constexpr auto ROBOT_MOVEMENT_STEP = 0.05f;
 as::BufferManager buffer_manager;
 as::ProgramManager program_manager;
 as::ShaderManager shader_manager;
+as::TextureManager texture_manager;
 as::UniformManager uniform_manager;
 as::VertexSpecManager vertex_spec_manager;
 
@@ -35,43 +36,50 @@ bool timer_enabled = true;
  * User Interface States
  ******************************************************************************/
 
- // Window states
+// Window states
 float window_aspect_ratio;
 
 // Keyboard states
-bool pressed_keys[KEYBOARD_KEY_SIZE] = { false };
+bool pressed_keys[KEYBOARD_KEY_SIZE] = {false};
 
 // Mouse states
 bool camera_rotating = false;
 glm::vec2 last_mouse_pos;
 
 /*******************************************************************************
- * Object Transformations (Object states)
+ * Camera States
  ******************************************************************************/
 
- // Body part transformation declaration
+// Camera transformations
+as::CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
+
+/*******************************************************************************
+ * Model States
+ ******************************************************************************/
+
+// Body part transformation declaration
 class BodyPartTrans {
-public:
+ public:
   BodyPartTrans()
-    : pre_translate(glm::vec3(0.0f)),
-    scale(glm::vec3(1.0f)),
-    rotate_angle(0.0f),
-    rotate_axis(glm::vec3(1.0f, 0.0f, 0.0f)),
-    translate(glm::vec3(0.0f)) {}
+      : pre_translate(glm::vec3(0.0f)),
+        scale(glm::vec3(1.0f)),
+        rotate_angle(0.0f),
+        rotate_axis(glm::vec3(1.0f, 0.0f, 0.0f)),
+        translate(glm::vec3(0.0f)) {}
 
   glm::mat4 GetTrans() const {
     const glm::mat4 identity(1.0f);
     return glm::translate(identity, translate) *
-      glm::rotate(identity, rotate_angle, rotate_axis) *
-      glm::scale(identity, scale) *
-      glm::translate(identity, pre_translate);
+           glm::rotate(identity, rotate_angle, rotate_axis) *
+           glm::scale(identity, scale) *
+           glm::translate(identity, pre_translate);
   }
 
   glm::mat4 GetTransWithoutScale() const {
     const glm::mat4 identity(1.0f);
     return glm::translate(identity, translate) *
-      glm::rotate(identity, rotate_angle, rotate_axis) *
-      glm::translate(identity, pre_translate);
+           glm::rotate(identity, rotate_angle, rotate_axis) *
+           glm::translate(identity, pre_translate);
   }
 
   glm::vec3 GetColor() const { return color; }
@@ -86,9 +94,6 @@ public:
   glm::vec3 color;
 };
 
-// Camera transformations
-as::CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 15.0f), glm::vec3(0.0f));
-
 // Body part transformations
 BodyPartTrans torso_trans;
 BodyPartTrans head_trans;
@@ -102,33 +107,41 @@ BodyPartTrans r1_leg_trans;
 BodyPartTrans r2_leg_trans;
 
 /*******************************************************************************
- * GL Transformations (Feed to GL)
+ * GL States (Feed to GL)
  ******************************************************************************/
 
- // Global MVP declaration
+// Global MVP declaration
 struct GlobalMvp {
   glm::mat4 model;
   glm::mat4 view;
   glm::mat4 proj;
 };
 
-// Object transformation declaration
-struct ObjTrans {
+// Model transformation declaration
+struct ModelTrans {
   glm::mat4 trans;
   glm::vec3 color;
+};
+
+// Texture declaration
+struct Textures {
+  GLint tex_hdlr;
 };
 
 // Global MVP
 GlobalMvp global_mvp;
 
-// Object transformations
-ObjTrans obj_trans;
+// Model transformations
+ModelTrans model_trans;
+
+// Textures
+Textures textures;
 
 /*******************************************************************************
- * Objects
+ * Models
  ******************************************************************************/
 
- // Cube
+// Cube
 std::vector<glm::vec3> cube_vertices;
 std::vector<glm::vec3> cube_colors;
 size_t cube_vertices_mem_sz;
@@ -140,6 +153,15 @@ size_t cylinder_vertices_mem_sz;
 std::vector<glm::vec3> sphere_vertices;
 std::vector<glm::vec3> sphere_colors;
 size_t sphere_vertices_mem_sz;
+
+/*******************************************************************************
+ * Textures
+ ******************************************************************************/
+
+// Metal
+std::vector<GLubyte> metal_texels;
+GLsizei metal_width;
+GLsizei metal_height;
 
 /*******************************************************************************
  * GL Initialization Methods
@@ -168,7 +190,7 @@ void InitGLEW() {
  * Model Handlers
  ******************************************************************************/
 
-void InitObjectTransformation() {
+void InitModelTransformation() {
   // Torso
   torso_trans.rotate_axis = glm::vec3(0.0f, 0.0f, 1.0f);
   torso_trans.scale = glm::vec3(2.0f, 2.5f, 1.0f);
@@ -227,19 +249,26 @@ void InitObjectTransformation() {
   r2_leg_trans.color = glm::vec3(0.0f, 0.5f, 0.5f);
 }
 
-void LoadObjects() {
+void LoadModels() {
   // Cube
-  as::LoadObjByTinyobj("assets/models/cube.obj", cube_vertices);
+  as::LoadModelByTinyobj("assets/models/cube.obj", cube_vertices);
   cube_colors.assign(cube_vertices.size(), glm::vec3(1.0f, 0.0f, 0.0f));
   cube_vertices_mem_sz = cube_vertices.size() * sizeof(glm::vec3);
   // Cylinder
-  as::LoadObjByTinyobj("assets/models/cylinder.obj", cylinder_vertices);
+  as::LoadModelByTinyobj("assets/models/cylinder.obj", cylinder_vertices);
   cylinder_colors.assign(cylinder_vertices.size(), glm::vec3(0.0f, 1.0f, 0.0f));
   cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(glm::vec3);
   // Sphere
-  as::LoadObjByTinyobj("assets/models/sphere.obj", sphere_vertices);
+  as::LoadModelByTinyobj("assets/models/sphere.obj", sphere_vertices);
   sphere_colors.assign(sphere_vertices.size(), glm::vec3(0.0f, 0.0f, 1.0f));
   sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
+}
+
+void LoadTextures() {
+  int comp;
+  // Metal
+  as::LoadTextureByStb("assets/textures/metal.png", 4, metal_width,
+                       metal_height, comp, metal_texels);
 }
 
 /*******************************************************************************
@@ -254,6 +283,9 @@ void ConfigGL() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 
+  /* Initialize managers */
+  texture_manager.Init();
+
   /* Register managers */
   program_manager.RegisterShaderManager(shader_manager);
   uniform_manager.RegisterProgramManager(program_manager);
@@ -262,9 +294,9 @@ void ConfigGL() {
 
   /* Create shaders */
   shader_manager.CreateShader("vertex_shader", GL_VERTEX_SHADER,
-    "assets/shaders/vertex.vert");
+                              "assets/shaders/vertex.vert");
   shader_manager.CreateShader("fragment_shader", GL_FRAGMENT_SHADER,
-    "assets/shaders/fragment.frag");
+                              "assets/shaders/fragment.frag");
 
   /* Create programs */
   program_manager.CreateProgram("program");
@@ -276,8 +308,8 @@ void ConfigGL() {
   /* Create buffers */
   // Global MVP
   buffer_manager.GenBuffer("global_mvp_buffer");
-  // Object transformation
-  buffer_manager.GenBuffer("obj_trans_buffer");
+  // Model transformation
+  buffer_manager.GenBuffer("model_trans_buffer");
   // Cube
   buffer_manager.GenBuffer("cube_buffer");
   // Cylinder
@@ -293,11 +325,15 @@ void ConfigGL() {
   // Sphere
   vertex_spec_manager.GenVertexArray("sphere_va");
 
+  /* Create textures */
+  // Metal
+  texture_manager.GenTexture("metal_tex");
+
   /* Bind buffer targets to be repeatedly used later */
   // Global MVP
   buffer_manager.BindBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER);
-  // Object transformation
-  buffer_manager.BindBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER);
+  // Model transformation
+  buffer_manager.BindBuffer("model_trans_buffer", GL_UNIFORM_BUFFER);
   // Cube
   buffer_manager.BindBuffer("cube_buffer", GL_ARRAY_BUFFER);
   // Cylinder
@@ -305,109 +341,127 @@ void ConfigGL() {
   // Sphere
   buffer_manager.BindBuffer("sphere_buffer", GL_ARRAY_BUFFER);
 
+  /* Bind textures to be repeatedly used later */
+  // Metal
+  texture_manager.BindTexture("metal_tex", GL_TEXTURE_2D, 0);
+
   /* Initialize buffers */
   // Global MVP
   buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER,
-    sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
-  // Object transformation
-  buffer_manager.InitBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER,
-    sizeof(ObjTrans), NULL, GL_STATIC_DRAW);
+                            sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
+  // Model transformation
+  buffer_manager.InitBuffer("model_trans_buffer", GL_UNIFORM_BUFFER,
+                            sizeof(ModelTrans), NULL, GL_STATIC_DRAW);
   // Cube
   buffer_manager.InitBuffer("cube_buffer", GL_ARRAY_BUFFER,
-    2 * cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+                            2 * cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
   // Cylinder
   buffer_manager.InitBuffer("cylinder_buffer", GL_ARRAY_BUFFER,
-    2 * cylinder_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+                            2 * cylinder_vertices_mem_sz, NULL, GL_STATIC_DRAW);
   // Sphere
   buffer_manager.InitBuffer("sphere_buffer", GL_ARRAY_BUFFER,
-    2 * sphere_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+                            2 * sphere_vertices_mem_sz, NULL, GL_STATIC_DRAW);
+
+  /* Initialize textures */
+  // Metal
+  texture_manager.InitTexture2D("metal_tex", GL_TEXTURE_2D, 1, GL_RGBA8,
+                                metal_width, metal_height);
 
   /* Update buffers */
   // Global MVP
   buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0,
-    sizeof(GlobalMvp), &global_mvp);
-  // Object transformation
-  buffer_manager.UpdateBuffer("obj_trans_buffer", GL_UNIFORM_BUFFER, 0,
-    sizeof(ObjTrans), &obj_trans);
+                              sizeof(GlobalMvp), &global_mvp);
+  // Model transformation
+  buffer_manager.UpdateBuffer("model_trans_buffer", GL_UNIFORM_BUFFER, 0,
+                              sizeof(ModelTrans), &model_trans);
   // Cube
   buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER,
-    0 * cube_vertices_mem_sz, cube_vertices_mem_sz,
-    cube_vertices.data());
+                              0 * cube_vertices_mem_sz, cube_vertices_mem_sz,
+                              cube_vertices.data());
   buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER,
-    1 * cube_vertices_mem_sz, cube_vertices_mem_sz,
-    cube_colors.data());
+                              1 * cube_vertices_mem_sz, cube_vertices_mem_sz,
+                              cube_colors.data());
   // Cylinder
   buffer_manager.UpdateBuffer(
-    "cylinder_buffer", GL_ARRAY_BUFFER, 0 * cylinder_vertices_mem_sz,
-    cylinder_vertices_mem_sz, cylinder_vertices.data());
+      "cylinder_buffer", GL_ARRAY_BUFFER, 0 * cylinder_vertices_mem_sz,
+      cylinder_vertices_mem_sz, cylinder_vertices.data());
   buffer_manager.UpdateBuffer("cylinder_buffer", GL_ARRAY_BUFFER,
-    1 * cylinder_vertices_mem_sz,
-    cylinder_vertices_mem_sz, cylinder_colors.data());
+                              1 * cylinder_vertices_mem_sz,
+                              cylinder_vertices_mem_sz, cylinder_colors.data());
   // Sphere
   buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER,
-    0 * sphere_vertices_mem_sz,
-    sphere_vertices_mem_sz, sphere_vertices.data());
+                              0 * sphere_vertices_mem_sz,
+                              sphere_vertices_mem_sz, sphere_vertices.data());
   buffer_manager.UpdateBuffer("sphere_buffer", GL_ARRAY_BUFFER,
-    1 * sphere_vertices_mem_sz,
-    sphere_vertices_mem_sz, sphere_colors.data());
+                              1 * sphere_vertices_mem_sz,
+                              sphere_vertices_mem_sz, sphere_colors.data());
+
+  /* Update textures */
+  // Metal
+  texture_manager.UpdateTexture2D("metal_tex", GL_TEXTURE_2D, 0, 0, 0,
+                                  metal_width, metal_height, GL_RGBA,
+                                  GL_UNSIGNED_BYTE, metal_texels.data());
+  texture_manager.GenMipmap("metal_tex", GL_TEXTURE_2D);
 
   /* Bind uniform blocks to buffers */
   // Global MVP
   uniform_manager.AssignUniformBlockToBindingPoint("program", "global_mvp", 0);
   uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
-  // Object transformation
-  uniform_manager.AssignUniformBlockToBindingPoint("program", "obj_trans", 1);
-  uniform_manager.BindBufferBaseToBindingPoint("obj_trans_buffer", 1);
+  // Model transformation
+  uniform_manager.AssignUniformBlockToBindingPoint("program", "model_trans", 1);
+  uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
 
   /* Bind vertex arrays to buffers */
   // Cube
   vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 0, 3, GL_FLOAT, GL_FALSE,
-    0);
+                                            0);
   vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 1, 3, GL_FLOAT, GL_FALSE,
-    0);
+                                            0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cube_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cube_va", 1, 1);
   vertex_spec_manager.BindBufferToBindingPoint("cube_va", "cube_buffer", 0, 0,
-    sizeof(glm::vec3));
+                                               sizeof(glm::vec3));
   vertex_spec_manager.BindBufferToBindingPoint(
-    "cube_va", "cube_buffer", 1, cube_vertices_mem_sz, sizeof(glm::vec3));
+      "cube_va", "cube_buffer", 1, cube_vertices_mem_sz, sizeof(glm::vec3));
   // Cylinder
   vertex_spec_manager.SpecifyVertexArrayOrg("cylinder_va", 0, 3, GL_FLOAT,
-    GL_FALSE, 0);
+                                            GL_FALSE, 0);
   vertex_spec_manager.SpecifyVertexArrayOrg("cylinder_va", 1, 3, GL_FLOAT,
-    GL_FALSE, 0);
+                                            GL_FALSE, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cylinder_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("cylinder_va", 1, 1);
   vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer",
-    0, 0, sizeof(glm::vec3));
+                                               0, 0, sizeof(glm::vec3));
   vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer",
-    1, cylinder_vertices_mem_sz,
-    sizeof(glm::vec3));
+                                               1, cylinder_vertices_mem_sz,
+                                               sizeof(glm::vec3));
   // Sphere
   vertex_spec_manager.SpecifyVertexArrayOrg("sphere_va", 0, 3, GL_FLOAT,
-    GL_FALSE, 0);
+                                            GL_FALSE, 0);
   vertex_spec_manager.SpecifyVertexArrayOrg("sphere_va", 1, 3, GL_FLOAT,
-    GL_FALSE, 0);
+                                            GL_FALSE, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("sphere_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("sphere_va", 1, 1);
   vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 0,
-    0, sizeof(glm::vec3));
+                                               0, sizeof(glm::vec3));
   vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 1,
-    sphere_vertices_mem_sz,
-    sizeof(glm::vec3));
+                                               sphere_vertices_mem_sz,
+                                               sizeof(glm::vec3));
 }
 
 /*******************************************************************************
- * GL Transformation Handling Methods
+ * GL States Handling Methods
  ******************************************************************************/
 
 void UpdateGlobalMvp() {
   const glm::mat4 identity(1.0f);
   global_mvp.proj =
-    glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
+      glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
   global_mvp.view = camera_trans.GetTrans();
   global_mvp.model = identity;
 }
+
+void UpdateTextures() { textures.tex_hdlr = 0; }
 
 /*******************************************************************************
  * GLUT Callbacks
@@ -420,102 +474,108 @@ void GLUTDisplayCallback() {
   /* Use the program */
   program_manager.UseProgram("program");
 
-  /* Update buffers */
+  /* Update GL states */
   // Global MVP
   UpdateGlobalMvp();
   buffer_manager.UpdateBuffer("global_mvp_buffer");
 
+  /* Update textures */
+  // Textures
+  UpdateTextures();
+  uniform_manager.SetUniform1Int("program", "tex_hdlr", textures.tex_hdlr);
+
   /* Draw vertex arrays */
   // Torso
   torso_trans.rotate_angle =
-    static_cast<float>(0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  obj_trans.trans = torso_trans.GetTrans();
-  obj_trans.color = torso_trans.GetColor();
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
+      static_cast<float>(0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  model_trans.trans = torso_trans.GetTrans();
+  model_trans.color = torso_trans.GetColor();
+  buffer_manager.UpdateBuffer("model_trans_buffer");
   vertex_spec_manager.BindVertexArray("cube_va");
   glDrawArrays(GL_TRIANGLES, 0, cube_vertices.size());
   // Head
   head_trans.translate.x =
-    static_cast<float>(-0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  obj_trans.trans = torso_trans.GetTransWithoutScale() * head_trans.GetTrans();
-  obj_trans.color = head_trans.GetColor();
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
+      static_cast<float>(-0.1f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  model_trans.trans =
+      torso_trans.GetTransWithoutScale() * head_trans.GetTrans();
+  model_trans.color = head_trans.GetColor();
+  buffer_manager.UpdateBuffer("model_trans_buffer");
   vertex_spec_manager.BindVertexArray("sphere_va");
   glDrawArrays(GL_TRIANGLES, 0, sphere_vertices.size());
   // L1 arm
   l1_arm_trans.rotate_angle =
-    static_cast<float>(0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  obj_trans.trans =
-    torso_trans.GetTransWithoutScale() * l1_arm_trans.GetTrans();
-  obj_trans.color = l1_arm_trans.GetColor();
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
+      static_cast<float>(0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  model_trans.trans =
+      torso_trans.GetTransWithoutScale() * l1_arm_trans.GetTrans();
+  model_trans.color = l1_arm_trans.GetColor();
+  buffer_manager.UpdateBuffer("model_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // L2 arm
   l2_arm_trans.rotate_angle =
-    static_cast<float>(0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  obj_trans.trans = torso_trans.GetTransWithoutScale() *
-    l1_arm_trans.GetTransWithoutScale() *
-    l2_arm_trans.GetTrans();
-  obj_trans.color = l2_arm_trans.GetColor();
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
+      static_cast<float>(0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  model_trans.trans = torso_trans.GetTransWithoutScale() *
+                      l1_arm_trans.GetTransWithoutScale() *
+                      l2_arm_trans.GetTrans();
+  model_trans.color = l2_arm_trans.GetColor();
+  buffer_manager.UpdateBuffer("model_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R1 arm
   r1_arm_trans.rotate_angle =
-    static_cast<float>(0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  obj_trans.trans =
-    torso_trans.GetTransWithoutScale() * r1_arm_trans.GetTrans();
-  obj_trans.color = r1_arm_trans.GetColor();
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
+      static_cast<float>(0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  model_trans.trans =
+      torso_trans.GetTransWithoutScale() * r1_arm_trans.GetTrans();
+  model_trans.color = r1_arm_trans.GetColor();
+  buffer_manager.UpdateBuffer("model_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R2 arm
   r2_arm_trans.rotate_angle =
-    static_cast<float>(0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  obj_trans.trans = torso_trans.GetTransWithoutScale() *
-    r1_arm_trans.GetTransWithoutScale() *
-    r2_arm_trans.GetTrans();
-  obj_trans.color = r2_arm_trans.GetColor();
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
+      static_cast<float>(0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  model_trans.trans = torso_trans.GetTransWithoutScale() *
+                      r1_arm_trans.GetTransWithoutScale() *
+                      r2_arm_trans.GetTrans();
+  model_trans.color = r2_arm_trans.GetColor();
+  buffer_manager.UpdateBuffer("model_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // L1 leg
   l1_leg_trans.rotate_angle =
-    static_cast<float>(-0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  obj_trans.trans =
-    torso_trans.GetTransWithoutScale() * l1_leg_trans.GetTrans();
-  obj_trans.color = l1_leg_trans.GetColor();
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
+      static_cast<float>(-0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  model_trans.trans =
+      torso_trans.GetTransWithoutScale() * l1_leg_trans.GetTrans();
+  model_trans.color = l1_leg_trans.GetColor();
+  buffer_manager.UpdateBuffer("model_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // L2 leg
   l2_leg_trans.rotate_angle =
-    static_cast<float>(-0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  obj_trans.trans = torso_trans.GetTransWithoutScale() *
-    l1_leg_trans.GetTransWithoutScale() *
-    l2_leg_trans.GetTrans();
-  obj_trans.color = l2_leg_trans.GetColor();
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
+      static_cast<float>(-0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  model_trans.trans = torso_trans.GetTransWithoutScale() *
+                      l1_leg_trans.GetTransWithoutScale() *
+                      l2_leg_trans.GetTrans();
+  model_trans.color = l2_leg_trans.GetColor();
+  buffer_manager.UpdateBuffer("model_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R1 leg
   r1_leg_trans.rotate_angle =
-    static_cast<float>(-0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  obj_trans.trans =
-    torso_trans.GetTransWithoutScale() * r1_leg_trans.GetTrans();
-  obj_trans.color = r1_leg_trans.GetColor();
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
+      static_cast<float>(-0.3f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  model_trans.trans =
+      torso_trans.GetTransWithoutScale() * r1_leg_trans.GetTrans();
+  model_trans.color = r1_leg_trans.GetColor();
+  buffer_manager.UpdateBuffer("model_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
   // R2 leg
   r2_leg_trans.rotate_angle =
-    static_cast<float>(-0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
-  obj_trans.trans = torso_trans.GetTransWithoutScale() *
-    r1_leg_trans.GetTransWithoutScale() *
-    r2_leg_trans.GetTrans();
-  obj_trans.color = r2_leg_trans.GetColor();
-  buffer_manager.UpdateBuffer("obj_trans_buffer");
+      static_cast<float>(-0.5f * sin(ROBOT_MOVEMENT_STEP * timer_cnt));
+  model_trans.trans = torso_trans.GetTransWithoutScale() *
+                      r1_leg_trans.GetTransWithoutScale() *
+                      r2_leg_trans.GetTrans();
+  model_trans.color = r2_leg_trans.GetColor();
+  buffer_manager.UpdateBuffer("model_trans_buffer");
   vertex_spec_manager.BindVertexArray("cylinder_va");
   glDrawArrays(GL_TRIANGLES, 0, cylinder_vertices.size());
 
@@ -534,14 +594,14 @@ void GLUTReshapeCallback(int width, int height) {
 void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   pressed_keys[key] = true;
   switch (key) {
-  case 'r':
-    // Reset camera transformation
-    camera_trans.ResetTrans();
-    UpdateGlobalMvp();
-    break;
-  case 27:  // Escape
-    glutLeaveMainLoop();
-    break;
+    case 'r':
+      // Reset camera transformation
+      camera_trans.ResetTrans();
+      UpdateGlobalMvp();
+      break;
+    case 27:  // Escape
+      glutLeaveMainLoop();
+      break;
   }
 }
 
@@ -551,18 +611,18 @@ void GLUTKeyboardUpCallback(unsigned char key, int x, int y) {
 
 void GLUTSpecialCallback(int key, int x, int y) {
   switch (key) {
-  case GLUT_KEY_F1:
-    printf("F1 is pressed at (%d, %d)\n", x, y);
-    break;
-  case GLUT_KEY_PAGE_UP:
-    printf("Page up is pressed at (%d, %d)\n", x, y);
-    break;
-  case GLUT_KEY_LEFT:
-    printf("Left arrow is pressed at (%d, %d)\n", x, y);
-    break;
-  default:
-    printf("Other special key is pressed at (%d, %d)\n", x, y);
-    break;
+    case GLUT_KEY_F1:
+      printf("F1 is pressed at (%d, %d)\n", x, y);
+      break;
+    case GLUT_KEY_PAGE_UP:
+      printf("Page up is pressed at (%d, %d)\n", x, y);
+      break;
+    case GLUT_KEY_LEFT:
+      printf("Left arrow is pressed at (%d, %d)\n", x, y);
+      break;
+    default:
+      printf("Other special key is pressed at (%d, %d)\n", x, y);
+      break;
   }
 }
 
@@ -572,8 +632,7 @@ void GLUTMouseCallback(int button, int state, int x, int y) {
       last_mouse_pos = glm::vec2(x, y);
       camera_rotating = true;
     }
-  }
-  else if (state == GLUT_UP) {
+  } else if (state == GLUT_UP) {
     camera_rotating = false;
   }
 }
@@ -581,8 +640,7 @@ void GLUTMouseCallback(int button, int state, int x, int y) {
 void GLUTMouseWheelCallback(int button, int dir, int x, int y) {
   if (dir > 0) {
     camera_trans.AddEye(CAMERA_ZOOMING_STEP * glm::vec3(0.0f, 0.0f, -1.0f));
-  }
-  else {
+  } else {
     camera_trans.AddEye(CAMERA_ZOOMING_STEP * glm::vec3(0.0f, 0.0f, 1.0f));
   }
 }
@@ -592,7 +650,7 @@ void GLUTMotionCallback(int x, int y) {
     const glm::vec2 mouse_pos = glm::vec2(x, y);
     const glm::vec2 diff = mouse_pos - last_mouse_pos;
     camera_trans.AddAngle(CAMERA_ROTATION_SENSITIVITY *
-      glm::vec3(diff.y, diff.x, 0.0f));
+                          glm::vec3(diff.y, diff.x, 0.0f));
     last_mouse_pos = mouse_pos;
   }
 }
@@ -635,32 +693,32 @@ void GLUTTimerCallback(int val) {
 
 void GLUTMainMenuCallback(int id) {
   switch (id) {
-  case 2:
-    glutChangeToMenuEntry(2, "New Label", 2);
-    break;
-  case 3:
-    glutLeaveMainLoop();
-    break;
-  default:
-    throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
-      "'");
+    case 2:
+      glutChangeToMenuEntry(2, "New Label", 2);
+      break;
+    case 3:
+      glutLeaveMainLoop();
+      break;
+    default:
+      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
+                               "'");
   }
 }
 
 void GLUTTimerMenuCallback(int id) {
   switch (id) {
-  case 1:
-    if (!timer_enabled) {
-      timer_enabled = true;
-      glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
-    }
-    break;
-  case 2:
-    timer_enabled = false;
-    break;
-  default:
-    throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
-      "'");
+    case 1:
+      if (!timer_enabled) {
+        timer_enabled = true;
+        glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
+      }
+      break;
+    case 2:
+      timer_enabled = false;
+      break;
+    default:
+      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
+                               "'");
   }
 }
 
@@ -708,16 +766,16 @@ void EnterGLUTLoop() { glutMainLoop(); }
 
 int main(int argc, char *argv[]) {
   try {
-    InitObjectTransformation();
-    LoadObjects();
+    InitModelTransformation();
+    LoadModels();
+    LoadTextures();
     InitGLUT(argc, argv);
     InitGLEW();
     ConfigGL();
     RegisterGLUTCallbacks();
     CreateGLUTMenus();
     EnterGLUTLoop();
-  }
-  catch (const std::exception &ex) {
+  } catch (const std::exception &ex) {
     std::cerr << "Exception: " << ex.what() << std::endl;
     return 1;
   }

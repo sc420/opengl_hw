@@ -18,7 +18,7 @@ void as::VertexSpecManager::GenVertexArray(const std::string& va_name) {
   // Generate a vertex array object
   GLuint va_hdlr;
   glGenVertexArrays(1, &va_hdlr);
-  // Save the vertex array object
+  // Save the vertex array object handler
   hdlrs_[va_name] = va_hdlr;
 }
 

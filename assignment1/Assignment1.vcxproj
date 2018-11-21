@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="15.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -161,6 +161,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\gl\common.hpp" />
     <ClInclude Include="..\include\as\gl\program.hpp" />
     <ClInclude Include="..\include\as\gl\shader.hpp" />
+    <ClInclude Include="..\include\as\gl\texture.hpp" />
     <ClInclude Include="..\include\as\gl\uniform.hpp" />
     <ClInclude Include="..\include\as\gl\vertex_spec.hpp" />
     <ClInclude Include="..\include\as\model\loader.hpp" />
@@ -171,6 +172,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\gl\buffer.cpp" />
     <ClCompile Include="..\src\gl\program.cpp" />
     <ClCompile Include="..\src\gl\shader.cpp" />
+    <ClCompile Include="..\src\gl\texture.cpp" />
     <ClCompile Include="..\src\gl\uniform.cpp" />
     <ClCompile Include="..\src\gl\vertex_spec.cpp" />
     <ClCompile Include="..\src\model\loader.cpp" />
@@ -179,12 +181,12 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="assets\shaders\fragment.frag">
-      <FileType>Document</FileType>
+      <FileType>CppCode</FileType>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/shaders</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/shaders</DestinationFolders>
     </CopyFileToFolders>
     <CopyFileToFolders Include="assets\shaders\vertex.vert">
-      <FileType>Document</FileType>
+      <FileType>CppCode</FileType>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/shaders</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/shaders</DestinationFolders>
     </CopyFileToFolders>

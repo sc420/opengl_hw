@@ -40,31 +40,6 @@ void GLAPIENTRY GLMessageCallback(GLenum source, GLenum type, GLuint id,
  * Public Methods
  ******************************************************************************/
 
-as::texture_data as::load_png(const char* path) {
-  texture_data texture;
-  int n;
-  stbi_uc* data = stbi_load(path, &texture.width, &texture.height, &n, 4);
-  if (data != NULL) {
-    texture.data = new unsigned char[texture.width * texture.height * 4 *
-                                     sizeof(unsigned char)];
-    memcpy(texture.data, data,
-           texture.width * texture.height * 4 * sizeof(unsigned char));
-    // vertical-mirror image data
-    for (int i = 0; i < texture.width; i++) {
-      for (int j = 0; j < texture.height / 2; j++) {
-        for (int k = 0; k < 4; k++) {
-          std::swap(
-              texture.data[(j * texture.width + i) * 4 + k],
-              texture.data[((texture.height - j - 1) * texture.width + i) * 4 +
-                           k]);
-        }
-      }
-    }
-    stbi_image_free(data);
-  }
-  return texture;
-}
-
 /**
  * Print OpenGL context information.
  *

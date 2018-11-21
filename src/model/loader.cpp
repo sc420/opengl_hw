@@ -1,6 +1,6 @@
 #include "as/model/loader.hpp"
 
-void as::LoadObjByTinyobj(const std::string &path,
+void as::LoadModelByTinyobj(const std::string &path,
                           std::vector<glm::vec3> &vertices) {
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
@@ -48,7 +48,7 @@ void as::LoadObjByTinyobj(const std::string &path,
         //  "), nxyz = (" << nx << ", " << ny << ", " << nz <<
         //  "), txy = (" << tx << ", " << ty << ")" << std::endl;
 
-        vertices.push_back(glm::vec3(vx, vy, vz));
+        vertices.push_back(glm::vec3((double)vx, (double)vy, (double)vz));
 
         // Optional: vertex colors
         // tinyobj::real_t red = attrib.colors[3*idx.vertex_index+0];
@@ -61,4 +61,12 @@ void as::LoadObjByTinyobj(const std::string &path,
       shapes[s].mesh.material_ids[f];
     }
   }
+}
+
+void as::LoadTextureByStb(const std::string & path, const GLint req_comp, GLsizei &width, GLsizei &height, GLint&comp, std::vector<GLubyte>& texels)
+{
+  unsigned char* data = stbi_load(path.c_str(), &width, &height, &comp, req_comp);
+  unsigned int len = width * height * comp;
+  texels.assign(data, data + len);
+  stbi_image_free(data);
 }

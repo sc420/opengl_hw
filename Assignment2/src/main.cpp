@@ -168,7 +168,7 @@ void InitGLEW() {
  * Model Handlers
  ******************************************************************************/
 
-void InitObjectTransformation() {
+void InitModelTransformation() {
   // Torso
   torso_trans.rotate_axis = glm::vec3(0.0f, 0.0f, 1.0f);
   torso_trans.scale = glm::vec3(2.0f, 2.5f, 1.0f);
@@ -227,17 +227,17 @@ void InitObjectTransformation() {
   r2_leg_trans.color = glm::vec3(0.0f, 0.5f, 0.5f);
 }
 
-void LoadObjects() {
+void LoadModels() {
   // Cube
-  as::LoadObjByTinyobj("assets/models/cube.obj", cube_vertices);
+  as::LoadModelByTinyobj("assets/models/cube.obj", cube_vertices);
   cube_colors.assign(cube_vertices.size(), glm::vec3(1.0f, 0.0f, 0.0f));
   cube_vertices_mem_sz = cube_vertices.size() * sizeof(glm::vec3);
   // Cylinder
-  as::LoadObjByTinyobj("assets/models/cylinder.obj", cylinder_vertices);
+  as::LoadModelByTinyobj("assets/models/cylinder.obj", cylinder_vertices);
   cylinder_colors.assign(cylinder_vertices.size(), glm::vec3(0.0f, 1.0f, 0.0f));
   cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(glm::vec3);
   // Sphere
-  as::LoadObjByTinyobj("assets/models/sphere.obj", sphere_vertices);
+  as::LoadModelByTinyobj("assets/models/sphere.obj", sphere_vertices);
   sphere_colors.assign(sphere_vertices.size(), glm::vec3(0.0f, 0.0f, 1.0f));
   sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(glm::vec3);
 }
@@ -706,8 +706,8 @@ void EnterGLUTLoop() { glutMainLoop(); }
 
 int main(int argc, char *argv[]) {
   try {
-    InitObjectTransformation();
-    LoadObjects();
+    InitModelTransformation();
+    LoadModels();
     InitGLUT(argc, argv);
     InitGLEW();
     ConfigGL();

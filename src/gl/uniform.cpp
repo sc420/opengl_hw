@@ -13,22 +13,27 @@ void as::UniformManager::RegisterBufferManager(
   buffer_manager_ = &buffer_manager;
 }
 
+void as::UniformManager::SetUniform1Float(const std::string &program_name,
+                                          const std::string &var_name,
+                                          const GLfloat v0) {
+  const GLint var_hdlr = GetUniformVarHdlr(program_name, var_name);
+  glUniform1f(var_hdlr, v0);
+}
+
+void as::UniformManager::SetUniform1Int(const std::string &program_name,
+                                        const std::string &var_name,
+                                        const GLint v0) {
+  const GLint var_hdlr = GetUniformVarHdlr(program_name, var_name);
+  glUniform1i(var_hdlr, v0);
+}
+
 void as::UniformManager::AssignUniformBlockToBindingPoint(
     const std::string &program_name, const std::string &block_name,
     const GLuint binding_idx) {
   // Get program handler
   const GLuint program_hdlr = program_manager_->GetProgramHdlr(program_name);
-  // Check whether to retrieve the index of a named uniform block lazily
-  GLuint block_hdlr = NULL;
-  if (block_idxs_.count(program_name) > 0 &&
-      block_idxs_.at(program_name).count(block_name) > 0) {
-    block_hdlr = block_idxs_.at(program_name).at(block_name);
-  } else {
-    // Retrieve the index of a named uniform block
-    block_hdlr = glGetUniformBlockIndex(program_hdlr, block_name.c_str());
-    // Save the block handler
-    block_idxs_[program_name][block_name] = block_hdlr;
-  }
+  // Get uniform block handler
+  const GLuint block_hdlr = GetUniformBlockHdlr(program_name, block_name);
   // Assign the binding point
   glUniformBlockBinding(program_hdlr, block_hdlr, binding_idx);
   // Save the binding point
@@ -65,4 +70,38 @@ GLuint as::UniformManager::GetUniformBlockBindingPoint(
                              "'");
   }
   return block_to_points.at(block_name);
+}
+
+GLint as::UniformManager::GetUniformVarHdlr(const std::string &program_name,
+                                            const std::string &block_name) {
+  GLint var_hdlr;
+  // Check whether to retrieve the index of a named uniform variable lazily
+  if (var_hdlrs_.count(program_name) > 0 &&
+      var_hdlrs_.at(program_name).count(block_name) > 0) {
+    var_hdlr = var_hdlrs_.at(program_name).at(block_name);
+  } else {
+    const GLuint program_hdlr = program_manager_->GetProgramHdlr(program_name);
+    // Retrieve the index of a named uniform variable
+    var_hdlr = glGetUniformLocation(program_hdlr, block_name.c_str());
+    // Save the variable handler
+    var_hdlrs_[program_name][block_name] = var_hdlr;
+  }
+  return var_hdlr;
+}
+
+GLuint as::UniformManager::GetUniformBlockHdlr(const std::string &program_name,
+                                               const std::string &block_name) {
+  GLuint block_hdlr;
+  // Check whether to retrieve the index of a named uniform block lazily
+  if (block_hdlrs_.count(program_name) > 0 &&
+      block_hdlrs_.at(program_name).count(block_name) > 0) {
+    block_hdlr = block_hdlrs_.at(program_name).at(block_name);
+  } else {
+    const GLuint program_hdlr = program_manager_->GetProgramHdlr(program_name);
+    // Retrieve the index of a named uniform block
+    block_hdlr = glGetUniformBlockIndex(program_hdlr, block_name.c_str());
+    // Save the block handler
+    block_hdlrs_[program_name][block_name] = block_hdlr;
+  }
+  return block_hdlr;
 }
