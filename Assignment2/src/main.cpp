@@ -278,8 +278,10 @@ void GLUTDisplayCallback() {
   uniform_manager.SetUniform1Int("program", "tex_hdlr", textures.tex_hdlr);
 
   /* Draw the scene */
-  const std::vector<as::Mesh> &meshes = scene_model.GetMeshes();
+  const std::vector<as::Mesh> meshes = scene_model.GetMeshes();
   for (const as::Mesh mesh : meshes) {
+    const std::vector<as::Vertex> vertices = mesh.GetVertices();
+    const std::vector<size_t> idxs = mesh.GetIdxs();
     const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
     const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
 
@@ -294,16 +296,16 @@ void GLUTDisplayCallback() {
     /* Update buffers */
     // Scene
     buffer_manager.UpdateBuffer("scene_buffer", GL_ARRAY_BUFFER, 0,
-                                vertices_mem_sz, mesh.vertices.data());
+                                vertices_mem_sz, vertices.data());
     // Scene VA indexes
     buffer_manager.UpdateBuffer("scene_idxs_buffer", GL_ELEMENT_ARRAY_BUFFER, 0,
-                                idxs_mem_sz, mesh.idxs.data());
+                                idxs_mem_sz, idxs.data());
 
     /* Draw vertex arrays */
     vertex_spec_manager.BindVertexArray("scene_va");
     buffer_manager.BindBuffer("scene_buffer");
     buffer_manager.BindBuffer("scene_idxs_buffer");
-    glDrawElements(GL_TRIANGLES, mesh.idxs.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, 0);
   }
 
   /* Swap frame buffers in double buffer mode */

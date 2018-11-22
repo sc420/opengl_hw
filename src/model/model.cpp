@@ -86,5 +86,5 @@ const as::Mesh as::Model::ProcessMesh(const aiMesh *ai_mesh,
       idxs.push_back(face.mIndices[tri_idx]);
     }
   }
-  return Mesh(vertices, idxs);
+  return Mesh(ai_mesh->mName.C_Str(), vertices, idxs);
 }
