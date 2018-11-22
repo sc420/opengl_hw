@@ -1,7 +1,7 @@
 #include "as/common.hpp"
 #include "as/gl/common.hpp"
-#include "as/model/model.hpp"
 #include "as/model/loader.hpp"
+#include "as/model/model.hpp"
 #include "as/trans/camera.hpp"
 
 /*******************************************************************************
@@ -52,7 +52,8 @@ glm::vec2 last_mouse_pos;
  ******************************************************************************/
 
 // Camera transformations
-as::CameraTrans camera_trans(glm::vec3(0.0f, 30.0f, 50.0f), glm::vec3(0.5f, 0.0f, 0.0f));
+as::CameraTrans camera_trans(glm::vec3(0.0f, 30.0f, 50.0f),
+                             glm::vec3(0.5f, 0.0f, 0.0f));
 
 /*******************************************************************************
  * Model States
@@ -339,16 +340,18 @@ void ConfigGL() {
 
   /* Bind vertex arrays to buffers */
   // Scene
-  vertex_spec_manager.SpecifyVertexArrayOrg("scene_va", 0, 3, GL_FLOAT, GL_FALSE,
-    0);
-  vertex_spec_manager.SpecifyVertexArrayOrg("scene_va", 1, 3, GL_FLOAT, GL_FALSE,
-    0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("scene_va", 0, 3, GL_FLOAT,
+                                            GL_FALSE, 0);
+  vertex_spec_manager.SpecifyVertexArrayOrg("scene_va", 1, 3, GL_FLOAT,
+                                            GL_FALSE, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("scene_va", 0, 0);
   vertex_spec_manager.AssocVertexAttribToBindingPoint("scene_va", 1, 1);
-  vertex_spec_manager.BindBufferToBindingPoint(
-    "scene_va", "scene_buffer", 0, offsetof(as::Vertex, pos), sizeof(as::Vertex));
-  vertex_spec_manager.BindBufferToBindingPoint(
-    "scene_va", "scene_buffer", 1, offsetof(as::Vertex, tex_coords), sizeof(as::Vertex));
+  vertex_spec_manager.BindBufferToBindingPoint("scene_va", "scene_buffer", 0,
+                                               offsetof(as::Vertex, pos),
+                                               sizeof(as::Vertex));
+  vertex_spec_manager.BindBufferToBindingPoint("scene_va", "scene_buffer", 1,
+                                               offsetof(as::Vertex, tex_coords),
+                                               sizeof(as::Vertex));
   // Cube
   vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 0, 3, GL_FLOAT, GL_FALSE,
                                             0);
@@ -404,17 +407,19 @@ void GLUTDisplayCallback() {
 
     /* Initialize buffers */
     // Scene
-    buffer_manager.InitBuffer("scene_buffer", GL_ARRAY_BUFFER,
-      vertices_mem_sz, NULL, GL_STATIC_DRAW);
+    buffer_manager.InitBuffer("scene_buffer", GL_ARRAY_BUFFER, vertices_mem_sz,
+                              NULL, GL_STATIC_DRAW);
     // Scene VA indexes
     buffer_manager.InitBuffer("scene_idxs_buffer", GL_ELEMENT_ARRAY_BUFFER,
-      idxs_mem_sz, NULL, GL_STATIC_DRAW);
+                              idxs_mem_sz, NULL, GL_STATIC_DRAW);
 
     /* Update buffers */
     // Scene
-    buffer_manager.UpdateBuffer("scene_buffer", GL_ARRAY_BUFFER, 0, vertices_mem_sz, mesh.vertices.data());
+    buffer_manager.UpdateBuffer("scene_buffer", GL_ARRAY_BUFFER, 0,
+                                vertices_mem_sz, mesh.vertices.data());
     // Scene VA indexes
-    buffer_manager.UpdateBuffer("scene_idxs_buffer", GL_ELEMENT_ARRAY_BUFFER, 0, idxs_mem_sz, mesh.idxs.data());
+    buffer_manager.UpdateBuffer("scene_idxs_buffer", GL_ELEMENT_ARRAY_BUFFER, 0,
+                                idxs_mem_sz, mesh.idxs.data());
 
     /* Draw vertex arrays */
     vertex_spec_manager.BindVertexArray("scene_va");

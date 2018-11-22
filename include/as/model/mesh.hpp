@@ -6,7 +6,7 @@
 namespace as {
 
 class Mesh {
-public:
+ public:
   Mesh(const std::vector<Vertex> &vertices, const std::vector<size_t> idxs);
 
   size_t GetVerticesMemSize() const;
@@ -16,4 +16,4 @@ public:
   std::vector<Vertex> vertices;
   std::vector<size_t> idxs;
 };
-}
+}  // namespace as
