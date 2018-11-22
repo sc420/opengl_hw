@@ -29,5 +29,9 @@ class Model {
   void ProcessNode(const aiNode *ai_node, const aiScene *ai_scene);
 
   const Mesh ProcessMesh(const aiMesh *ai_mesh, const aiScene *ai_scene);
+
+  std::vector<Vertex> ProcessMeshVertices(const aiMesh *ai_mesh) const;
+
+  std::vector<size_t> ProcessMeshIdxs(const aiMesh *ai_mesh) const;
 };
 }  // namespace as

@@ -65,9 +65,14 @@ void as::Model::ProcessNode(const aiNode *ai_node, const aiScene *ai_scene) {
 
 const as::Mesh as::Model::ProcessMesh(const aiMesh *ai_mesh,
                                       const aiScene *ai_scene) {
+  const std::vector<Vertex> vertices = ProcessMeshVertices(ai_mesh);
+  const std::vector<size_t> idxs = ProcessMeshIdxs(ai_mesh);
+  return Mesh(ai_mesh->mName.C_Str(), vertices, idxs);
+}
+
+std::vector<as::Vertex> as::Model::ProcessMeshVertices(
+    const aiMesh *ai_mesh) const {
   std::vector<Vertex> vertices;
-  std::vector<size_t> idxs;
-  // Iterate through each vertex
   for (size_t vtx_idx = 0; vtx_idx < ai_mesh->mNumVertices; vtx_idx++) {
     Vertex vertex;
     const aiVector3D &m_vertex = ai_mesh->mVertices[vtx_idx];
@@ -82,7 +87,11 @@ const as::Mesh as::Model::ProcessMesh(const aiMesh *ai_mesh,
     }
     vertices.push_back(vertex);
   }
-  // Iterate through each face
+  return vertices;
+}
+
+std::vector<size_t> as::Model::ProcessMeshIdxs(const aiMesh *ai_mesh) const {
+  std::vector<size_t> idxs;
   for (size_t face_idx = 0; face_idx < ai_mesh->mNumFaces; face_idx++) {
     const aiFace &face = ai_mesh->mFaces[face_idx];
     // Iterate through each triangle index
@@ -90,5 +99,5 @@ const as::Mesh as::Model::ProcessMesh(const aiMesh *ai_mesh,
       idxs.push_back(face.mIndices[tri_idx]);
     }
   }
-  return Mesh(ai_mesh->mName.C_Str(), vertices, idxs);
+  return idxs;
 }
