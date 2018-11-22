@@ -4,16 +4,19 @@
 #include "as/model/vertex.hpp"
 
 namespace as {
-
 class Mesh {
  public:
-  Mesh(const std::vector<Vertex> &vertices, const std::vector<size_t> idxs);
+  Mesh();
+
+  Mesh(const std::vector<Vertex> &vertices, const std::vector<size_t> &idxs);
 
   size_t GetVerticesMemSize() const;
 
   size_t GetIdxsMemSize() const;
 
+  /* Geometry data */
   std::vector<Vertex> vertices;
+
   std::vector<size_t> idxs;
 };
 }  // namespace as

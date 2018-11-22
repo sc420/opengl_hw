@@ -1,7 +1,9 @@
 #include "as/model/mesh.hpp"
 
+as::Mesh::Mesh() {}
+
 as::Mesh::Mesh(const std::vector<Vertex>& vertices,
-               const std::vector<size_t> idxs)
+               const std::vector<size_t>& idxs)
     : vertices(vertices), idxs(idxs) {}
 
 size_t as::Mesh::GetVerticesMemSize() const {

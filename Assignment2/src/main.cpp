@@ -278,7 +278,8 @@ void GLUTDisplayCallback() {
   uniform_manager.SetUniform1Int("program", "tex_hdlr", textures.tex_hdlr);
 
   /* Draw the scene */
-  for (const as::Mesh mesh : scene_model.meshes) {
+  const std::vector<as::Mesh> &meshes = scene_model.GetMeshes();
+  for (const as::Mesh mesh : meshes) {
     const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
     const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
 

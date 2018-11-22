@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <iostream>
 #include <map>
+#include <queue>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -23,10 +24,10 @@
  * Include GL Libraries
  ******************************************************************************/
 
-// Cross-platform 3D model import library 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
+// Cross-platform 3D model import library
 #include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
 
 // Loading library
 #include <glew/glew.h>

@@ -167,6 +167,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\model\loader.hpp" />
     <ClInclude Include="..\include\as\model\mesh.hpp" />
     <ClInclude Include="..\include\as\model\model.hpp" />
+    <ClInclude Include="..\include\as\model\node.hpp" />
     <ClInclude Include="..\include\as\model\vertex.hpp" />
     <ClInclude Include="..\include\as\trans\camera.hpp" />
   </ItemGroup>
@@ -181,6 +182,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\model\loader.cpp" />
     <ClCompile Include="..\src\model\mesh.cpp" />
     <ClCompile Include="..\src\model\model.cpp" />
+    <ClCompile Include="..\src\model\node.cpp" />
     <ClCompile Include="..\src\model\vertex.cpp" />
     <ClCompile Include="..\src\trans\camera.cpp" />
     <ClCompile Include="src\main.cpp" />

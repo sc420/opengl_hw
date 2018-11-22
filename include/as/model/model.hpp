@@ -8,17 +8,26 @@
 /* Project libraries */
 #include "as/common.hpp"
 #include "as/model/mesh.hpp"
+#include "as/model/node.hpp"
 
 namespace as {
 class Model {
  public:
   void LoadFile(const std::string &path);
 
-  std::vector<Mesh> meshes;
+  const std::vector<Node> &GetNodes() const;
+
+  const std::vector<Mesh> &GetMeshes() const;
 
  private:
-  void ProcessNode(const aiNode *node, const aiScene *scene);
+  std::vector<Node> nodes_;
 
-  Mesh ProcessMesh(const aiMesh *mesh, const aiScene *scene);
+  std::vector<Mesh> meshes_;
+
+  void Reset();
+
+  void ProcessNode(const aiNode *ai_node, const aiScene *ai_scene);
+
+  Mesh ProcessMesh(const aiMesh *ai_mesh, const aiScene *ai_scene);
 };
 }  // namespace as

@@ -81,6 +81,9 @@
     <ClInclude Include="..\include\as\model\mesh.hpp">
       <Filter>include\as\model</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\model\node.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp">
@@ -120,6 +123,9 @@
       <Filter>src\model</Filter>
     </ClCompile>
     <ClCompile Include="..\src\model\vertex.cpp">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\node.cpp">
       <Filter>src\model</Filter>
     </ClCompile>
   </ItemGroup>
