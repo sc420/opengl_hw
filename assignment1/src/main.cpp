@@ -144,7 +144,7 @@ Textures textures;
 // Vertex declaration
 struct Vertex {
   glm::vec3 pos;
-  glm::vec3 color;
+  glm::vec2 tex_coord;
 };
 
 // Cube
@@ -260,8 +260,8 @@ void LoadModels() {
   as::LoadModelByTinyobj("assets/models/cube.obj", positions, normals,
                          tex_coords);
   cube_vertices.clear();
-  for (const glm::vec3 pos : positions) {
-    Vertex vertex = {pos, glm::vec3(1.0f, 0.0f, 0.0f)};
+  for (size_t i = 0; i < positions.size(); i++) {
+    Vertex vertex = {positions.at(i), tex_coords.at(i)};
     cube_vertices.push_back(vertex);
   }
   cube_vertices_mem_sz = cube_vertices.size() * sizeof(Vertex);
@@ -269,8 +269,8 @@ void LoadModels() {
   as::LoadModelByTinyobj("assets/models/cylinder.obj", positions, normals,
                          tex_coords);
   cylinder_vertices.clear();
-  for (const glm::vec3 pos : positions) {
-    Vertex vertex = {pos, glm::vec3(0.0f, 1.0f, 0.0f)};
+  for (size_t i = 0; i < positions.size(); i++) {
+    Vertex vertex = {positions.at(i), tex_coords.at(i)};
     cylinder_vertices.push_back(vertex);
   }
   cylinder_vertices_mem_sz = cylinder_vertices.size() * sizeof(Vertex);
@@ -278,8 +278,8 @@ void LoadModels() {
   as::LoadModelByTinyobj("assets/models/sphere.obj", positions, normals,
                          tex_coords);
   sphere_vertices.clear();
-  for (const glm::vec3 pos : positions) {
-    Vertex vertex = {pos, glm::vec3(0.0f, 0.0f, 1.0f)};
+  for (size_t i = 0; i < positions.size(); i++) {
+    Vertex vertex = {positions.at(i), tex_coords.at(i)};
     sphere_vertices.push_back(vertex);
   }
   sphere_vertices_mem_sz = sphere_vertices.size() * sizeof(Vertex);
@@ -432,7 +432,7 @@ void ConfigGL() {
   vertex_spec_manager.BindBufferToBindingPoint(
       "cube_va", "cube_buffer", 0, offsetof(Vertex, pos), sizeof(Vertex));
   vertex_spec_manager.BindBufferToBindingPoint(
-      "cube_va", "cube_buffer", 1, offsetof(Vertex, color), sizeof(Vertex));
+      "cube_va", "cube_buffer", 1, offsetof(Vertex, tex_coord), sizeof(Vertex));
   // Cylinder
   vertex_spec_manager.SpecifyVertexArrayOrg("cylinder_va", 0, 3, GL_FLOAT,
                                             GL_FALSE, 0);
@@ -444,7 +444,7 @@ void ConfigGL() {
                                                0, offsetof(Vertex, pos),
                                                sizeof(Vertex));
   vertex_spec_manager.BindBufferToBindingPoint("cylinder_va", "cylinder_buffer",
-                                               1, offsetof(Vertex, color),
+                                               1, offsetof(Vertex, tex_coord),
                                                sizeof(Vertex));
   // Sphere
   vertex_spec_manager.SpecifyVertexArrayOrg("sphere_va", 0, 3, GL_FLOAT,
@@ -455,8 +455,9 @@ void ConfigGL() {
   vertex_spec_manager.AssocVertexAttribToBindingPoint("sphere_va", 1, 1);
   vertex_spec_manager.BindBufferToBindingPoint(
       "sphere_va", "sphere_buffer", 0, offsetof(Vertex, pos), sizeof(Vertex));
-  vertex_spec_manager.BindBufferToBindingPoint(
-      "sphere_va", "sphere_buffer", 1, offsetof(Vertex, color), sizeof(Vertex));
+  vertex_spec_manager.BindBufferToBindingPoint("sphere_va", "sphere_buffer", 1,
+                                               offsetof(Vertex, tex_coord),
+                                               sizeof(Vertex));
 }
 
 /*******************************************************************************
