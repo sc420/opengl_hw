@@ -44,7 +44,7 @@ void as::Model::ProcessNode(const aiNode *ai_node, const aiScene *ai_scene) {
     // Process each mesh in the node
     for (size_t i = 0; i < cur_ai_node->mNumMeshes; i++) {
       const aiMesh *ai_mesh = ai_scene->mMeshes[cur_ai_node->mMeshes[i]];
-      Mesh mesh = ProcessMesh(ai_mesh, ai_scene);
+      const Mesh mesh = ProcessMesh(ai_mesh, ai_scene);
       node.AddMesh(&mesh);
       // Add the mesh to the list
       meshes_.push_back(mesh);
@@ -59,8 +59,8 @@ void as::Model::ProcessNode(const aiNode *ai_node, const aiScene *ai_scene) {
   }
 }
 
-as::Mesh as::Model::ProcessMesh(const aiMesh *ai_mesh,
-                                const aiScene *ai_scene) {
+const as::Mesh as::Model::ProcessMesh(const aiMesh *ai_mesh,
+                                      const aiScene *ai_scene) {
   std::vector<Vertex> vertices;
   std::vector<size_t> idxs;
   // Iterate through each vertex

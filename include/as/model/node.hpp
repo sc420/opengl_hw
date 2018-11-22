@@ -14,11 +14,11 @@ class Node {
 
   std::string GetName() const;
 
-  const std::vector<const Mesh *> &GetMeshes() const;
+  const std::vector<const Mesh *> GetMeshes() const;
 
   const Node *GetParent() const;
 
-  const std::vector<const Node *> &GetChildren() const;
+  const std::vector<const Node *> GetChildren() const;
 
  private:
   std::string name_;

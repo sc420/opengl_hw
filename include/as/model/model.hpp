@@ -28,6 +28,6 @@ class Model {
 
   void ProcessNode(const aiNode *ai_node, const aiScene *ai_scene);
 
-  Mesh ProcessMesh(const aiMesh *ai_mesh, const aiScene *ai_scene);
+  const Mesh ProcessMesh(const aiMesh *ai_mesh, const aiScene *ai_scene);
 };
 }  // namespace as

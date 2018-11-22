@@ -9,12 +9,12 @@ void as::Node::AddChild(const Node* child) { children_.push_back(child); }
 
 std::string as::Node::GetName() const { return name_; }
 
-const std::vector<const as::Mesh*>& as::Node::GetMeshes() const {
+const std::vector<const as::Mesh*> as::Node::GetMeshes() const {
   return meshes_;
 }
 
 const as::Node* as::Node::GetParent() const { return parent_; }
 
-const std::vector<const as::Node*>& as::Node::GetChildren() const {
+const std::vector<const as::Node*> as::Node::GetChildren() const {
   return children_;
 }
