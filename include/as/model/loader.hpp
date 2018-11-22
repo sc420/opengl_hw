@@ -1,8 +1,10 @@
 #pragma once
 
+/* Third-party libraries */
 #include <stb/stb_image.h>
 #include <tinyobjloader/tiny_obj_loader.h>
 
+/* Project libaries */
 #include "as/common.hpp"
 
 namespace as {

@@ -40,15 +40,6 @@
 
 namespace as {
 
-typedef struct _texture_data {
-  _texture_data() : width(0), height(0), data(0) {}
-  int width;
-  int height;
-  unsigned char* data;
-} texture_data;
-
-texture_data load_png(const char* path);
-
 void PrintGLContextInfo(const bool print_entensions = false,
                         const bool print_supported_glsl_versions = false);
 
