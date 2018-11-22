@@ -56,48 +56,20 @@ as::CameraTrans camera_trans(glm::vec3(0.0f, 30.0f, 50.0f),
                              glm::vec3(0.5f, 0.0f, 0.0f));
 
 /*******************************************************************************
- * Model States
+ * Models
  ******************************************************************************/
 
-// Body part transformation declaration
-class BodyPartTrans {
- public:
-  BodyPartTrans()
-      : pre_translate(glm::vec3(0.0f)),
-        scale(glm::vec3(1.0f)),
-        rotate_angle(0.0f),
-        rotate_axis(glm::vec3(1.0f, 0.0f, 0.0f)),
-        translate(glm::vec3(0.0f)) {}
+// Model
+as::Model scene_model;
 
-  glm::mat4 GetTrans() const {
-    const glm::mat4 identity(1.0f);
-    return glm::translate(identity, translate) *
-           glm::rotate(identity, rotate_angle, rotate_axis) *
-           glm::scale(identity, scale) *
-           glm::translate(identity, pre_translate);
-  }
+/*******************************************************************************
+ * Textures
+ ******************************************************************************/
 
-  glm::mat4 GetTransWithoutScale() const {
-    const glm::mat4 identity(1.0f);
-    return glm::translate(identity, translate) *
-           glm::rotate(identity, rotate_angle, rotate_axis) *
-           glm::translate(identity, pre_translate);
-  }
-
-  glm::vec3 GetColor() const { return color; }
-
-  glm::vec3 pre_translate;
-
-  glm::vec3 scale;
-  float rotate_angle;
-  glm::vec3 rotate_axis;
-  glm::vec3 translate;
-
-  glm::vec3 color;
-};
-
-// Body part transformations
-BodyPartTrans torso_trans;
+// Metal
+std::vector<GLubyte> metal_texels;
+GLsizei metal_width;
+GLsizei metal_height;
 
 /*******************************************************************************
  * GL States (Feed to GL)
@@ -110,12 +82,6 @@ struct GlobalMvp {
   glm::mat4 proj;
 };
 
-// Model transformation declaration
-struct ModelTrans {
-  glm::mat4 trans;
-  glm::vec3 color;
-};
-
 // Texture declaration
 struct Textures {
   GLint tex_hdlr;
@@ -124,43 +90,8 @@ struct Textures {
 // Global MVP
 GlobalMvp global_mvp;
 
-// Model transformations
-ModelTrans model_trans;
-
 // Textures
 Textures textures;
-
-/*******************************************************************************
- * Models
- ******************************************************************************/
-
-// Model
-as::Model scene_model;
-
-// Vertex declaration
-struct Vertex {
-  glm::vec3 pos;
-  glm::vec2 tex_coord;
-};
-
-// Cube
-std::vector<Vertex> cube_vertices;
-size_t cube_vertices_mem_sz;
-// Cylinder
-std::vector<Vertex> cylinder_vertices;
-size_t cylinder_vertices_mem_sz;
-// Sphere
-std::vector<Vertex> sphere_vertices;
-size_t sphere_vertices_mem_sz;
-
-/*******************************************************************************
- * Textures
- ******************************************************************************/
-
-// Metal
-std::vector<GLubyte> metal_texels;
-GLsizei metal_width;
-GLsizei metal_height;
 
 /*******************************************************************************
  * GL Initialization Methods
@@ -189,29 +120,9 @@ void InitGLEW() {
  * Model Handlers
  ******************************************************************************/
 
-void InitModelTransformation() {
-  // Torso
-  torso_trans.rotate_axis = glm::vec3(0.0f, 0.0f, 1.0f);
-  torso_trans.scale = glm::vec3(2.0f, 2.5f, 1.0f);
-  torso_trans.color = glm::vec3(0.5f, 0.0f, 0.0f);
-}
-
 void LoadModels() {
   // Scene
   scene_model.LoadFile("assets/models/dabrovic-sponza/sponza.obj");
-
-  std::vector<glm::vec3> positions;
-  std::vector<glm::vec3> normals;
-  std::vector<glm::vec2> tex_coords;
-  // Cube
-  as::LoadModelByTinyobj("assets/models/cube.obj", positions, normals,
-                         tex_coords);
-  cube_vertices.clear();
-  for (size_t i = 0; i < positions.size(); i++) {
-    Vertex vertex = {positions.at(i), tex_coords.at(i)};
-    cube_vertices.push_back(vertex);
-  }
-  cube_vertices_mem_sz = cube_vertices.size() * sizeof(Vertex);
 }
 
 void LoadTextures() {
@@ -264,14 +175,10 @@ void ConfigGL() {
   buffer_manager.GenBuffer("scene_buffer");
   // Scene array indexes
   buffer_manager.GenBuffer("scene_idxs_buffer");
-  // Cube
-  buffer_manager.GenBuffer("cube_buffer");
 
   /* Create vertex arrays */
   // Scene
   vertex_spec_manager.GenVertexArray("scene_va");
-  // Cube
-  vertex_spec_manager.GenVertexArray("cube_va");
 
   /* Create textures */
   // Metal
@@ -280,14 +187,10 @@ void ConfigGL() {
   /* Bind buffer targets to be repeatedly used later */
   // Global MVP
   buffer_manager.BindBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER);
-  // Model transformation
-  buffer_manager.BindBuffer("model_trans_buffer", GL_UNIFORM_BUFFER);
   // Scene
   buffer_manager.BindBuffer("scene_buffer", GL_ARRAY_BUFFER);
   // Scene array indexes
   buffer_manager.BindBuffer("scene_idxs_buffer", GL_ELEMENT_ARRAY_BUFFER);
-  // Cube
-  buffer_manager.BindBuffer("cube_buffer", GL_ARRAY_BUFFER);
 
   /* Bind textures to be repeatedly used later */
   // Metal
@@ -297,12 +200,6 @@ void ConfigGL() {
   // Global MVP
   buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER,
                             sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
-  // Model transformation
-  buffer_manager.InitBuffer("model_trans_buffer", GL_UNIFORM_BUFFER,
-                            sizeof(ModelTrans), NULL, GL_STATIC_DRAW);
-  // Cube
-  buffer_manager.InitBuffer("cube_buffer", GL_ARRAY_BUFFER,
-                            cube_vertices_mem_sz, NULL, GL_STATIC_DRAW);
 
   /* Initialize textures */
   // Metal
@@ -313,12 +210,6 @@ void ConfigGL() {
   // Global MVP
   buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(GlobalMvp), &global_mvp);
-  // Model transformation
-  buffer_manager.UpdateBuffer("model_trans_buffer", GL_UNIFORM_BUFFER, 0,
-                              sizeof(ModelTrans), &model_trans);
-  // Cube
-  buffer_manager.UpdateBuffer("cube_buffer", GL_ARRAY_BUFFER, 0,
-                              cube_vertices_mem_sz, cube_vertices.data());
 
   /* Update textures */
   // Metal
@@ -334,9 +225,6 @@ void ConfigGL() {
   // Global MVP
   uniform_manager.AssignUniformBlockToBindingPoint("program", "GlobalMvp", 0);
   uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
-  // Model transformation
-  uniform_manager.AssignUniformBlockToBindingPoint("program", "ModelTrans", 1);
-  uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
 
   /* Bind vertex arrays to buffers */
   // Scene
@@ -352,17 +240,6 @@ void ConfigGL() {
   vertex_spec_manager.BindBufferToBindingPoint("scene_va", "scene_buffer", 1,
                                                offsetof(as::Vertex, tex_coords),
                                                sizeof(as::Vertex));
-  // Cube
-  vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 0, 3, GL_FLOAT, GL_FALSE,
-                                            0);
-  vertex_spec_manager.SpecifyVertexArrayOrg("cube_va", 1, 3, GL_FLOAT, GL_FALSE,
-                                            0);
-  vertex_spec_manager.AssocVertexAttribToBindingPoint("cube_va", 0, 0);
-  vertex_spec_manager.AssocVertexAttribToBindingPoint("cube_va", 1, 1);
-  vertex_spec_manager.BindBufferToBindingPoint(
-      "cube_va", "cube_buffer", 0, offsetof(Vertex, pos), sizeof(Vertex));
-  vertex_spec_manager.BindBufferToBindingPoint(
-      "cube_va", "cube_buffer", 1, offsetof(Vertex, tex_coord), sizeof(Vertex));
 }
 
 /*******************************************************************************
@@ -615,7 +492,6 @@ void EnterGLUTLoop() { glutMainLoop(); }
 
 int main(int argc, char *argv[]) {
   try {
-    InitModelTransformation();
     LoadModels();
     LoadTextures();
     InitGLUT(argc, argv);
