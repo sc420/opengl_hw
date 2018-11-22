@@ -8,7 +8,7 @@
 
 ## Libraries
 
-* [Assimp](http://assimp.sourceforge.net/main_downloads.html): 3.1.1 x32
+* [Assimp](https://github.com/assimp/assimp): 3.3.1 x32
 * [FreeGLUT](http://freeglut.sourceforge.net/index.php#download): 3.0.0 for MSVC x32
 * [GLEW](http://glew.sourceforge.net/): 2.1.0 x32
 * [GLM](https://glm.g-truc.net/0.9.9/index.html): 0.9.9.3

@@ -1,25 +1,26 @@
 #version 440
 
-uniform global_mvp
-{
+uniform GlobalMvp {
   mat4 model;
   mat4 view;
   mat4 proj;
-};
+}
+global_mvp;
 
-uniform obj_trans
-{
+uniform ModelTrans {
   mat4 trans;
   vec3 color;
-};
+}
+model_trans;
 
-layout(location = 0) in vec3 in_vertex;
-layout(location = 1) in vec3 in_color;
+layout(location = 0) in vec3 in_pos;
+layout(location = 1) in vec2 in_tex_coords;
 
-out vec3 vs_color;
+layout(location = 0) out vec2 vs_tex_coords;
 
-void main()
-{
-  gl_Position = proj * view * model * trans * vec4(in_vertex, 1.0f);
-  vs_color = (in_color + color) / 2.0f;
+void main() {
+  mat4 global_trans = global_mvp.proj * global_mvp.view * global_mvp.model;
+  mat4 trans = global_trans; // * model_trans.trans;
+  gl_Position = trans * vec4(in_pos, 1.0f);
+  vs_tex_coords = in_tex_coords;
 }

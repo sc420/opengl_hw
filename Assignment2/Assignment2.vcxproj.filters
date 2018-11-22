@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <ItemGroup>
     <Filter Include="assets">
@@ -69,6 +69,18 @@
     <ClInclude Include="..\include\as\gl\common.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\gl\texture.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\model.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\vertex.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\mesh.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp">
@@ -97,6 +109,18 @@
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Assignment2\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gl\texture.cpp">
+      <Filter>src\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\model.cpp">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\mesh.cpp">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\vertex.cpp">
+      <Filter>src\model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -4,6 +4,7 @@
  * Link .lib Files
  ******************************************************************************/
 
+#pragma comment(lib, "assimp.lib")
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "freeglut.lib")
 
@@ -22,17 +23,22 @@
  * Include GL Libraries
  ******************************************************************************/
 
-// OpenGL loading library
-#include <glew/glew.h>
+// Cross-platform 3D model import library 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
-// Cross-platform windowing and keyboard/mouse handler
-#include <freeglut/freeglut.h>
+// Loading library
+#include <glew/glew.h>
 
 // Cross-platform C++ mathematics library
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+// Cross-platform windowing and keyboard/mouse handler
+#include <freeglut/freeglut.h>
 
 /*******************************************************************************
  * Declarations
