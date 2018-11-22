@@ -385,7 +385,7 @@ void ConfigGL() {
 
   /* Initialize textures */
   // Metal
-  texture_manager.InitTexture2D("metal_tex", GL_TEXTURE_2D, 1, GL_RGBA8,
+  texture_manager.InitTexture2D("metal_tex", GL_TEXTURE_2D, 3, GL_RGBA8,
                                 metal_width, metal_height);
 
   /* Update buffers */
@@ -412,6 +412,9 @@ void ConfigGL() {
                                   metal_width, metal_height, GL_RGBA,
                                   GL_UNSIGNED_BYTE, metal_texels.data());
   texture_manager.GenMipmap("metal_tex", GL_TEXTURE_2D);
+  texture_manager.SetTextureParamInt("metal_tex", GL_TEXTURE_2D,
+                                     GL_TEXTURE_MIN_FILTER,
+                                     GL_LINEAR_MIPMAP_LINEAR);
 
   /* Bind uniform blocks to buffers */
   // Global MVP
