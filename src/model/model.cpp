@@ -29,7 +29,7 @@ void as::Model::Reset() {
 
 void as::Model::ProcessNode(const aiNode *ai_node, const aiScene *ai_scene) {
   std::queue<const aiNode *> waiting_nodes;
-  std::queue<const Node *> parents;
+  std::queue<Node *> parents;
   waiting_nodes.push(ai_node);
   parents.push(nullptr);
   while (!waiting_nodes.empty()) {
@@ -37,7 +37,7 @@ void as::Model::ProcessNode(const aiNode *ai_node, const aiScene *ai_scene) {
     const aiNode *cur_ai_node = waiting_nodes.front();
     waiting_nodes.pop();
     // Get the current parent from the queue
-    const Node *parent = parents.front();
+    Node *parent = parents.front();
     parents.pop();
     // Create a node
     Node node(ai_node->mName.C_Str(), parent);
@@ -53,6 +53,10 @@ void as::Model::ProcessNode(const aiNode *ai_node, const aiScene *ai_scene) {
     for (size_t i = 0; i < cur_ai_node->mNumChildren; i++) {
       waiting_nodes.push(cur_ai_node->mChildren[i]);
       parents.push(&node);
+    }
+    if (parent != nullptr) {
+      // Add the current node to the children of the parent
+      parent->AddChild(&node);
     }
     // Add the current node to the list
     nodes_.push_back(node);
