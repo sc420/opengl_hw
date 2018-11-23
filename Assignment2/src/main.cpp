@@ -66,6 +66,9 @@ as::Model scene_model;
  * Textures
  ******************************************************************************/
 
+// Texture unit indexes
+std::map<std::string, GLuint> texture_unit_idxs;
+
 // Metal
 std::vector<GLubyte> metal_texels;
 GLsizei metal_width;
@@ -135,6 +138,58 @@ void LoadTextures() {
 /*******************************************************************************
  * GL Context Configuration
  ******************************************************************************/
+
+std::vector<GLubyte> ConvertChannels3To4(const std::vector<GLubyte> data) {
+  const size_t size = data.size();
+  const size_t num_pixel = size / 3;
+  const size_t new_size = num_pixel * 4;
+  std::vector<GLubyte> output(new_size, 0);
+  for (size_t i = 0; i < num_pixel; i++) {
+    for (size_t c = 0; c < 3; c++) {
+      output[4 * i + c] = data[3 * i + c];
+    }
+  }
+  return output;
+}
+
+void ConfigTextures() {
+  const std::vector<as::Mesh> meshes = scene_model.GetMeshes();
+  for (const as::Mesh mesh : meshes) {
+    const std::set<as::Texture> textures = mesh.GetTextures();
+    for (const as::Texture &texture : textures) {
+      const std::string path = texture.GetPath();
+      // Check if the texture has been loaded
+      if (texture_unit_idxs.count(path) <= 0) {
+        // Calculate the new unit index
+        const GLuint unit_idx = texture_unit_idxs.size();
+        // Load the texture
+        GLsizei width, height;
+        int comp;
+        std::vector<GLubyte> texels;
+        as::LoadTextureByStb(path, 0, width, height, comp, texels);
+        // Convert the texels from 3 channels to 4 channels to avoid GL errors
+        texels = ConvertChannels3To4(texels);
+        // Generate the texture
+        texture_manager.GenTexture(path);
+        // Bind the texture
+        texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_idx);
+        // Initialize the texture
+        texture_manager.InitTexture2D(path, GL_TEXTURE_2D, 5, GL_RGBA8, width,
+                                      height);
+        // Update the texture
+        texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
+                                        height, GL_RGBA, GL_UNSIGNED_BYTE,
+                                        texels.data());
+        texture_manager.GenMipmap(path, GL_TEXTURE_2D);
+        texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
+                                           GL_TEXTURE_MIN_FILTER,
+                                           GL_LINEAR_MIPMAP_LINEAR);
+        // Save the unit index
+        texture_unit_idxs[path] = unit_idx;
+      }
+    }
+  }
+}
 
 void ConfigGL() {
   as::EnableCatchingGLError();
@@ -240,6 +295,9 @@ void ConfigGL() {
   vertex_spec_manager.BindBufferToBindingPoint("scene_va", "scene_buffer", 1,
                                                offsetof(as::Vertex, tex_coords),
                                                sizeof(as::Vertex));
+
+  /* Configure textures */
+  ConfigTextures();
 }
 
 /*******************************************************************************
@@ -272,11 +330,6 @@ void GLUTDisplayCallback() {
   UpdateGlobalMvp();
   buffer_manager.UpdateBuffer("global_mvp_buffer");
 
-  /* Update textures */
-  // Textures
-  UpdateTextures();
-  uniform_manager.SetUniform1Int("program", "tex_hdlr", textures.tex_hdlr);
-
   /* Draw the scene */
   const std::vector<as::Mesh> meshes = scene_model.GetMeshes();
   for (const as::Mesh mesh : meshes) {
@@ -284,14 +337,7 @@ void GLUTDisplayCallback() {
     const std::vector<size_t> idxs = mesh.GetIdxs();
     const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
     const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
-
     const std::set<as::Texture> textures = mesh.GetTextures();
-
-    // std::cerr << "Mesh " << mesh.GetName() << std::endl;
-    // for (const as::Texture texture : textures) {
-    //  std::cerr << texture.GetPath() << " " << texture.GetType() << std::endl;
-    //}
-    // throw std::runtime_error("debug");
 
     /* Initialize buffers */
     // Scene
@@ -308,6 +354,17 @@ void GLUTDisplayCallback() {
     // Scene VA indexes
     buffer_manager.UpdateBuffer("scene_idxs_buffer", GL_ELEMENT_ARRAY_BUFFER, 0,
                                 idxs_mem_sz, idxs.data());
+
+    /* Update textures */
+    // TODO: There is only diffuse texture
+    for (const as::Texture texture : textures) {
+      const std::string path = texture.GetPath();
+      // Bind the texture
+      texture_manager.BindTexture(path);
+      // Get the unit index
+      const GLuint unit_idx = texture_unit_idxs.at(path);
+      uniform_manager.SetUniform1Int("program", "tex_hdlr", unit_idx);
+    }
 
     /* Draw vertex arrays */
     vertex_spec_manager.BindVertexArray("scene_va");
