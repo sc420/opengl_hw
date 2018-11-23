@@ -23,7 +23,7 @@ void as::LoadModelByTinyobj(const std::string &path,
     // Loop over faces(polygon)
     size_t index_offset = 0;
     for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
-      int fv = shapes[s].mesh.num_face_vertices[f];
+      const int fv = shapes[s].mesh.num_face_vertices[f];
       // Loop over vertices in the face.
       for (int v = 0; v < fv; v++) {
         tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
@@ -49,7 +49,7 @@ void as::LoadTextureByStb(const std::string &path, const GLint req_comp,
                           std::vector<GLubyte> &texels) {
   unsigned char *data =
       stbi_load(path.c_str(), &width, &height, &comp, req_comp);
-  unsigned int len = width * height * comp;
+  const size_t len = width * height * comp;
   texels.assign(data, data + len);
   stbi_image_free(data);
 }
