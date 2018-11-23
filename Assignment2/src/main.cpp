@@ -86,6 +86,11 @@ struct GlobalMvp {
   glm::mat4 proj;
 };
 
+// Model transformation declaration
+struct ModelTrans {
+  glm::mat4 trans;
+};
+
 // Texture declaration
 struct Textures {
   GLint tex_hdlr;
@@ -93,6 +98,9 @@ struct Textures {
 
 // Global MVP
 GlobalMvp global_mvp;
+
+// Model transformations
+ModelTrans model_trans;
 
 // Textures
 Textures textures;
@@ -299,21 +307,32 @@ void ConfigGL() {
   /* Bind buffer targets to be repeatedly used later */
   // Global MVP
   buffer_manager.BindBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER);
+  // Model transformation
+  buffer_manager.BindBuffer("model_trans_buffer", GL_UNIFORM_BUFFER);
 
   /* Initialize buffers */
   // Global MVP
   buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER,
                             sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
+  // Model transformation
+  buffer_manager.InitBuffer("model_trans_buffer", GL_UNIFORM_BUFFER,
+                            sizeof(ModelTrans), NULL, GL_STATIC_DRAW);
 
   /* Update buffers */
   // Global MVP
   buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(GlobalMvp), &global_mvp);
+  // Model transformation
+  buffer_manager.UpdateBuffer("model_trans_buffer", GL_UNIFORM_BUFFER, 0,
+                              sizeof(ModelTrans), &model_trans);
 
   /* Bind uniform blocks to buffers */
   // Global MVP
   uniform_manager.AssignUniformBlockToBindingPoint("program", "GlobalMvp", 0);
   uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
+  // Model transformation
+  uniform_manager.AssignUniformBlockToBindingPoint("program", "ModelTrans", 1);
+  uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
 
   /* Configure scenes */
   ConfigSceneBuffers();
@@ -349,6 +368,12 @@ void GLUTDisplayCallback() {
   // Global MVP
   UpdateGlobalMvp();
   buffer_manager.UpdateBuffer("global_mvp_buffer");
+
+  /* Update model transformations */
+  const float scale_factors[SCENE_SIZE] = {1.0f, 0.01f};
+  model_trans.trans =
+      glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors[cur_scene_idx]));
+  buffer_manager.UpdateBuffer("model_trans_buffer");
 
   /* Draw the scenes */
   const std::vector<as::Mesh> meshes = scene_model[cur_scene_idx].GetMeshes();
