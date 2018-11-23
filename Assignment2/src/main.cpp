@@ -11,9 +11,9 @@
 constexpr auto TIMER_INTERVAL = 10;
 constexpr auto KEYBOARD_KEY_SIZE = 256;
 constexpr auto CAMERA_MOVING_STEP = 0.2f;
-constexpr auto CAMERA_ROTATION_SENSITIVITY = 0.01f;
+constexpr auto CAMERA_ROTATION_SENSITIVITY = 0.005f;
 constexpr auto CAMERA_ZOOMING_STEP = 5.0f;
-constexpr auto ROBOT_MOVEMENT_STEP = 0.05f;
+constexpr auto SCENE_SIZE = 2;
 
 /*******************************************************************************
  * Managers
@@ -59,8 +59,8 @@ as::CameraTrans camera_trans(glm::vec3(0.0f, 30.0f, 50.0f),
  * Models
  ******************************************************************************/
 
-// Model
-as::Model scene_model;
+// Scenes
+as::Model scene_model[SCENE_SIZE];
 
 /*******************************************************************************
  * Textures
@@ -68,6 +68,12 @@ as::Model scene_model;
 
 // Texture unit indexes
 std::map<std::string, GLuint> texture_unit_idxs;
+
+/*******************************************************************************
+ * Model States
+ ******************************************************************************/
+
+size_t cur_scene_idx = 0;
 
 /*******************************************************************************
  * GL States (Feed to GL)
@@ -119,8 +125,10 @@ void InitGLEW() {
  ******************************************************************************/
 
 void LoadModels() {
-  // Scene
-  scene_model.LoadFile("assets/models/dabrovic-sponza/sponza.obj");
+  // First scene
+  scene_model[0].LoadFile("assets/models/dabrovic-sponza/sponza.obj");
+  // Second scene
+  scene_model[1].LoadFile("assets/models/crytek-sponza/sponza.obj");
 }
 
 /*******************************************************************************
@@ -141,104 +149,112 @@ std::vector<GLubyte> ConvertChannels3To4(const std::vector<GLubyte> data) {
 }
 
 void ConfigSceneBuffers() {
-  const std::vector<as::Mesh> meshes = scene_model.GetMeshes();
-  for (size_t i = 0; i < meshes.size(); i++) {
-    const as::Mesh &mesh = meshes.at(i);
-    // Decide the vertex spec name
-    const std::string scene_va_name = "va_" + std::to_string(i);
-    // Decide the buffer names
-    const std::string scene_buffer_name = "mesh_" + std::to_string(i);
-    const std::string scene_idxs_buffer_name = scene_buffer_name + "_idxs";
-    // Get mesh data
-    const std::vector<as::Vertex> vertices = mesh.GetVertices();
-    const std::vector<size_t> idxs = mesh.GetIdxs();
-    // Get memory size of mesh data
-    const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
-    const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
+  for (size_t scene_idx = 0; scene_idx < SCENE_SIZE; scene_idx++) {
+    const std::vector<as::Mesh> meshes = scene_model[scene_idx].GetMeshes();
+    for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+      const as::Mesh &mesh = meshes.at(mesh_idx);
+      // Decide the vertex spec name
+      const std::string scene_va_name =
+          std::to_string(scene_idx) + "va_" + std::to_string(mesh_idx);
+      // Decide the buffer names
+      const std::string scene_buffer_name =
+          std::to_string(scene_idx) + "mesh_" + std::to_string(mesh_idx);
+      const std::string scene_idxs_buffer_name = scene_buffer_name + "_idxs";
+      // Get mesh data
+      const std::vector<as::Vertex> vertices = mesh.GetVertices();
+      const std::vector<size_t> idxs = mesh.GetIdxs();
+      // Get memory size of mesh data
+      const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
+      const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
 
-    /* Generate buffers */
-    // Scene
-    buffer_manager.GenBuffer(scene_buffer_name);
-    // Scene array indexes
-    buffer_manager.GenBuffer(scene_idxs_buffer_name);
+      /* Generate buffers */
+      // Scene
+      buffer_manager.GenBuffer(scene_buffer_name);
+      // Scene array indexes
+      buffer_manager.GenBuffer(scene_idxs_buffer_name);
 
-    /* Bind buffers */
-    // Scene
-    buffer_manager.BindBuffer(scene_buffer_name, GL_ARRAY_BUFFER);
-    // Scene array indexes
-    buffer_manager.BindBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER);
+      /* Bind buffers */
+      // Scene
+      buffer_manager.BindBuffer(scene_buffer_name, GL_ARRAY_BUFFER);
+      // Scene array indexes
+      buffer_manager.BindBuffer(scene_idxs_buffer_name,
+                                GL_ELEMENT_ARRAY_BUFFER);
 
-    /* Initialize buffers */
-    // Scene
-    buffer_manager.InitBuffer(scene_buffer_name, GL_ARRAY_BUFFER,
-                              vertices_mem_sz, NULL, GL_STATIC_DRAW);
-    // Scene array indexes
-    buffer_manager.InitBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
-                              idxs_mem_sz, NULL, GL_STATIC_DRAW);
+      /* Initialize buffers */
+      // Scene
+      buffer_manager.InitBuffer(scene_buffer_name, GL_ARRAY_BUFFER,
+                                vertices_mem_sz, NULL, GL_STATIC_DRAW);
+      // Scene array indexes
+      buffer_manager.InitBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
+                                idxs_mem_sz, NULL, GL_STATIC_DRAW);
 
-    /* Update buffers */
-    // Scene
-    buffer_manager.UpdateBuffer(scene_buffer_name, GL_ARRAY_BUFFER, 0,
-                                vertices_mem_sz, vertices.data());
-    // Scene array indexes
-    buffer_manager.UpdateBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
-                                0, idxs_mem_sz, idxs.data());
+      /* Update buffers */
+      // Scene
+      buffer_manager.UpdateBuffer(scene_buffer_name, GL_ARRAY_BUFFER, 0,
+                                  vertices_mem_sz, vertices.data());
+      // Scene array indexes
+      buffer_manager.UpdateBuffer(scene_idxs_buffer_name,
+                                  GL_ELEMENT_ARRAY_BUFFER, 0, idxs_mem_sz,
+                                  idxs.data());
 
-    /* Create vertex arrays */
-    // Scene
-    vertex_spec_manager.GenVertexArray(scene_va_name);
+      /* Create vertex arrays */
+      // Scene
+      vertex_spec_manager.GenVertexArray(scene_va_name);
 
-    /* Bind vertex arrays to buffers */
-    // Scene
-    vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 0, 3, GL_FLOAT,
-                                              GL_FALSE, 0);
-    vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 1, 3, GL_FLOAT,
-                                              GL_FALSE, 0);
-    vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 0, 0);
-    vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 1, 1);
-    vertex_spec_manager.BindBufferToBindingPoint(
-        scene_va_name, scene_buffer_name, 0, offsetof(as::Vertex, pos),
-        sizeof(as::Vertex));
-    vertex_spec_manager.BindBufferToBindingPoint(
-        scene_va_name, scene_buffer_name, 1, offsetof(as::Vertex, tex_coords),
-        sizeof(as::Vertex));
+      /* Bind vertex arrays to buffers */
+      // Scene
+      vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 0, 3, GL_FLOAT,
+                                                GL_FALSE, 0);
+      vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 1, 3, GL_FLOAT,
+                                                GL_FALSE, 0);
+      vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 0, 0);
+      vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 1, 1);
+      vertex_spec_manager.BindBufferToBindingPoint(
+          scene_va_name, scene_buffer_name, 0, offsetof(as::Vertex, pos),
+          sizeof(as::Vertex));
+      vertex_spec_manager.BindBufferToBindingPoint(
+          scene_va_name, scene_buffer_name, 1, offsetof(as::Vertex, tex_coords),
+          sizeof(as::Vertex));
+    }
   }
 }
 
 void ConfigSceneTextures() {
-  const std::vector<as::Mesh> meshes = scene_model.GetMeshes();
-  for (const as::Mesh mesh : meshes) {
-    const std::set<as::Texture> textures = mesh.GetTextures();
-    for (const as::Texture &texture : textures) {
-      const std::string path = texture.GetPath();
-      // Check if the texture has been loaded
-      if (texture_unit_idxs.count(path) <= 0) {
-        // Calculate the new unit index
-        const GLuint unit_idx = texture_unit_idxs.size();
-        // Load the texture
-        GLsizei width, height;
-        int comp;
-        std::vector<GLubyte> texels;
-        as::LoadTextureByStb(path, 0, width, height, comp, texels);
-        // Convert the texels from 3 channels to 4 channels to avoid GL errors
-        texels = ConvertChannels3To4(texels);
-        // Generate the texture
-        texture_manager.GenTexture(path);
-        // Bind the texture
-        texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_idx);
-        // Initialize the texture
-        texture_manager.InitTexture2D(path, GL_TEXTURE_2D, 5, GL_RGBA8, width,
-                                      height);
-        // Update the texture
-        texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
-                                        height, GL_RGBA, GL_UNSIGNED_BYTE,
-                                        texels.data());
-        texture_manager.GenMipmap(path, GL_TEXTURE_2D);
-        texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
-                                           GL_TEXTURE_MIN_FILTER,
-                                           GL_LINEAR_MIPMAP_LINEAR);
-        // Save the unit index
-        texture_unit_idxs[path] = unit_idx;
+  for (size_t scene_idx = 0; scene_idx < SCENE_SIZE; scene_idx++) {
+    const std::vector<as::Mesh> meshes = scene_model[scene_idx].GetMeshes();
+    for (const as::Mesh mesh : meshes) {
+      const std::set<as::Texture> textures = mesh.GetTextures();
+      for (const as::Texture &texture : textures) {
+        const std::string path = texture.GetPath();
+        // Check if the texture has been loaded
+        if (texture_unit_idxs.count(path) <= 0) {
+          // Calculate the new unit index
+          const GLuint unit_idx = texture_unit_idxs.size();
+          // Load the texture
+          GLsizei width, height;
+          int comp;
+          std::vector<GLubyte> texels;
+          as::LoadTextureByStb(path, 0, width, height, comp, texels);
+          // Convert the texels from 3 channels to 4 channels to avoid GL errors
+          texels = ConvertChannels3To4(texels);
+          // Generate the texture
+          texture_manager.GenTexture(path);
+          // Bind the texture
+          texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_idx);
+          // Initialize the texture
+          texture_manager.InitTexture2D(path, GL_TEXTURE_2D, 5, GL_RGBA8, width,
+                                        height);
+          // Update the texture
+          texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
+                                          height, GL_RGBA, GL_UNSIGNED_BYTE,
+                                          texels.data());
+          texture_manager.GenMipmap(path, GL_TEXTURE_2D);
+          texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
+                                             GL_TEXTURE_MIN_FILTER,
+                                             GL_LINEAR_MIPMAP_LINEAR);
+          // Save the unit index
+          texture_unit_idxs[path] = unit_idx;
+        }
       }
     }
   }
@@ -311,7 +327,7 @@ void ConfigGL() {
 void UpdateGlobalMvp() {
   const glm::mat4 identity(1.0f);
   global_mvp.proj =
-      glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 100.0f);
+      glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 1000.0f);
   global_mvp.view = camera_trans.GetTrans();
   global_mvp.model = identity;
 }
@@ -334,14 +350,16 @@ void GLUTDisplayCallback() {
   UpdateGlobalMvp();
   buffer_manager.UpdateBuffer("global_mvp_buffer");
 
-  /* Draw the scene */
-  const std::vector<as::Mesh> meshes = scene_model.GetMeshes();
-  for (size_t i = 0; i < meshes.size(); i++) {
-    const as::Mesh &mesh = meshes.at(i);
+  /* Draw the scenes */
+  const std::vector<as::Mesh> meshes = scene_model[cur_scene_idx].GetMeshes();
+  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+    const as::Mesh &mesh = meshes.at(mesh_idx);
     // Decide the vertex spec name
-    const std::string scene_va_name = "va_" + std::to_string(i);
+    const std::string scene_va_name =
+        std::to_string(cur_scene_idx) + "va_" + std::to_string(mesh_idx);
     // Decide the buffer names
-    const std::string scene_buffer_name = "mesh_" + std::to_string(i);
+    const std::string scene_buffer_name =
+        std::to_string(cur_scene_idx) + "mesh_" + std::to_string(mesh_idx);
     const std::string scene_idxs_buffer_name = scene_buffer_name + "_idxs";
     // Get the array indexes
     const std::vector<size_t> idxs = mesh.GetIdxs();
@@ -406,7 +424,10 @@ void GLUTSpecialCallback(int key, int x, int y) {
       printf("Page up is pressed at (%d, %d)\n", x, y);
       break;
     case GLUT_KEY_LEFT:
-      printf("Left arrow is pressed at (%d, %d)\n", x, y);
+      cur_scene_idx = (cur_scene_idx + SCENE_SIZE - 1) % SCENE_SIZE;
+      break;
+    case GLUT_KEY_RIGHT:
+      cur_scene_idx = (cur_scene_idx + SCENE_SIZE + 1) % SCENE_SIZE;
       break;
     default:
       printf("Other special key is pressed at (%d, %d)\n", x, y);
