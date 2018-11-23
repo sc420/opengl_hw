@@ -52,8 +52,9 @@ glm::vec2 last_mouse_pos;
  ******************************************************************************/
 
 // Camera transformations
-as::CameraTrans camera_trans(glm::vec3(0.0f, 30.0f, 50.0f),
-                             glm::vec3(0.5f, 0.0f, 0.0f));
+as::CameraTrans camera_trans(glm::vec3(0.0f, 5.0f, 0.0f),
+                             glm::vec3(-0.3f * glm::half_pi<float>(),
+                                       glm::half_pi<float>(), 0.0f));
 
 /*******************************************************************************
  * Models
