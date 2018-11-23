@@ -285,6 +285,14 @@ void GLUTDisplayCallback() {
     const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
     const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
 
+    const std::set<as::Texture> textures = mesh.GetTextures();
+
+    // std::cerr << "Mesh " << mesh.GetName() << std::endl;
+    // for (const as::Texture texture : textures) {
+    //  std::cerr << texture.GetPath() << " " << texture.GetType() << std::endl;
+    //}
+    // throw std::runtime_error("debug");
+
     /* Initialize buffers */
     // Scene
     buffer_manager.InitBuffer("scene_buffer", GL_ARRAY_BUFFER, vertices_mem_sz,

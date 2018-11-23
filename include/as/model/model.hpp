@@ -12,6 +12,8 @@
 #include "as/model/node.hpp"
 #include "as/model/texture.hpp"
 
+namespace fs = std::experimental::filesystem;
+
 namespace as {
 class Model {
  public:
@@ -28,19 +30,23 @@ class Model {
 
   void Reset();
 
-  void ProcessNode(const aiNode *ai_node, const aiScene *ai_scene);
+  void ProcessNode(const fs::path &dir, const aiScene *ai_scene,
+                   const aiNode *ai_node);
 
-  const Mesh ProcessMesh(const aiMesh *ai_mesh, const aiScene *ai_scene);
+  const Mesh ProcessMesh(const fs::path &dir, const aiScene *ai_scene,
+                         const aiMesh *ai_mesh);
 
   std::vector<Vertex> ProcessMeshVertices(const aiMesh *ai_mesh) const;
 
   std::vector<size_t> ProcessMeshIdxs(const aiMesh *ai_mesh) const;
 
-  std::set<Texture> ProcessMeshTextures(const aiMesh *ai_mesh,
-                                        const aiScene *ai_scene) const;
+  std::set<Texture> ProcessMeshTextures(const fs::path &dir,
+                                        const aiScene *ai_scene,
+                                        const aiMesh *ai_mesh) const;
 
   std::set<Texture> ProcessMaterialTextures(
-      const aiMaterial *ai_material, const aiTextureType ai_texture_type) const;
+      const fs::path &dir, const aiMaterial *ai_material,
+      const aiTextureType ai_texture_type) const;
 
   std::string AiTextureTypeToStr(const aiTextureType ai_texture_type) const;
 };

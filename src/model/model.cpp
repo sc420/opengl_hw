@@ -11,11 +11,13 @@ void as::Model::LoadFile(const std::string &path) {
     std::cerr << importer.GetErrorString() << std::endl;
     throw std::runtime_error("Could not read the file by Assimp");
   }
-  const std::string dir = path.substr(0, path.find_last_of('/'));
+  // Get the directory
+  const fs::path p(path);
+  const std::string dir = p.parent_path().string();
   // Reset the model
   Reset();
   // Process the root node
-  ProcessNode(scene->mRootNode, scene);
+  ProcessNode(dir, scene, scene->mRootNode);
 }
 
 const std::vector<as::Node> &as::Model::GetNodes() const { return nodes_; }
@@ -27,7 +29,8 @@ void as::Model::Reset() {
   meshes_.clear();
 }
 
-void as::Model::ProcessNode(const aiNode *ai_node, const aiScene *ai_scene) {
+void as::Model::ProcessNode(const fs::path &dir, const aiScene *ai_scene,
+                            const aiNode *ai_node) {
   std::queue<const aiNode *> waiting_nodes;
   std::queue<Node *> parents;
   waiting_nodes.push(ai_node);
@@ -44,7 +47,7 @@ void as::Model::ProcessNode(const aiNode *ai_node, const aiScene *ai_scene) {
     // Process each mesh in the node
     for (size_t i = 0; i < cur_ai_node->mNumMeshes; i++) {
       const aiMesh *ai_mesh = ai_scene->mMeshes[cur_ai_node->mMeshes[i]];
-      const Mesh mesh = ProcessMesh(ai_mesh, ai_scene);
+      const Mesh mesh = ProcessMesh(dir, ai_scene, ai_mesh);
       node.AddMesh(&mesh);
       // Add the mesh to the list
       meshes_.push_back(mesh);
@@ -63,11 +66,13 @@ void as::Model::ProcessNode(const aiNode *ai_node, const aiScene *ai_scene) {
   }
 }
 
-const as::Mesh as::Model::ProcessMesh(const aiMesh *ai_mesh,
-                                      const aiScene *ai_scene) {
+const as::Mesh as::Model::ProcessMesh(const fs::path &dir,
+                                      const aiScene *ai_scene,
+                                      const aiMesh *ai_mesh) {
   const std::vector<Vertex> vertices = ProcessMeshVertices(ai_mesh);
   const std::vector<size_t> idxs = ProcessMeshIdxs(ai_mesh);
-  const std::set<Texture> textures = ProcessMeshTextures(ai_mesh, ai_scene);
+  const std::set<Texture> textures =
+      ProcessMeshTextures(dir, ai_scene, ai_mesh);
   return Mesh(ai_mesh->mName.C_Str(), vertices, idxs, textures);
 }
 
@@ -104,23 +109,28 @@ std::vector<size_t> as::Model::ProcessMeshIdxs(const aiMesh *ai_mesh) const {
 }
 
 std::set<as::Texture> as::Model::ProcessMeshTextures(
-    const aiMesh *ai_mesh, const aiScene *ai_scene) const {
+    const fs::path &dir, const aiScene *ai_scene, const aiMesh *ai_mesh) const {
   // if (ai_mesh->mMaterialIndex >= 0) {
   const aiMaterial *ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
   std::set<Texture> diffuse_textures =
-      ProcessMaterialTextures(ai_material, aiTextureType_DIFFUSE);
+      ProcessMaterialTextures(dir, ai_material, aiTextureType_DIFFUSE);
   return diffuse_textures;
   //}
 }
 
 std::set<as::Texture> as::Model::ProcessMaterialTextures(
-    const aiMaterial *ai_material, const aiTextureType ai_texture_type) const {
+    const fs::path &dir, const aiMaterial *ai_material,
+    const aiTextureType ai_texture_type) const {
   std::set<Texture> textures;
   for (size_t i = 0; i < ai_material->GetTextureCount(ai_texture_type); i++) {
+    // Get the relative path
     aiString path;
     ai_material->GetTexture(ai_texture_type, i, &path);
+    // Build the full path
+    fs::path full_path = dir / fs::path(path.C_Str());
+    // Get type name
     const std::string type = AiTextureTypeToStr(ai_texture_type);
-    const Texture texture = Texture(path.C_Str(), type);
+    const Texture texture = Texture(full_path.string(), type);
     textures.insert(texture);
   }
   return textures;
