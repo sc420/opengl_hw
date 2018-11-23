@@ -140,7 +140,72 @@ std::vector<GLubyte> ConvertChannels3To4(const std::vector<GLubyte> data) {
   return output;
 }
 
-void ConfigTextures() {
+void ConfigSceneBuffers() {
+  const std::vector<as::Mesh> meshes = scene_model.GetMeshes();
+  for (size_t i = 0; i < meshes.size(); i++) {
+    const as::Mesh &mesh = meshes.at(i);
+    // Decide the vertex spec name
+    const std::string scene_va_name = "va_" + std::to_string(i);
+    // Decide the buffer names
+    const std::string scene_buffer_name = "mesh_" + std::to_string(i);
+    const std::string scene_idxs_buffer_name = scene_buffer_name + "_idxs";
+    // Get mesh data
+    const std::vector<as::Vertex> vertices = mesh.GetVertices();
+    const std::vector<size_t> idxs = mesh.GetIdxs();
+    // Get memory size of mesh data
+    const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
+    const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
+
+    /* Generate buffers */
+    // Scene
+    buffer_manager.GenBuffer(scene_buffer_name);
+    // Scene array indexes
+    buffer_manager.GenBuffer(scene_idxs_buffer_name);
+
+    /* Bind buffers */
+    // Scene
+    buffer_manager.BindBuffer(scene_buffer_name, GL_ARRAY_BUFFER);
+    // Scene array indexes
+    buffer_manager.BindBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER);
+
+    /* Initialize buffers */
+    // Scene
+    buffer_manager.InitBuffer(scene_buffer_name, GL_ARRAY_BUFFER,
+                              vertices_mem_sz, NULL, GL_STATIC_DRAW);
+    // Scene array indexes
+    buffer_manager.InitBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
+                              idxs_mem_sz, NULL, GL_STATIC_DRAW);
+
+    /* Update buffers */
+    // Scene
+    buffer_manager.UpdateBuffer(scene_buffer_name, GL_ARRAY_BUFFER, 0,
+                                vertices_mem_sz, vertices.data());
+    // Scene array indexes
+    buffer_manager.UpdateBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
+                                0, idxs_mem_sz, idxs.data());
+
+    /* Create vertex arrays */
+    // Scene
+    vertex_spec_manager.GenVertexArray(scene_va_name);
+
+    /* Bind vertex arrays to buffers */
+    // Scene
+    vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 0, 3, GL_FLOAT,
+                                              GL_FALSE, 0);
+    vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 1, 3, GL_FLOAT,
+                                              GL_FALSE, 0);
+    vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 0, 0);
+    vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 1, 1);
+    vertex_spec_manager.BindBufferToBindingPoint(
+        scene_va_name, scene_buffer_name, 0, offsetof(as::Vertex, pos),
+        sizeof(as::Vertex));
+    vertex_spec_manager.BindBufferToBindingPoint(
+        scene_va_name, scene_buffer_name, 1, offsetof(as::Vertex, tex_coords),
+        sizeof(as::Vertex));
+  }
+}
+
+void ConfigSceneTextures() {
   const std::vector<as::Mesh> meshes = scene_model.GetMeshes();
   for (const as::Mesh mesh : meshes) {
     const std::set<as::Texture> textures = mesh.GetTextures();
@@ -214,22 +279,10 @@ void ConfigGL() {
   buffer_manager.GenBuffer("global_mvp_buffer");
   // Model transformation
   buffer_manager.GenBuffer("model_trans_buffer");
-  // Scene
-  buffer_manager.GenBuffer("scene_buffer");
-  // Scene array indexes
-  buffer_manager.GenBuffer("scene_idxs_buffer");
-
-  /* Create vertex arrays */
-  // Scene
-  vertex_spec_manager.GenVertexArray("scene_va");
 
   /* Bind buffer targets to be repeatedly used later */
   // Global MVP
   buffer_manager.BindBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER);
-  // Scene
-  buffer_manager.BindBuffer("scene_buffer", GL_ARRAY_BUFFER);
-  // Scene array indexes
-  buffer_manager.BindBuffer("scene_idxs_buffer", GL_ELEMENT_ARRAY_BUFFER);
 
   /* Initialize buffers */
   // Global MVP
@@ -246,23 +299,9 @@ void ConfigGL() {
   uniform_manager.AssignUniformBlockToBindingPoint("program", "GlobalMvp", 0);
   uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
 
-  /* Bind vertex arrays to buffers */
-  // Scene
-  vertex_spec_manager.SpecifyVertexArrayOrg("scene_va", 0, 3, GL_FLOAT,
-                                            GL_FALSE, 0);
-  vertex_spec_manager.SpecifyVertexArrayOrg("scene_va", 1, 3, GL_FLOAT,
-                                            GL_FALSE, 0);
-  vertex_spec_manager.AssocVertexAttribToBindingPoint("scene_va", 0, 0);
-  vertex_spec_manager.AssocVertexAttribToBindingPoint("scene_va", 1, 1);
-  vertex_spec_manager.BindBufferToBindingPoint("scene_va", "scene_buffer", 0,
-                                               offsetof(as::Vertex, pos),
-                                               sizeof(as::Vertex));
-  vertex_spec_manager.BindBufferToBindingPoint("scene_va", "scene_buffer", 1,
-                                               offsetof(as::Vertex, tex_coords),
-                                               sizeof(as::Vertex));
-
-  /* Configure textures */
-  ConfigTextures();
+  /* Configure scenes */
+  ConfigSceneBuffers();
+  ConfigSceneTextures();
 }
 
 /*******************************************************************************
@@ -297,28 +336,17 @@ void GLUTDisplayCallback() {
 
   /* Draw the scene */
   const std::vector<as::Mesh> meshes = scene_model.GetMeshes();
-  for (const as::Mesh mesh : meshes) {
-    const std::vector<as::Vertex> vertices = mesh.GetVertices();
+  for (size_t i = 0; i < meshes.size(); i++) {
+    const as::Mesh &mesh = meshes.at(i);
+    // Decide the vertex spec name
+    const std::string scene_va_name = "va_" + std::to_string(i);
+    // Decide the buffer names
+    const std::string scene_buffer_name = "mesh_" + std::to_string(i);
+    const std::string scene_idxs_buffer_name = scene_buffer_name + "_idxs";
+    // Get the array indexes
     const std::vector<size_t> idxs = mesh.GetIdxs();
-    const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
-    const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
+    // Get the textures
     const std::set<as::Texture> textures = mesh.GetTextures();
-
-    /* Initialize buffers */
-    // Scene
-    buffer_manager.InitBuffer("scene_buffer", GL_ARRAY_BUFFER, vertices_mem_sz,
-                              NULL, GL_STATIC_DRAW);
-    // Scene VA indexes
-    buffer_manager.InitBuffer("scene_idxs_buffer", GL_ELEMENT_ARRAY_BUFFER,
-                              idxs_mem_sz, NULL, GL_STATIC_DRAW);
-
-    /* Update buffers */
-    // Scene
-    buffer_manager.UpdateBuffer("scene_buffer", GL_ARRAY_BUFFER, 0,
-                                vertices_mem_sz, vertices.data());
-    // Scene VA indexes
-    buffer_manager.UpdateBuffer("scene_idxs_buffer", GL_ELEMENT_ARRAY_BUFFER, 0,
-                                idxs_mem_sz, idxs.data());
 
     /* Update textures */
     // TODO: There is only diffuse texture
@@ -333,9 +361,9 @@ void GLUTDisplayCallback() {
     }
 
     /* Draw vertex arrays */
-    vertex_spec_manager.BindVertexArray("scene_va");
-    buffer_manager.BindBuffer("scene_buffer");
-    buffer_manager.BindBuffer("scene_idxs_buffer");
+    vertex_spec_manager.BindVertexArray(scene_va_name);
+    buffer_manager.BindBuffer(scene_buffer_name);
+    buffer_manager.BindBuffer(scene_idxs_buffer_name);
     glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, 0);
   }
 
