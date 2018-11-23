@@ -69,9 +69,6 @@
     <ClInclude Include="..\include\as\gl\common.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\as\gl\texture.hpp">
-      <Filter>include\as\gl</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\as\model\model.hpp">
       <Filter>include\as\model</Filter>
     </ClInclude>
@@ -83,6 +80,12 @@
     </ClInclude>
     <ClInclude Include="..\include\as\model\node.hpp">
       <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\texture.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\texture_manager.hpp">
+      <Filter>include\as\gl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -113,9 +116,6 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Assignment2\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\texture.cpp">
-      <Filter>src\gl</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\model\model.cpp">
       <Filter>src\model</Filter>
     </ClCompile>
@@ -127,6 +127,12 @@
     </ClCompile>
     <ClCompile Include="..\src\model\node.cpp">
       <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\texture.cpp">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gl\texture_manager.cpp">
+      <Filter>src\gl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

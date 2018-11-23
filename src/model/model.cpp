@@ -67,7 +67,8 @@ const as::Mesh as::Model::ProcessMesh(const aiMesh *ai_mesh,
                                       const aiScene *ai_scene) {
   const std::vector<Vertex> vertices = ProcessMeshVertices(ai_mesh);
   const std::vector<size_t> idxs = ProcessMeshIdxs(ai_mesh);
-  return Mesh(ai_mesh->mName.C_Str(), vertices, idxs);
+  const std::set<Texture> textures = ProcessMeshTextures(ai_mesh, ai_scene);
+  return Mesh(ai_mesh->mName.C_Str(), vertices, idxs, textures);
 }
 
 std::vector<as::Vertex> as::Model::ProcessMeshVertices(
@@ -100,4 +101,73 @@ std::vector<size_t> as::Model::ProcessMeshIdxs(const aiMesh *ai_mesh) const {
     }
   }
   return idxs;
+}
+
+std::set<as::Texture> as::Model::ProcessMeshTextures(
+    const aiMesh *ai_mesh, const aiScene *ai_scene) const {
+  // if (ai_mesh->mMaterialIndex >= 0) {
+  const aiMaterial *ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
+  std::set<Texture> diffuse_textures =
+      ProcessMaterialTextures(ai_material, aiTextureType_DIFFUSE);
+  return diffuse_textures;
+  //}
+}
+
+std::set<as::Texture> as::Model::ProcessMaterialTextures(
+    const aiMaterial *ai_material, const aiTextureType ai_texture_type) const {
+  std::set<Texture> textures;
+  for (size_t i = 0; i < ai_material->GetTextureCount(ai_texture_type); i++) {
+    aiString path;
+    ai_material->GetTexture(ai_texture_type, i, &path);
+    const std::string type = AiTextureTypeToStr(ai_texture_type);
+    const Texture texture = Texture(path.C_Str(), type);
+    textures.insert(texture);
+  }
+  return textures;
+}
+
+std::string as::Model::AiTextureTypeToStr(
+    const aiTextureType ai_texture_type) const {
+  switch (ai_texture_type) {
+    case aiTextureType_DIFFUSE: {
+      return "DIFFUSE";
+    } break;
+    case aiTextureType_SPECULAR: {
+      return "SPECULAR";
+    } break;
+    case aiTextureType_AMBIENT: {
+      return "AMBIENT";
+    } break;
+    case aiTextureType_EMISSIVE: {
+      return "EMISSIVE";
+    } break;
+    case aiTextureType_HEIGHT: {
+      return "HEIGHT";
+    } break;
+    case aiTextureType_NORMALS: {
+      return "NORMALS";
+    } break;
+    case aiTextureType_SHININESS: {
+      return "SHININESS";
+    } break;
+    case aiTextureType_OPACITY: {
+      return "OPACITY";
+    } break;
+    case aiTextureType_DISPLACEMENT: {
+      return "DISPLACEMENT";
+    } break;
+    case aiTextureType_LIGHTMAP: {
+      return "LIGHTMAP";
+    } break;
+    case aiTextureType_REFLECTION: {
+      return "REFLECTION";
+    } break;
+    case aiTextureType_UNKNOWN: {
+      return "UNKNOWN";
+    } break;
+    default: {
+      throw std::runtime_error("Unknown texture type '" +
+                               std::to_string(ai_texture_type) + "'");
+    }
+  }
 }
