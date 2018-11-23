@@ -14,7 +14,7 @@ layout(location = 0) out vec2 vs_tex_coords;
 
 void main() {
   mat4 global_trans = global_mvp.proj * global_mvp.view * global_mvp.model;
-  mat4 trans = global_trans;  // * model_trans.trans;
+  mat4 trans = global_trans;
   gl_Position = trans * vec4(in_pos, 1.0f);
   vs_tex_coords = in_tex_coords;
 }

@@ -69,11 +69,6 @@ as::Model scene_model;
 // Texture unit indexes
 std::map<std::string, GLuint> texture_unit_idxs;
 
-// Metal
-std::vector<GLubyte> metal_texels;
-GLsizei metal_width;
-GLsizei metal_height;
-
 /*******************************************************************************
  * GL States (Feed to GL)
  ******************************************************************************/
@@ -126,13 +121,6 @@ void InitGLEW() {
 void LoadModels() {
   // Scene
   scene_model.LoadFile("assets/models/dabrovic-sponza/sponza.obj");
-}
-
-void LoadTextures() {
-  int comp;
-  // Metal
-  as::LoadTextureByStb("assets/textures/metal.png", 4, metal_width,
-                       metal_height, comp, metal_texels);
 }
 
 /*******************************************************************************
@@ -235,10 +223,6 @@ void ConfigGL() {
   // Scene
   vertex_spec_manager.GenVertexArray("scene_va");
 
-  /* Create textures */
-  // Metal
-  texture_manager.GenTexture("metal_tex");
-
   /* Bind buffer targets to be repeatedly used later */
   // Global MVP
   buffer_manager.BindBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER);
@@ -247,34 +231,15 @@ void ConfigGL() {
   // Scene array indexes
   buffer_manager.BindBuffer("scene_idxs_buffer", GL_ELEMENT_ARRAY_BUFFER);
 
-  /* Bind textures to be repeatedly used later */
-  // Metal
-  texture_manager.BindTexture("metal_tex", GL_TEXTURE_2D, 0);
-
   /* Initialize buffers */
   // Global MVP
   buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER,
                             sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
 
-  /* Initialize textures */
-  // Metal
-  texture_manager.InitTexture2D("metal_tex", GL_TEXTURE_2D, 3, GL_RGBA8,
-                                metal_width, metal_height);
-
   /* Update buffers */
   // Global MVP
   buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(GlobalMvp), &global_mvp);
-
-  /* Update textures */
-  // Metal
-  texture_manager.UpdateTexture2D("metal_tex", GL_TEXTURE_2D, 0, 0, 0,
-                                  metal_width, metal_height, GL_RGBA,
-                                  GL_UNSIGNED_BYTE, metal_texels.data());
-  texture_manager.GenMipmap("metal_tex", GL_TEXTURE_2D);
-  texture_manager.SetTextureParamInt("metal_tex", GL_TEXTURE_2D,
-                                     GL_TEXTURE_MIN_FILTER,
-                                     GL_LINEAR_MIPMAP_LINEAR);
 
   /* Bind uniform blocks to buffers */
   // Global MVP
@@ -363,6 +328,7 @@ void GLUTDisplayCallback() {
       texture_manager.BindTexture(path);
       // Get the unit index
       const GLuint unit_idx = texture_unit_idxs.at(path);
+      // Set the texture handler to the unit index
       uniform_manager.SetUniform1Int("program", "tex_hdlr", unit_idx);
     }
 
@@ -561,7 +527,6 @@ void EnterGLUTLoop() { glutMainLoop(); }
 int main(int argc, char *argv[]) {
   try {
     LoadModels();
-    LoadTextures();
     InitGLUT(argc, argv);
     InitGLEW();
     ConfigGL();
