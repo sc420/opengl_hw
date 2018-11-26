@@ -45,8 +45,8 @@ glm::vec2 last_mouse_pos;
  ******************************************************************************/
 
 // Camera transformations
-as::CameraTrans camera_trans(glm::vec3(0.0f, 5.0f, 0.0f),
-                             glm::vec3(-0.3f * glm::half_pi<float>(),
+as::CameraTrans camera_trans(glm::vec3(-12.0f, 2.0f, 0.0f),
+                             glm::vec3(-0.15f * glm::half_pi<float>(),
                                        glm::half_pi<float>(), 0.0f));
 
 /*******************************************************************************
@@ -136,9 +136,9 @@ void LoadModels() {
   const unsigned int flags =
       aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate;
   // First scene
-  scene_model[0].LoadFile("assets/models/dabrovic-sponza/sponza.obj", flags);
+  scene_model[0].LoadFile("assets/models/crytek-sponza/sponza.obj", flags);
   // Second scene
-  scene_model[1].LoadFile("assets/models/crytek-sponza/sponza.obj", flags);
+  scene_model[1].LoadFile("assets/models/dabrovic-sponza/sponza.obj", flags);
   // First skybox
   skybox_model[0].LoadFile("assets/models/sea/skybox.obj", flags);
   // Second skybox
@@ -524,7 +524,7 @@ void GLUTDisplayCallback() {
   buffer_manager.UpdateBuffer("global_mvp_buffer");
 
   /* Update model transformations */
-  const float scale_factors[SCENE_SIZE] = {1.0f, 0.01f};
+  const float scale_factors[SCENE_SIZE] = {0.01f, 1.0f};
   model_trans.trans =
       glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors[cur_scene_idx]));
   buffer_manager.UpdateBuffer("model_trans_buffer");
