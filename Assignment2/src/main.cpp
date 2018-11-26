@@ -4,6 +4,8 @@
 #include "as/model/model.hpp"
 #include "as/trans/camera.hpp"
 
+namespace fs = std::experimental::filesystem;
+
 /*******************************************************************************
  * Constants
  ******************************************************************************/
@@ -14,7 +16,7 @@ constexpr auto CAMERA_MOVING_STEP = 0.2f;
 constexpr auto CAMERA_ROTATION_SENSITIVITY = 0.005f;
 constexpr auto CAMERA_ZOOMING_STEP = 5.0f;
 constexpr auto SCENE_SIZE = 2;
-constexpr auto SKYBOX_SIZE = 1;
+constexpr auto SKYBOX_SIZE = 2;
 constexpr auto NUM_MIPMAP_LEVEL = 5;
 
 /*******************************************************************************
@@ -68,6 +70,7 @@ std::map<std::string, GLuint> texture_unit_idxs;
  ******************************************************************************/
 
 size_t cur_scene_idx = 0;
+size_t cur_skybox_idx = 0;
 
 /*******************************************************************************
  * GL Managers
@@ -137,7 +140,9 @@ void LoadModels() {
   // Second scene
   scene_model[1].LoadFile("assets/models/crytek-sponza/sponza.obj", flags);
   // First skybox
-  skybox_model[0].LoadFile("assets/models/skybox/skybox.obj", flags);
+  skybox_model[0].LoadFile("assets/models/sea/skybox.obj", flags);
+  // Second skybox
+  skybox_model[1].LoadFile("assets/models/ame_shadow/skybox.obj", flags);
 }
 
 /*******************************************************************************
@@ -311,12 +316,8 @@ void ConfigSkyboxBuffers() {
 
 void ConfigSkyboxTextures() {
   static const std::map<std::string, size_t> path_to_target_idx = {
-      {"assets\\models\\skybox\\textures\\right.jpg", 0},
-      {"assets\\models\\skybox\\textures\\left.jpg", 1},
-      {"assets\\models\\skybox\\textures\\top.jpg", 2},
-      {"assets\\models\\skybox\\textures\\bottom.jpg", 3},
-      {"assets\\models\\skybox\\textures\\front.jpg", 4},
-      {"assets\\models\\skybox\\textures\\back.jpg", 5}};
+      {"right.jpg", 0},  {"left.jpg", 1},  {"top.jpg", 2},
+      {"bottom.jpg", 3}, {"front.jpg", 4}, {"back.jpg", 5}};
   for (size_t scene_idx = 0; scene_idx < SKYBOX_SIZE; scene_idx++) {
     const std::vector<as::Mesh> meshes = skybox_model[scene_idx].GetMeshes();
     for (const as::Mesh mesh : meshes) {
@@ -327,8 +328,11 @@ void ConfigSkyboxTextures() {
         if (texture_unit_idxs.count(path) > 0) {
           continue;
         }
+        // Get the file name
+        const fs::path fs_path(path);
+        const std::string file_name = fs_path.filename().string();
         // Calculate the target
-        const size_t target_idx = path_to_target_idx.at(path);
+        const size_t target_idx = path_to_target_idx.at(file_name);
         const GLenum target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + target_idx;
         // Calculate the new unit index
         const GLuint unit_idx = texture_unit_idxs.size();
@@ -534,8 +538,9 @@ void GLUTDisplayCallback() {
 
   /* Draw the skyboxes */
   program_manager.UseProgram("skybox");
-  const std::string skybox_group_name = GetSkyboxGroupName(0);
-  const std::vector<as::Mesh> skybox_meshes = skybox_model[0].GetMeshes();
+  const std::string skybox_group_name = GetSkyboxGroupName(cur_skybox_idx);
+  const std::vector<as::Mesh> skybox_meshes =
+      skybox_model[cur_skybox_idx].GetMeshes();
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
 
   /* Swap frame buffers in double buffer mode */
@@ -553,14 +558,14 @@ void GLUTReshapeCallback(int width, int height) {
 void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   pressed_keys[key] = true;
   switch (key) {
-    case 'r':
+    case 'r': {
       // Reset camera transformation
       camera_trans.ResetTrans();
       UpdateGlobalMvp();
-      break;
-    case 27:  // Escape
+    } break;
+    case 27: {  // Escape
       glutLeaveMainLoop();
-      break;
+    } break;
   }
 }
 
@@ -570,12 +575,18 @@ void GLUTKeyboardUpCallback(unsigned char key, int x, int y) {
 
 void GLUTSpecialCallback(int key, int x, int y) {
   switch (key) {
-    case GLUT_KEY_LEFT:
+    case GLUT_KEY_LEFT: {
       cur_scene_idx = (cur_scene_idx + SCENE_SIZE - 1) % SCENE_SIZE;
-      break;
-    case GLUT_KEY_RIGHT:
+    } break;
+    case GLUT_KEY_RIGHT: {
       cur_scene_idx = (cur_scene_idx + SCENE_SIZE + 1) % SCENE_SIZE;
-      break;
+    } break;
+    case GLUT_KEY_UP: {
+      cur_skybox_idx = (cur_skybox_idx + SKYBOX_SIZE - 1) % SKYBOX_SIZE;
+    } break;
+    case GLUT_KEY_DOWN: {
+      cur_skybox_idx = (cur_skybox_idx + SKYBOX_SIZE + 1) % SKYBOX_SIZE;
+    } break;
   }
 }
 
@@ -648,32 +659,34 @@ void GLUTTimerCallback(int val) {
 
 void GLUTMainMenuCallback(int id) {
   switch (id) {
-    case 2:
+    case 2: {
       glutChangeToMenuEntry(2, "New Label", 2);
-      break;
-    case 3:
+    } break;
+    case 3: {
       glutLeaveMainLoop();
-      break;
-    default:
+    } break;
+    default: {
       throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
                                "'");
+    }
   }
 }
 
 void GLUTTimerMenuCallback(int id) {
   switch (id) {
-    case 1:
+    case 1: {
       if (!timer_enabled) {
         timer_enabled = true;
         glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
       }
-      break;
-    case 2:
+    } break;
+    case 2: {
       timer_enabled = false;
-      break;
-    default:
+    } break;
+    default: {
       throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
                                "'");
+    }
   }
 }
 
