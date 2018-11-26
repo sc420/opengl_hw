@@ -47,7 +47,15 @@ class TextureManager {
                        const GLsizei height, const GLenum fmt,
                        const GLenum type, const GLvoid *data);
 
+  void UpdateCubeMapTexture2D(const std::string &tex_name, const GLenum target,
+                              const GLint mipmap_level, const GLint x_ofs,
+                              const GLint y_ofs, const GLsizei width,
+                              const GLsizei height, const GLenum fmt,
+                              const GLenum type, const GLvoid *data);
+
   void UpdateTexture2D(const std::string &tex_name, const GLenum target);
+
+  void UpdateCubeMapTexture2D(const std::string &tex_name, const GLenum target);
 
   void GenMipmap(const std::string &tex_name, const GLenum target);
 

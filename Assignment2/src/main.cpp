@@ -15,6 +15,7 @@ constexpr auto CAMERA_ROTATION_SENSITIVITY = 0.005f;
 constexpr auto CAMERA_ZOOMING_STEP = 5.0f;
 constexpr auto SCENE_SIZE = 2;
 constexpr auto SKYBOX_SIZE = 1;
+constexpr auto NUM_MIPMAP_LEVEL = 5;
 
 /*******************************************************************************
  * Timers
@@ -145,6 +146,10 @@ std::string GetSceneGroupName(const size_t scene_idx) {
   return "scene" + std::to_string(scene_idx);
 }
 
+std::string GetSkyboxGroupName(const size_t scene_idx) {
+  return "skybox" + std::to_string(scene_idx);
+}
+
 std::string GetMeshVAName(const std::string &group_name,
                           const size_t mesh_idx) {
   return "va/" + group_name + "/" + std::to_string(mesh_idx);
@@ -196,39 +201,39 @@ void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
     const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
 
     /* Generate buffers */
-    // Scene
+    // VA
     buffer_manager.GenBuffer(scene_buffer_name);
-    // Scene array indexes
+    // VA indexes
     buffer_manager.GenBuffer(scene_idxs_buffer_name);
 
     /* Bind buffers */
-    // Scene
+    // VA
     buffer_manager.BindBuffer(scene_buffer_name, GL_ARRAY_BUFFER);
-    // Scene array indexes
+    // VA indexes
     buffer_manager.BindBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER);
 
     /* Initialize buffers */
-    // Scene
+    // VA
     buffer_manager.InitBuffer(scene_buffer_name, GL_ARRAY_BUFFER,
                               vertices_mem_sz, NULL, GL_STATIC_DRAW);
-    // Scene array indexes
+    // VA indexes
     buffer_manager.InitBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
                               idxs_mem_sz, NULL, GL_STATIC_DRAW);
 
     /* Update buffers */
-    // Scene
+    // VA
     buffer_manager.UpdateBuffer(scene_buffer_name, GL_ARRAY_BUFFER, 0,
                                 vertices_mem_sz, vertices.data());
-    // Scene array indexes
+    // VA indexes
     buffer_manager.UpdateBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
                                 0, idxs_mem_sz, idxs.data());
 
     /* Create vertex arrays */
-    // Scene
+    // VA
     vertex_spec_manager.GenVertexArray(scene_va_name);
 
     /* Bind vertex arrays to buffers */
-    // Scene
+    // VA
     vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 0, 3, GL_FLOAT,
                                               GL_FALSE, 0);
     vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 1, 3, GL_FLOAT,
@@ -259,34 +264,102 @@ void ConfigSceneTextures() {
       for (const as::Texture &texture : textures) {
         const std::string path = texture.GetPath();
         // Check if the texture has been loaded
-        if (texture_unit_idxs.count(path) <= 0) {
-          // Calculate the new unit index
-          const GLuint unit_idx = texture_unit_idxs.size();
-          // Load the texture
-          GLsizei width, height;
-          int comp;
-          std::vector<GLubyte> texels;
-          as::LoadTextureByStb(path, 0, width, height, comp, texels);
-          // Convert the texels from 3 channels to 4 channels to avoid GL errors
-          texels = ConvertChannels3To4(texels);
-          // Generate the texture
-          texture_manager.GenTexture(path);
-          // Bind the texture
-          texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_idx);
-          // Initialize the texture
-          texture_manager.InitTexture2D(path, GL_TEXTURE_2D, 5, GL_RGBA8, width,
-                                        height);
-          // Update the texture
-          texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
-                                          height, GL_RGBA, GL_UNSIGNED_BYTE,
-                                          texels.data());
-          texture_manager.GenMipmap(path, GL_TEXTURE_2D);
-          texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
-                                             GL_TEXTURE_MIN_FILTER,
-                                             GL_LINEAR_MIPMAP_LINEAR);
-          // Save the unit index
-          texture_unit_idxs[path] = unit_idx;
+        if (texture_unit_idxs.count(path) > 0) {
+          continue;
         }
+        // Calculate the new unit index
+        const GLuint unit_idx = texture_unit_idxs.size();
+        // Load the texture
+        GLsizei width, height;
+        int comp;
+        std::vector<GLubyte> texels;
+        as::LoadTextureByStb(path, 0, width, height, comp, texels);
+        // Convert the texels from 3 channels to 4 channels to avoid GL errors
+        texels = ConvertChannels3To4(texels);
+        // Generate the texture
+        texture_manager.GenTexture(path);
+        // Bind the texture
+        texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_idx);
+        // Initialize the texture
+        texture_manager.InitTexture2D(path, GL_TEXTURE_2D, NUM_MIPMAP_LEVEL,
+                                      GL_RGBA8, width, height);
+        // Update the texture
+        texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
+                                        height, GL_RGBA, GL_UNSIGNED_BYTE,
+                                        texels.data());
+        texture_manager.GenMipmap(path, GL_TEXTURE_2D);
+        texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
+                                           GL_TEXTURE_MIN_FILTER,
+                                           GL_LINEAR_MIPMAP_LINEAR);
+        texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
+                                           GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // Save the unit index
+        texture_unit_idxs[path] = unit_idx;
+      }
+    }
+  }
+}
+
+void ConfigSkyboxBuffers() {
+  for (size_t skybox_idx = 0; skybox_idx < SKYBOX_SIZE; skybox_idx++) {
+    const std::string group_name = GetSkyboxGroupName(skybox_idx);
+    ConfigModelBuffers(skybox_model[skybox_idx], group_name);
+  }
+}
+
+void ConfigSkyboxTextures() {
+  static const std::map<std::string, size_t> path_to_target_idx = {
+      {"assets\\models\\skybox\\textures\\right.jpg", 0},
+      {"assets\\models\\skybox\\textures\\left.jpg", 1},
+      {"assets\\models\\skybox\\textures\\top.jpg", 2},
+      {"assets\\models\\skybox\\textures\\bottom.jpg", 3},
+      {"assets\\models\\skybox\\textures\\back.jpg", 4},
+      {"assets\\models\\skybox\\textures\\front.jpg", 5}};
+  for (size_t scene_idx = 0; scene_idx < SKYBOX_SIZE; scene_idx++) {
+    const std::vector<as::Mesh> meshes = skybox_model[scene_idx].GetMeshes();
+    for (const as::Mesh mesh : meshes) {
+      const std::set<as::Texture> textures = mesh.GetTextures();
+      for (const as::Texture &texture : textures) {
+        const std::string path = texture.GetPath();
+        // Check if the texture has been loaded
+        if (texture_unit_idxs.count(path) > 0) {
+          continue;
+        }
+        // Calculate the target
+        const size_t target_idx = path_to_target_idx.at(path);
+        const GLenum target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + target_idx;
+        // Calculate the new unit index
+        const GLuint unit_idx = texture_unit_idxs.size();
+        // Load the texture
+        GLsizei width, height;
+        int comp;
+        std::vector<GLubyte> texels;
+        as::LoadTextureByStb(path, 0, width, height, comp, texels);
+        // Convert the texels from 3 channels to 4 channels to avoid GL errors
+        texels = ConvertChannels3To4(texels);
+        // Generate the texture
+        texture_manager.GenTexture(path);
+        // Bind the texture
+        texture_manager.BindTexture(path, GL_TEXTURE_CUBE_MAP, unit_idx);
+        // Initialize the texture
+        texture_manager.InitTexture2D(path, GL_TEXTURE_CUBE_MAP, 1, GL_RGBA8,
+                                      width, height);
+        // Update the texture
+        texture_manager.UpdateCubeMapTexture2D(path, target, 0, 0, 0, width,
+                                               height, GL_RGBA,
+                                               GL_UNSIGNED_BYTE, texels.data());
+        texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
+                                           GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
+                                           GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
+                                           GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
+                                           GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
+                                           GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        // Save the unit index
+        texture_unit_idxs[path] = unit_idx;
       }
     }
   }
@@ -358,9 +431,13 @@ void ConfigGL() {
   uniform_manager.AssignUniformBlockToBindingPoint("program", "ModelTrans", 1);
   uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
 
-  /* Configure scenes */
+  /* Configure models */
+  // Scenes
   ConfigSceneBuffers();
   ConfigSceneTextures();
+  // Skyboxes
+  ConfigSkyboxBuffers();
+  ConfigSkyboxTextures();
 }
 
 /*******************************************************************************

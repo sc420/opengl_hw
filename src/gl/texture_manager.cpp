@@ -71,15 +71,38 @@ void as::TextureManager::UpdateTexture2D(
   update_texture_2d_prev_params_[tex_name] = prev_params;
 }
 
+void as::TextureManager::UpdateCubeMapTexture2D(
+    const std::string &tex_name, const GLenum target, const GLint mipmap_level,
+    const GLint x_ofs, const GLint y_ofs, const GLsizei width,
+    const GLsizei height, const GLenum fmt, const GLenum type,
+    const GLvoid *data) {
+  BindTexture(tex_name, GL_TEXTURE_CUBE_MAP);
+  glTexSubImage2D(target, mipmap_level, x_ofs, y_ofs, width, height, fmt, type,
+                  data);
+  // Save the parameters
+  UpdateTexture2DPrevParams prev_params = {
+      target, mipmap_level, x_ofs, y_ofs, width, height, fmt, type, data};
+  update_texture_2d_prev_params_[tex_name] = prev_params;
+}
+
 void as::TextureManager::UpdateTexture2D(const std::string &tex_name,
                                          const GLenum target) {
-  BindTexture(tex_name, target);
   const UpdateTexture2DPrevParams &prev_params =
       GetUpdateTexture2DPrevParams(tex_name);
   UpdateTexture2D(tex_name, prev_params.target, prev_params.mipmap_level,
                   prev_params.x_ofs, prev_params.y_ofs, prev_params.width,
                   prev_params.height, prev_params.fmt, prev_params.type,
                   prev_params.data);
+}
+
+void as::TextureManager::UpdateCubeMapTexture2D(const std::string &tex_name,
+                                                const GLenum target) {
+  const UpdateTexture2DPrevParams &prev_params =
+      GetUpdateTexture2DPrevParams(tex_name);
+  UpdateCubeMapTexture2D(tex_name, prev_params.target, prev_params.mipmap_level,
+                         prev_params.x_ofs, prev_params.y_ofs,
+                         prev_params.width, prev_params.height, prev_params.fmt,
+                         prev_params.type, prev_params.data);
 }
 
 void as::TextureManager::GenMipmap(const std::string &tex_name,
