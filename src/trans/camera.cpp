@@ -17,7 +17,7 @@ glm::mat4 as::CameraTrans::GetTrans() const {
   return rotate * translate;
 }
 
-void as::CameraTrans::AddEyeAxisAligned(const glm::vec3 &add_pos) {
+void as::CameraTrans::AddEyeWorldSpace(const glm::vec3 &add_pos) {
   eye_ += add_pos;
 }
 

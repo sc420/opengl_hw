@@ -567,20 +567,11 @@ void GLUTKeyboardUpCallback(unsigned char key, int x, int y) {
 
 void GLUTSpecialCallback(int key, int x, int y) {
   switch (key) {
-    case GLUT_KEY_F1:
-      printf("F1 is pressed at (%d, %d)\n", x, y);
-      break;
-    case GLUT_KEY_PAGE_UP:
-      printf("Page up is pressed at (%d, %d)\n", x, y);
-      break;
     case GLUT_KEY_LEFT:
       cur_scene_idx = (cur_scene_idx + SCENE_SIZE - 1) % SCENE_SIZE;
       break;
     case GLUT_KEY_RIGHT:
       cur_scene_idx = (cur_scene_idx + SCENE_SIZE + 1) % SCENE_SIZE;
-      break;
-    default:
-      printf("Other special key is pressed at (%d, %d)\n", x, y);
       break;
   }
 }
@@ -636,11 +627,13 @@ void GLUTTimerCallback(int val) {
     UpdateGlobalMvp();
   }
   if (pressed_keys['z']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0f, 1.0f, 0.0f));
+    camera_trans.AddEyeWorldSpace(CAMERA_MOVING_STEP *
+                                  glm::vec3(0.0f, 1.0f, 0.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['x']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0f, -1.0f, 0.0f));
+    camera_trans.AddEyeWorldSpace(CAMERA_MOVING_STEP *
+                                  glm::vec3(0.0f, -1.0f, 0.0f));
     UpdateGlobalMvp();
   }
 

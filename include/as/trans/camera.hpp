@@ -9,7 +9,7 @@ class CameraTrans {
 
   glm::mat4 GetTrans() const;
 
-  void AddEyeAxisAligned(const glm::vec3 &add_pos);
+  void AddEyeWorldSpace(const glm::vec3 &add_pos);
 
   void AddEye(const glm::vec3 &add_dir);
 
