@@ -130,17 +130,14 @@ void InitGLEW() {
  ******************************************************************************/
 
 void LoadModels() {
-  const unsigned int scene_flags =
+  const unsigned int flags =
       aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate;
-  const unsigned int skybox_flags = 0;
   // First scene
-  scene_model[0].LoadFile("assets/models/dabrovic-sponza/sponza.obj",
-                          scene_flags);
+  scene_model[0].LoadFile("assets/models/dabrovic-sponza/sponza.obj", flags);
   // Second scene
-  scene_model[1].LoadFile("assets/models/crytek-sponza/sponza.obj",
-                          scene_flags);
+  scene_model[1].LoadFile("assets/models/crytek-sponza/sponza.obj", flags);
   // First skybox
-  skybox_model[0].LoadFile("assets/models/skybox/skybox.obj", skybox_flags);
+  skybox_model[0].LoadFile("assets/models/skybox/skybox.obj", flags);
 }
 
 /*******************************************************************************
