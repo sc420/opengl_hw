@@ -1,9 +1,8 @@
 #include "as/model/model.hpp"
 
-void as::Model::LoadFile(const std::string &path) {
+void as::Model::LoadFile(const std::string &path, const unsigned int flags) {
   Assimp::Importer importer;
-  const aiScene *scene = importer.ReadFile(
-      path, aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate);
+  const aiScene *scene = importer.ReadFile(path, flags);
   // Check errors
   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
       !scene->mRootNode) {

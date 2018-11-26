@@ -136,11 +136,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="assets\shaders\fragment.frag">
+    <CopyFileToFolders Include="assets\shaders\scene.frag">
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
-    <CopyFileToFolders Include="assets\shaders\vertex.vert">
+    <CopyFileToFolders Include="assets\shaders\scene.vert">
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\skybox.frag">
+      <Filter>assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\skybox.vert">
+      <Filter>assets\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

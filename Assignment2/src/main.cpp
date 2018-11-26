@@ -130,12 +130,17 @@ void InitGLEW() {
  ******************************************************************************/
 
 void LoadModels() {
+  const unsigned int scene_flags =
+      aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate;
+  const unsigned int skybox_flags = 0;
   // First scene
-  scene_model[0].LoadFile("assets/models/dabrovic-sponza/sponza.obj");
+  scene_model[0].LoadFile("assets/models/dabrovic-sponza/sponza.obj",
+                          scene_flags);
   // Second scene
-  scene_model[1].LoadFile("assets/models/crytek-sponza/sponza.obj");
+  scene_model[1].LoadFile("assets/models/crytek-sponza/sponza.obj",
+                          scene_flags);
   // First skybox
-  skybox_model[0].LoadFile("assets/models/skybox/skybox.obj");
+  skybox_model[0].LoadFile("assets/models/skybox/skybox.obj", skybox_flags);
 }
 
 /*******************************************************************************
@@ -313,8 +318,8 @@ void ConfigSkyboxTextures() {
       {"assets\\models\\skybox\\textures\\left.jpg", 1},
       {"assets\\models\\skybox\\textures\\top.jpg", 2},
       {"assets\\models\\skybox\\textures\\bottom.jpg", 3},
-      {"assets\\models\\skybox\\textures\\back.jpg", 4},
-      {"assets\\models\\skybox\\textures\\front.jpg", 5}};
+      {"assets\\models\\skybox\\textures\\front.jpg", 4},
+      {"assets\\models\\skybox\\textures\\back.jpg", 5}};
   for (size_t scene_idx = 0; scene_idx < SKYBOX_SIZE; scene_idx++) {
     const std::vector<as::Mesh> meshes = skybox_model[scene_idx].GetMeshes();
     for (const as::Mesh mesh : meshes) {
@@ -383,17 +388,30 @@ void ConfigGL() {
   vertex_spec_manager.RegisterBufferManager(buffer_manager);
 
   /* Create shaders */
-  shader_manager.CreateShader("vertex_shader", GL_VERTEX_SHADER,
-                              "assets/shaders/vertex.vert");
-  shader_manager.CreateShader("fragment_shader", GL_FRAGMENT_SHADER,
-                              "assets/shaders/fragment.frag");
+  // Scenes
+  shader_manager.CreateShader("vertex/scene", GL_VERTEX_SHADER,
+                              "assets/shaders/scene.vert");
+  shader_manager.CreateShader("fragment/scene", GL_FRAGMENT_SHADER,
+                              "assets/shaders/scene.frag");
+  // Skyboxes
+  shader_manager.CreateShader("vertex/skybox", GL_VERTEX_SHADER,
+                              "assets/shaders/skybox.vert");
+  shader_manager.CreateShader("fragment/skybox", GL_FRAGMENT_SHADER,
+                              "assets/shaders/skybox.frag");
 
   /* Create programs */
-  program_manager.CreateProgram("program");
-  program_manager.AttachShader("program", "vertex_shader");
-  program_manager.AttachShader("program", "fragment_shader");
-  program_manager.LinkProgram("program");
-  program_manager.UseProgram("program");
+  // Scenes
+  program_manager.CreateProgram("scene");
+  program_manager.AttachShader("scene", "vertex/scene");
+  program_manager.AttachShader("scene", "fragment/scene");
+  program_manager.LinkProgram("scene");
+  program_manager.UseProgram("scene");
+  // Skyboxes
+  program_manager.CreateProgram("skybox");
+  program_manager.AttachShader("skybox", "vertex/skybox");
+  program_manager.AttachShader("skybox", "fragment/skybox");
+  program_manager.LinkProgram("skybox");
+  program_manager.UseProgram("skybox");
 
   /* Create buffers */
   // Global MVP
@@ -425,10 +443,10 @@ void ConfigGL() {
 
   /* Bind uniform blocks to buffers */
   // Global MVP
-  uniform_manager.AssignUniformBlockToBindingPoint("program", "GlobalMvp", 0);
+  uniform_manager.AssignUniformBlockToBindingPoint("scene", "GlobalMvp", 0);
   uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
   // Model transformation
-  uniform_manager.AssignUniformBlockToBindingPoint("program", "ModelTrans", 1);
+  uniform_manager.AssignUniformBlockToBindingPoint("scene", "ModelTrans", 1);
   uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
 
   /* Configure models */
@@ -456,27 +474,8 @@ void UpdateGlobalMvp() {
  * GLUT Callbacks
  ******************************************************************************/
 
-void GLUTDisplayCallback() {
-  /* Clear frame buffers */
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  /* Use the program */
-  program_manager.UseProgram("program");
-
-  /* Update GL states */
-  // Global MVP
-  UpdateGlobalMvp();
-  buffer_manager.UpdateBuffer("global_mvp_buffer");
-
-  /* Update model transformations */
-  const float scale_factors[SCENE_SIZE] = {1.0f, 0.01f};
-  model_trans.trans =
-      glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors[cur_scene_idx]));
-  buffer_manager.UpdateBuffer("model_trans_buffer");
-
-  /* Draw the scenes */
-  const std::string group_name = GetSceneGroupName(cur_scene_idx);
-  const std::vector<as::Mesh> meshes = scene_model[cur_scene_idx].GetMeshes();
+void DrawMeshes(const std::string &program_name, const std::string &group_name,
+                const std::vector<as::Mesh> &meshes) {
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
     const as::Mesh &mesh = meshes.at(mesh_idx);
     // Decide the vertex spec name
@@ -500,7 +499,7 @@ void GLUTDisplayCallback() {
       // Get the unit index
       const GLuint unit_idx = texture_unit_idxs.at(path);
       // Set the texture handler to the unit index
-      uniform_manager.SetUniform1Int("program", "tex_hdlr", unit_idx);
+      uniform_manager.SetUniform1Int(program_name, "tex_hdlr", unit_idx);
     }
 
     /* Draw vertex arrays */
@@ -509,6 +508,35 @@ void GLUTDisplayCallback() {
     buffer_manager.BindBuffer(scene_idxs_buffer_name);
     glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, 0);
   }
+}
+
+void GLUTDisplayCallback() {
+  /* Clear frame buffers */
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  /* Update GL states */
+  // Global MVP
+  UpdateGlobalMvp();
+  buffer_manager.UpdateBuffer("global_mvp_buffer");
+
+  /* Update model transformations */
+  const float scale_factors[SCENE_SIZE] = {1.0f, 0.01f};
+  model_trans.trans =
+      glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors[cur_scene_idx]));
+  buffer_manager.UpdateBuffer("model_trans_buffer");
+
+  /* Draw the scenes */
+  program_manager.UseProgram("scene");
+  const std::string scene_group_name = GetSceneGroupName(cur_scene_idx);
+  const std::vector<as::Mesh> scene_meshes =
+      scene_model[cur_scene_idx].GetMeshes();
+  DrawMeshes("scene", scene_group_name, scene_meshes);
+
+  /* Draw the skyboxes */
+  program_manager.UseProgram("skybox");
+  const std::string skybox_group_name = GetSkyboxGroupName(0);
+  const std::vector<as::Mesh> skybox_meshes = skybox_model[0].GetMeshes();
+  DrawMeshes("skybox", skybox_group_name, skybox_meshes);
 
   /* Swap frame buffers in double buffer mode */
   glutSwapBuffers();

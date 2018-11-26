@@ -17,7 +17,7 @@ namespace fs = std::experimental::filesystem;
 namespace as {
 class Model {
  public:
-  void LoadFile(const std::string &path);
+  void LoadFile(const std::string &path, const unsigned int flags);
 
   const std::vector<Node> &GetNodes() const;
 
