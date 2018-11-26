@@ -344,14 +344,17 @@ void ConfigSkyboxTextures() {
         // Bind the texture
         texture_manager.BindTexture(path, GL_TEXTURE_CUBE_MAP, unit_idx);
         // Initialize the texture
-        texture_manager.InitTexture2D(path, GL_TEXTURE_CUBE_MAP, 1, GL_RGBA8,
-                                      width, height);
+        texture_manager.InitTexture2D(path, GL_TEXTURE_CUBE_MAP,
+                                      NUM_MIPMAP_LEVEL, GL_RGBA8, width,
+                                      height);
         // Update the texture
         texture_manager.UpdateCubeMapTexture2D(path, target, 0, 0, 0, width,
                                                height, GL_RGBA,
                                                GL_UNSIGNED_BYTE, texels.data());
+        texture_manager.GenMipmap(path, GL_TEXTURE_CUBE_MAP);
         texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                           GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                                           GL_TEXTURE_MIN_FILTER,
+                                           GL_LINEAR_MIPMAP_LINEAR);
         texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
                                            GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
