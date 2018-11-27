@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="15.0">
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -23,7 +23,7 @@
     <RootNamespace>Assignment1</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -50,18 +50,18 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"/>
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"/>
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"/>
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"/>
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
@@ -87,8 +87,8 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <PostBuildEvent>
-      <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
-xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
+      <Command>xcopy /d /e /y &quot;$(SolutionDir)bin\*.*&quot; &quot;$(OutDir)&quot;
+xcopy /d /e /y &quot;$(ProjectDir)assets\*.*&quot; &quot;$(OutDir)assets\&quot;</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy dependencies to output directory</Message>
@@ -112,8 +112,8 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
-xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
+      <Command>xcopy /d /e /y &quot;$(SolutionDir)bin\*.*&quot; &quot;$(OutDir)&quot;
+xcopy /d /e /y &quot;$(ProjectDir)assets\*.*&quot; &quot;$(OutDir)assets\&quot;</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy dependencies to output directory</Message>
@@ -131,8 +131,8 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     </Link>
     <PostBuildEvent>
       <Message>Copy dependencies to output directory</Message>
-      <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
-xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
+      <Command>xcopy /d /e /y &quot;$(SolutionDir)bin\*.*&quot; &quot;$(OutDir)&quot;
+xcopy /d /e /y &quot;$(ProjectDir)assets\*.*&quot; &quot;$(OutDir)assets\&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,49 +151,59 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     </Link>
     <PostBuildEvent>
       <Message>Copy dependencies to output directory</Message>
-      <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
-xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
+      <Command>xcopy /d /e /y &quot;$(SolutionDir)bin\*.*&quot; &quot;$(OutDir)&quot;
+xcopy /d /e /y &quot;$(ProjectDir)assets\*.*&quot; &quot;$(OutDir)assets\&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\as\common.hpp" />
-    <ClInclude Include="..\include\as\gl\buffer.hpp" />
-    <ClInclude Include="..\include\as\gl\common.hpp" />
-    <ClInclude Include="..\include\as\gl\program.hpp" />
-    <ClInclude Include="..\include\as\gl\shader.hpp" />
-    <ClInclude Include="..\include\as\gl\texture.hpp" />
-    <ClInclude Include="..\include\as\gl\uniform.hpp" />
-    <ClInclude Include="..\include\as\gl\vertex_spec.hpp" />
-    <ClInclude Include="..\include\as\model\loader.hpp" />
-    <ClInclude Include="..\include\as\trans\camera.hpp" />
+    <ClInclude Include="..\include\as\common.hpp"/>
+    <ClInclude Include="..\include\as\gl\buffer_manager.hpp"/>
+    <ClInclude Include="..\include\as\gl\gl_managers.hpp"/>
+    <ClInclude Include="..\include\as\gl\program_manager.hpp"/>
+    <ClInclude Include="..\include\as\gl\shader_manager.hpp"/>
+    <ClInclude Include="..\include\as\gl\texture_manager.hpp"/>
+    <ClInclude Include="..\include\as\gl\uniform_manager.hpp"/>
+    <ClInclude Include="..\include\as\gl\vertex_spec_manager.hpp"/>
+    <ClInclude Include="..\include\as\model\loader.hpp"/>
+    <ClInclude Include="..\include\as\model\mesh.hpp"/>
+    <ClInclude Include="..\include\as\model\model.hpp"/>
+    <ClInclude Include="..\include\as\model\node.hpp"/>
+    <ClInclude Include="..\include\as\model\texture.hpp"/>
+    <ClInclude Include="..\include\as\model\vertex.hpp"/>
+    <ClInclude Include="..\include\as\trans\camera.hpp"/>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common.cpp" />
-    <ClCompile Include="..\src\gl\buffer.cpp" />
-    <ClCompile Include="..\src\gl\program.cpp" />
-    <ClCompile Include="..\src\gl\shader.cpp" />
-    <ClCompile Include="..\src\gl\texture.cpp" />
-    <ClCompile Include="..\src\gl\uniform.cpp" />
-    <ClCompile Include="..\src\gl\vertex_spec.cpp" />
-    <ClCompile Include="..\src\model\loader.cpp" />
-    <ClCompile Include="..\src\trans\camera.cpp" />
-    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="..\src\common.cpp"/>
+    <ClCompile Include="..\src\gl\buffer_manager.cpp"/>
+    <ClCompile Include="..\src\gl\program_manager.cpp"/>
+    <ClCompile Include="..\src\gl\shader_manager.cpp"/>
+    <ClCompile Include="..\src\gl\texture_manager.cpp"/>
+    <ClCompile Include="..\src\gl\uniform_manager.cpp"/>
+    <ClCompile Include="..\src\gl\vertex_spec_manager.cpp"/>
+    <ClCompile Include="..\src\model\loader.cpp"/>
+    <ClCompile Include="..\src\model\mesh.cpp"/>
+    <ClCompile Include="..\src\model\model.cpp"/>
+    <ClCompile Include="..\src\model\node.cpp"/>
+    <ClCompile Include="..\src\model\texture.cpp"/>
+    <ClCompile Include="..\src\model\vertex.cpp"/>
+    <ClCompile Include="..\src\trans\camera.cpp"/>
+    <ClCompile Include="src\main.cpp"/>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="assets\shaders\fragment.frag">
       <FileType>CppCode</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/shaders</DestinationFolders>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/assets/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/assets/shaders</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)/shaders</DestinationFolders>
     </CopyFileToFolders>
     <CopyFileToFolders Include="assets\shaders\vertex.vert">
       <FileType>CppCode</FileType>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/shaders</DestinationFolders>
-      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/assets/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/assets/shaders</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)/shaders</DestinationFolders>
     </CopyFileToFolders>
   </ItemGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
 </Project>
