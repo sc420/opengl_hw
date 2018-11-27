@@ -1,5 +1,5 @@
 #include "as/common.hpp"
-#include "as/gl/common.hpp"
+#include "as/gl/gl_managers.hpp"
 #include "as/model/loader.hpp"
 #include "as/model/model.hpp"
 #include "as/trans/camera.hpp"

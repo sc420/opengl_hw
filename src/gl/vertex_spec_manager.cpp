@@ -1,4 +1,4 @@
-#include "as/gl/vertex_spec.hpp"
+#include "as/gl/vertex_spec_manager.hpp"
 
 as::VertexSpecManager::VertexSpecManager() : buffer_manager_(nullptr) {}
 

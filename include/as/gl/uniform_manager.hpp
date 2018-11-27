@@ -7,8 +7,8 @@
 #pragma once
 
 #include "as/common.hpp"
-#include "as/gl/buffer.hpp"
-#include "as/gl/program.hpp"
+#include "as/gl/buffer_manager.hpp"
+#include "as/gl/program_manager.hpp"
 
 namespace as {
 class UniformManager {

@@ -1,4 +1,4 @@
-#include "as/gl/program.hpp"
+#include "as/gl/program_manager.hpp"
 
 as::ProgramManager::ProgramManager() : shader_manager_(nullptr) {}
 

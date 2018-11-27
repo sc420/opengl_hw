@@ -1,4 +1,4 @@
-#include "as/gl/shader.hpp"
+#include "as/gl/shader_manager.hpp"
 
 as::ShaderManager::~ShaderManager() {
   // Delete all shader objects

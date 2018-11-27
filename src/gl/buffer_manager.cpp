@@ -1,4 +1,4 @@
-#include "as/gl/buffer.hpp"
+#include "as/gl/buffer_manager.hpp"
 
 as::BufferManager::~BufferManager() {
   // Delete all buffer objects

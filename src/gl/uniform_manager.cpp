@@ -1,4 +1,4 @@
-#include "as/gl/uniform.hpp"
+#include "as/gl/uniform_manager.hpp"
 
 as::UniformManager::UniformManager()
     : program_manager_(nullptr), buffer_manager_(nullptr) {}

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="15.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -157,13 +157,13 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\include\as\common.hpp" />
-    <ClInclude Include="..\include\as\gl\buffer.hpp" />
-    <ClInclude Include="..\include\as\gl\common.hpp" />
-    <ClInclude Include="..\include\as\gl\program.hpp" />
-    <ClInclude Include="..\include\as\gl\shader.hpp" />
+    <ClInclude Include="..\include\as\gl\buffer_manager.hpp" />
+    <ClInclude Include="..\include\as\gl\gl_managers.hpp" />
+    <ClInclude Include="..\include\as\gl\program_manager.hpp" />
+    <ClInclude Include="..\include\as\gl\shader_manager.hpp" />
     <ClInclude Include="..\include\as\gl\texture_manager.hpp" />
-    <ClInclude Include="..\include\as\gl\uniform.hpp" />
-    <ClInclude Include="..\include\as\gl\vertex_spec.hpp" />
+    <ClInclude Include="..\include\as\gl\uniform_manager.hpp" />
+    <ClInclude Include="..\include\as\gl\vertex_spec_manager.hpp" />
     <ClInclude Include="..\include\as\model\loader.hpp" />
     <ClInclude Include="..\include\as\model\mesh.hpp" />
     <ClInclude Include="..\include\as\model\model.hpp" />
@@ -174,12 +174,12 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp" />
-    <ClCompile Include="..\src\gl\buffer.cpp" />
-    <ClCompile Include="..\src\gl\program.cpp" />
-    <ClCompile Include="..\src\gl\shader.cpp" />
+    <ClCompile Include="..\src\gl\buffer_manager.cpp" />
+    <ClCompile Include="..\src\gl\program_manager.cpp" />
+    <ClCompile Include="..\src\gl\shader_manager.cpp" />
     <ClCompile Include="..\src\gl\texture_manager.cpp" />
-    <ClCompile Include="..\src\gl\uniform.cpp" />
-    <ClCompile Include="..\src\gl\vertex_spec.cpp" />
+    <ClCompile Include="..\src\gl\uniform_manager.cpp" />
+    <ClCompile Include="..\src\gl\vertex_spec_manager.cpp" />
     <ClCompile Include="..\src\model\loader.cpp" />
     <ClCompile Include="..\src\model\mesh.cpp" />
     <ClCompile Include="..\src\model\model.cpp" />

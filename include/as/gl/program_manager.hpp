@@ -1,7 +1,7 @@
 #pragma once
 
 #include "as/common.hpp"
-#include "as/gl/shader.hpp"
+#include "as/gl/shader_manager.hpp"
 
 namespace as {
 

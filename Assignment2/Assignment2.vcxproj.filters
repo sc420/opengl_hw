@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <ItemGroup>
     <Filter Include="assets">
@@ -42,21 +42,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\as\gl\buffer.hpp">
-      <Filter>include\as\gl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\gl\program.hpp">
-      <Filter>include\as\gl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\gl\shader.hpp">
-      <Filter>include\as\gl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\gl\uniform.hpp">
-      <Filter>include\as\gl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\gl\vertex_spec.hpp">
-      <Filter>include\as\gl</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\as\model\loader.hpp">
       <Filter>include\as\model</Filter>
     </ClInclude>
@@ -65,9 +50,6 @@
     </ClInclude>
     <ClInclude Include="..\include\as\common.hpp">
       <Filter>include\as</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\gl\common.hpp">
-      <Filter>include\as\gl</Filter>
     </ClInclude>
     <ClInclude Include="..\include\as\model\model.hpp">
       <Filter>include\as\model</Filter>
@@ -87,6 +69,24 @@
     <ClInclude Include="..\include\as\gl\texture_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\gl\buffer_manager.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\gl_managers.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\program_manager.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\shader_manager.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\uniform_manager.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\gl\vertex_spec_manager.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp">
@@ -97,21 +97,6 @@
     </ClCompile>
     <ClCompile Include="..\src\model\loader.cpp">
       <Filter>src\model</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gl\buffer.cpp">
-      <Filter>src\gl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gl\program.cpp">
-      <Filter>src\gl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gl\shader.cpp">
-      <Filter>src\gl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gl\uniform.cpp">
-      <Filter>src\gl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gl\vertex_spec.cpp">
-      <Filter>src\gl</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Assignment2\src</Filter>
@@ -132,6 +117,21 @@
       <Filter>src\model</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gl\texture_manager.cpp">
+      <Filter>src\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gl\buffer_manager.cpp">
+      <Filter>src\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gl\program_manager.cpp">
+      <Filter>src\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gl\shader_manager.cpp">
+      <Filter>src\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gl\uniform_manager.cpp">
+      <Filter>src\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gl\vertex_spec_manager.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
   </ItemGroup>
