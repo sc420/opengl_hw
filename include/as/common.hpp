@@ -1,12 +1,11 @@
 #pragma once
 
 /*******************************************************************************
- * Link .lib Files
+ * Include MSVC Libraries
  ******************************************************************************/
 
-#pragma comment(lib, "assimp.lib")
-#pragma comment(lib, "glew32.lib")
-#pragma comment(lib, "freeglut.lib")
+// For disabling code analysis warnings for third-party libraries
+#include <codeanalysis\warnings.h>
 
 /*******************************************************************************
  * Include Standard Libraries
@@ -26,6 +25,9 @@
  * Include GL Libraries
  ******************************************************************************/
 
+#pragma warning(push)
+#pragma warning(disable : ALL_CODE_ANALYSIS_WARNINGS)
+
 // Cross-platform 3D model import library
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -43,14 +45,25 @@
 // Cross-platform windowing and keyboard/mouse handler
 #include <freeglut/freeglut.h>
 
+#pragma warning(pop)
+
+/*******************************************************************************
+ * Link .lib Files
+ ******************************************************************************/
+
+#pragma comment(lib, "assimp.lib")
+#pragma comment(lib, "glew32.lib")
+#pragma comment(lib, "freeglut.lib")
+
 /*******************************************************************************
  * Declarations
  ******************************************************************************/
 
 namespace as {
+void InitGLEW();
 
 void PrintGLContextInfo(const bool print_entensions = false,
                         const bool print_supported_glsl_versions = false);
 
-void EnableCatchingGLError();
+void EnableCatchingGLError(const bool stop_when_error = false);
 }  // namespace as

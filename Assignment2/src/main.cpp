@@ -119,15 +119,6 @@ void InitGLUT(int argc, char *argv[]) {
   glutCreateWindow("Assignment 2");
 }
 
-void InitGLEW() {
-  const GLenum err = glewInit();
-  if (err != GLEW_OK) {
-    std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
-    throw std::runtime_error("Could not initialize GLEW");
-  }
-  // as::PrintGLContextInfo();
-}
-
 /*******************************************************************************
  * Model Handlers
  ******************************************************************************/
@@ -265,11 +256,11 @@ void ConfigSceneBuffers() {
 
 void ConfigSceneTextures() {
   for (size_t scene_idx = 0; scene_idx < SCENE_SIZE; scene_idx++) {
-    const std::vector<as::Mesh> meshes = scene_model[scene_idx].GetMeshes();
-    for (const as::Mesh mesh : meshes) {
-      const std::set<as::Texture> textures = mesh.GetTextures();
+    const std::vector<as::Mesh> &meshes = scene_model[scene_idx].GetMeshes();
+    for (const as::Mesh &mesh : meshes) {
+      const std::set<as::Texture> &textures = mesh.GetTextures();
       for (const as::Texture &texture : textures) {
-        const std::string path = texture.GetPath();
+        const std::string &path = texture.GetPath();
         // Check if the texture has been loaded
         if (texture_unit_idxs.count(path) > 0) {
           continue;
@@ -319,11 +310,11 @@ void ConfigSkyboxTextures() {
       {"right.jpg", 0},  {"left.jpg", 1},  {"top.jpg", 2},
       {"bottom.jpg", 3}, {"front.jpg", 4}, {"back.jpg", 5}};
   for (size_t scene_idx = 0; scene_idx < SKYBOX_SIZE; scene_idx++) {
-    const std::vector<as::Mesh> meshes = skybox_model[scene_idx].GetMeshes();
-    for (const as::Mesh mesh : meshes) {
-      const std::set<as::Texture> textures = mesh.GetTextures();
+    const std::vector<as::Mesh> &meshes = skybox_model[scene_idx].GetMeshes();
+    for (const as::Mesh &mesh : meshes) {
+      const std::set<as::Texture> &textures = mesh.GetTextures();
       for (const as::Texture &texture : textures) {
-        const std::string path = texture.GetPath();
+        const std::string &path = texture.GetPath();
         // Check if the texture has been loaded
         if (texture_unit_idxs.count(path) > 0) {
           continue;
@@ -490,14 +481,14 @@ void DrawMeshes(const std::string &program_name, const std::string &group_name,
     const std::string scene_idxs_buffer_name =
         GetMeshVAIdxsBufferName(group_name, mesh_idx);
     // Get the array indexes
-    const std::vector<size_t> idxs = mesh.GetIdxs();
+    const std::vector<size_t> &idxs = mesh.GetIdxs();
     // Get the textures
-    const std::set<as::Texture> textures = mesh.GetTextures();
+    const std::set<as::Texture> &textures = mesh.GetTextures();
 
     /* Update textures */
     // TODO: There is only diffuse texture
-    for (const as::Texture texture : textures) {
-      const std::string path = texture.GetPath();
+    for (const as::Texture &texture : textures) {
+      const std::string &path = texture.GetPath();
       // Bind the texture
       texture_manager.BindTexture(path);
       // Get the unit index
@@ -547,15 +538,15 @@ void GLUTDisplayCallback() {
   glutSwapBuffers();
 }
 
-void GLUTReshapeCallback(int width, int height) {
+void GLUTReshapeCallback(const int width, const int height) {
+  // Update window aspect ratio
   window_aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
 
+  // Set the viewport
   glViewport(0, 0, width, height);
-
-  UpdateGlobalMvp();
 }
 
-void GLUTKeyboardCallback(unsigned char key, int x, int y) {
+void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
   pressed_keys[key] = true;
   switch (key) {
     case 'r': {
@@ -569,11 +560,11 @@ void GLUTKeyboardCallback(unsigned char key, int x, int y) {
   }
 }
 
-void GLUTKeyboardUpCallback(unsigned char key, int x, int y) {
+void GLUTKeyboardUpCallback(const unsigned char key, const int x, const int y) {
   pressed_keys[key] = false;
 }
 
-void GLUTSpecialCallback(int key, int x, int y) {
+void GLUTSpecialCallback(const int key, const int x, const int y) {
   switch (key) {
     case GLUT_KEY_LEFT: {
       cur_scene_idx = (cur_scene_idx + SCENE_SIZE - 1) % SCENE_SIZE;
@@ -590,7 +581,8 @@ void GLUTSpecialCallback(int key, int x, int y) {
   }
 }
 
-void GLUTMouseCallback(int button, int state, int x, int y) {
+void GLUTMouseCallback(const int button, const int state, const int x,
+                       const int y) {
   if (state == GLUT_DOWN) {
     if (button == GLUT_LEFT_BUTTON) {
       last_mouse_pos = glm::vec2(x, y);
@@ -601,7 +593,8 @@ void GLUTMouseCallback(int button, int state, int x, int y) {
   }
 }
 
-void GLUTMouseWheelCallback(int button, int dir, int x, int y) {
+void GLUTMouseWheelCallback(const int button, const int dir, const int x,
+                            const int y) {
   if (dir > 0) {
     camera_trans.AddEye(CAMERA_ZOOMING_STEP * glm::vec3(0.0f, 0.0f, -1.0f));
   } else {
@@ -609,7 +602,7 @@ void GLUTMouseWheelCallback(int button, int dir, int x, int y) {
   }
 }
 
-void GLUTMotionCallback(int x, int y) {
+void GLUTMotionCallback(const int x, const int y) {
   if (camera_rotating) {
     const glm::vec2 mouse_pos = glm::vec2(x, y);
     const glm::vec2 diff = mouse_pos - last_mouse_pos;
@@ -619,7 +612,7 @@ void GLUTMotionCallback(int x, int y) {
   }
 }
 
-void GLUTTimerCallback(int val) {
+void GLUTTimerCallback(const int val) {
   // Increment the counter
   timer_cnt++;
 
@@ -651,13 +644,16 @@ void GLUTTimerCallback(int val) {
     UpdateGlobalMvp();
   }
 
+  // Mark the current window as needing to be redisplayed
   glutPostRedisplay();
+
+  // Register the timer callback again
   if (timer_enabled) {
     glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, val);
   }
 }
 
-void GLUTMainMenuCallback(int id) {
+void GLUTMainMenuCallback(const int id) {
   switch (id) {
     case 2: {
       glutChangeToMenuEntry(2, "New Label", 2);
@@ -672,7 +668,7 @@ void GLUTMainMenuCallback(int id) {
   }
 }
 
-void GLUTTimerMenuCallback(int id) {
+void GLUTTimerMenuCallback(const int id) {
   switch (id) {
     case 1: {
       if (!timer_enabled) {
@@ -734,9 +730,9 @@ void EnterGLUTLoop() { glutMainLoop(); }
 
 int main(int argc, char *argv[]) {
   try {
-    LoadModels();
     InitGLUT(argc, argv);
-    InitGLEW();
+    as::InitGLEW();
+    LoadModels();
     ConfigGL();
     RegisterGLUTCallbacks();
     CreateGLUTMenus();

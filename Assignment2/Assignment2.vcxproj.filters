@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <ItemGroup>
     <Filter Include="assets">
@@ -142,13 +142,11 @@
     <CopyFileToFolders Include="assets\shaders\scene.vert">
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="assets\shaders\skybox.frag">
+    <CopyFileToFolders Include="assets\shaders\skybox.frag">
       <Filter>assets\shaders</Filter>
-    </None>
-    <None Include="assets\shaders\skybox.vert">
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\skybox.vert">
       <Filter>assets\shaders</Filter>
-    </None>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

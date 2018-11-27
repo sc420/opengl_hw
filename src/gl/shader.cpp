@@ -13,7 +13,7 @@ void as::ShaderManager::CreateShader(const std::string& shader_name,
   // Create a shader object
   const GLuint shader_hdlr = glCreateShader(type);
   // Load the shader source
-  std::string src = LoadShaderSource(path);
+  const std::string src = LoadShaderSource(path);
   // Replace the source code in the shader object
   const char* str = src.c_str();
   glShaderSource(shader_hdlr, 1, &str, NULL);
@@ -39,14 +39,17 @@ GLuint as::ShaderManager::GetShaderHdlr(const std::string& shader_name) const {
 }
 
 std::string as::ShaderManager::LoadShaderSource(const std::string& file) const {
-  FILE* fp;
-  fopen_s(&fp, file.c_str(), "rb");
-  fseek(fp, 0, SEEK_END);
-  long sz = ftell(fp);
-  fseek(fp, 0, SEEK_SET);
+  FILE* stream;
+  const errno_t err = fopen_s(&stream, file.c_str(), "rb");
+  if (err || stream == nullptr) {
+    throw std::runtime_error("Could not open the file '" + file + "'");
+  }
+  fseek(stream, 0, SEEK_END);
+  const long sz = ftell(stream);
+  fseek(stream, 0, SEEK_SET);
   std::string src(sz + 1, '\0');
-  fread(&src[0], sizeof(char), sz, fp);
-  fclose(fp);
+  fread(&src[0], sizeof(char), sz, stream);
+  fclose(stream);
   return src;
 }
 

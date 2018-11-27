@@ -4,7 +4,8 @@
  * Include Header-only Libraries
  ******************************************************************************/
 
-#pragma warning(push, 0)
+#pragma warning(push)
+#pragma warning(disable : ALL_CODE_ANALYSIS_WARNINGS)
 
 // Load tinyobjloader
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -17,28 +18,31 @@
 #pragma warning(pop)
 
 /*******************************************************************************
- * Private Methods
+ * Private Method Declarations
  ******************************************************************************/
 
-void GLAPIENTRY GLMessageCallback(GLenum source, GLenum type, GLuint id,
-                                  GLenum severity, GLsizei length,
-                                  const GLchar* message,
-                                  const void* userParam) {
-  /* Filter based on types */
-  // Ignore API_ID_RECOMPILE_FRAGMENT_SHADER
-  if (type == 0x8250) {
-    return;
-  }
-  /* Print the message */
-  fprintf(stderr,
-          "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-          (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity,
-          message);
-}
+void GLAPIENTRY GLMessageCallback(const GLenum source, const GLenum type,
+                                  const GLuint id, const GLenum severity,
+                                  const GLsizei length, const GLchar* message,
+                                  const void* userParam);
 
 /*******************************************************************************
  * Public Methods
  ******************************************************************************/
+
+/**
+ * Initialize GLEW.
+ *
+ * Reference: http://glew.sourceforge.net/basic.html
+ */
+void as::InitGLEW() {
+  const GLenum err = glewInit();
+  if (err != GLEW_OK) {
+    std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
+    throw std::runtime_error("Could not initialize GLEW");
+  }
+  // as::PrintGLContextInfo();
+}
 
 /**
  * Print OpenGL context information.
@@ -82,7 +86,32 @@ void as::PrintGLContextInfo(const bool print_extensions,
  *
  * Reference: https://www.khronos.org/opengl/wiki/Debug_Output
  */
-void as::EnableCatchingGLError() {
+void as::EnableCatchingGLError(const bool stop_when_error) {
   glEnable(GL_DEBUG_OUTPUT);
-  glDebugMessageCallback(GLMessageCallback, 0);
+  glDebugMessageCallback(GLMessageCallback, &stop_when_error);
+}
+
+/*******************************************************************************
+ * Private Methods
+ ******************************************************************************/
+
+void GLAPIENTRY GLMessageCallback(const GLenum source, const GLenum type,
+                                  const GLuint id, const GLenum severity,
+                                  const GLsizei length, const GLchar* message,
+                                  const void* user_param) {
+  /* Filter based on types */
+  // Ignore API_ID_RECOMPILE_FRAGMENT_SHADER
+  if (type == 0x8250) {
+    return;
+  }
+  /* Print the message */
+  std::cerr << "GL Callback: "
+            << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "")
+            << " type = 0x" << std::hex << type << ", severity = 0x" << std::hex
+            << severity << ", message = " << message << std::endl;
+  /* Check whether to stop */
+  const bool stop_when_error = (*static_cast<const bool*>(user_param));
+  if (stop_when_error) {
+    throw std::runtime_error("GL error has occurred, stopping now");
+  }
 }

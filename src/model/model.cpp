@@ -6,9 +6,8 @@ void as::Model::LoadFile(const std::string &path, const unsigned int flags) {
   // Check errors
   if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
       !scene->mRootNode) {
-    std::cerr << "Assimp error:" << std::endl;
-    std::cerr << importer.GetErrorString() << std::endl;
-    throw std::runtime_error("Could not read the file by Assimp");
+    throw std::runtime_error("Could not read the file by Assimp. Error: " +
+                             std::string(importer.GetErrorString()));
   }
   // Get the directory
   const fs::path p(path);
@@ -126,7 +125,7 @@ std::set<as::Texture> as::Model::ProcessMaterialTextures(
     aiString path;
     ai_material->GetTexture(ai_texture_type, i, &path);
     // Build the full path
-    fs::path full_path = dir / fs::path(path.C_Str());
+    const fs::path full_path = dir / fs::path(path.C_Str());
     // Get type name
     const std::string type = AiTextureTypeToStr(ai_texture_type);
     const Texture texture = Texture(full_path.string(), type);
