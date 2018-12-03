@@ -31,6 +31,7 @@ bool timer_enabled = true;
  ******************************************************************************/
 
 // Window states
+bool window_closed = false;
 float window_aspect_ratio;
 
 // Keyboard states
@@ -366,6 +367,7 @@ void ConfigSkyboxTextures() {
 }
 
 void ConfigGL() {
+  /* Enable catching errors */
   as::EnableCatchingGLError();
 
   /* Configure GL */
@@ -613,6 +615,11 @@ void GLUTMotionCallback(const int x, const int y) {
 }
 
 void GLUTTimerCallback(const int val) {
+  // Check whether the window has closed
+  if (window_closed) {
+    return;
+  }
+
   // Increment the counter
   timer_cnt++;
 
@@ -652,6 +659,8 @@ void GLUTTimerCallback(const int val) {
     glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, val);
   }
 }
+
+void GLUTCloseCallback() { window_closed = true; }
 
 void GLUTMainMenuCallback(const int id) {
   switch (id) {
@@ -700,6 +709,7 @@ void RegisterGLUTCallbacks() {
   glutMouseWheelFunc(GLUTMouseWheelCallback);
   glutMotionFunc(GLUTMotionCallback);
   glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
+  glutCloseFunc(GLUTCloseCallback);
 }
 
 void CreateGLUTMenus() {
