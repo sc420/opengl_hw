@@ -41,7 +41,6 @@ void as::InitGLEW() {
     std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
     throw std::runtime_error("Could not initialize GLEW");
   }
-  // as::PrintGLContextInfo();
 }
 
 /**

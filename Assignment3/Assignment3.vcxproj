@@ -159,6 +159,7 @@ xcopy /d /e /y &quot;$(ProjectDir)assets\*.*&quot; &quot;$(OutDir)assets\&quot;<
   <ItemGroup>
     <ClInclude Include="..\include\as\common.hpp"/>
     <ClInclude Include="..\include\as\gl\buffer_manager.hpp"/>
+    <ClInclude Include="..\include\as\gl\framebuffer_manager.hpp"/>
     <ClInclude Include="..\include\as\gl\gl_managers.hpp"/>
     <ClInclude Include="..\include\as\gl\program_manager.hpp"/>
     <ClInclude Include="..\include\as\gl\shader_manager.hpp"/>
@@ -176,6 +177,7 @@ xcopy /d /e /y &quot;$(ProjectDir)assets\*.*&quot; &quot;$(OutDir)assets\&quot;<
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp"/>
     <ClCompile Include="..\src\gl\buffer_manager.cpp"/>
+    <ClCompile Include="..\src\gl\framebuffer_manager.cpp"/>
     <ClCompile Include="..\src\gl\program_manager.cpp"/>
     <ClCompile Include="..\src\gl\shader_manager.cpp"/>
     <ClCompile Include="..\src\gl\texture_manager.cpp"/>
