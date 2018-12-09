@@ -172,6 +172,7 @@ std::string GetMeshVAIdxsBufferName(const std::string &group_name,
 void ConfigGLSettings() {
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glDepthFunc(GL_LEQUAL);
+  glEnable(GL_DEPTH_TEST);
 }
 
 void InitGLManagers() {
@@ -235,7 +236,7 @@ void ConfigScreenTextures() {
 
   texture_manager.GenTexture("screen_quad_tex");
   texture_manager.BindTexture("screen_quad_tex", GL_TEXTURE_2D, unit_idx);
-  texture_manager.InitTexture2D("screen_quad_tex", GL_TEXTURE_2D, 1, GL_RGBA8,
+  texture_manager.InitTexture2D("screen_quad_tex", GL_TEXTURE_2D, 1, GL_RGB8,
                                 600, 600);
   texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
                                      GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -310,19 +311,21 @@ void ConfigScreenFramebuffers() {
   // Create framebuffers
   framebuffer_manager.GenFramebuffer("screen_framebuffer");
   // Create renderbuffers
-  framebuffer_manager.GenRenderbuffer("screen_renderbuffer");
+  framebuffer_manager.GenRenderbuffer("screen_depth_renderbuffer");
   // Initialize renderbuffers
-  framebuffer_manager.InitRenderbuffer("screen_renderbuffer", GL_RENDERBUFFER,
-                                       GL_DEPTH24_STENCIL8, 600,
-                                       600);  // TODO: Dynamically change it
-  // Attach textures to framebuffers
-  framebuffer_manager.AttachRenderbufferToFramebuffer(
-      "screen_framebuffer", "screen_renderbuffer", GL_FRAMEBUFFER,
-      GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER);
+  // TODO: Dynamically change it
+  framebuffer_manager.InitRenderbuffer("screen_depth_renderbuffer",
+                                       GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 600,
+                                       600);
   // Attach renderbuffers to framebuffers
+  framebuffer_manager.AttachRenderbufferToFramebuffer(
+      "screen_framebuffer", "screen_depth_renderbuffer", GL_FRAMEBUFFER,
+      GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER);
+  // Attach textures to framebuffers
   framebuffer_manager.AttachTexture2DToFramebuffer(
       "screen_framebuffer", "screen_quad_tex", GL_FRAMEBUFFER,
       GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0);
+  ;
 }
 
 void ConfigGLScreens() {
@@ -598,12 +601,12 @@ void UpdateGlobalMvp() {
 }
 
 /*******************************************************************************
- * GLUT Callbacks
+ * Drawing Methods
  ******************************************************************************/
 
-void ConfigGLSettingsForScene() { glEnable(GL_DEPTH_TEST); }
+void ClearColorBuffer() { glClear(GL_COLOR_BUFFER_BIT); }
 
-void ClearDrawing() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
+void ClearDepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT); }
 
 void UpdateGLStates() {
   // Global MVP
@@ -620,7 +623,6 @@ void UpdateGLModelTrans() {
 
 void UseScreenFramebuffer() {
   framebuffer_manager.BindFramebuffer("screen_framebuffer");
-  framebuffer_manager.BindRenderbuffer("screen_renderbuffer");
 }
 
 void DrawMeshes(const std::string &program_name, const std::string &group_name,
@@ -675,8 +677,6 @@ void DrawSkyboxes() {
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
 }
 
-void ConfigGLSettingsForPostproc() { glDisable(GL_DEPTH_TEST); }
-
 void UseDefaultFramebuffer() {
   framebuffer_manager.BindDefaultFramebuffer(GL_FRAMEBUFFER);
 }
@@ -704,20 +704,23 @@ void DrawScreenTexture() {
   }
 }
 
+/*******************************************************************************
+ * GLUT Callbacks
+ ******************************************************************************/
+
 void GLUTDisplayCallback() {
   // Update scene-wise contexts
   UpdateGLStates();
   UpdateGLModelTrans();
   // Draw the scenes
   UseScreenFramebuffer();
-  ClearDrawing();
-  ConfigGLSettingsForScene();
+  ClearColorBuffer();
+  ClearDepthBuffer();
   DrawScenes();
   DrawSkyboxes();
   // Draw the post-processing effects
   UseDefaultFramebuffer();
-  ConfigGLSettingsForPostproc();
-  ClearDrawing();
+  ClearDepthBuffer();
   DrawScreenTexture();
   // Swap double buffers
   glutSwapBuffers();
