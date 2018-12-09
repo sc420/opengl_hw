@@ -1,7 +1,6 @@
 #include "as/common.hpp"
 #include "as/gl/gl_managers.hpp"
-#include "as/model/loader.hpp"
-#include "as/model/model.hpp"
+#include "as/model/model_tools.hpp"
 #include "as/trans/camera.hpp"
 
 namespace fs = std::experimental::filesystem;
@@ -78,6 +77,7 @@ size_t cur_skybox_idx = 0;
  ******************************************************************************/
 
 as::BufferManager buffer_manager;
+as::FramebufferManager framebuffer_manager;
 as::ProgramManager program_manager;
 as::ShaderManager shader_manager;
 as::TextureManager texture_manager;
@@ -117,7 +117,7 @@ void InitGLUT(int argc, char *argv[]) {
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowPosition(100, 100);
   glutInitWindowSize(600, 600);
-  glutCreateWindow("Assignment 2");
+  glutCreateWindow("Assignment 3");
 }
 
 /*******************************************************************************
@@ -168,17 +168,104 @@ std::string GetMeshVAIdxsBufferName(const std::string &group_name,
  * GL Context Configuration
  ******************************************************************************/
 
-std::vector<GLubyte> ConvertChannels3To4(const std::vector<GLubyte> data) {
-  const size_t size = data.size();
-  const size_t num_pixel = size / 3;
-  const size_t new_size = num_pixel * 4;
-  std::vector<GLubyte> output(new_size, 0);
-  for (size_t i = 0; i < num_pixel; i++) {
-    for (size_t c = 0; c < 3; c++) {
-      output[4 * i + c] = data[3 * i + c];
-    }
-  }
-  return output;
+void ConfigGLSettings() {
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LEQUAL);
+}
+
+void InitGLManagers() {
+  // Initialize managers
+  texture_manager.Init();
+
+  // Register managers
+  framebuffer_manager.RegisterTextureManager(texture_manager);
+  program_manager.RegisterShaderManager(shader_manager);
+  uniform_manager.RegisterProgramManager(program_manager);
+  uniform_manager.RegisterBufferManager(buffer_manager);
+  vertex_spec_manager.RegisterBufferManager(buffer_manager);
+}
+
+void CreateGLShaders() {
+  // Scenes
+  shader_manager.CreateShader("vertex/scene", GL_VERTEX_SHADER,
+                              "assets/shaders/scene.vert");
+  shader_manager.CreateShader("fragment/scene", GL_FRAGMENT_SHADER,
+                              "assets/shaders/scene.frag");
+  // Skyboxes
+  shader_manager.CreateShader("vertex/skybox", GL_VERTEX_SHADER,
+                              "assets/shaders/skybox.vert");
+  shader_manager.CreateShader("fragment/skybox", GL_FRAGMENT_SHADER,
+                              "assets/shaders/skybox.frag");
+}
+
+void CreateGLPrograms() {
+  // Scenes
+  program_manager.CreateProgram("scene");
+  program_manager.AttachShader("scene", "vertex/scene");
+  program_manager.AttachShader("scene", "fragment/scene");
+  program_manager.LinkProgram("scene");
+  program_manager.UseProgram("scene");
+  // Skyboxes
+  program_manager.CreateProgram("skybox");
+  program_manager.AttachShader("skybox", "vertex/skybox");
+  program_manager.AttachShader("skybox", "fragment/skybox");
+  program_manager.LinkProgram("skybox");
+  program_manager.UseProgram("skybox");
+}
+
+void CreateGLBuffers() {
+  // Global MVP
+  buffer_manager.GenBuffer("global_mvp_buffer");
+  // Model transformation
+  buffer_manager.GenBuffer("model_trans_buffer");
+}
+
+void InitGLBuffers() {
+  // Global MVP
+  buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER,
+                            sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
+  // Model transformation
+  buffer_manager.InitBuffer("model_trans_buffer", GL_UNIFORM_BUFFER,
+                            sizeof(ModelTrans), NULL, GL_STATIC_DRAW);
+}
+
+void UpdateGLBuffers() {
+  // Global MVP
+  buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0,
+                              sizeof(GlobalMvp), &global_mvp);
+  // Model transformation
+  buffer_manager.UpdateBuffer("model_trans_buffer", GL_UNIFORM_BUFFER, 0,
+                              sizeof(ModelTrans), &model_trans);
+}
+
+void BindGLUniformBlocksToBuffers() {
+  // Global MVP
+  uniform_manager.AssignUniformBlockToBindingPoint("scene", "GlobalMvp", 0);
+  uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
+  // Model transformation
+  uniform_manager.AssignUniformBlockToBindingPoint("scene", "ModelTrans", 1);
+  uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
+}
+
+void CreateGLFramebuffers() {
+  framebuffer_manager.GenFramebuffer("framebuffer");
+}
+
+void CreateGLRenderbuffers() {
+  framebuffer_manager.GenRenderbuffer("renderbuffer");
+}
+
+void InitGLRenderbuffers() {
+  framebuffer_manager.InitRenderbuffer("renderbuffer", GL_RENDERBUFFER,
+                                       GL_DEPTH24_STENCIL8, 600,
+                                       600);  // TODO: Dynamically change it
+}
+
+void AttachGLRenderbuffersToFramebuffers() {
+  framebuffer_manager.AttachRenderbufferToFramebuffer(
+      "framebuffer", "renderbuffer", GL_FRAMEBUFFER,
+      GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER);
 }
 
 void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
@@ -274,7 +361,7 @@ void ConfigSceneTextures() {
         std::vector<GLubyte> texels;
         as::LoadTextureByStb(path, 0, width, height, comp, texels);
         // Convert the texels from 3 channels to 4 channels to avoid GL errors
-        texels = ConvertChannels3To4(texels);
+        texels = as::ConvertDataChannels3To4(texels);
         // Generate the texture
         texture_manager.GenTexture(path);
         // Bind the texture
@@ -334,7 +421,7 @@ void ConfigSkyboxTextures() {
         std::vector<GLubyte> texels;
         as::LoadTextureByStb(path, 0, width, height, comp, texels);
         // Convert the texels from 3 channels to 4 channels to avoid GL errors
-        texels = ConvertChannels3To4(texels);
+        texels = as::ConvertDataChannels3To4(texels);
         // Generate the texture
         texture_manager.GenTexture(path);
         // Bind the texture
@@ -366,93 +453,33 @@ void ConfigSkyboxTextures() {
   }
 }
 
-void ConfigGL() {
-  /* Enable catching errors */
-  as::EnableCatchingGLError();
-
-  /* Configure GL */
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-
-  /* Initialize managers */
-  texture_manager.Init();
-
-  /* Register managers */
-  program_manager.RegisterShaderManager(shader_manager);
-  uniform_manager.RegisterProgramManager(program_manager);
-  uniform_manager.RegisterBufferManager(buffer_manager);
-  vertex_spec_manager.RegisterBufferManager(buffer_manager);
-
-  /* Create shaders */
-  // Scenes
-  shader_manager.CreateShader("vertex/scene", GL_VERTEX_SHADER,
-                              "assets/shaders/scene.vert");
-  shader_manager.CreateShader("fragment/scene", GL_FRAGMENT_SHADER,
-                              "assets/shaders/scene.frag");
-  // Skyboxes
-  shader_manager.CreateShader("vertex/skybox", GL_VERTEX_SHADER,
-                              "assets/shaders/skybox.vert");
-  shader_manager.CreateShader("fragment/skybox", GL_FRAGMENT_SHADER,
-                              "assets/shaders/skybox.frag");
-
-  /* Create programs */
-  // Scenes
-  program_manager.CreateProgram("scene");
-  program_manager.AttachShader("scene", "vertex/scene");
-  program_manager.AttachShader("scene", "fragment/scene");
-  program_manager.LinkProgram("scene");
-  program_manager.UseProgram("scene");
-  // Skyboxes
-  program_manager.CreateProgram("skybox");
-  program_manager.AttachShader("skybox", "vertex/skybox");
-  program_manager.AttachShader("skybox", "fragment/skybox");
-  program_manager.LinkProgram("skybox");
-  program_manager.UseProgram("skybox");
-
-  /* Create buffers */
-  // Global MVP
-  buffer_manager.GenBuffer("global_mvp_buffer");
-  // Model transformation
-  buffer_manager.GenBuffer("model_trans_buffer");
-
-  /* Bind buffer targets to be repeatedly used later */
-  // Global MVP
-  buffer_manager.BindBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER);
-  // Model transformation
-  buffer_manager.BindBuffer("model_trans_buffer", GL_UNIFORM_BUFFER);
-
-  /* Initialize buffers */
-  // Global MVP
-  buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER,
-                            sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
-  // Model transformation
-  buffer_manager.InitBuffer("model_trans_buffer", GL_UNIFORM_BUFFER,
-                            sizeof(ModelTrans), NULL, GL_STATIC_DRAW);
-
-  /* Update buffers */
-  // Global MVP
-  buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0,
-                              sizeof(GlobalMvp), &global_mvp);
-  // Model transformation
-  buffer_manager.UpdateBuffer("model_trans_buffer", GL_UNIFORM_BUFFER, 0,
-                              sizeof(ModelTrans), &model_trans);
-
-  /* Bind uniform blocks to buffers */
-  // Global MVP
-  uniform_manager.AssignUniformBlockToBindingPoint("scene", "GlobalMvp", 0);
-  uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
-  // Model transformation
-  uniform_manager.AssignUniformBlockToBindingPoint("scene", "ModelTrans", 1);
-  uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
-
-  /* Configure models */
+void ConfigGLModels() {
   // Scenes
   ConfigSceneBuffers();
   ConfigSceneTextures();
   // Skyboxes
   ConfigSkyboxBuffers();
   ConfigSkyboxTextures();
+}
+
+void ConfigGL() {
+  /* Configure global contexts */
+  as::EnableCatchingGLError();
+  ConfigGLSettings();
+  InitGLManagers();
+  /* Configure scene-wise contexts */
+  CreateGLShaders();
+  CreateGLPrograms();
+  CreateGLBuffers();
+  InitGLBuffers();
+  UpdateGLBuffers();
+  BindGLUniformBlocksToBuffers();
+  // CreateGLFramebuffers();
+  // CreateGLRenderbuffers();
+  // InitGLRenderbuffers();
+  // AttachGLRenderbuffersToFramebuffers();
+  /* Configure model-wise contexts */
+  ConfigGLModels();
 }
 
 /*******************************************************************************

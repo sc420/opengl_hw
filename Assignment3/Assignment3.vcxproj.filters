@@ -90,6 +90,12 @@
     <ClInclude Include="..\include\as\trans\camera.hpp">
       <Filter>include\as\trans</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\model\converter.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\model_tools.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp">
@@ -139,6 +145,9 @@
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Assignment3\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\converter.cpp">
+      <Filter>src\model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
