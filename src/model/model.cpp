@@ -79,10 +79,14 @@ std::vector<as::Vertex> as::Model::ProcessMeshVertices(
   std::vector<Vertex> vertices;
   for (size_t vtx_idx = 0; vtx_idx < ai_mesh->mNumVertices; vtx_idx++) {
     Vertex vertex;
-    const aiVector3D &m_vertex = ai_mesh->mVertices[vtx_idx];
-    const aiVector3D &m_normal = ai_mesh->mNormals[vtx_idx];
-    vertex.pos = glm::vec3(m_vertex.x, m_vertex.y, m_vertex.z);
-    vertex.normal = glm::vec3(m_normal.x, m_normal.y, m_normal.z);
+    if (ai_mesh->HasPositions()) {
+      const aiVector3D &m_vertex = ai_mesh->mVertices[vtx_idx];
+      vertex.pos = glm::vec3(m_vertex.x, m_vertex.y, m_vertex.z);
+    }
+    if (ai_mesh->HasNormals()) {
+      const aiVector3D &m_normal = ai_mesh->mNormals[vtx_idx];
+      vertex.normal = glm::vec3(m_normal.x, m_normal.y, m_normal.z);
+    }
     if (ai_mesh->mTextureCoords[0]) {
       const aiVector3D &m_tex_coords = ai_mesh->mTextureCoords[0][vtx_idx];
       vertex.tex_coords = glm::vec2(m_tex_coords.x, m_tex_coords.y);

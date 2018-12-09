@@ -127,15 +127,16 @@ void InitGLUT(int argc, char *argv[]) {
  ******************************************************************************/
 
 void LoadModels() {
-  const unsigned int assimp_flags =
+  const unsigned int screen_quad_flags = 0;
+  const unsigned int scene_flags =
       aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate;
   // Screen quad
-  screen_quad_model.LoadFile("assets/models/quad/quad.obj", assimp_flags);
+  screen_quad_model.LoadFile("assets/models/quad/quad.obj", screen_quad_flags);
   // First scene
   scene_model[0].LoadFile("assets/models/crytek-sponza/sponza.obj",
-                          assimp_flags);
+                          scene_flags);
   // First skybox
-  skybox_model[0].LoadFile("assets/models/sea/skybox.obj", assimp_flags);
+  skybox_model[0].LoadFile("assets/models/sea/skybox.obj", scene_flags);
 }
 
 /*******************************************************************************
