@@ -145,18 +145,22 @@ void as::TextureManager::SetTextureParamIntVector(const std::string &tex_name,
 
 void as::TextureManager::DeleteTexture(const std::string &tex_name) {
   const GLuint tex_hdlr = GetTextureHdlr(tex_name);
-  glDeleteVertexArrays(1, &tex_hdlr);
+  glDeleteTextures(1, &tex_hdlr);
   // Delete previous parameters
   bind_texture_prev_params_.erase(tex_name);
   update_texture_2d_prev_params_.erase(tex_name);
 }
 
 GLuint as::TextureManager::GetTextureHdlr(const std::string &tex_name) const {
-  if (hdlrs_.count(tex_name) == 0) {
+  if (!HasTexture(tex_name)) {
     throw std::runtime_error("Could not find the texture name '" + tex_name +
                              "'");
   }
   return hdlrs_.at(tex_name);
+}
+
+bool as::TextureManager::HasTexture(const std::string &tex_name) const {
+  return hdlrs_.count(tex_name) > 0;
 }
 
 const as::TextureManager::BindTexturePrevParams &

@@ -77,6 +77,8 @@ class TextureManager {
 
   GLuint GetTextureHdlr(const std::string &tex_name) const;
 
+  bool HasTexture(const std::string &tex_name) const;
+
  private:
   GLuint max_combined_texture_image_units_;
 

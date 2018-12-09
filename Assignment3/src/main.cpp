@@ -9,6 +9,8 @@ namespace fs = std::experimental::filesystem;
  * Constants
  ******************************************************************************/
 
+constexpr auto INIT_WINDOW_WIDTH = 600;
+constexpr auto INIT_WINDOW_HEIGHT = 600;
 constexpr auto TIMER_INTERVAL = 10;
 constexpr auto KEYBOARD_KEY_SIZE = 256;
 constexpr auto CAMERA_MOVING_STEP = 0.2f;
@@ -118,7 +120,7 @@ void InitGLUT(int argc, char *argv[]) {
   glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowPosition(100, 100);
-  glutInitWindowSize(600, 600);
+  glutInitWindowSize(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
   glutCreateWindow("Assignment 3");
 }
 
@@ -231,23 +233,6 @@ void CreateGLPrograms() {
  * GL Context Configuration / Screens
  ******************************************************************************/
 
-void ConfigScreenTextures() {
-  // Calculate the new unit index
-  const GLuint unit_idx = texture_unit_idxs.size();
-
-  texture_manager.GenTexture("screen_quad_tex");
-  texture_manager.BindTexture("screen_quad_tex", GL_TEXTURE_2D, unit_idx);
-  texture_manager.InitTexture2D("screen_quad_tex", GL_TEXTURE_2D, 1, GL_RGB8,
-                                600, 600);
-  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
-                                     GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
-                                     GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  // Save the unit index
-  texture_unit_idxs["screen_quad_tex"] = unit_idx;
-}
-
 void ConfigScreenVertexArrays() {
   const std::vector<as::Mesh> meshes = screen_quad_model.GetMeshes();
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
@@ -308,31 +293,61 @@ void ConfigScreenVertexArrays() {
   }
 }
 
-void ConfigScreenFramebuffers() {
-  // Create framebuffers
-  framebuffer_manager.GenFramebuffer("screen_framebuffer");
-  // Create renderbuffers
-  framebuffer_manager.GenRenderbuffer("screen_depth_renderbuffer");
-  // Initialize renderbuffers
-  // TODO: Dynamically change it
-  framebuffer_manager.InitRenderbuffer("screen_depth_renderbuffer",
-                                       GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 600,
-                                       600);
-  // Attach renderbuffers to framebuffers
-  framebuffer_manager.AttachRenderbufferToFramebuffer(
-      "screen_framebuffer", "screen_depth_renderbuffer", GL_FRAMEBUFFER,
-      GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER);
+void UpdateScreenTextures(const GLsizei width, const GLsizei height) {
+  // Check whether to delete old texture
+  GLuint unit_idx;
+  if (texture_manager.HasTexture("screen_quad_tex")) {
+    texture_manager.DeleteTexture("screen_quad_tex");
+    unit_idx = texture_unit_idxs["screen_quad_tex"];
+  } else {
+    // Calculate the new unit index
+    unit_idx = texture_unit_idxs.size();
+    // Save the unit index
+    texture_unit_idxs["screen_quad_tex"] = unit_idx;
+  }
+  // Generate texture
+  texture_manager.GenTexture("screen_quad_tex");
+  // Update texture
+  texture_manager.BindTexture("screen_quad_tex", GL_TEXTURE_2D, unit_idx);
+  texture_manager.InitTexture2D("screen_quad_tex", GL_TEXTURE_2D, 1, GL_RGB8,
+                                width, height);
+  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
+                                     GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
+                                     GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   // Attach textures to framebuffers
   framebuffer_manager.AttachTexture2DToFramebuffer(
       "screen_framebuffer", "screen_quad_tex", GL_FRAMEBUFFER,
       GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0);
-  ;
+}
+
+void UpdateScreenRenderbuffers(const GLsizei width, const GLsizei height) {
+  // Check whether to delete old renderbuffer
+  if (framebuffer_manager.HasRenderbuffer("screen_depth_renderbuffer")) {
+    framebuffer_manager.DeleteRenderbuffer("screen_depth_renderbuffer");
+  }
+  // Create renderbuffers
+  framebuffer_manager.GenRenderbuffer("screen_depth_renderbuffer");
+  // Initialize renderbuffers
+  framebuffer_manager.InitRenderbuffer("screen_depth_renderbuffer",
+                                       GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
+                                       width, height);
+  // Attach renderbuffers to framebuffers
+  framebuffer_manager.AttachRenderbufferToFramebuffer(
+      "screen_framebuffer", "screen_depth_renderbuffer", GL_FRAMEBUFFER,
+      GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER);
+}
+
+void ConfigScreenFramebuffers() {
+  // Create framebuffers
+  framebuffer_manager.GenFramebuffer("screen_framebuffer");
 }
 
 void ConfigGLScreens() {
-  ConfigScreenTextures();
   ConfigScreenVertexArrays();
   ConfigScreenFramebuffers();
+  UpdateScreenTextures(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
+  UpdateScreenRenderbuffers(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
 }
 
 /*******************************************************************************
@@ -730,9 +745,12 @@ void GLUTDisplayCallback() {
 void GLUTReshapeCallback(const int width, const int height) {
   // Update window aspect ratio
   window_aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
-
   // Set the viewport
   glViewport(0, 0, width, height);
+  // Update screen textures
+  UpdateScreenTextures(width, height);
+  // Update screen renderbuffers
+  UpdateScreenRenderbuffers(width, height);
 }
 
 void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {

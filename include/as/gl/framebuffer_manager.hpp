@@ -66,6 +66,10 @@ class FramebufferManager {
 
   GLuint GetRenderbufferHdlr(const std::string &renderbuffer_name) const;
 
+  bool HasFramebuffer(const std::string &framebuffer_name) const;
+
+  bool HasRenderbuffer(const std::string &renderbuffer_name) const;
+
  private:
   const TextureManager *texture_manager_;
 

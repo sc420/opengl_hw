@@ -121,7 +121,7 @@ void as::FramebufferManager::DeleteRenderbuffer(
 
 GLuint as::FramebufferManager::GetFramebufferHdlr(
     const std::string& framebuffer_name) const {
-  if (framebuffer_hdlrs_.count(framebuffer_name) == 0) {
+  if (!HasFramebuffer(framebuffer_name)) {
     throw std::runtime_error("Could not find the framebuffer name '" +
                              framebuffer_name + "'");
   }
@@ -130,11 +130,21 @@ GLuint as::FramebufferManager::GetFramebufferHdlr(
 
 GLuint as::FramebufferManager::GetRenderbufferHdlr(
     const std::string& renderbuffer_name) const {
-  if (renderbuffer_hdlrs_.count(renderbuffer_name) == 0) {
+  if (!HasRenderbuffer(renderbuffer_name)) {
     throw std::runtime_error("Could not find the renderbuffer name '" +
                              renderbuffer_name + "'");
   }
   return renderbuffer_hdlrs_.at(renderbuffer_name);
+}
+
+bool as::FramebufferManager::HasFramebuffer(
+    const std::string& framebuffer_name) const {
+  return framebuffer_hdlrs_.count(framebuffer_name) > 0;
+}
+
+bool as::FramebufferManager::HasRenderbuffer(
+    const std::string& renderbuffer_name) const {
+  return renderbuffer_hdlrs_.count(renderbuffer_name) > 0;
 }
 
 const as::FramebufferManager::BindFramebufferPrevParams&
