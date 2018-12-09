@@ -14,8 +14,8 @@ constexpr auto KEYBOARD_KEY_SIZE = 256;
 constexpr auto CAMERA_MOVING_STEP = 0.2f;
 constexpr auto CAMERA_ROTATION_SENSITIVITY = 0.005f;
 constexpr auto CAMERA_ZOOMING_STEP = 5.0f;
-constexpr auto SCENE_SIZE = 2;
-constexpr auto SKYBOX_SIZE = 2;
+constexpr auto SCENE_SIZE = 1;
+constexpr auto SKYBOX_SIZE = 1;
 constexpr auto NUM_MIPMAP_LEVEL = 5;
 
 /*******************************************************************************
@@ -129,12 +129,8 @@ void LoadModels() {
       aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate;
   // First scene
   scene_model[0].LoadFile("assets/models/crytek-sponza/sponza.obj", flags);
-  // Second scene
-  scene_model[1].LoadFile("assets/models/dabrovic-sponza/sponza.obj", flags);
   // First skybox
   skybox_model[0].LoadFile("assets/models/sea/skybox.obj", flags);
-  // Second skybox
-  skybox_model[1].LoadFile("assets/models/ame_shadow/skybox.obj", flags);
 }
 
 /*******************************************************************************
@@ -291,12 +287,6 @@ void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
     buffer_manager.GenBuffer(scene_buffer_name);
     // VA indexes
     buffer_manager.GenBuffer(scene_idxs_buffer_name);
-
-    /* Bind buffers */
-    // VA
-    buffer_manager.BindBuffer(scene_buffer_name, GL_ARRAY_BUFFER);
-    // VA indexes
-    buffer_manager.BindBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER);
 
     /* Initialize buffers */
     // VA
@@ -498,6 +488,23 @@ void UpdateGlobalMvp() {
  * GLUT Callbacks
  ******************************************************************************/
 
+void ClearGLFramebuffers() {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void UpdateGLStates() {
+  // Global MVP
+  UpdateGlobalMvp();
+  buffer_manager.UpdateBuffer("global_mvp_buffer");
+}
+
+void UpdateGLModelTrans() {
+  const float scale_factors[SCENE_SIZE] = {0.01f};
+  model_trans.trans =
+      glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors[cur_scene_idx]));
+  buffer_manager.UpdateBuffer("model_trans_buffer");
+}
+
 void DrawMeshes(const std::string &program_name, const std::string &group_name,
                 const std::vector<as::Mesh> &meshes) {
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
@@ -534,36 +541,28 @@ void DrawMeshes(const std::string &program_name, const std::string &group_name,
   }
 }
 
-void GLUTDisplayCallback() {
-  /* Clear frame buffers */
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  /* Update GL states */
-  // Global MVP
-  UpdateGlobalMvp();
-  buffer_manager.UpdateBuffer("global_mvp_buffer");
-
-  /* Update model transformations */
-  const float scale_factors[SCENE_SIZE] = {0.01f, 1.0f};
-  model_trans.trans =
-      glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors[cur_scene_idx]));
-  buffer_manager.UpdateBuffer("model_trans_buffer");
-
-  /* Draw the scenes */
+void DrawScenes() {
   program_manager.UseProgram("scene");
   const std::string scene_group_name = GetSceneGroupName(cur_scene_idx);
   const std::vector<as::Mesh> scene_meshes =
       scene_model[cur_scene_idx].GetMeshes();
   DrawMeshes("scene", scene_group_name, scene_meshes);
+}
 
-  /* Draw the skyboxes */
+void DrawSkyboxes() {
   program_manager.UseProgram("skybox");
   const std::string skybox_group_name = GetSkyboxGroupName(cur_skybox_idx);
   const std::vector<as::Mesh> skybox_meshes =
       skybox_model[cur_skybox_idx].GetMeshes();
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
+}
 
-  /* Swap frame buffers in double buffer mode */
+void GLUTDisplayCallback() {
+  ClearGLFramebuffers();
+  UpdateGLStates();
+  UpdateGLModelTrans();
+  DrawScenes();
+  DrawSkyboxes();
   glutSwapBuffers();
 }
 
