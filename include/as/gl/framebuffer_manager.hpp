@@ -27,6 +27,8 @@ class FramebufferManager {
 
   void BindFramebuffer(const std::string &framebuffer_name);
 
+  void BindDefaultFramebuffer(const GLenum framebuffer_target);
+
   void BindRenderbuffer(const std::string &renderbuffer_name,
                         const GLenum renderbuffer_target);
 

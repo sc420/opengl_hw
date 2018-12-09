@@ -12,6 +12,7 @@
  ******************************************************************************/
 
 #include <algorithm>
+#include <cassert>
 #include <filesystem>
 #include <iostream>
 #include <map>

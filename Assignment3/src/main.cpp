@@ -53,6 +53,8 @@ as::CameraTrans camera_trans(glm::vec3(-12.0f, 2.0f, 0.0f),
  * Models
  ******************************************************************************/
 
+// Screen quad
+as::Model screen_quad_model;
 // Scenes
 as::Model scene_model[SCENE_SIZE];
 // Skyboxes
@@ -125,12 +127,15 @@ void InitGLUT(int argc, char *argv[]) {
  ******************************************************************************/
 
 void LoadModels() {
-  const unsigned int flags =
+  const unsigned int assimp_flags =
       aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate;
+  // Screen quad
+  screen_quad_model.LoadFile("assets/models/quad/quad.obj", assimp_flags);
   // First scene
-  scene_model[0].LoadFile("assets/models/crytek-sponza/sponza.obj", flags);
+  scene_model[0].LoadFile("assets/models/crytek-sponza/sponza.obj",
+                          assimp_flags);
   // First skybox
-  skybox_model[0].LoadFile("assets/models/sea/skybox.obj", flags);
+  skybox_model[0].LoadFile("assets/models/sea/skybox.obj", assimp_flags);
 }
 
 /*******************************************************************************
@@ -161,12 +166,11 @@ std::string GetMeshVAIdxsBufferName(const std::string &group_name,
 }
 
 /*******************************************************************************
- * GL Context Configuration
+ * GL Context Configuration / Global
  ******************************************************************************/
 
 void ConfigGLSettings() {
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-  glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
 }
 
@@ -183,6 +187,11 @@ void InitGLManagers() {
 }
 
 void CreateGLShaders() {
+  // Post-processing - Image abstraction
+  shader_manager.CreateShader("vertex/postproc_img_abs", GL_VERTEX_SHADER,
+                              "assets/shaders/postproc_img_abs.vert");
+  shader_manager.CreateShader("fragment/postproc_img_abs", GL_FRAGMENT_SHADER,
+                              "assets/shaders/postproc_img_abs.frag");
   // Scenes
   shader_manager.CreateShader("vertex/scene", GL_VERTEX_SHADER,
                               "assets/shaders/scene.vert");
@@ -196,6 +205,12 @@ void CreateGLShaders() {
 }
 
 void CreateGLPrograms() {
+  // Post-processing - Image abstraction
+  program_manager.CreateProgram("postproc_img_abs");
+  program_manager.AttachShader("postproc_img_abs", "vertex/postproc_img_abs");
+  program_manager.AttachShader("postproc_img_abs", "fragment/postproc_img_abs");
+  program_manager.LinkProgram("postproc_img_abs");
+  program_manager.UseProgram("postproc_img_abs");
   // Scenes
   program_manager.CreateProgram("scene");
   program_manager.AttachShader("scene", "vertex/scene");
@@ -209,6 +224,116 @@ void CreateGLPrograms() {
   program_manager.LinkProgram("skybox");
   program_manager.UseProgram("skybox");
 }
+
+/*******************************************************************************
+ * GL Context Configuration / Screens
+ ******************************************************************************/
+
+void ConfigScreenTextures() {
+  // Calculate the new unit index
+  const GLuint unit_idx = texture_unit_idxs.size();
+
+  texture_manager.GenTexture("screen_quad_tex");
+  texture_manager.BindTexture("screen_quad_tex", GL_TEXTURE_2D, unit_idx);
+  texture_manager.InitTexture2D("screen_quad_tex", GL_TEXTURE_2D, 1, GL_RGBA8,
+                                600, 600);
+  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
+                                     GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
+                                     GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  // Save the unit index
+  texture_unit_idxs["screen_quad_tex"] = unit_idx;
+}
+
+void ConfigScreenVertexArrays() {
+  const std::vector<as::Mesh> meshes = screen_quad_model.GetMeshes();
+  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+    // There should be only one mesh
+    assert(mesh_idx <= 0);
+
+    const as::Mesh &mesh = meshes.at(mesh_idx);
+    // Decide the names
+    const std::string va_name = "screen_quad_va";
+    const std::string buffer_name = "screen_quad_buffer";
+    const std::string idxs_buffer_name = "screen_quad_idxs_buffer";
+    // Get mesh data
+    const std::vector<as::Vertex> vertices = mesh.GetVertices();
+    const std::vector<size_t> idxs = mesh.GetIdxs();
+    // Get memory size of mesh data
+    const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
+    const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
+
+    /* Generate buffers */
+    // VA
+    buffer_manager.GenBuffer(buffer_name);
+    // VA indexes
+    buffer_manager.GenBuffer(idxs_buffer_name);
+
+    /* Initialize buffers */
+    // VA
+    buffer_manager.InitBuffer(buffer_name, GL_ARRAY_BUFFER, vertices_mem_sz,
+                              NULL, GL_STATIC_DRAW);
+    // VA indexes
+    buffer_manager.InitBuffer(idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
+                              idxs_mem_sz, NULL, GL_STATIC_DRAW);
+
+    /* Update buffers */
+    // VA
+    buffer_manager.UpdateBuffer(buffer_name, GL_ARRAY_BUFFER, 0,
+                                vertices_mem_sz, vertices.data());
+    // VA indexes
+    buffer_manager.UpdateBuffer(idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER, 0,
+                                idxs_mem_sz, idxs.data());
+
+    /* Create vertex arrays */
+    // VA
+    vertex_spec_manager.GenVertexArray(va_name);
+
+    /* Bind vertex arrays to buffers */
+    // VA
+    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 0, 3, GL_FLOAT, GL_FALSE,
+                                              0);
+    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 1, 3, GL_FLOAT, GL_FALSE,
+                                              0);
+    vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 0, 0);
+    vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 1, 1);
+    vertex_spec_manager.BindBufferToBindingPoint(
+        va_name, buffer_name, 0, offsetof(as::Vertex, pos), sizeof(as::Vertex));
+    vertex_spec_manager.BindBufferToBindingPoint(
+        va_name, buffer_name, 1, offsetof(as::Vertex, tex_coords),
+        sizeof(as::Vertex));
+  }
+}
+
+void ConfigScreenFramebuffers() {
+  // Create framebuffers
+  framebuffer_manager.GenFramebuffer("screen_framebuffer");
+  // Create renderbuffers
+  framebuffer_manager.GenRenderbuffer("screen_renderbuffer");
+  // Initialize renderbuffers
+  framebuffer_manager.InitRenderbuffer("screen_renderbuffer", GL_RENDERBUFFER,
+                                       GL_DEPTH24_STENCIL8, 600,
+                                       600);  // TODO: Dynamically change it
+  // Attach textures to framebuffers
+  framebuffer_manager.AttachRenderbufferToFramebuffer(
+      "screen_framebuffer", "screen_renderbuffer", GL_FRAMEBUFFER,
+      GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER);
+  // Attach renderbuffers to framebuffers
+  framebuffer_manager.AttachTexture2DToFramebuffer(
+      "screen_framebuffer", "screen_quad_tex", GL_FRAMEBUFFER,
+      GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0);
+}
+
+void ConfigGLScreens() {
+  ConfigScreenTextures();
+  ConfigScreenVertexArrays();
+  ConfigScreenFramebuffers();
+}
+
+/*******************************************************************************
+ * GL Context Configuration / Scenes
+ ******************************************************************************/
 
 void CreateGLBuffers() {
   // Global MVP
@@ -244,25 +369,16 @@ void BindGLUniformBlocksToBuffers() {
   uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
 }
 
-void CreateGLFramebuffers() {
-  framebuffer_manager.GenFramebuffer("framebuffer");
+void ConfigGLScenes() {
+  CreateGLBuffers();
+  InitGLBuffers();
+  UpdateGLBuffers();
+  BindGLUniformBlocksToBuffers();
 }
 
-void CreateGLRenderbuffers() {
-  framebuffer_manager.GenRenderbuffer("renderbuffer");
-}
-
-void InitGLRenderbuffers() {
-  framebuffer_manager.InitRenderbuffer("renderbuffer", GL_RENDERBUFFER,
-                                       GL_DEPTH24_STENCIL8, 600,
-                                       600);  // TODO: Dynamically change it
-}
-
-void AttachGLRenderbuffersToFramebuffers() {
-  framebuffer_manager.AttachRenderbufferToFramebuffer(
-      "framebuffer", "renderbuffer", GL_FRAMEBUFFER,
-      GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER);
-}
+/*******************************************************************************
+ * GL Context Configuration / Models
+ ******************************************************************************/
 
 void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
   const std::vector<as::Mesh> meshes = model.GetMeshes();
@@ -457,17 +573,14 @@ void ConfigGL() {
   as::EnableCatchingGLError();
   ConfigGLSettings();
   InitGLManagers();
-  /* Configure scene-wise contexts */
+  /* Configure program-wise contexts */
+  LoadModels();
   CreateGLShaders();
   CreateGLPrograms();
-  CreateGLBuffers();
-  InitGLBuffers();
-  UpdateGLBuffers();
-  BindGLUniformBlocksToBuffers();
-  // CreateGLFramebuffers();
-  // CreateGLRenderbuffers();
-  // InitGLRenderbuffers();
-  // AttachGLRenderbuffersToFramebuffers();
+  /* Configure screen-wise contexts */
+  ConfigGLScreens();
+  /* Configure scene-wise contexts */
+  ConfigGLScenes();
   /* Configure model-wise contexts */
   ConfigGLModels();
 }
@@ -488,9 +601,9 @@ void UpdateGlobalMvp() {
  * GLUT Callbacks
  ******************************************************************************/
 
-void ClearGLFramebuffers() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
+void ConfigGLSettingsForScene() { glEnable(GL_DEPTH_TEST); }
+
+void ClearDrawing() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); }
 
 void UpdateGLStates() {
   // Global MVP
@@ -503,6 +616,11 @@ void UpdateGLModelTrans() {
   model_trans.trans =
       glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors[cur_scene_idx]));
   buffer_manager.UpdateBuffer("model_trans_buffer");
+}
+
+void UseScreenFramebuffer() {
+  framebuffer_manager.BindFramebuffer("screen_framebuffer");
+  framebuffer_manager.BindRenderbuffer("screen_renderbuffer");
 }
 
 void DrawMeshes(const std::string &program_name, const std::string &group_name,
@@ -557,12 +675,51 @@ void DrawSkyboxes() {
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
 }
 
+void ConfigGLSettingsForPostproc() { glDisable(GL_DEPTH_TEST); }
+
+void UseDefaultFramebuffer() {
+  framebuffer_manager.BindDefaultFramebuffer(GL_FRAMEBUFFER);
+}
+
+void DrawScreenTexture() {
+  const std::vector<as::Mesh> meshes = screen_quad_model.GetMeshes();
+  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+    // There should be only one mesh
+    assert(mesh_idx <= 0);
+
+    // Decide the names
+    const std::string va_name = "screen_quad_va";
+    const std::string buffer_name = "screen_quad_buffer";
+    const std::string idxs_buffer_name = "screen_quad_idxs_buffer";
+    const as::Mesh &mesh = meshes.at(mesh_idx);
+    // Get the array indexes
+    const std::vector<size_t> &idxs = mesh.GetIdxs();
+
+    program_manager.UseProgram("postproc_img_abs");
+    vertex_spec_manager.BindVertexArray("screen_quad_va");
+    texture_manager.BindTexture("screen_quad_tex");
+    buffer_manager.BindBuffer("screen_quad_buffer");
+    buffer_manager.BindBuffer("screen_quad_idxs_buffer");
+    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, 0);
+  }
+}
+
 void GLUTDisplayCallback() {
-  ClearGLFramebuffers();
+  // Update scene-wise contexts
   UpdateGLStates();
   UpdateGLModelTrans();
+  // Draw the scenes
+  UseScreenFramebuffer();
+  ClearDrawing();
+  ConfigGLSettingsForScene();
   DrawScenes();
   DrawSkyboxes();
+  // Draw the post-processing effects
+  UseDefaultFramebuffer();
+  ConfigGLSettingsForPostproc();
+  ClearDrawing();
+  DrawScreenTexture();
+  // Swap double buffers
   glutSwapBuffers();
 }
 
@@ -768,7 +925,6 @@ int main(int argc, char *argv[]) {
   try {
     InitGLUT(argc, argv);
     as::InitGLEW();
-    LoadModels();
     ConfigGL();
     RegisterGLUTCallbacks();
     CreateGLUTMenus();

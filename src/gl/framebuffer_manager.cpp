@@ -46,6 +46,11 @@ void as::FramebufferManager::BindFramebuffer(
   BindFramebuffer(framebuffer_name, prev_params.target);
 }
 
+void as::FramebufferManager::BindDefaultFramebuffer(
+    const GLenum framebuffer_target) {
+  glBindFramebuffer(framebuffer_target, 0);
+}
+
 void as::FramebufferManager::BindRenderbuffer(
     const std::string& renderbuffer_name, const GLenum renderbuffer_target) {
   const GLuint hdlr = GetRenderbufferHdlr(renderbuffer_name);
