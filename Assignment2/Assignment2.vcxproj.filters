@@ -4,26 +4,17 @@
     <Filter Include="assets">
       <UniqueIdentifier>{9dda94c8-3a6f-4562-90fe-5ceface38c32}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include">
-      <UniqueIdentifier>{9234ca84-7ae3-4a22-8850-a64d28d34c12}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{bcc2fea6-cd53-450f-917b-563a4cf5ab55}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\gl">
-      <UniqueIdentifier>{ec19cf54-08c6-48d4-99c9-570566091727}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\model">
-      <UniqueIdentifier>{1aa9c770-ffc8-4fac-88fb-38224f38f25f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\trans">
-      <UniqueIdentifier>{5406f30e-c62b-4d43-b914-56d5cad59dea}</UniqueIdentifier>
+    <Filter Include="assets\shaders">
+      <UniqueIdentifier>{4a8aa88a-0207-4dd4-9e2f-f34d3a505d1c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Assignment2">
       <UniqueIdentifier>{34fd948e-325d-4a05-afc5-c0b3b3a147d9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Assignment2\src">
       <UniqueIdentifier>{241569b9-b50d-4433-9131-99752bf77d8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{9234ca84-7ae3-4a22-8850-a64d28d34c12}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\as">
       <UniqueIdentifier>{5f4bd6d1-1813-4da7-b9c2-530d4145604c}</UniqueIdentifier>
@@ -37,39 +28,27 @@
     <Filter Include="include\as\trans">
       <UniqueIdentifier>{a0615eae-6957-4368-9fb2-a262bc89330a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="assets\shaders">
-      <UniqueIdentifier>{4a8aa88a-0207-4dd4-9e2f-f34d3a505d1c}</UniqueIdentifier>
+    <Filter Include="src">
+      <UniqueIdentifier>{bcc2fea6-cd53-450f-917b-563a4cf5ab55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\gl">
+      <UniqueIdentifier>{ec19cf54-08c6-48d4-99c9-570566091727}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\model">
+      <UniqueIdentifier>{1aa9c770-ffc8-4fac-88fb-38224f38f25f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\trans">
+      <UniqueIdentifier>{5406f30e-c62b-4d43-b914-56d5cad59dea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\as\model\loader.hpp">
-      <Filter>include\as\model</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\trans\camera.hpp">
-      <Filter>include\as\trans</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\as\common.hpp">
       <Filter>include\as</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\as\model\model.hpp">
-      <Filter>include\as\model</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\model\vertex.hpp">
-      <Filter>include\as\model</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\model\mesh.hpp">
-      <Filter>include\as\model</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\model\node.hpp">
-      <Filter>include\as\model</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\model\texture.hpp">
-      <Filter>include\as\model</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\as\gl\texture_manager.hpp">
+    <ClInclude Include="..\include\as\gl\buffer_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\as\gl\buffer_manager.hpp">
+    <ClInclude Include="..\include\as\gl\framebuffer_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
     <ClInclude Include="..\include\as\gl\gl_managers.hpp">
@@ -81,45 +60,45 @@
     <ClInclude Include="..\include\as\gl\shader_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\gl\texture_manager.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
     <ClInclude Include="..\include\as\gl\uniform_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
     <ClInclude Include="..\include\as\gl\vertex_spec_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\model\loader.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\mesh.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\model.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\node.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\texture.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\vertex.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\trans\camera.hpp">
+      <Filter>include\as\trans</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\trans\camera.cpp">
-      <Filter>src\trans</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\model\loader.cpp">
-      <Filter>src\model</Filter>
-    </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Assignment2\src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\model\model.cpp">
-      <Filter>src\model</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\model\mesh.cpp">
-      <Filter>src\model</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\model\vertex.cpp">
-      <Filter>src\model</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\model\node.cpp">
-      <Filter>src\model</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\model\texture.cpp">
-      <Filter>src\model</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gl\texture_manager.cpp">
+    <ClCompile Include="..\src\gl\buffer_manager.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\buffer_manager.cpp">
+    <ClCompile Include="..\src\gl\framebuffer_manager.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gl\program_manager.cpp">
@@ -128,11 +107,38 @@
     <ClCompile Include="..\src\gl\shader_manager.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\gl\texture_manager.cpp">
+      <Filter>src\gl</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\gl\uniform_manager.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gl\vertex_spec_manager.cpp">
       <Filter>src\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\loader.cpp">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\mesh.cpp">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\model.cpp">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\node.cpp">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\texture.cpp">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\vertex.cpp">
+      <Filter>src\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\trans\camera.cpp">
+      <Filter>src\trans</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Assignment3\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
