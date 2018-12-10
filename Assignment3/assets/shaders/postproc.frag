@@ -8,6 +8,7 @@
 const int kDisplayModeOriginal = 0;
 const int kDisplayModeBar = 1;
 const int kDisplayModePostproc = 2;
+const int kDisplayModeMagnified = 3;
 /* Post-processing effects */
 const int kPostprocEffectImgAbs = 0;
 const int kPostprocEffectLaplacian = 1;
@@ -17,6 +18,7 @@ const int kPostprocEffectBloomEffect = 4;
 const int kPostprocEffectMagnifier = 5;
 /* Display */
 const float kComparisonBarWidth = 4;
+const float kMagnifierRadius = 0.2f;
 /* Colors */
 const vec4 kWhiteColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 const vec4 kBlackColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -69,13 +71,28 @@ int CalcDisplayMode() {
   if (comparison_bar.enabled[0] == 0) {
     return kDisplayModeOriginal;
   }
-  const vec2 dist = vec2(gl_FragCoord) - comparison_bar.mouse_pos;
-  if (dist.x < -1.0f * kComparisonBarWidth / 2.0f) {
-    return kDisplayModePostproc;
-  } else if (dist.x > 1.0f * kComparisonBarWidth / 2.0f) {
-    return kDisplayModeOriginal;
+  const vec2 mouse_pos = comparison_bar.mouse_pos;
+  const vec2 window_size = postproc_inputs.window_size;
+  const vec2 reversed_mouse_pos =
+      vec2(mouse_pos.x, window_size.y - mouse_pos.y);
+  const vec2 dist = vec2(gl_FragCoord) - reversed_mouse_pos;
+  if (postproc_inputs.effect_idx[0] == kPostprocEffectMagnifier) {
+    const float radius = sqrt(pow(dist.x, 2.0f) + pow(dist.y, 2.0f));
+    const float min_window_len =
+        min(postproc_inputs.window_size.x, postproc_inputs.window_size.y);
+    if (radius / min_window_len <= kMagnifierRadius) {
+      return kDisplayModeMagnified;
+    } else {
+      return kDisplayModeOriginal;
+    }
   } else {
-    return kDisplayModeBar;
+    if (dist.x < -1.0f * kComparisonBarWidth / 2.0f) {
+      return kDisplayModePostproc;
+    } else if (dist.x > 1.0f * kComparisonBarWidth / 2.0f) {
+      return kDisplayModeOriginal;
+    } else {
+      return kDisplayModeBar;
+    }
   }
 }
 
@@ -317,7 +334,17 @@ vec4 CalcBloomEffect() {
  * Post-processing / Magnifier
  ******************************************************************************/
 
-vec4 CalcMagnifier() { return kErrorColor; }
+vec4 CalcMagnifier() {
+  const float kMagnifyFactor = 2.0f;
+
+  const vec2 mouse_pos = comparison_bar.mouse_pos;
+  const vec2 window_size = postproc_inputs.window_size;
+  const vec2 center =
+      vec2(mouse_pos.x, window_size.y - mouse_pos.y) / window_size;
+  const vec2 dist = vs_tex_coords - center;
+  const vec2 magnified_coords = center + dist / kMagnifyFactor;
+  return GetTexel(magnified_coords);
+}
 
 /*******************************************************************************
  * Post-processing / Center
@@ -363,6 +390,9 @@ void main() {
     } break;
     case kDisplayModeBar: {
       fs_color = vec4(vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    } break;
+    case kDisplayModeMagnified: {
+      fs_color = CalcPostproc();
     } break;
     default: { fs_color = kErrorColor; }
   }

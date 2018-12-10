@@ -56,7 +56,7 @@ size_t cur_skybox_idx = 0;
 Modes cur_mode = Modes::comparison;
 
 // Effects
-int cur_effect_idx = Effects::kEffectBloomEffect;
+int cur_effect_idx = Effects::kEffectMagnifier;
 int cur_pass_idx = 0;
 
 /*******************************************************************************
