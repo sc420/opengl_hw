@@ -43,8 +43,8 @@ float window_aspect_ratio;
 bool pressed_keys[KEYBOARD_KEY_SIZE] = {false};
 
 // Mouse states
-bool camera_rotating = false;
-glm::vec2 last_mouse_pos;
+bool mouse_left_down = false;
+glm::vec2 mouse_left_down_init_pos;
 
 /*******************************************************************************
  * Camera States
@@ -643,11 +643,11 @@ void GLUTSpecialCallback(int key, int x, int y) {
 void GLUTMouseCallback(int button, int state, int x, int y) {
   if (state == GLUT_DOWN) {
     if (button == GLUT_LEFT_BUTTON) {
-      last_mouse_pos = glm::vec2(x, y);
-      camera_rotating = true;
+      mouse_left_down_init_pos = glm::vec2(x, y);
+      mouse_left_down = true;
     }
   } else if (state == GLUT_UP) {
-    camera_rotating = false;
+    mouse_left_down = false;
   }
 }
 
@@ -660,12 +660,12 @@ void GLUTMouseWheelCallback(int button, int dir, int x, int y) {
 }
 
 void GLUTMotionCallback(int x, int y) {
-  if (camera_rotating) {
+  if (mouse_left_down) {
     const glm::vec2 mouse_pos = glm::vec2(x, y);
-    const glm::vec2 diff = mouse_pos - last_mouse_pos;
+    const glm::vec2 diff = mouse_pos - mouse_left_down_init_pos;
     camera_trans.AddAngle(CAMERA_ROTATION_SENSITIVITY *
                           glm::vec3(diff.y, diff.x, 0.0f));
-    last_mouse_pos = mouse_pos;
+    mouse_left_down_init_pos = mouse_pos;
   }
 }
 

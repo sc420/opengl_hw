@@ -21,37 +21,6 @@ constexpr auto SKYBOX_SIZE = 1;
 constexpr auto NUM_MIPMAP_LEVEL = 5;
 
 /*******************************************************************************
- * Timers
- ******************************************************************************/
-
-unsigned int timer_cnt = 0;
-bool timer_enabled = true;
-
-/*******************************************************************************
- * User Interface States
- ******************************************************************************/
-
-// Window states
-bool window_closed = false;
-float window_aspect_ratio;
-
-// Keyboard states
-bool pressed_keys[KEYBOARD_KEY_SIZE] = {false};
-
-// Mouse states
-bool camera_rotating = false;
-glm::vec2 last_mouse_pos;
-
-/*******************************************************************************
- * Camera States
- ******************************************************************************/
-
-// Camera transformations
-as::CameraTrans camera_trans(glm::vec3(-12.0f, 2.0f, 0.0f),
-                             glm::vec3(-0.15f * glm::half_pi<float>(),
-                                       glm::half_pi<float>(), 0.0f));
-
-/*******************************************************************************
  * Models
  ******************************************************************************/
 
@@ -63,18 +32,27 @@ as::Model scene_model[SCENE_SIZE];
 as::Model skybox_model[SKYBOX_SIZE];
 
 /*******************************************************************************
- * Textures
- ******************************************************************************/
-
-// Texture unit indexes
-std::map<std::string, GLuint> texture_unit_idxs;
-
-/*******************************************************************************
  * Model States
  ******************************************************************************/
 
 size_t cur_scene_idx = 0;
 size_t cur_skybox_idx = 0;
+
+/*******************************************************************************
+ * Camera States
+ ******************************************************************************/
+
+// Camera transformations
+as::CameraTrans camera_trans(glm::vec3(-12.0f, 2.0f, 0.0f),
+                             glm::vec3(-0.15f * glm::half_pi<float>(),
+                                       glm::half_pi<float>(), 0.0f));
+
+/*******************************************************************************
+ * Textures
+ ******************************************************************************/
+
+// Texture unit indexes
+std::map<std::string, GLuint> texture_unit_idxs;
 
 /*******************************************************************************
  * GL Managers
@@ -104,11 +82,59 @@ struct ModelTrans {
   glm::mat4 trans;
 };
 
+// Comparison bar declaration
+struct ComparisonBar {
+  // Use vec2 instead of bool to avoid alignment mismatch problem (OpenGL will
+  // pad the memory for alignment, but C++ sizeof() won't)
+  glm::vec2 enabled;
+  glm::vec2 mouse_pos;
+};
+
 // Global MVP
 GlobalMvp global_mvp;
 
 // Model transformations
 ModelTrans model_trans;
+
+// Comparison bar
+ComparisonBar comparison_bar;
+
+/*******************************************************************************
+ * User Interface States
+ ******************************************************************************/
+
+// Modes
+enum class Mode { comparison, navigation };
+
+// Window states
+bool window_closed = false;
+float window_aspect_ratio;
+
+// Keyboard states
+bool pressed_keys[KEYBOARD_KEY_SIZE] = {false};
+
+// Mouse states
+bool mouse_left_down = false;
+glm::vec2 mouse_left_down_init_pos;
+glm::vec2 mouse_pos;
+
+// Current mode
+Mode cur_mode = Mode::comparison;
+
+/*******************************************************************************
+ * Timers
+ ******************************************************************************/
+
+unsigned int timer_cnt = 0;
+bool timer_enabled = true;
+
+/*******************************************************************************
+ * Menus
+ ******************************************************************************/
+
+enum MainMenuItems { kMainImgAbs, kMainExit };
+enum ModeMenuItems { kModeComparison, kModeNavigation };
+enum TimerMenuItems { kTimerStart, kTimerStop };
 
 /*******************************************************************************
  * GL Initialization Methods
@@ -359,6 +385,9 @@ void CreateGLBuffers() {
   buffer_manager.GenBuffer("global_mvp_buffer");
   // Model transformation
   buffer_manager.GenBuffer("model_trans_buffer");
+
+  // Comparison bar
+  buffer_manager.GenBuffer("comparison_bar_buffer");
 }
 
 void InitGLBuffers() {
@@ -368,6 +397,10 @@ void InitGLBuffers() {
   // Model transformation
   buffer_manager.InitBuffer("model_trans_buffer", GL_UNIFORM_BUFFER,
                             sizeof(ModelTrans), NULL, GL_STATIC_DRAW);
+
+  // Comparison bar
+  buffer_manager.InitBuffer("comparison_bar_buffer", GL_UNIFORM_BUFFER,
+                            sizeof(ComparisonBar), NULL, GL_STATIC_DRAW);
 }
 
 void UpdateGLBuffers() {
@@ -377,6 +410,10 @@ void UpdateGLBuffers() {
   // Model transformation
   buffer_manager.UpdateBuffer("model_trans_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(ModelTrans), &model_trans);
+
+  // Comparison bar
+  buffer_manager.UpdateBuffer("comparison_bar_buffer", GL_UNIFORM_BUFFER, 0,
+                              sizeof(ComparisonBar), &comparison_bar);
 }
 
 void BindGLUniformBlocksToBuffers() {
@@ -386,6 +423,11 @@ void BindGLUniformBlocksToBuffers() {
   // Model transformation
   uniform_manager.AssignUniformBlockToBindingPoint("scene", "ModelTrans", 1);
   uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
+
+  // Comparison bar
+  uniform_manager.AssignUniformBlockToBindingPoint("postproc_img_abs",
+                                                   "ComparisonBar", 2);
+  uniform_manager.BindBufferBaseToBindingPoint("comparison_bar_buffer", 2);
 }
 
 void ConfigGLScenes() {
@@ -616,6 +658,11 @@ void UpdateGlobalMvp() {
   global_mvp.model = identity;
 }
 
+void UpdateComparisonBar() {
+  comparison_bar.enabled.x = (cur_mode == Mode::comparison && mouse_left_down);
+  comparison_bar.mouse_pos = mouse_pos;
+}
+
 /*******************************************************************************
  * Drawing Methods
  ******************************************************************************/
@@ -624,17 +671,28 @@ void ClearColorBuffer() { glClear(GL_COLOR_BUFFER_BIT); }
 
 void ClearDepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT); }
 
-void UpdateGLStates() {
-  // Global MVP
+void UpdateGlobalMvpBuffer() {
   UpdateGlobalMvp();
   buffer_manager.UpdateBuffer("global_mvp_buffer");
 }
 
-void UpdateGLModelTrans() {
+void UpdateModelTransBuffer() {
   const float scale_factors[SCENE_SIZE] = {0.01f};
   model_trans.trans =
       glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors[cur_scene_idx]));
   buffer_manager.UpdateBuffer("model_trans_buffer");
+}
+
+void UpdateComparisonBarBuffer() {
+  UpdateComparisonBar();
+  buffer_manager.UpdateBuffer("comparison_bar_buffer");
+}
+
+void UpdateGLStateBuffers() {
+  UpdateGlobalMvpBuffer();
+  UpdateModelTransBuffer();
+
+  UpdateComparisonBarBuffer();
 }
 
 void UseScreenFramebuffer() {
@@ -721,13 +779,12 @@ void DrawScreenTexture() {
 }
 
 /*******************************************************************************
- * GLUT Callbacks
+ * GLUT Callbacks / Display
  ******************************************************************************/
 
 void GLUTDisplayCallback() {
   // Update scene-wise contexts
-  UpdateGLStates();
-  UpdateGLModelTrans();
+  UpdateGLStateBuffers();
   // Draw the scenes
   UseScreenFramebuffer();
   ClearColorBuffer();
@@ -752,6 +809,10 @@ void GLUTReshapeCallback(const int width, const int height) {
   // Update screen renderbuffers
   UpdateScreenRenderbuffers(width, height);
 }
+
+/*******************************************************************************
+ * GLUT Callbacks / User Interface
+ ******************************************************************************/
 
 void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
   pressed_keys[key] = true;
@@ -790,13 +851,17 @@ void GLUTSpecialCallback(const int key, const int x, const int y) {
 
 void GLUTMouseCallback(const int button, const int state, const int x,
                        const int y) {
-  if (state == GLUT_DOWN) {
-    if (button == GLUT_LEFT_BUTTON) {
-      last_mouse_pos = glm::vec2(x, y);
-      camera_rotating = true;
-    }
-  } else if (state == GLUT_UP) {
-    camera_rotating = false;
+  // Save mouse position
+  mouse_pos = glm::vec2(x, y);
+  // Check which mouse button is clicked
+  switch (state) {
+    case GLUT_DOWN: {
+      mouse_left_down_init_pos = glm::vec2(x, y);
+      mouse_left_down = true;
+    } break;
+    case GLUT_UP: {
+      mouse_left_down = false;
+    } break;
   }
 }
 
@@ -810,14 +875,29 @@ void GLUTMouseWheelCallback(const int button, const int dir, const int x,
 }
 
 void GLUTMotionCallback(const int x, const int y) {
-  if (camera_rotating) {
-    const glm::vec2 mouse_pos = glm::vec2(x, y);
-    const glm::vec2 diff = mouse_pos - last_mouse_pos;
-    camera_trans.AddAngle(CAMERA_ROTATION_SENSITIVITY *
-                          glm::vec3(diff.y, diff.x, 0.0f));
-    last_mouse_pos = mouse_pos;
+  // Save mouse position
+  mouse_pos = glm::vec2(x, y);
+  // Check whether the left mouse button is down
+  if (mouse_left_down) {
+    switch (cur_mode) {
+      case Mode::comparison: {
+      } break;
+      case Mode::navigation: {
+        const glm::vec2 diff = mouse_pos - mouse_left_down_init_pos;
+        camera_trans.AddAngle(CAMERA_ROTATION_SENSITIVITY *
+                              glm::vec3(diff.y, diff.x, 0.0f));
+        mouse_left_down_init_pos = mouse_pos;
+      } break;
+      default: { throw new std::runtime_error("Unknown mode"); }
+    }
   }
 }
+
+void GLUTCloseCallback() { window_closed = true; }
+
+/*******************************************************************************
+ * GLUT Callbacks / Timer
+ ******************************************************************************/
 
 void GLUTTimerCallback(const int val) {
   // Check whether the window has closed
@@ -865,15 +945,31 @@ void GLUTTimerCallback(const int val) {
   }
 }
 
-void GLUTCloseCallback() { window_closed = true; }
+/*******************************************************************************
+ * GLUT Callbacks / Menus
+ ******************************************************************************/
 
 void GLUTMainMenuCallback(const int id) {
   switch (id) {
-    case 2: {
-      glutChangeToMenuEntry(2, "New Label", 2);
+    case MainMenuItems::kMainImgAbs: {
     } break;
-    case 3: {
+    case MainMenuItems::kMainExit: {
       glutLeaveMainLoop();
+    } break;
+    default: {
+      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
+                               "'");
+    }
+  }
+}
+
+void GLUTModeMenuCallback(const int id) {
+  switch (id) {
+    case ModeMenuItems::kModeComparison: {
+      cur_mode = Mode::comparison;
+    } break;
+    case ModeMenuItems::kModeNavigation: {
+      cur_mode = Mode::navigation;
     } break;
     default: {
       throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
@@ -884,13 +980,13 @@ void GLUTMainMenuCallback(const int id) {
 
 void GLUTTimerMenuCallback(const int id) {
   switch (id) {
-    case 1: {
+    case TimerMenuItems::kTimerStart: {
       if (!timer_enabled) {
         timer_enabled = true;
         glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
       }
     } break;
-    case 2: {
+    case TimerMenuItems::kTimerStop: {
       timer_enabled = false;
     } break;
     default: {
@@ -905,35 +1001,44 @@ void GLUTTimerMenuCallback(const int id) {
  ******************************************************************************/
 
 void RegisterGLUTCallbacks() {
+  /* Display */
   glutDisplayFunc(GLUTDisplayCallback);
   glutReshapeFunc(GLUTReshapeCallback);
+  /* User interface */
   glutKeyboardFunc(GLUTKeyboardCallback);
   glutKeyboardUpFunc(GLUTKeyboardUpCallback);
   glutSpecialFunc(GLUTSpecialCallback);
   glutMouseFunc(GLUTMouseCallback);
   glutMouseWheelFunc(GLUTMouseWheelCallback);
   glutMotionFunc(GLUTMotionCallback);
-  glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
   glutCloseFunc(GLUTCloseCallback);
+  /* Timer */
+  glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
 }
 
 void CreateGLUTMenus() {
   const int main_menu_hdlr = glutCreateMenu(GLUTMainMenuCallback);
-  const int timer_menu_hdlr = glutCreateMenu(GLUTTimerMenuCallback);
+  const int mode_submenu_hdlr = glutCreateMenu(GLUTModeMenuCallback);
+  const int timer_submenu_hdlr = glutCreateMenu(GLUTTimerMenuCallback);
+
+  /* Main menu */
+  glutSetMenu(main_menu_hdlr);
+  glutAddSubMenu("Mode", mode_submenu_hdlr);
+  glutAddSubMenu("Timer", timer_submenu_hdlr);
+  glutAddMenuEntry("1. Image Abstraction", MainMenuItems::kMainImgAbs);
+  glutAddMenuEntry("Exit", MainMenuItems::kMainExit);
+
+  /* Mode submenu */
+  glutSetMenu(mode_submenu_hdlr);
+  glutAddMenuEntry("Comparison", ModeMenuItems::kModeComparison);
+  glutAddMenuEntry("Navigation", ModeMenuItems::kModeNavigation);
+
+  /* Timer submenu */
+  glutSetMenu(timer_submenu_hdlr);
+  glutAddMenuEntry("Start", TimerMenuItems::kTimerStart);
+  glutAddMenuEntry("Stop", TimerMenuItems::kTimerStop);
 
   glutSetMenu(main_menu_hdlr);
-
-  glutAddSubMenu("Timer", timer_menu_hdlr);
-  glutAddMenuEntry("Change Label", 2);
-  glutAddMenuEntry("Exit", 3);
-
-  glutSetMenu(timer_menu_hdlr);
-
-  glutAddMenuEntry("Start", 1);
-  glutAddMenuEntry("Stop", 2);
-
-  glutSetMenu(main_menu_hdlr);
-
   glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
