@@ -60,6 +60,7 @@ layout(location = 0) in vec2 vs_tex_coords;
  ******************************************************************************/
 
 layout(location = 0) out vec4 fs_color;
+layout(location = 1) out vec4 fs_multipass_color;
 
 /*******************************************************************************
  * Display Mode Handlers
@@ -84,6 +85,10 @@ int CalcDisplayMode() {
  ******************************************************************************/
 
 vec4 GetTexel(vec2 coord) { return texture(screen_tex, coord); }
+
+vec4 GetMultipassTexel(sampler2D tex, vec2 coord) {
+  return texture(tex, coord);
+}
 
 /*******************************************************************************
  * Post-processing / Image Processing
@@ -247,63 +252,64 @@ vec4 CalcPixelation() {
 /*******************************************************************************
  * Post-processing / Bloom Effect
  ******************************************************************************/
-//
-// vec4 CalcBrightness(vec4 color) {
-//  // References:
-//  // https://learnopengl.com/Advanced-Lighting/Bloom
-//  // https://en.wikipedia.org/wiki/Relative_luminance
-//  const float kThresh = 0.4f;
-//
-//  const float luminance = dot(vec3(color), vec3(0.2126f, 0.7152f, 0.0722f));
-//  if (luminance > kThresh) {
-//    return color;
-//  } else {
-//    return kBlackColor;
-//  }
-//}
-//
-// vec4 CalcGaussianBlur(bool horizontal) {
-//  const int len = 5;
-//  const float weight[len] =
-//      float[](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);
-//  vec2 window_size = postproc_inputs.window_size;
-//  vec4 sum = weight[0] * GetTexel(vs_tex_coords);
-//  if (horizontal) {
-//    for (int x = 1; x < len; x++) {
-//      const vec2 ofs = vec2(x, 0.0f) / window_size;
-//      sum += weight[x] * GetTexel(vs_tex_coords + ofs);
-//      sum += weight[x] * GetTexel(vs_tex_coords - ofs);
-//    }
-//  } else {
-//    for (int y = 1; y < len; y++) {
-//      const vec2 ofs = vec2(0.0f, y) / window_size;
-//      sum += weight[y] * GetTexel(vs_tex_coords + ofs);
-//      sum += weight[y] * GetTexel(vs_tex_coords - ofs);
-//    }
-//  }
-//  return vec4(vec3(sum), 1.0f);
-//}
-//
-vec4 CalcBloomEffect() {
-  //  const float kExposure = 1.0f;
-  //  const float kGamma = 1.0f;
-  //
-  //  const int pass_idx = postproc_inputs.pass_idx;
-  //  if (pass_idx < 11) {
-  //    const bool horizontal = (pass_idx % 2 == 0);
-  //    return CalcGaussianBlur(horizontal);
-  //  } else {
-  //    vec4 hdrColor = GetTexel(vs_tex_coords);
-  //    vec4 bloomColor = CalcGaussianBlur();
-  //    hdrColor += bloomColor;  // additive blending
-  //    // tone mapping
-  //    vec4 result = kWhiteColor - exp(-hdrColor * kExposure);
-  //    // also gamma correct while we're at it
-  //    result = pow(result, vec4(1.0f / kGamma));
-  //    return vec4(vec3(result), 1.0f);
-  //  }
 
-  return kErrorColor;
+vec4 CalcBrightness(vec4 color) {
+  // References:
+  // https://learnopengl.com/Advanced-Lighting/Bloom
+  // https://en.wikipedia.org/wiki/Relative_luminance
+  const float kThresh = 0.4f;
+
+  const float luminance = dot(vec3(color), vec3(0.2126f, 0.7152f, 0.0722f));
+  if (luminance > kThresh) {
+    return color;
+  } else {
+    return kBlackColor;
+  }
+}
+
+vec4 CalcGaussianBlur(sampler2D tex, bool horizontal) {
+  const int len = 5;
+  const float weight[len] =
+      float[](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);
+  vec2 window_size = postproc_inputs.window_size;
+  vec4 sum = weight[0] * GetMultipassTexel(tex, vs_tex_coords);
+  if (horizontal) {
+    for (int x = 1; x < len; x++) {
+      const vec2 ofs = vec2(x, 0.0f) / window_size;
+      sum += weight[x] * GetMultipassTexel(tex, vs_tex_coords + ofs);
+      sum += weight[x] * GetMultipassTexel(tex, vs_tex_coords - ofs);
+    }
+  } else {
+    for (int y = 1; y < len; y++) {
+      const vec2 ofs = vec2(0.0f, y) / window_size;
+      sum += weight[y] * GetMultipassTexel(tex, vs_tex_coords + ofs);
+      sum += weight[y] * GetMultipassTexel(tex, vs_tex_coords - ofs);
+    }
+  }
+  return vec4(vec3(sum), 1.0f);
+}
+
+vec4 CalcBloomEffect() {
+  const int kNumMultipass = 5;
+  const float kExposure = 1.0f;
+  const float kGamma = 1.0f;
+
+  const int pass_idx = postproc_inputs.pass_idx[0];
+  if (pass_idx == 0) {
+    fs_color = GetTexel(vs_tex_coords);
+  } else if (pass_idx < 1 + kNumMultipass * 2) {
+    if ((pass_idx + 1) % 2 == 0) {
+      const bool horizontal = (pass_idx % 2 == 0);
+      fs_color = CalcGaussianBlur(multipass_tex1, horizontal);
+    } else {
+      const bool horizontal = (pass_idx % 2 == 0);
+      fs_color = CalcGaussianBlur(multipass_tex2, horizontal);
+    }
+  } else {
+    const bool horizontal = (pass_idx % 2 == 0);
+    fs_color = GetMultipassTexel(multipass_tex1, vs_tex_coords);
+  }
+  return fs_color;
 }
 
 /*******************************************************************************

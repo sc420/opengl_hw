@@ -56,7 +56,7 @@ size_t cur_skybox_idx = 0;
 Modes cur_mode = Modes::comparison;
 
 // Effects
-int cur_effect_idx = Effects::kEffectImgAbs;
+int cur_effect_idx = Effects::kEffectBloomEffect;
 int cur_pass_idx = 0;
 
 /*******************************************************************************
@@ -399,7 +399,7 @@ void UpdateScreenTextures(const GLsizei width, const GLsizei height) {
                                        GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // Attach textures to framebuffers
     framebuffer_manager.AttachTexture2DToFramebuffer(
-        framebuffer_name, tex_name, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
+        framebuffer_name, tex_name, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D, 0);
   }
 }
@@ -428,17 +428,11 @@ void UpdateScreenRenderbuffers(const GLsizei width, const GLsizei height) {
   }
 }
 
-void ConfigScreenDrawBuffers() {
-  const GLenum attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-  glDrawBuffers(2, attachments);
-}
-
 void ConfigGLScreens() {
   ConfigScreenVertexArrays();
   ConfigScreenFramebuffers();
   UpdateScreenTextures(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
   UpdateScreenRenderbuffers(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
-  ConfigScreenDrawBuffers();
 }
 
 /*******************************************************************************
@@ -846,7 +840,7 @@ void DrawSkyboxes() {
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
 }
 
-void DrawScreenToTexture(const int screen_tex_idx = 0) {
+void DrawScreenWithTexture(const int screen_tex_idx = 0) {
   program_manager.UseProgram("postproc");
 
   const std::vector<as::Mesh> meshes = screen_quad_model.GetMeshes();
@@ -885,22 +879,36 @@ void DrawScreenToTexture(const int screen_tex_idx = 0) {
 
 void DrawScreen() {
   if (cur_effect_idx == Effects::kEffectBloomEffect) {
-    // Draw to multi-pass framebuffers
-    for (int i = 0; i < 11; i++) {
+    const int kNumMultipass = 5;
+    /* Draw to framebuffer 1 with texture 0 */
+    // Update the current pass index
+    cur_pass_idx = 0;
+    UpdatePostprocInputsBuffer();
+    // Draw to screen framebuffer
+    UseScreenFramebuffer(1);
+    DrawScreenWithTexture(0);
+
+    /* Draw to framebuffer 2(1) with texture 1(2) */
+    for (int i = 1; i < 1 + kNumMultipass * 2; i++) {
       // Update the current pass index
       cur_pass_idx = i;
-      // Update postproc inputs buffer
       UpdatePostprocInputsBuffer();
-      // Bind the multi-pass framebuffer
-      UseScreenFramebuffer(i % 2);
-      // Draw the screen texture once
-      DrawScreenToTexture(i % 2);
+      // Draw to screen framebuffer
+      const int source_idx = 1 + (i % 2);
+      const int target_idx = 1 + ((i + 1) % 2);
+      UseScreenFramebuffer(target_idx);
+      DrawScreenWithTexture(source_idx);
     }
+
+    /* Draw to framebuffer 0 with texture 1 */
+    // Update the current pass index
+    cur_pass_idx = 1 + kNumMultipass * 2;
+    UpdatePostprocInputsBuffer();
     // Draw to default framebuffer
     UseDefaultFramebuffer();
-    DrawScreenToTexture(0);
+    DrawScreenWithTexture(1);
   } else {
-    DrawScreenToTexture(0);
+    DrawScreenWithTexture();
   }
 }
 
