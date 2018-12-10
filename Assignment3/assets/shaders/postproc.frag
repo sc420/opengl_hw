@@ -169,6 +169,14 @@ vec4 CalcDoG() {
   return vec4(edge, edge, edge, 1.0f);
 }
 
+vec4 CalcImageAbstraction() {
+  const vec4 white = vec4(vec3(0.0f), 1.0f);
+  const vec4 blur_quantized =
+      clamp(CalcBlur() + CalcQuantization(), 0.0f, 1.0f);
+  const vec4 color = mix(white, blur_quantized, CalcDoG());
+  return color;
+}
+
 /*******************************************************************************
  * Post-processing / Laplacian Filter
  ******************************************************************************/
@@ -252,11 +260,7 @@ vec4 CalcPostproc() {
   int effect_idx = postproc_inputs.effect_idx[0];
   switch (effect_idx) {
     case kPostprocEffectImgAbs: {
-      const vec4 white = vec4(vec3(0.0f), 1.0f);
-      const vec4 blur_quantized =
-          clamp(CalcBlur() + CalcQuantization(), 0.0f, 1.0f);
-      const vec4 color = mix(white, blur_quantized, CalcDoG());
-      return color;
+      return CalcImageAbstraction();
     } break;
     case kPostprocEffectLaplacian: {
       return CalcLaplacian();
