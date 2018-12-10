@@ -121,23 +121,22 @@ vec4 ApplyKernel(mat3 kernel) {
  ******************************************************************************/
 
 vec4 CalcBlur() {
-  const int half_size = 1;
-  vec3 color_sum = vec3(0.0f);
-  for (int i = -half_size; i <= half_size; ++i) {
-    for (int j = -half_size; j <= half_size; ++j) {
-      vec2 coord =
-          vec2(vs_tex_coords) + vec2(i, j) / postproc_inputs.window_size;
-      color_sum += vec3(GetTexel(coord));
-    }
-  }
-  float sample_count = (half_size * 2 + 1) * (half_size * 2 + 1);
-  return vec4(color_sum / sample_count, 1.0f);
+  const mat3 kKernel = mat3(
+      // 1st row
+      1.0f, 1.0f, 1.0f,
+      // 2nd row
+      1.0f, 1.0f, 1.0f,
+      // 3rd row
+      1.0f, 1.0f, 1.0f);
+
+  return ApplyKernel(kKernel);
 }
 
 vec4 CalcQuantization() {
-  const float nbins = 8.0f;
+  const float kNumColors = 8.0f;
+
   const vec3 color = vec3(GetTexel(vs_tex_coords));
-  const vec3 quantized = floor(color * nbins) / nbins;
+  const vec3 quantized = floor(color * kNumColors) / kNumColors;
   return vec4(quantized, 1.0f);
 }
 
@@ -184,6 +183,7 @@ vec4 CalcLaplacian() {
       // 3rd row
       -1.0f, -1.0f, -1.0f);
   const float kThresh = 1.0f;
+
   const vec4 color = ApplyKernel(kKernel);
   const float avg = (color.x + color.y + color.z) / 3.0f;
   if (avg < kThresh) {
@@ -205,7 +205,32 @@ vec4 CalcSharpness() {
       -1.0f, 9.0f, -1.0f,
       // 3rd row
       -1.0f, -1.0f, -1.0f);
+
   return ApplyKernel(kKernel);
+}
+
+/*******************************************************************************
+ * Post-processing / Pixelation
+ ******************************************************************************/
+
+vec4 CalcPixelation() {
+  const float kCellWidth = 8.0f;
+  const float kCellHeight = 8.0f;
+
+  const float texel_size = kCellWidth * kCellHeight;
+  const vec2 cell_size = vec2(kCellWidth, kCellHeight);
+  const vec2 window_size = postproc_inputs.window_size;
+  const vec2 screen_coords = vs_tex_coords * window_size;
+  const vec2 low_pos = floor(screen_coords / cell_size) * cell_size;
+  const vec2 high_pos = low_pos + cell_size;
+  vec4 sum = vec4(0.0f);
+  for (float x = low_pos.x; x < high_pos.x; x++) {
+    for (float y = low_pos.y; y < high_pos.y; y++) {
+      sum += GetTexel(vec2(x, y) / window_size);
+    }
+  }
+  sum /= texel_size;
+  return vec4(vec3(sum), 1.0f);
 }
 
 /*******************************************************************************
@@ -226,7 +251,7 @@ vec4 CalcPostproc() {
       return CalcSharpness();
     } break;
     case kPostprocEffectPixelation: {
-      return CalcLaplacian();
+      return CalcPixelation();
     } break;
     case kPostprocEffectFishEye: {
       return CalcLaplacian();
