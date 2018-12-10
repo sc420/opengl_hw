@@ -8,6 +8,9 @@
 const int DISPLAY_MODE_ORIGINAL = 0;
 const int DISPLAY_MODE_BAR = 1;
 const int DISPLAY_MODE_POSTPROC = 2;
+/* Post-processing effects */
+const int POSTPROC_EFFECT_IMG_ABS = 0;
+const int POSTPROC_EFFECT_LAPLACIAN = 1;
 /* Display */
 const float IMG_SIZE = 600.0f;
 const float COMPARISON_BAR_WIDTH = 4;
@@ -16,11 +19,16 @@ const float COMPARISON_BAR_WIDTH = 4;
  * Uniform Blocks
  ******************************************************************************/
 
+/* Comparison bar */
 uniform ComparisonBar {
   vec2 enabled;
   vec2 mouse_pos;
 }
 comparison_bar;
+
+/* Post-processing inputs */
+uniform PostprocInputs { int effect_idx; }
+postproc_inputs;
 
 /*******************************************************************************
  * Textures
@@ -122,8 +130,16 @@ vec4 CalcDoG() {
  ******************************************************************************/
 
 vec4 CalcPostproc() {
-  const vec4 color = CalcBlur() + CalcQuantization() + CalcDoG();
-  return normalize(color);
+  switch (postproc_inputs.effect_idx) {
+    case POSTPROC_EFFECT_IMG_ABS: {
+      const vec4 color = CalcBlur() + CalcQuantization() + CalcDoG();
+      return normalize(color);
+    } break;
+    case POSTPROC_EFFECT_LAPLACIAN: {
+      return CalcBlur();
+    } break;
+    default: { return GetTexel(vs_tex_coords); }
+  }
 }
 
 /*******************************************************************************

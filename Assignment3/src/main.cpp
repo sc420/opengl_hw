@@ -35,8 +35,18 @@ as::Model skybox_model[SKYBOX_SIZE];
  * Model States
  ******************************************************************************/
 
+// Modes
+enum class Modes { comparison, navigation };
+
+// Scene
 size_t cur_scene_idx = 0;
 size_t cur_skybox_idx = 0;
+
+// Modes
+Modes cur_mode = Modes::comparison;
+
+// Effect
+int cur_effect_idx = 0;
 
 /*******************************************************************************
  * Camera States
@@ -90,6 +100,11 @@ struct ComparisonBar {
   glm::vec2 mouse_pos;
 };
 
+// Post-processing inputs
+struct PostprocInputs {
+  int effect_idx;
+};
+
 // Global MVP
 GlobalMvp global_mvp;
 
@@ -99,12 +114,12 @@ ModelTrans model_trans;
 // Comparison bar
 ComparisonBar comparison_bar;
 
+// Post-processing inputs
+PostprocInputs postproc_inputs;
+
 /*******************************************************************************
  * User Interface States
  ******************************************************************************/
-
-// Modes
-enum class Mode { comparison, navigation };
 
 // Window states
 bool window_closed = false;
@@ -118,9 +133,6 @@ bool mouse_left_down = false;
 glm::vec2 mouse_left_down_init_pos;
 glm::vec2 mouse_pos;
 
-// Current mode
-Mode cur_mode = Mode::comparison;
-
 /*******************************************************************************
  * Timers
  ******************************************************************************/
@@ -132,7 +144,16 @@ bool timer_enabled = true;
  * Menus
  ******************************************************************************/
 
-enum MainMenuItems { kMainImgAbs, kMainExit };
+enum MainMenuItems {
+  kMainImgAbs,
+  kMainLaplacian,
+  kMainSharpness,
+  kMainPixelation,
+  kMainFishEye,
+  kMainSinWave,
+  kMainRedBlue,
+  kMainExit
+};
 enum ModeMenuItems { kModeComparison, kModeNavigation };
 enum TimerMenuItems { kTimerStart, kTimerStop };
 
@@ -388,6 +409,8 @@ void CreateGLBuffers() {
 
   // Comparison bar
   buffer_manager.GenBuffer("comparison_bar_buffer");
+  // Post-processing inputs
+  buffer_manager.GenBuffer("postproc_inputs_buffer");
 }
 
 void InitGLBuffers() {
@@ -401,6 +424,9 @@ void InitGLBuffers() {
   // Comparison bar
   buffer_manager.InitBuffer("comparison_bar_buffer", GL_UNIFORM_BUFFER,
                             sizeof(ComparisonBar), NULL, GL_STATIC_DRAW);
+  // Post-processing inputs
+  buffer_manager.InitBuffer("postproc_inputs_buffer", GL_UNIFORM_BUFFER,
+                            sizeof(PostprocInputs), NULL, GL_STATIC_DRAW);
 }
 
 void UpdateGLBuffers() {
@@ -414,6 +440,9 @@ void UpdateGLBuffers() {
   // Comparison bar
   buffer_manager.UpdateBuffer("comparison_bar_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(ComparisonBar), &comparison_bar);
+  // Post-processing inputs
+  buffer_manager.UpdateBuffer("postproc_inputs_buffer", GL_UNIFORM_BUFFER, 0,
+                              sizeof(PostprocInputs), &postproc_inputs);
 }
 
 void BindGLUniformBlocksToBuffers() {
@@ -428,6 +457,10 @@ void BindGLUniformBlocksToBuffers() {
   uniform_manager.AssignUniformBlockToBindingPoint("postproc", "ComparisonBar",
                                                    2);
   uniform_manager.BindBufferBaseToBindingPoint("comparison_bar_buffer", 2);
+  // Post-processing inputs
+  uniform_manager.AssignUniformBlockToBindingPoint("postproc", "PostprocInputs",
+                                                   3);
+  uniform_manager.BindBufferBaseToBindingPoint("postproc_inputs_buffer", 3);
 }
 
 void ConfigGLScenes() {
@@ -659,9 +692,11 @@ void UpdateGlobalMvp() {
 }
 
 void UpdateComparisonBar() {
-  comparison_bar.enabled.x = (cur_mode == Mode::comparison && mouse_left_down);
+  comparison_bar.enabled.x = (cur_mode == Modes::comparison && mouse_left_down);
   comparison_bar.mouse_pos = mouse_pos;
 }
+
+void UpdatePostprocInputs() { postproc_inputs.effect_idx = cur_effect_idx; }
 
 /*******************************************************************************
  * Drawing Methods
@@ -688,11 +723,17 @@ void UpdateComparisonBarBuffer() {
   buffer_manager.UpdateBuffer("comparison_bar_buffer");
 }
 
+void UpdatePostprocInputsBuffer() {
+  UpdatePostprocInputs();
+  buffer_manager.UpdateBuffer("postproc_inputs_buffer");
+}
+
 void UpdateGLStateBuffers() {
   UpdateGlobalMvpBuffer();
   UpdateModelTransBuffer();
 
   UpdateComparisonBarBuffer();
+  UpdatePostprocInputsBuffer();
 }
 
 void UseScreenFramebuffer() {
@@ -880,9 +921,9 @@ void GLUTMotionCallback(const int x, const int y) {
   // Check whether the left mouse button is down
   if (mouse_left_down) {
     switch (cur_mode) {
-      case Mode::comparison: {
+      case Modes::comparison: {
       } break;
-      case Mode::navigation: {
+      case Modes::navigation: {
         const glm::vec2 diff = mouse_pos - mouse_left_down_init_pos;
         camera_trans.AddAngle(CAMERA_ROTATION_SENSITIVITY *
                               glm::vec3(diff.y, diff.x, 0.0f));
@@ -952,6 +993,25 @@ void GLUTTimerCallback(const int val) {
 void GLUTMainMenuCallback(const int id) {
   switch (id) {
     case MainMenuItems::kMainImgAbs: {
+      cur_effect_idx = 0;
+    } break;
+    case MainMenuItems::kMainLaplacian: {
+      cur_effect_idx = 1;
+    } break;
+    case MainMenuItems::kMainSharpness: {
+      cur_effect_idx = 2;
+    } break;
+    case MainMenuItems::kMainPixelation: {
+      cur_effect_idx = 3;
+    } break;
+    case MainMenuItems::kMainFishEye: {
+      cur_effect_idx = 4;
+    } break;
+    case MainMenuItems::kMainSinWave: {
+      cur_effect_idx = 5;
+    } break;
+    case MainMenuItems::kMainRedBlue: {
+      cur_effect_idx = 6;
     } break;
     case MainMenuItems::kMainExit: {
       glutLeaveMainLoop();
@@ -966,10 +1026,10 @@ void GLUTMainMenuCallback(const int id) {
 void GLUTModeMenuCallback(const int id) {
   switch (id) {
     case ModeMenuItems::kModeComparison: {
-      cur_mode = Mode::comparison;
+      cur_mode = Modes::comparison;
     } break;
     case ModeMenuItems::kModeNavigation: {
-      cur_mode = Mode::navigation;
+      cur_mode = Modes::navigation;
     } break;
     default: {
       throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
@@ -1026,6 +1086,12 @@ void CreateGLUTMenus() {
   glutAddSubMenu("Mode", mode_submenu_hdlr);
   glutAddSubMenu("Timer", timer_submenu_hdlr);
   glutAddMenuEntry("1. Image Abstraction", MainMenuItems::kMainImgAbs);
+  glutAddMenuEntry("2. Laplacian Filter", MainMenuItems::kMainLaplacian);
+  glutAddMenuEntry("3. Sharpness Filter", MainMenuItems::kMainSharpness);
+  glutAddMenuEntry("4. Pixelation", MainMenuItems::kMainPixelation);
+  glutAddMenuEntry("5. Fish-eye distortion", MainMenuItems::kMainFishEye);
+  glutAddMenuEntry("6. Sine wave distortion", MainMenuItems::kMainSinWave);
+  glutAddMenuEntry("7. Red-blue stereo", MainMenuItems::kMainRedBlue);
   glutAddMenuEntry("Exit", MainMenuItems::kMainExit);
 
   /* Mode submenu */
