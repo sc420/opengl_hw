@@ -46,7 +46,7 @@ size_t cur_skybox_idx = 0;
 Modes cur_mode = Modes::comparison;
 
 // Effect
-int cur_effect_idx = 1;
+int cur_effect_idx = 2;
 
 /*******************************************************************************
  * Camera States

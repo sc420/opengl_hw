@@ -180,10 +180,10 @@ vec4 CalcLaplacian() {
       // 1st row
       -1.0f, -1.0f, -1.0f,
       // 2nd row
-      -1.0f, 8.0f, -1.0f,
+      -1.0f, 9.0f, -1.0f,
       // 3rd row
       -1.0f, -1.0f, -1.0f);
-  const float kThresh = 0.5f;
+  const float kThresh = 1.0f;
   const vec4 color = ApplyKernel(kKernel);
   const float avg = (color.x + color.y + color.z) / 3.0f;
   if (avg < kThresh) {
@@ -202,7 +202,7 @@ vec4 CalcSharpness() {
       // 1st row
       -1.0f, -1.0f, -1.0f,
       // 2nd row
-      -1.0f, 8.0f, -1.0f,
+      -1.0f, 9.0f, -1.0f,
       // 3rd row
       -1.0f, -1.0f, -1.0f);
   return ApplyKernel(kKernel);
