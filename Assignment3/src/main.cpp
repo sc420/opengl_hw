@@ -42,7 +42,8 @@ enum Effects {
   kEffectSharpness,
   kEffectPixelation,
   kEffectBloomEffect,
-  kEffectMagnifier
+  kEffectMagnifier,
+  kEffectSpecial,
 };
 
 // Modes
@@ -56,7 +57,7 @@ size_t cur_skybox_idx = 0;
 Modes cur_mode = Modes::comparison;
 
 // Effects
-int cur_effect_idx = Effects::kEffectMagnifier;
+int cur_effect_idx = Effects::kEffectSpecial;
 int cur_pass_idx = 0;
 
 /*******************************************************************************
@@ -167,6 +168,8 @@ enum MainMenuItems {
   kMainAdvancedSep,
   kMainBloomEffect,
   kMainMagnifier,
+  kMainCool,
+  kMainSpecial,
   kMainExit
 };
 enum ModeMenuItems { kModeComparison, kModeNavigation };
@@ -1109,6 +1112,11 @@ void GLUTMainMenuCallback(const int id) {
     case MainMenuItems::kMainMagnifier: {
       cur_effect_idx = kEffectMagnifier;
     } break;
+    case MainMenuItems::kMainCool: {
+    } break;
+    case MainMenuItems::kMainSpecial: {
+      cur_effect_idx = kEffectSpecial;
+    } break;
     case MainMenuItems::kMainExit: {
       glutLeaveMainLoop();
     } break;
@@ -1189,6 +1197,8 @@ void CreateGLUTMenus() {
   glutAddMenuEntry("(Advanced)", MainMenuItems::kMainAdvancedSep);
   glutAddMenuEntry("1. Blooem Effect", MainMenuItems::kMainBloomEffect);
   glutAddMenuEntry("2. Magnifier", MainMenuItems::kMainMagnifier);
+  glutAddMenuEntry("(Cool)", MainMenuItems::kMainCool);
+  glutAddMenuEntry("1. Special Effect", MainMenuItems::kMainSpecial);
   glutAddMenuEntry("Exit", MainMenuItems::kMainExit);
 
   /* Mode submenu */

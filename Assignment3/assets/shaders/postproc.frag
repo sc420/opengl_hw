@@ -16,6 +16,7 @@ const int kPostprocEffectSharpness = 2;
 const int kPostprocEffectPixelation = 3;
 const int kPostprocEffectBloomEffect = 4;
 const int kPostprocEffectMagnifier = 5;
+const int kPostprocEffectSpecial = 6;
 /* Display */
 const float kComparisonBarWidth = 4;
 const float kMagnifierRadius = 0.2f;
@@ -347,6 +348,12 @@ vec4 CalcMagnifier() {
 }
 
 /*******************************************************************************
+ * Post-processing / Special
+ ******************************************************************************/
+
+vec4 CalcSpecial() { return kErrorColor; }
+
+/*******************************************************************************
  * Post-processing / Center
  ******************************************************************************/
 
@@ -370,6 +377,9 @@ vec4 CalcPostproc() {
     } break;
     case kPostprocEffectMagnifier: {
       return CalcMagnifier();
+    } break;
+    case kPostprocEffectSpecial: {
+      return CalcSpecial();
     } break;
     default: { return kErrorColor; }
   }
