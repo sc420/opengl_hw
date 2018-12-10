@@ -289,7 +289,7 @@ vec4 CalcGaussianBlur(sampler2D tex, bool horizontal) {
 }
 
 vec4 CalcBloomEffectMixedColor(vec4 orig_color, vec4 blurred_color) {
-  return 0.3f * orig_color + 1.3f * blurred_color;
+  return 0.3f * orig_color + 1.0f * blurred_color;
 }
 
 vec4 CalcBloomEffect() {
@@ -297,7 +297,8 @@ vec4 CalcBloomEffect() {
 
   const int pass_idx = postproc_inputs.pass_idx[0];
   if (pass_idx == 0) {
-    return GetTexel(vs_tex_coords);
+    return 0.8f * GetTexel(vs_tex_coords) +
+           0.5f * CalcBrightness(GetTexel(vs_tex_coords));
   } else if (pass_idx < 1 + kNumMultipass * 2) {
     const bool horizontal = (pass_idx % 2 == 0);
     if ((pass_idx + 1) % 2 == 0) {
@@ -307,7 +308,6 @@ vec4 CalcBloomEffect() {
     }
   } else {
     const vec4 orig_color = GetTexel(vs_tex_coords);
-    const vec4 bright_color = CalcBrightness(orig_color);
     const vec4 blurred_color = GetMultipassTexel(multipass_tex1, vs_tex_coords);
     return CalcBloomEffectMixedColor(orig_color, blurred_color);
   }
