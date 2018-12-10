@@ -147,13 +147,14 @@ bool timer_enabled = true;
  ******************************************************************************/
 
 enum MainMenuItems {
+  kMainMidLevelSep,
   kMainImgAbs,
   kMainLaplacian,
   kMainSharpness,
   kMainPixelation,
-  kMainFishEye,
-  kMainSinWave,
-  kMainRedBlue,
+  kMainAdvancedSep,
+  kMainBloomEffect,
+  kMainMagnifier,
   kMainExit
 };
 enum ModeMenuItems { kModeComparison, kModeNavigation };
@@ -1004,6 +1005,8 @@ void GLUTTimerCallback(const int val) {
 
 void GLUTMainMenuCallback(const int id) {
   switch (id) {
+    case MainMenuItems::kMainMidLevelSep: {
+    } break;
     case MainMenuItems::kMainImgAbs: {
       cur_effect_idx = 0;
     } break;
@@ -1016,14 +1019,13 @@ void GLUTMainMenuCallback(const int id) {
     case MainMenuItems::kMainPixelation: {
       cur_effect_idx = 3;
     } break;
-    case MainMenuItems::kMainFishEye: {
+    case MainMenuItems::kMainAdvancedSep: {
+    } break;
+    case MainMenuItems::kMainBloomEffect: {
       cur_effect_idx = 4;
     } break;
-    case MainMenuItems::kMainSinWave: {
+    case MainMenuItems::kMainMagnifier: {
       cur_effect_idx = 5;
-    } break;
-    case MainMenuItems::kMainRedBlue: {
-      cur_effect_idx = 6;
     } break;
     case MainMenuItems::kMainExit: {
       glutLeaveMainLoop();
@@ -1097,13 +1099,14 @@ void CreateGLUTMenus() {
   glutSetMenu(main_menu_hdlr);
   glutAddSubMenu("Mode", mode_submenu_hdlr);
   glutAddSubMenu("Timer", timer_submenu_hdlr);
+  glutAddMenuEntry("(Mid-level)", MainMenuItems::kMainMidLevelSep);
   glutAddMenuEntry("1. Image Abstraction", MainMenuItems::kMainImgAbs);
   glutAddMenuEntry("2. Laplacian Filter", MainMenuItems::kMainLaplacian);
   glutAddMenuEntry("3. Sharpness Filter", MainMenuItems::kMainSharpness);
   glutAddMenuEntry("4. Pixelation", MainMenuItems::kMainPixelation);
-  glutAddMenuEntry("5. Fish-eye distortion", MainMenuItems::kMainFishEye);
-  glutAddMenuEntry("6. Sine wave distortion", MainMenuItems::kMainSinWave);
-  glutAddMenuEntry("7. Red-blue stereo", MainMenuItems::kMainRedBlue);
+  glutAddMenuEntry("(Advanced)", MainMenuItems::kMainAdvancedSep);
+  glutAddMenuEntry("1. Fish-eye distortion", MainMenuItems::kMainBloomEffect);
+  glutAddMenuEntry("2. Sine wave distortion", MainMenuItems::kMainMagnifier);
   glutAddMenuEntry("Exit", MainMenuItems::kMainExit);
 
   /* Mode submenu */

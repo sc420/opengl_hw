@@ -13,9 +13,8 @@ const int kPostprocEffectImgAbs = 0;
 const int kPostprocEffectLaplacian = 1;
 const int kPostprocEffectSharpness = 2;
 const int kPostprocEffectPixelation = 3;
-const int kPostprocEffectFishEye = 4;
-const int kPostprocEffectSinWave = 5;
-const int kPostprocEffectRedBlue = 6;
+const int kPostprocEffectBloomEffect = 4;
+const int kPostprocEffectMagnifier = 5;
 /* Display */
 const float kComparisonBarWidth = 4;
 /* Colors */
@@ -234,6 +233,18 @@ vec4 CalcPixelation() {
 }
 
 /*******************************************************************************
+ * Post-processing / Bloom Effect
+ ******************************************************************************/
+
+vec4 CalcBloomEffect() { return kErrorColor; }
+
+/*******************************************************************************
+ * Post-processing / Magnifier
+ ******************************************************************************/
+
+vec4 CalcMagnifier() { return kErrorColor; }
+
+/*******************************************************************************
  * Post-processing / Center
  ******************************************************************************/
 
@@ -256,14 +267,11 @@ vec4 CalcPostproc() {
     case kPostprocEffectPixelation: {
       return CalcPixelation();
     } break;
-    case kPostprocEffectFishEye: {
-      return CalcLaplacian();
+    case kPostprocEffectBloomEffect: {
+      return CalcBloomEffect();
     } break;
-    case kPostprocEffectSinWave: {
-      return CalcLaplacian();
-    } break;
-    case kPostprocEffectRedBlue: {
-      return CalcLaplacian();
+    case kPostprocEffectMagnifier: {
+      return CalcMagnifier();
     } break;
     default: { return kErrorColor; }
   }
