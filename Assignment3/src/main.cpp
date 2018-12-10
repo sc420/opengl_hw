@@ -364,6 +364,10 @@ void UpdateScreenTextures(const GLsizei width, const GLsizei height) {
                                      GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
                                      GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
+                                     GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
+                                     GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   // Attach textures to framebuffers
   framebuffer_manager.AttachTexture2DToFramebuffer(
       "screen_framebuffer", "screen_quad_tex", GL_FRAMEBUFFER,
