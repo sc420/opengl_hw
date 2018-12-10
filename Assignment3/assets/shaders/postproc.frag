@@ -88,8 +88,6 @@ int CalcDisplayMode() {
     } else {
       return kDisplayModeOriginal;
     }
-  } else if (effect_idx == kPostprocEffectSpecial) {
-    return kDisplayModePostproc;
   } else {
     if (dist.x < -1.0f * kComparisonBarWidth / 2.0f) {
       return kDisplayModePostproc;
@@ -354,14 +352,285 @@ vec4 CalcMagnifier() {
 /*******************************************************************************
  * Post-processing / Special
  ******************************************************************************/
+#define PI 3.14159265
+#define TILE_SIZE 16.0
 
-vec4 CalcSpecial() {
+float sat(float t) { return clamp(t, 0.0, 1.0); }
+
+vec2 sat(vec2 t) { return clamp(t, 0.0, 1.0); }
+
+// remaps inteval [a;b] to [0;1]
+float remap(float t, float a, float b) { return sat((t - a) / (b - a)); }
+
+// note: /\ t=[0;0.5;1], y=[0;1;0]
+float linterp(float t) { return sat(1.0 - abs(2.0 * t - 1.0)); }
+
+vec3 spectrum_offset(float t) {
+  float t0 = 3.0 * t - 1.5;
+  return clamp(vec3(-t0, 1.0 - abs(t0), t0), 0.0, 1.0);
+  /*
+      vec3 ret;
+      float lo = step(t,0.5);
+      float hi = 1.0-lo;
+      float w = linterp( remap( t, 1.0/6.0, 5.0/6.0 ) );
+      float neg_w = 1.0-w;
+      ret = vec3(lo,1.0,hi) * vec3(neg_w, w, neg_w);
+      return pow( ret, vec3(1.0/2.2) );
+*/
+}
+
+// note: [0;1]
+float rand(vec2 n) {
+  return fract(sin(dot(n.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+// note: [-1;1]
+float srand(vec2 n) { return rand(n) * 2.0 - 1.0; }
+
+float mytrunc(float x, float num_levels) {
+  return floor(x * num_levels) / num_levels;
+}
+vec2 mytrunc(vec2 x, float num_levels) {
+  return floor(x * num_levels) / num_levels;
+}
+vec2 mytrunc(vec2 x, vec2 num_levels) {
+  return floor(x * num_levels) / num_levels;
+}
+vec3 rgb2yuv(vec3 rgb) {
+  vec3 yuv;
+  yuv.x = dot(rgb, vec3(0.299, 0.587, 0.114));
+  yuv.y = dot(rgb, vec3(-0.14713, -0.28886, 0.436));
+  yuv.z = dot(rgb, vec3(0.615, -0.51499, -0.10001));
+  return yuv;
+}
+vec3 yuv2rgb(vec3 yuv) {
+  vec3 rgb;
+  rgb.r = yuv.x + yuv.z * 1.13983;
+  rgb.g = yuv.x + dot(vec2(-0.39465, -0.58060), yuv.yz);
+  rgb.b = yuv.x + yuv.y * 2.03211;
+  return rgb;
+}
+
+float noise(vec2 p) {
+  vec2 ip = floor(p);
+  vec2 u = fract(p);
+  u = u * u * (3.0 - 2.0 * u);
+
+  float res =
+      mix(mix(rand(ip), rand(ip + vec2(1.0, 0.0)), u.x),
+          mix(rand(ip + vec2(0.0, 1.0)), rand(ip + vec2(1.0, 1.0)), u.x), u.y);
+  return res * res;
+}
+
+vec3 rgb2hsv(vec3 c) {
+  vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+  vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+  vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+  float d = q.x - min(q.w, q.y);
+  float e = 1.0e-10;
+  return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+vec3 hsv2rgb(vec3 c) {
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+vec3 posterize(vec3 color, float steps) { return floor(color * steps) / steps; }
+
+float quantize(float n, float steps) { return floor(n * steps) / steps; }
+
+vec4 downsample(sampler2D sampler, vec2 uv, float pixelSize) {
+  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+
+  return texture(sampler, uv - mod(uv, vec2(pixelSize) / iResolution.xy));
+}
+
+vec3 edge(sampler2D sampler, vec2 uv, float sampleSize) {
+  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const float iTime = postproc_inputs.time[0] / 100.0f;
+
+  float dx = sampleSize / iResolution.x;
+  float dy = sampleSize / iResolution.y;
+  return (mix(downsample(sampler, uv - vec2(dx, 0.0), sampleSize),
+              downsample(sampler, uv + vec2(dx, 0.0), sampleSize),
+              mod(uv.x, dx) / dx) +
+          mix(downsample(sampler, uv - vec2(0.0, dy), sampleSize),
+              downsample(sampler, uv + vec2(0.0, dy), sampleSize),
+              mod(uv.y, dy) / dy))
+                 .rgb /
+             2.0 -
+         texture(sampler, uv).rgb;
+}
+
+float rand(float n) { return fract(sin(n) * 43758.5453123); }
+
+float noise(float p) {
+  float fl = floor(p);
+  float fc = fract(p);
+  return mix(rand(fl), rand(fl + 1.0), fc);
+}
+
+vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
+  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const float iTime = postproc_inputs.time[0] / 100.0f;
+  const float Amount = 0.1f + 0.5f * abs(sin(iTime));
+
+  vec2 pixel = vec2(1.0) / iResolution.xy;
+  vec3 field = rgb2hsv(edge(sampler, uv, edgeSize));
+  vec2 distort = pixel * sin((field.rb) * PI * 2.0);
+  float shiftx =
+      noise(vec2(quantize(uv.y + 31.5, iResolution.y / TILE_SIZE) * iTime,
+                 fract(iTime) * 300.0));
+  float shifty =
+      noise(vec2(quantize(uv.x + 11.5, iResolution.x / TILE_SIZE) * iTime,
+                 fract(iTime) * 100.0));
+  vec3 rgb = texture(sampler, uv + (distort + (pixel - pixel / 2.0) *
+                                                  vec2(shiftx, shifty) *
+                                                  (50.0 + 100.0 * Amount)) *
+                                       Amount)
+                 .rgb;
+  vec3 hsv = rgb2hsv(rgb);
+  hsv.y = mod(hsv.y + shifty * pow(Amount, 5.0) * 0.25, 1.0);
+  return posterize(
+      hsv2rgb(hsv),
+      floor(mix(256.0, pow(1.0 - hsv.z - 0.5, 2.0) * 64.0 * shiftx + 4.0,
+                1.0 - pow(1.0 - Amount, 5.0))));
+}
+
+// Reference: https://www.shadertoy.com/view/MdfGD2
+vec4 ShampainGlitch01(vec2 fragCoord) {
+  vec4 fragColor;
+  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const float iTime = postproc_inputs.time[0] / 100.0f;
+  const vec4 iMouse = vec4(comparison_bar.mouse_pos, 0.0f, 0.0f);
+
+  float THRESHOLD = 0.1f + abs(sin(iTime)) * 0.5f;
+  float time_s = mod(iTime, 32.0);
+
+  float glitch_threshold = 1.0 - THRESHOLD;
+  const float max_ofs_siz = 0.05;   // TOOD: input
+  const float yuv_threshold = 0.9;  // TODO: input, >1.0f == no distort
+  const float time_frq = 16.0;
+
+  vec2 uv = fragCoord.xy / iResolution.xy;
+  //  uv.y = 1.0 - uv.y;
+
+  const float min_change_frq = 4.0;
+  float ct = mytrunc(time_s, min_change_frq);
+  float change_rnd = rand(mytrunc(uv.yy, vec2(16)) + 150.0 * ct);
+
+  float tf = time_frq * change_rnd;
+
+  float t = 5.0 * mytrunc(time_s, tf);
+  float vt_rnd = 0.5 * rand(mytrunc(uv.yy + t, vec2(11)));
+  vt_rnd += 0.5 * rand(mytrunc(uv.yy + t, vec2(7)));
+  vt_rnd = vt_rnd * 2.0 - 1.0;
+  vt_rnd = sign(vt_rnd) *
+           sat((abs(vt_rnd) - glitch_threshold) / (1.0 - glitch_threshold));
+
+  vec2 uv_nm = uv;
+  uv_nm = sat(uv_nm + vec2(max_ofs_siz * vt_rnd, 0));
+
+  float rnd = rand(vec2(mytrunc(time_s, 8.0)));
+  uv_nm.y = (rnd > mix(1.0, 0.975, sat(THRESHOLD))) ? 1.0 - uv_nm.y : uv_nm.y;
+
+  vec4 smpl = GetTexel(uv_nm);
+  vec3 smpl_yuv = rgb2yuv(smpl.rgb);
+  smpl_yuv.y /= 1.0 - 3.0 * abs(vt_rnd) * sat(yuv_threshold - vt_rnd);
+  smpl_yuv.z += 0.125 * vt_rnd * sat(vt_rnd - yuv_threshold);
+  fragColor = vec4(yuv2rgb(smpl_yuv), smpl.a);
+  return fragColor;
+}
+
+// Reference: https://www.shadertoy.com/view/lsfGD2
+vec4 ShampainGlitch02(vec2 fragCoord) {
+  vec4 fragColor;
+  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const float iTime = postproc_inputs.time[0] / 100.0f;
+
+  float aspect = iResolution.x / iResolution.y;
+  vec2 uv = fragCoord.xy / iResolution.xy;
+  // uv.y = 1.0 - uv.y;
+
+  float time = mod(iTime, 32.0);  // + modelmat[0].x + modelmat[0].z;
+
+  float GLITCH = 0.01f + 0.2f * abs(sin(iTime));
+
+  // float rdist = length( (uv - vec2(0.5,0.5))*vec2(aspect, 1.0) )/1.4;
+  // GLITCH *= rdist;
+
+  float gnm = sat(GLITCH);
+  float rnd0 = rand(mytrunc(vec2(time, time), 6.0));
+  float r0 = sat((1.0 - gnm) * 0.7 + rnd0);
+  float rnd1 = rand(vec2(mytrunc(uv.x, 10.0 * r0), time));  // horz
+  // float r1 = 1.0f - sat( (1.0f-gnm)*0.5f + rnd1 );
+  float r1 = 0.5 - 0.5 * gnm + rnd1;
+  r1 = 1.0 - max(0.0, ((r1 < 1.0)
+                           ? r1
+                           : 0.9999999));  // note: weird ass bug on old drivers
+  float rnd2 = rand(vec2(mytrunc(uv.y, 40.0 * r1), time));  // vert
+  float r2 = sat(rnd2);
+
+  float rnd3 = rand(vec2(mytrunc(uv.y, 10.0 * r0), time));
+  float r3 = (1.0 - sat(rnd3 + 0.8)) - 0.1;
+
+  float pxrnd = rand(uv + time);
+
+  float ofs = 0.05 * r2 * GLITCH * (rnd0 > 0.5 ? 1.0 : -1.0);
+  ofs += 0.5 * pxrnd * ofs;
+
+  uv.y += 0.1 * r3 * GLITCH;
+
+  const int NUM_SAMPLES = 10;
+  const float RCP_NUM_SAMPLES_F = 1.0 / float(NUM_SAMPLES);
+
+  vec4 sum = vec4(0.0);
+  vec3 wsum = vec3(0.0);
+  for (int i = 0; i < NUM_SAMPLES; ++i) {
+    float t = float(i) * RCP_NUM_SAMPLES_F;
+    uv.x = sat(uv.x + ofs * t);
+    vec4 samplecol = GetTexel(uv);
+    vec3 s = spectrum_offset(t);
+    samplecol.rgb = samplecol.rgb * s;
+    sum += samplecol;
+    wsum += s;
+  }
+  sum.rgb /= wsum;
+  sum.a *= RCP_NUM_SAMPLES_F;
+
+  // fragColor = vec4( sum.bbb, 1.0 ); return;
+
+  fragColor.a = sum.a;
+  fragColor.rgb = sum.rgb;  // * outcol0.a;
+  return fragColor;
+}
+
+vec4 GlitchShaderB(vec2 fragCoord) {
+  vec4 fragColor;
+
+  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const float iTime = postproc_inputs.time[0] / 100.0f;
+
+  vec2 uv = fragCoord.xy / iResolution.xy;
+
+  float wow = clamp(mod(noise(iTime + uv.y), 1.0), 0.0, 1.0) * 2.0 - 1.0;
+  vec3 finalColor;
+  finalColor += distort(screen_tex, uv, 4.0);
+  fragColor = vec4(finalColor, 1.0);
+
+  return fragColor;
+}
+
+vec4 CalcSwirl() {
   const float kMaxAmount = 10.0f;
   const float kSpeed = 0.1f;
-  const float kRadius = 300.0f;
   const float kAngle = 0.8f;
 
   const float amount = kMaxAmount * sin(postproc_inputs.time[0] * kSpeed);
+  const float radius = 300.0f * sin(postproc_inputs.time[0] * kSpeed);
   const vec2 window_size = postproc_inputs.window_size;
   const vec2 mouse_pos = comparison_bar.mouse_pos;
   const vec2 reversed_mouse_pos =
@@ -370,8 +639,8 @@ vec4 CalcSpecial() {
   vec2 tc = vs_tex_coords * window_size;
   tc -= center;
   float dist = length(tc);
-  if (dist < kRadius) {
-    float percent = (kRadius - dist) / kRadius;
+  if (dist < radius) {
+    float percent = (radius - dist) / radius;
     float theta = percent * percent * kAngle * amount;
     float s = sin(theta);
     float c = cos(theta);
@@ -379,6 +648,13 @@ vec4 CalcSpecial() {
   }
   tc += center;
   return GetTexel(tc / window_size);
+}
+
+vec4 CalcSpecial() {
+  const vec2 window_tex_coords = vs_tex_coords * postproc_inputs.window_size;
+  return 0.4f * ShampainGlitch01(window_tex_coords) +
+         0.4f * ShampainGlitch02(window_tex_coords) +
+         0.2f * GlitchShaderB(window_tex_coords);
 }
 
 /*******************************************************************************
