@@ -117,6 +117,7 @@ struct PostprocInputs {
   int effect_idx[2];
   glm::vec2 window_size;
   int pass_idx[2];
+  int time[2];
 };
 
 // Global MVP
@@ -742,6 +743,7 @@ void UpdatePostprocInputs() {
   postproc_inputs.effect_idx[0] = cur_effect_idx;
   postproc_inputs.window_size = window_size;
   postproc_inputs.pass_idx[0] = cur_pass_idx;
+  postproc_inputs.time[0] = timer_cnt;
 }
 
 /*******************************************************************************

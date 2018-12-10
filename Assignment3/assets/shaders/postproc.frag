@@ -41,6 +41,7 @@ uniform PostprocInputs {
   int effect_idx[2];
   vec2 window_size;
   int pass_idx[2];
+  int time[2];
 }
 postproc_inputs;
 
@@ -72,12 +73,13 @@ int CalcDisplayMode() {
   if (comparison_bar.enabled[0] == 0) {
     return kDisplayModeOriginal;
   }
+  const int effect_idx = postproc_inputs.effect_idx[0];
   const vec2 mouse_pos = comparison_bar.mouse_pos;
   const vec2 window_size = postproc_inputs.window_size;
   const vec2 reversed_mouse_pos =
       vec2(mouse_pos.x, window_size.y - mouse_pos.y);
   const vec2 dist = vec2(gl_FragCoord) - reversed_mouse_pos;
-  if (postproc_inputs.effect_idx[0] == kPostprocEffectMagnifier) {
+  if (effect_idx == kPostprocEffectMagnifier) {
     const float radius = sqrt(pow(dist.x, 2.0f) + pow(dist.y, 2.0f));
     const float min_window_len =
         min(postproc_inputs.window_size.x, postproc_inputs.window_size.y);
@@ -86,6 +88,8 @@ int CalcDisplayMode() {
     } else {
       return kDisplayModeOriginal;
     }
+  } else if (effect_idx == kPostprocEffectSpecial) {
+    return kDisplayModePostproc;
   } else {
     if (dist.x < -1.0f * kComparisonBarWidth / 2.0f) {
       return kDisplayModePostproc;
@@ -351,7 +355,31 @@ vec4 CalcMagnifier() {
  * Post-processing / Special
  ******************************************************************************/
 
-vec4 CalcSpecial() { return kErrorColor; }
+vec4 CalcSpecial() {
+  const float kMaxAmount = 10.0f;
+  const float kSpeed = 0.1f;
+  const float kRadius = 300.0f;
+  const float kAngle = 0.8f;
+
+  const float amount = kMaxAmount * sin(postproc_inputs.time[0] * kSpeed);
+  const vec2 window_size = postproc_inputs.window_size;
+  const vec2 mouse_pos = comparison_bar.mouse_pos;
+  const vec2 reversed_mouse_pos =
+      vec2(mouse_pos.x, window_size.y - mouse_pos.y);
+  const vec2 center = reversed_mouse_pos;
+  vec2 tc = vs_tex_coords * window_size;
+  tc -= center;
+  float dist = length(tc);
+  if (dist < kRadius) {
+    float percent = (kRadius - dist) / kRadius;
+    float theta = percent * percent * kAngle * amount;
+    float s = sin(theta);
+    float c = cos(theta);
+    tc = vec2(dot(tc, vec2(c, -s)), dot(tc, vec2(s, c)));
+  }
+  tc += center;
+  return GetTexel(tc / window_size);
+}
 
 /*******************************************************************************
  * Post-processing / Center
