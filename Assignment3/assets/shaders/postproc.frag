@@ -18,6 +18,8 @@ const int kPostprocEffectMagnifier = 5;
 /* Display */
 const float kComparisonBarWidth = 4;
 /* Colors */
+const vec4 kWhiteColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+const vec4 kBlackColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 const vec4 kErrorColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 /*******************************************************************************
@@ -35,6 +37,7 @@ comparison_bar;
 uniform PostprocInputs {
   int effect_idx[2];
   vec2 window_size;
+  int pass_idx[2];
 }
 postproc_inputs;
 
@@ -43,6 +46,8 @@ postproc_inputs;
  ******************************************************************************/
 
 uniform sampler2D screen_tex;
+uniform sampler2D multipass_tex1;
+uniform sampler2D multipass_tex2;
 
 /*******************************************************************************
  * Inputs
@@ -64,7 +69,7 @@ int CalcDisplayMode() {
   if (comparison_bar.enabled[0] == 0) {
     return kDisplayModeOriginal;
   }
-  const vec2 dist = gl_FragCoord.xy - comparison_bar.mouse_pos;
+  const vec2 dist = vec2(gl_FragCoord) - comparison_bar.mouse_pos;
   if (dist.x < -1.0f * kComparisonBarWidth / 2.0f) {
     return kDisplayModePostproc;
   } else if (dist.x > 1.0f * kComparisonBarWidth / 2.0f) {
@@ -134,9 +139,9 @@ vec4 CalcBlur() {
 vec4 CalcQuantization() {
   const float kNumColors = 8.0f;
 
-  const vec3 color = vec3(GetTexel(vs_tex_coords));
-  const vec3 quantized = floor(color * kNumColors) / kNumColors;
-  return vec4(quantized, 1.0f);
+  const vec4 color = GetTexel(vs_tex_coords);
+  const vec4 quantized = floor(color * kNumColors) / kNumColors;
+  return vec4(vec3(quantized), 1.0f);
 }
 
 vec4 CalcDoG() {
@@ -170,10 +175,9 @@ vec4 CalcDoG() {
 }
 
 vec4 CalcImageAbstraction() {
-  const vec4 white = vec4(vec3(0.0f), 1.0f);
   const vec4 blur_quantized =
       clamp(CalcBlur() + CalcQuantization(), 0.0f, 1.0f);
-  const vec4 color = mix(white, blur_quantized, CalcDoG());
+  const vec4 color = mix(kWhiteColor, blur_quantized, CalcDoG());
   return color;
 }
 
@@ -194,9 +198,9 @@ vec4 CalcLaplacian() {
   const vec4 color = ApplyKernel(kKernel);
   const float avg = (color.x + color.y + color.z) / 3.0f;
   if (avg < kThresh) {
-    return vec4(vec3(0.0f), 1.0f);
+    return kBlackColor;
   } else {
-    return vec4(vec3(1.0f), 1.0f);
+    return kWhiteColor;
   }
 }
 
@@ -243,8 +247,64 @@ vec4 CalcPixelation() {
 /*******************************************************************************
  * Post-processing / Bloom Effect
  ******************************************************************************/
+//
+// vec4 CalcBrightness(vec4 color) {
+//  // References:
+//  // https://learnopengl.com/Advanced-Lighting/Bloom
+//  // https://en.wikipedia.org/wiki/Relative_luminance
+//  const float kThresh = 0.4f;
+//
+//  const float luminance = dot(vec3(color), vec3(0.2126f, 0.7152f, 0.0722f));
+//  if (luminance > kThresh) {
+//    return color;
+//  } else {
+//    return kBlackColor;
+//  }
+//}
+//
+// vec4 CalcGaussianBlur(bool horizontal) {
+//  const int len = 5;
+//  const float weight[len] =
+//      float[](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);
+//  vec2 window_size = postproc_inputs.window_size;
+//  vec4 sum = weight[0] * GetTexel(vs_tex_coords);
+//  if (horizontal) {
+//    for (int x = 1; x < len; x++) {
+//      const vec2 ofs = vec2(x, 0.0f) / window_size;
+//      sum += weight[x] * GetTexel(vs_tex_coords + ofs);
+//      sum += weight[x] * GetTexel(vs_tex_coords - ofs);
+//    }
+//  } else {
+//    for (int y = 1; y < len; y++) {
+//      const vec2 ofs = vec2(0.0f, y) / window_size;
+//      sum += weight[y] * GetTexel(vs_tex_coords + ofs);
+//      sum += weight[y] * GetTexel(vs_tex_coords - ofs);
+//    }
+//  }
+//  return vec4(vec3(sum), 1.0f);
+//}
+//
+vec4 CalcBloomEffect() {
+  //  const float kExposure = 1.0f;
+  //  const float kGamma = 1.0f;
+  //
+  //  const int pass_idx = postproc_inputs.pass_idx;
+  //  if (pass_idx < 11) {
+  //    const bool horizontal = (pass_idx % 2 == 0);
+  //    return CalcGaussianBlur(horizontal);
+  //  } else {
+  //    vec4 hdrColor = GetTexel(vs_tex_coords);
+  //    vec4 bloomColor = CalcGaussianBlur();
+  //    hdrColor += bloomColor;  // additive blending
+  //    // tone mapping
+  //    vec4 result = kWhiteColor - exp(-hdrColor * kExposure);
+  //    // also gamma correct while we're at it
+  //    result = pow(result, vec4(1.0f / kGamma));
+  //    return vec4(vec3(result), 1.0f);
+  //  }
 
-vec4 CalcBloomEffect() { return kErrorColor; }
+  return kErrorColor;
+}
 
 /*******************************************************************************
  * Post-processing / Magnifier

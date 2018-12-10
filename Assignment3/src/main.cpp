@@ -35,6 +35,16 @@ as::Model skybox_model[SKYBOX_SIZE];
  * Model States
  ******************************************************************************/
 
+// Effects
+enum Effects {
+  kEffectImgAbs,
+  kEffectLaplacian,
+  kEffectSharpness,
+  kEffectPixelation,
+  kEffectBloomEffect,
+  kEffectMagnifier
+};
+
 // Modes
 enum class Modes { comparison, navigation };
 
@@ -45,8 +55,9 @@ size_t cur_skybox_idx = 0;
 // Modes
 Modes cur_mode = Modes::comparison;
 
-// Effect
-int cur_effect_idx = 4;
+// Effects
+int cur_effect_idx = Effects::kEffectImgAbs;
+int cur_pass_idx = 0;
 
 /*******************************************************************************
  * Camera States
@@ -104,6 +115,7 @@ struct ComparisonBar {
 struct PostprocInputs {
   int effect_idx[2];
   glm::vec2 window_size;
+  int pass_idx[2];
 };
 
 // Global MVP
@@ -291,9 +303,9 @@ void ConfigScreenVertexArrays() {
 
     const as::Mesh &mesh = meshes.at(mesh_idx);
     // Decide the names
-    const std::string va_name = "screen_quad_va";
-    const std::string buffer_name = "screen_quad_buffer";
-    const std::string idxs_buffer_name = "screen_quad_idxs_buffer";
+    const std::string va_name = "screen_va";
+    const std::string buffer_name = "screen_buffer";
+    const std::string idxs_buffer_name = "screen_idxs_buffer";
     // Get mesh data
     const std::vector<as::Vertex> vertices = mesh.GetVertices();
     const std::vector<size_t> idxs = mesh.GetIdxs();
@@ -343,58 +355,82 @@ void ConfigScreenVertexArrays() {
   }
 }
 
-void UpdateScreenTextures(const GLsizei width, const GLsizei height) {
-  // Check whether to delete old texture
-  GLuint unit_idx;
-  if (texture_manager.HasTexture("screen_quad_tex")) {
-    texture_manager.DeleteTexture("screen_quad_tex");
-    unit_idx = texture_unit_idxs["screen_quad_tex"];
-  } else {
-    // Calculate the new unit index
-    unit_idx = texture_unit_idxs.size();
-    // Save the unit index
-    texture_unit_idxs["screen_quad_tex"] = unit_idx;
+void ConfigScreenFramebuffers() {
+  // Create framebuffers
+  // 1st framebuffer is the original screen
+  // 2nd and 3rd framebuffers are ping pong screen for multi-pass filtering
+  for (int i = 0; i < 3; i++) {
+    framebuffer_manager.GenFramebuffer("screen_framebuffer[" +
+                                       std::to_string(i) + "]");
   }
-  // Generate texture
-  texture_manager.GenTexture("screen_quad_tex");
-  // Update texture
-  texture_manager.BindTexture("screen_quad_tex", GL_TEXTURE_2D, unit_idx);
-  texture_manager.InitTexture2D("screen_quad_tex", GL_TEXTURE_2D, 1, GL_RGB8,
-                                width, height);
-  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
-                                     GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
-                                     GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
-                                     GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  texture_manager.SetTextureParamInt("screen_quad_tex", GL_TEXTURE_2D,
-                                     GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  // Attach textures to framebuffers
-  framebuffer_manager.AttachTexture2DToFramebuffer(
-      "screen_framebuffer", "screen_quad_tex", GL_FRAMEBUFFER,
-      GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0);
+}
+
+void UpdateScreenTextures(const GLsizei width, const GLsizei height) {
+  for (int i = 0; i < 3; i++) {
+    // Decide the framebuffer name
+    const std::string framebuffer_name =
+        "screen_framebuffer[" + std::to_string(i) + "]";
+    // Decide the texture name
+    const std::string tex_name = "screen_tex[" + std::to_string(i) + "]";
+    // Check whether to delete old texture
+    GLuint unit_idx;
+    if (texture_manager.HasTexture(tex_name)) {
+      texture_manager.DeleteTexture(tex_name);
+      unit_idx = texture_unit_idxs[tex_name];
+    } else {
+      // Calculate the new unit index
+      unit_idx = texture_unit_idxs.size();
+      // Save the unit index
+      texture_unit_idxs[tex_name] = unit_idx;
+    }
+    // Generate texture
+    texture_manager.GenTexture(tex_name);
+    // Update texture
+    texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, unit_idx);
+    texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 1, GL_RGB8, width,
+                                  height);
+    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
+                                       GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
+                                       GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
+                                       GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
+                                       GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // Attach textures to framebuffers
+    framebuffer_manager.AttachTexture2DToFramebuffer(
+        framebuffer_name, tex_name, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
+        GL_TEXTURE_2D, 0);
+  }
 }
 
 void UpdateScreenRenderbuffers(const GLsizei width, const GLsizei height) {
-  // Check whether to delete old renderbuffer
-  if (framebuffer_manager.HasRenderbuffer("screen_depth_renderbuffer")) {
-    framebuffer_manager.DeleteRenderbuffer("screen_depth_renderbuffer");
+  for (int i = 0; i < 3; i++) {
+    // Decide the framebuffer name
+    const std::string framebuffer_name =
+        "screen_framebuffer[" + std::to_string(i) + "]";
+    // Decide the renderbuffer name
+    const std::string renderbuffer_name =
+        "screen_depth_renderbuffer[" + std::to_string(i) + "]";
+    // Check whether to delete old renderbuffer
+    if (framebuffer_manager.HasRenderbuffer(renderbuffer_name)) {
+      framebuffer_manager.DeleteRenderbuffer(renderbuffer_name);
+    }
+    // Create renderbuffers
+    framebuffer_manager.GenRenderbuffer(renderbuffer_name);
+    // Initialize renderbuffers
+    framebuffer_manager.InitRenderbuffer(renderbuffer_name, GL_RENDERBUFFER,
+                                         GL_DEPTH_COMPONENT, width, height);
+    // Attach renderbuffers to framebuffers
+    framebuffer_manager.AttachRenderbufferToFramebuffer(
+        framebuffer_name, renderbuffer_name, GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER);
   }
-  // Create renderbuffers
-  framebuffer_manager.GenRenderbuffer("screen_depth_renderbuffer");
-  // Initialize renderbuffers
-  framebuffer_manager.InitRenderbuffer("screen_depth_renderbuffer",
-                                       GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
-                                       width, height);
-  // Attach renderbuffers to framebuffers
-  framebuffer_manager.AttachRenderbufferToFramebuffer(
-      "screen_framebuffer", "screen_depth_renderbuffer", GL_FRAMEBUFFER,
-      GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER);
 }
 
-void ConfigScreenFramebuffers() {
-  // Create framebuffers
-  framebuffer_manager.GenFramebuffer("screen_framebuffer");
+void ConfigScreenDrawBuffers() {
+  const GLenum attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+  glDrawBuffers(2, attachments);
 }
 
 void ConfigGLScreens() {
@@ -402,6 +438,7 @@ void ConfigGLScreens() {
   ConfigScreenFramebuffers();
   UpdateScreenTextures(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
   UpdateScreenRenderbuffers(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
+  ConfigScreenDrawBuffers();
 }
 
 /*******************************************************************************
@@ -707,6 +744,7 @@ void UpdateComparisonBar() {
 void UpdatePostprocInputs() {
   postproc_inputs.effect_idx[0] = cur_effect_idx;
   postproc_inputs.window_size = window_size;
+  postproc_inputs.pass_idx[0] = cur_pass_idx;
 }
 
 /*******************************************************************************
@@ -747,8 +785,13 @@ void UpdateGLStateBuffers() {
   UpdatePostprocInputsBuffer();
 }
 
-void UseScreenFramebuffer() {
-  framebuffer_manager.BindFramebuffer("screen_framebuffer");
+void UseScreenFramebuffer(const int framebuffer_idx) {
+  framebuffer_manager.BindFramebuffer("screen_framebuffer[" +
+                                      std::to_string(framebuffer_idx) + "]");
+}
+
+void UseDefaultFramebuffer() {
+  framebuffer_manager.BindDefaultFramebuffer(GL_FRAMEBUFFER);
 }
 
 void DrawMeshes(const std::string &program_name, const std::string &group_name,
@@ -803,30 +846,61 @@ void DrawSkyboxes() {
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
 }
 
-void UseDefaultFramebuffer() {
-  framebuffer_manager.BindDefaultFramebuffer(GL_FRAMEBUFFER);
-}
+void DrawScreenToTexture(const int screen_tex_idx = 0) {
+  program_manager.UseProgram("postproc");
 
-void DrawScreenTexture() {
   const std::vector<as::Mesh> meshes = screen_quad_model.GetMeshes();
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
     // There should be only one mesh
     assert(mesh_idx <= 0);
 
     // Decide the names
-    const std::string va_name = "screen_quad_va";
-    const std::string buffer_name = "screen_quad_buffer";
-    const std::string idxs_buffer_name = "screen_quad_idxs_buffer";
+    const std::string va_name = "screen_va";
+    const std::string tex_name =
+        "screen_tex[" + std::to_string(screen_tex_idx) + "]";
+    const std::string buffer_name = "screen_buffer";
+    const std::string idxs_buffer_name = "screen_idxs_buffer";
     const as::Mesh &mesh = meshes.at(mesh_idx);
     // Get the array indexes
     const std::vector<size_t> &idxs = mesh.GetIdxs();
 
-    program_manager.UseProgram("postproc");
-    vertex_spec_manager.BindVertexArray("screen_quad_va");
-    texture_manager.BindTexture("screen_quad_tex");
-    buffer_manager.BindBuffer("screen_quad_buffer");
-    buffer_manager.BindBuffer("screen_quad_idxs_buffer");
+    // Get the unit indexes
+    const GLuint orig_unit_idx = texture_unit_idxs.at("screen_tex[0]");
+    const GLuint multipass_unit_idx1 = texture_unit_idxs.at("screen_tex[1]");
+    const GLuint multipass_unit_idx2 = texture_unit_idxs.at("screen_tex[2]");
+    // Set the texture handlers to the unit indexes
+    uniform_manager.SetUniform1Int("postproc", "screen_tex", orig_unit_idx);
+    uniform_manager.SetUniform1Int("postproc", "multipass_tex1",
+                                   multipass_unit_idx1);
+    uniform_manager.SetUniform1Int("postproc", "multipass_tex2",
+                                   multipass_unit_idx2);
+
+    vertex_spec_manager.BindVertexArray("screen_va");
+    texture_manager.BindTexture(tex_name);
+    buffer_manager.BindBuffer("screen_buffer");
+    buffer_manager.BindBuffer("screen_idxs_buffer");
     glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, 0);
+  }
+}
+
+void DrawScreen() {
+  if (cur_effect_idx == Effects::kEffectBloomEffect) {
+    // Draw to multi-pass framebuffers
+    for (int i = 0; i < 11; i++) {
+      // Update the current pass index
+      cur_pass_idx = i;
+      // Update postproc inputs buffer
+      UpdatePostprocInputsBuffer();
+      // Bind the multi-pass framebuffer
+      UseScreenFramebuffer(i % 2);
+      // Draw the screen texture once
+      DrawScreenToTexture(i % 2);
+    }
+    // Draw to default framebuffer
+    UseDefaultFramebuffer();
+    DrawScreenToTexture(0);
+  } else {
+    DrawScreenToTexture(0);
   }
 }
 
@@ -838,7 +912,7 @@ void GLUTDisplayCallback() {
   // Update scene-wise contexts
   UpdateGLStateBuffers();
   // Draw the scenes
-  UseScreenFramebuffer();
+  UseScreenFramebuffer(0);
   ClearColorBuffer();
   ClearDepthBuffer();
   DrawScenes();
@@ -846,7 +920,7 @@ void GLUTDisplayCallback() {
   // Draw the post-processing effects
   UseDefaultFramebuffer();
   ClearDepthBuffer();
-  DrawScreenTexture();
+  DrawScreen();
   // Swap double buffers
   glutSwapBuffers();
 }
@@ -1008,24 +1082,24 @@ void GLUTMainMenuCallback(const int id) {
     case MainMenuItems::kMainMidLevelSep: {
     } break;
     case MainMenuItems::kMainImgAbs: {
-      cur_effect_idx = 0;
+      cur_effect_idx = kEffectImgAbs;
     } break;
     case MainMenuItems::kMainLaplacian: {
-      cur_effect_idx = 1;
+      cur_effect_idx = kEffectLaplacian;
     } break;
     case MainMenuItems::kMainSharpness: {
-      cur_effect_idx = 2;
+      cur_effect_idx = kEffectSharpness;
     } break;
     case MainMenuItems::kMainPixelation: {
-      cur_effect_idx = 3;
+      cur_effect_idx = kEffectPixelation;
     } break;
     case MainMenuItems::kMainAdvancedSep: {
     } break;
     case MainMenuItems::kMainBloomEffect: {
-      cur_effect_idx = 4;
+      cur_effect_idx = kEffectBloomEffect;
     } break;
     case MainMenuItems::kMainMagnifier: {
-      cur_effect_idx = 5;
+      cur_effect_idx = kEffectMagnifier;
     } break;
     case MainMenuItems::kMainExit: {
       glutLeaveMainLoop();
@@ -1105,8 +1179,8 @@ void CreateGLUTMenus() {
   glutAddMenuEntry("3. Sharpness Filter", MainMenuItems::kMainSharpness);
   glutAddMenuEntry("4. Pixelation", MainMenuItems::kMainPixelation);
   glutAddMenuEntry("(Advanced)", MainMenuItems::kMainAdvancedSep);
-  glutAddMenuEntry("1. Fish-eye distortion", MainMenuItems::kMainBloomEffect);
-  glutAddMenuEntry("2. Sine wave distortion", MainMenuItems::kMainMagnifier);
+  glutAddMenuEntry("1. Blooem Effect", MainMenuItems::kMainBloomEffect);
+  glutAddMenuEntry("2. Magnifier", MainMenuItems::kMainMagnifier);
   glutAddMenuEntry("Exit", MainMenuItems::kMainExit);
 
   /* Mode submenu */
