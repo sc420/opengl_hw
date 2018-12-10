@@ -217,11 +217,11 @@ void InitGLManagers() {
 }
 
 void CreateGLShaders() {
-  // Post-processing - Image abstraction
-  shader_manager.CreateShader("vertex/postproc_img_abs", GL_VERTEX_SHADER,
-                              "assets/shaders/postproc_img_abs.vert");
-  shader_manager.CreateShader("fragment/postproc_img_abs", GL_FRAGMENT_SHADER,
-                              "assets/shaders/postproc_img_abs.frag");
+  // Post-processing
+  shader_manager.CreateShader("vertex/postproc", GL_VERTEX_SHADER,
+                              "assets/shaders/postproc.vert");
+  shader_manager.CreateShader("fragment/postproc", GL_FRAGMENT_SHADER,
+                              "assets/shaders/postproc.frag");
   // Scenes
   shader_manager.CreateShader("vertex/scene", GL_VERTEX_SHADER,
                               "assets/shaders/scene.vert");
@@ -235,12 +235,12 @@ void CreateGLShaders() {
 }
 
 void CreateGLPrograms() {
-  // Post-processing - Image abstraction
-  program_manager.CreateProgram("postproc_img_abs");
-  program_manager.AttachShader("postproc_img_abs", "vertex/postproc_img_abs");
-  program_manager.AttachShader("postproc_img_abs", "fragment/postproc_img_abs");
-  program_manager.LinkProgram("postproc_img_abs");
-  program_manager.UseProgram("postproc_img_abs");
+  // Post-processing
+  program_manager.CreateProgram("postproc");
+  program_manager.AttachShader("postproc", "vertex/postproc");
+  program_manager.AttachShader("postproc", "fragment/postproc");
+  program_manager.LinkProgram("postproc");
+  program_manager.UseProgram("postproc");
   // Scenes
   program_manager.CreateProgram("scene");
   program_manager.AttachShader("scene", "vertex/scene");
@@ -425,8 +425,8 @@ void BindGLUniformBlocksToBuffers() {
   uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
 
   // Comparison bar
-  uniform_manager.AssignUniformBlockToBindingPoint("postproc_img_abs",
-                                                   "ComparisonBar", 2);
+  uniform_manager.AssignUniformBlockToBindingPoint("postproc", "ComparisonBar",
+                                                   2);
   uniform_manager.BindBufferBaseToBindingPoint("comparison_bar_buffer", 2);
 }
 
@@ -769,7 +769,7 @@ void DrawScreenTexture() {
     // Get the array indexes
     const std::vector<size_t> &idxs = mesh.GetIdxs();
 
-    program_manager.UseProgram("postproc_img_abs");
+    program_manager.UseProgram("postproc");
     vertex_spec_manager.BindVertexArray("screen_quad_va");
     texture_manager.BindTexture("screen_quad_tex");
     buffer_manager.BindBuffer("screen_quad_buffer");

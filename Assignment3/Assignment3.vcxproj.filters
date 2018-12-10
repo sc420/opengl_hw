@@ -151,12 +151,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="assets\shaders\postproc_img_abs.frag">
-      <Filter>assets\shaders</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="assets\shaders\postproc_img_abs.vert">
-      <Filter>assets\shaders</Filter>
-    </CopyFileToFolders>
     <CopyFileToFolders Include="assets\shaders\scene.frag">
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
@@ -167,6 +161,12 @@
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="assets\shaders\skybox.vert">
+      <Filter>assets\shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\postproc.frag">
+      <Filter>assets\shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\postproc.vert">
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
   </ItemGroup>
