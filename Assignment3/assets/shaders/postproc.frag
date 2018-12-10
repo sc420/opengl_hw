@@ -27,7 +27,7 @@ const vec4 kErrorColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 /* Comparison bar */
 uniform ComparisonBar {
-  vec2 enabled;
+  int enabled[2];
   vec2 mouse_pos;
 }
 comparison_bar;
@@ -62,7 +62,7 @@ layout(location = 0) out vec4 fs_color;
  ******************************************************************************/
 
 int CalcDisplayMode() {
-  if (comparison_bar.enabled.x <= 0.0f) {
+  if (comparison_bar.enabled[0] == 0) {
     return kDisplayModeOriginal;
   }
   const vec2 dist = gl_FragCoord.xy - comparison_bar.mouse_pos;
@@ -241,8 +241,11 @@ vec4 CalcPostproc() {
   int effect_idx = postproc_inputs.effect_idx[0];
   switch (effect_idx) {
     case kPostprocEffectImgAbs: {
-      const vec4 color = CalcBlur() + CalcQuantization() + CalcDoG();
-      return normalize(color);
+      const vec4 white = vec4(vec3(0.0f), 1.0f);
+      const vec4 blur_quantized =
+          clamp(CalcBlur() + CalcQuantization(), 0.0f, 1.0f);
+      const vec4 color = mix(white, blur_quantized, CalcDoG());
+      return color;
     } break;
     case kPostprocEffectLaplacian: {
       return CalcLaplacian();

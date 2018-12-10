@@ -94,9 +94,9 @@ struct ModelTrans {
 
 // Comparison bar declaration
 struct ComparisonBar {
-  // Use vec2 instead of bool to avoid alignment mismatch problem (OpenGL will
-  // pad the memory for alignment, but C++ sizeof() won't)
-  glm::vec2 enabled;
+  // Use int[2] instead of bool to avoid alignment mismatch problem (OpenGL
+  // will pad the memory for alignment, but C++ sizeof() won't)
+  int enabled[2];
   glm::vec2 mouse_pos;
 };
 
@@ -694,7 +694,8 @@ void UpdateGlobalMvp() {
 }
 
 void UpdateComparisonBar() {
-  comparison_bar.enabled.x = (cur_mode == Modes::comparison && mouse_left_down);
+  comparison_bar.enabled[0] =
+      (cur_mode == Modes::comparison && mouse_left_down);
   comparison_bar.mouse_pos = mouse_pos;
 }
 
