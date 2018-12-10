@@ -46,7 +46,7 @@ size_t cur_skybox_idx = 0;
 Modes cur_mode = Modes::comparison;
 
 // Effect
-int cur_effect_idx = 0;
+int cur_effect_idx = 1;
 
 /*******************************************************************************
  * Camera States
@@ -102,7 +102,8 @@ struct ComparisonBar {
 
 // Post-processing inputs
 struct PostprocInputs {
-  int effect_idx;
+  int effect_idx[2];
+  glm::vec2 window_size;
 };
 
 // Global MVP
@@ -122,6 +123,7 @@ PostprocInputs postproc_inputs;
  ******************************************************************************/
 
 // Window states
+glm::vec2 window_size;
 bool window_closed = false;
 float window_aspect_ratio;
 
@@ -696,7 +698,10 @@ void UpdateComparisonBar() {
   comparison_bar.mouse_pos = mouse_pos;
 }
 
-void UpdatePostprocInputs() { postproc_inputs.effect_idx = cur_effect_idx; }
+void UpdatePostprocInputs() {
+  postproc_inputs.effect_idx[0] = cur_effect_idx;
+  postproc_inputs.window_size = window_size;
+}
 
 /*******************************************************************************
  * Drawing Methods
@@ -841,6 +846,8 @@ void GLUTDisplayCallback() {
 }
 
 void GLUTReshapeCallback(const int width, const int height) {
+  // Save the window size
+  window_size = glm::vec2(width, height);
   // Update window aspect ratio
   window_aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
   // Set the viewport

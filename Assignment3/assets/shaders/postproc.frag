@@ -5,15 +5,21 @@
  ******************************************************************************/
 
 /* Display modes */
-const int DISPLAY_MODE_ORIGINAL = 0;
-const int DISPLAY_MODE_BAR = 1;
-const int DISPLAY_MODE_POSTPROC = 2;
+const int kDisplayModeOriginal = 0;
+const int kDisplayModeBar = 1;
+const int kDisplayModePostproc = 2;
 /* Post-processing effects */
-const int POSTPROC_EFFECT_IMG_ABS = 0;
-const int POSTPROC_EFFECT_LAPLACIAN = 1;
+const int kPostprocEffectImgAbs = 0;
+const int kPostprocEffectLaplacian = 1;
+const int kPostprocEffectSharpness = 2;
+const int kPostprocEffectPixelation = 3;
+const int kPostprocEffectFishEye = 4;
+const int kPostprocEffectSinWave = 5;
+const int kPostprocEffectRedBlue = 6;
 /* Display */
-const float IMG_SIZE = 600.0f;
-const float COMPARISON_BAR_WIDTH = 4;
+const float kComparisonBarWidth = 4;
+/* Colors */
+const vec4 kErrorColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 /*******************************************************************************
  * Uniform Blocks
@@ -27,7 +33,10 @@ uniform ComparisonBar {
 comparison_bar;
 
 /* Post-processing inputs */
-uniform PostprocInputs { int effect_idx; }
+uniform PostprocInputs {
+  int effect_idx[2];
+  vec2 window_size;
+}
 postproc_inputs;
 
 /*******************************************************************************
@@ -54,15 +63,15 @@ layout(location = 0) out vec4 fs_color;
 
 int CalcDisplayMode() {
   if (comparison_bar.enabled.x <= 0.0f) {
-    return DISPLAY_MODE_ORIGINAL;
+    return kDisplayModeOriginal;
   }
   const vec2 dist = gl_FragCoord.xy - comparison_bar.mouse_pos;
-  if (dist.x < -1.0f * COMPARISON_BAR_WIDTH / 2.0f) {
-    return DISPLAY_MODE_ORIGINAL;
-  } else if (dist.x > 1.0f * COMPARISON_BAR_WIDTH / 2.0f) {
-    return DISPLAY_MODE_POSTPROC;
+  if (dist.x < -1.0f * kComparisonBarWidth / 2.0f) {
+    return kDisplayModePostproc;
+  } else if (dist.x > 1.0f * kComparisonBarWidth / 2.0f) {
+    return kDisplayModeOriginal;
   } else {
-    return DISPLAY_MODE_BAR;
+    return kDisplayModeBar;
   }
 }
 
@@ -73,6 +82,41 @@ int CalcDisplayMode() {
 vec4 GetTexel(vec2 coord) { return texture(screen_tex, coord); }
 
 /*******************************************************************************
+ * Post-processing / Image Processing
+ ******************************************************************************/
+
+mat3 NormalizeKernel(mat3 kernel) {
+  const int kHalfWidth = 1;
+  const int kHalfHeight = 1;
+  float sum = 0.0f;
+  for (int x = -1 * kHalfWidth; x <= kHalfWidth; x++) {
+    for (int y = -1 * kHalfHeight; y <= kHalfHeight; y++) {
+      sum += kernel[y + kHalfHeight][x + kHalfWidth];
+    }
+  }
+  if (sum > 0.0f || sum < 0.0f) {
+    return kernel / sum;
+  } else {
+    return kernel;
+  }
+}
+
+vec4 ApplyKernel(mat3 kernel) {
+  const int kHalfWidth = 1;
+  const int kHalfHeight = 1;
+  const mat3 norm_kernel = NormalizeKernel(kernel);
+  vec4 sum = vec4(0.0f);
+  for (int x = -1 * kHalfWidth; x <= kHalfWidth; x++) {
+    for (int y = -1 * kHalfHeight; y <= kHalfHeight; y++) {
+      const float kernel_val = norm_kernel[y + kHalfHeight][x + kHalfWidth];
+      const vec2 ofs = vec2(x, y) / postproc_inputs.window_size;
+      sum += kernel_val * GetTexel(vs_tex_coords + ofs);
+    }
+  }
+  return sum;
+}
+
+/*******************************************************************************
  * Post-processing / Image Abstraction
  ******************************************************************************/
 
@@ -81,7 +125,8 @@ vec4 CalcBlur() {
   vec3 color_sum = vec3(0.0f);
   for (int i = -half_size; i <= half_size; ++i) {
     for (int j = -half_size; j <= half_size; ++j) {
-      vec2 coord = vec2(vs_tex_coords) + vec2(i, j) / IMG_SIZE;
+      vec2 coord =
+          vec2(vs_tex_coords) + vec2(i, j) / postproc_inputs.window_size;
       color_sum += vec3(GetTexel(coord));
     }
   }
@@ -112,7 +157,8 @@ vec4 CalcDoG() {
       float d = length(vec2(i, j));
       vec2 kernel =
           vec2(exp(-d * d / twoSigmaESquared), exp(-d * d / twoSigmaRSquared));
-      vec4 c = GetTexel(vs_tex_coords + vec2(i, j) / IMG_SIZE);
+      vec4 c =
+          GetTexel(vs_tex_coords + vec2(i, j) / postproc_inputs.window_size);
       vec2 L = vec2(0.299f * c.r + 0.587f * c.g + 0.114f * c.b);
       norm += 2.0f * kernel;
       sum += kernel * L;
@@ -126,19 +172,72 @@ vec4 CalcDoG() {
 }
 
 /*******************************************************************************
+ * Post-processing / Laplacian Filter
+ ******************************************************************************/
+
+vec4 CalcLaplacian() {
+  const mat3 kKernel = mat3(
+      // 1st row
+      -1.0f, -1.0f, -1.0f,
+      // 2nd row
+      -1.0f, 8.0f, -1.0f,
+      // 3rd row
+      -1.0f, -1.0f, -1.0f);
+  const float kThresh = 0.5f;
+  const vec4 color = ApplyKernel(kKernel);
+  const float avg = (color.x + color.y + color.z) / 3.0f;
+  if (avg < kThresh) {
+    return vec4(vec3(0.0f), 1.0f);
+  } else {
+    return vec4(vec3(1.0f), 1.0f);
+  }
+}
+
+/*******************************************************************************
+ * Post-processing / Sharpness Filter
+ ******************************************************************************/
+
+vec4 CalcSharpness() {
+  const mat3 kKernel = mat3(
+      // 1st row
+      -1.0f, -1.0f, -1.0f,
+      // 2nd row
+      -1.0f, 8.0f, -1.0f,
+      // 3rd row
+      -1.0f, -1.0f, -1.0f);
+  return ApplyKernel(kKernel);
+}
+
+/*******************************************************************************
  * Post-processing / Center
  ******************************************************************************/
 
 vec4 CalcPostproc() {
-  switch (postproc_inputs.effect_idx) {
-    case POSTPROC_EFFECT_IMG_ABS: {
+  int effect_idx = postproc_inputs.effect_idx[0];
+  switch (effect_idx) {
+    case kPostprocEffectImgAbs: {
       const vec4 color = CalcBlur() + CalcQuantization() + CalcDoG();
       return normalize(color);
     } break;
-    case POSTPROC_EFFECT_LAPLACIAN: {
-      return CalcBlur();
+    case kPostprocEffectLaplacian: {
+      return CalcLaplacian();
     } break;
-    default: { return GetTexel(vs_tex_coords); }
+    case kPostprocEffectSharpness: {
+      return CalcSharpness();
+    } break;
+    case kPostprocEffectPixelation: {
+      return CalcLaplacian();
+    } break;
+    case kPostprocEffectFishEye: {
+      return CalcLaplacian();
+    } break;
+    case kPostprocEffectSinWave: {
+      return CalcLaplacian();
+    } break;
+    case kPostprocEffectRedBlue: {
+      return CalcLaplacian();
+    } break;
+    default: { return kErrorColor; }
   }
 }
 
@@ -149,14 +248,15 @@ vec4 CalcPostproc() {
 void main() {
   const int display_mode = CalcDisplayMode();
   switch (display_mode) {
-    case DISPLAY_MODE_ORIGINAL: {
-      fs_color = GetTexel(vs_tex_coords);
-    } break;
-    case DISPLAY_MODE_BAR: {
-      fs_color = vec4(vec3(1.0f, 0.0f, 0.0f), 1.0f);
-    } break;
-    case DISPLAY_MODE_POSTPROC: {
+    case kDisplayModePostproc: {
       fs_color = CalcPostproc();
     } break;
+    case kDisplayModeOriginal: {
+      fs_color = GetTexel(vs_tex_coords);
+    } break;
+    case kDisplayModeBar: {
+      fs_color = vec4(vec3(1.0f, 0.0f, 0.0f), 1.0f);
+    } break;
+    default: { fs_color = kErrorColor; }
   }
 }
