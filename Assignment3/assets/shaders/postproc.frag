@@ -60,7 +60,6 @@ layout(location = 0) in vec2 vs_tex_coords;
  ******************************************************************************/
 
 layout(location = 0) out vec4 fs_color;
-layout(location = 1) out vec4 fs_multipass_color;
 
 /*******************************************************************************
  * Display Mode Handlers
@@ -289,27 +288,29 @@ vec4 CalcGaussianBlur(sampler2D tex, bool horizontal) {
   return vec4(vec3(sum), 1.0f);
 }
 
+vec4 CalcBloomEffectMixedColor(vec4 orig_color, vec4 blurred_color) {
+  return 0.3f * orig_color + 1.3f * blurred_color;
+}
+
 vec4 CalcBloomEffect() {
-  const int kNumMultipass = 5;
-  const float kExposure = 1.0f;
-  const float kGamma = 1.0f;
+  const int kNumMultipass = 10;
 
   const int pass_idx = postproc_inputs.pass_idx[0];
   if (pass_idx == 0) {
-    fs_color = GetTexel(vs_tex_coords);
+    return GetTexel(vs_tex_coords);
   } else if (pass_idx < 1 + kNumMultipass * 2) {
+    const bool horizontal = (pass_idx % 2 == 0);
     if ((pass_idx + 1) % 2 == 0) {
-      const bool horizontal = (pass_idx % 2 == 0);
-      fs_color = CalcGaussianBlur(multipass_tex1, horizontal);
+      return CalcGaussianBlur(multipass_tex1, horizontal);
     } else {
-      const bool horizontal = (pass_idx % 2 == 0);
-      fs_color = CalcGaussianBlur(multipass_tex2, horizontal);
+      return CalcGaussianBlur(multipass_tex2, horizontal);
     }
   } else {
-    const bool horizontal = (pass_idx % 2 == 0);
-    fs_color = GetMultipassTexel(multipass_tex1, vs_tex_coords);
+    const vec4 orig_color = GetTexel(vs_tex_coords);
+    const vec4 bright_color = CalcBrightness(orig_color);
+    const vec4 blurred_color = GetMultipassTexel(multipass_tex1, vs_tex_coords);
+    return CalcBloomEffectMixedColor(orig_color, blurred_color);
   }
-  return fs_color;
 }
 
 /*******************************************************************************

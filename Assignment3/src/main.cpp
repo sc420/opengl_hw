@@ -879,7 +879,7 @@ void DrawScreenWithTexture(const int screen_tex_idx = 0) {
 
 void DrawScreen() {
   if (cur_effect_idx == Effects::kEffectBloomEffect) {
-    const int kNumMultipass = 5;
+    const int kNumMultipass = 10;
     /* Draw to framebuffer 1 with texture 0 */
     // Update the current pass index
     cur_pass_idx = 0;
