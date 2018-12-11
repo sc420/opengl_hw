@@ -69,6 +69,9 @@
     <ClInclude Include="..\include\as\gl\vertex_spec_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\model\converter.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
     <ClInclude Include="..\include\as\model\loader.hpp">
       <Filter>include\as\model</Filter>
     </ClInclude>
@@ -76,6 +79,9 @@
       <Filter>include\as\model</Filter>
     </ClInclude>
     <ClInclude Include="..\include\as\model\model.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\as\model\model_tools.hpp">
       <Filter>include\as\model</Filter>
     </ClInclude>
     <ClInclude Include="..\include\as\model\node.hpp">
@@ -115,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="..\src\gl\vertex_spec_manager.cpp">
       <Filter>src\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\model\converter.cpp">
+      <Filter>src\model</Filter>
     </ClCompile>
     <ClCompile Include="..\src\model\loader.cpp">
       <Filter>src\model</Filter>
