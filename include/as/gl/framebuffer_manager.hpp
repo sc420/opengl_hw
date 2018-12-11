@@ -14,6 +14,8 @@ class FramebufferManager {
     GLenum target;
   };
 
+  FramebufferManager();
+
   ~FramebufferManager();
 
   void RegisterTextureManager(const TextureManager &texture_manager);

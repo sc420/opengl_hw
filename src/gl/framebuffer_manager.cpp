@@ -1,5 +1,7 @@
 #include "as/gl/framebuffer_manager.hpp"
 
+as::FramebufferManager::FramebufferManager() : texture_manager_(nullptr) {}
+
 as::FramebufferManager::~FramebufferManager() {
   // Delete all framebuffers
   for (const auto& pair : framebuffer_hdlrs_) {

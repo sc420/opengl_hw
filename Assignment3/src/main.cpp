@@ -57,7 +57,7 @@ size_t cur_skybox_idx = 0;
 Modes cur_mode = Modes::comparison;
 
 // Effects
-int cur_effect_idx = Effects::kEffectSpecial;
+int cur_effect_idx = Effects::kEffectImgAbs;
 int cur_pass_idx = 0;
 
 /*******************************************************************************

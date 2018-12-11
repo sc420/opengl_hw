@@ -20,6 +20,8 @@ const int kPostprocEffectSpecial = 6;
 /* Display */
 const float kComparisonBarWidth = 4;
 const float kMagnifierRadius = 0.2f;
+/* Math */
+const float kPi = 3.1415926535897932384626433832795;
 /* Colors */
 const vec4 kWhiteColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 const vec4 kBlackColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -352,8 +354,6 @@ vec4 CalcMagnifier() {
 /*******************************************************************************
  * Post-processing / Special
  ******************************************************************************/
-#define PI 3.14159265
-#define TILE_SIZE 16.0
 
 float sat(float t) { return clamp(t, 0.0, 1.0); }
 
@@ -390,12 +390,15 @@ float srand(vec2 n) { return rand(n) * 2.0 - 1.0; }
 float mytrunc(float x, float num_levels) {
   return floor(x * num_levels) / num_levels;
 }
+
 vec2 mytrunc(vec2 x, float num_levels) {
   return floor(x * num_levels) / num_levels;
 }
+
 vec2 mytrunc(vec2 x, vec2 num_levels) {
   return floor(x * num_levels) / num_levels;
 }
+
 vec3 rgb2yuv(vec3 rgb) {
   vec3 yuv;
   yuv.x = dot(rgb, vec3(0.299, 0.587, 0.114));
@@ -403,6 +406,7 @@ vec3 rgb2yuv(vec3 rgb) {
   yuv.z = dot(rgb, vec3(0.615, -0.51499, -0.10001));
   return yuv;
 }
+
 vec3 yuv2rgb(vec3 yuv) {
   vec3 rgb;
   rgb.r = yuv.x + yuv.z * 1.13983;
@@ -474,18 +478,20 @@ float noise(float p) {
 }
 
 vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
+  const float kTileSize = 16;
+
   const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
   const float iTime = postproc_inputs.time[0] / 100.0f;
   const float Amount = 0.1f + 0.5f * abs(sin(iTime));
 
   vec2 pixel = vec2(1.0) / iResolution.xy;
   vec3 field = rgb2hsv(edge(sampler, uv, edgeSize));
-  vec2 distort = pixel * sin((field.rb) * PI * 2.0);
+  vec2 distort = pixel * sin((field.rb) * kPi * 2.0);
   float shiftx =
-      noise(vec2(quantize(uv.y + 31.5, iResolution.y / TILE_SIZE) * iTime,
+      noise(vec2(quantize(uv.y + 31.5, iResolution.y / kTileSize) * iTime,
                  fract(iTime) * 300.0));
   float shifty =
-      noise(vec2(quantize(uv.x + 11.5, iResolution.x / TILE_SIZE) * iTime,
+      noise(vec2(quantize(uv.x + 11.5, iResolution.x / kTileSize) * iTime,
                  fract(iTime) * 100.0));
   vec3 rgb = texture(sampler, uv + (distort + (pixel - pixel / 2.0) *
                                                   vec2(shiftx, shifty) *
@@ -511,8 +517,8 @@ vec4 ShampainGlitch01(vec2 fragCoord) {
   float time_s = mod(iTime, 32.0);
 
   float glitch_threshold = 1.0 - THRESHOLD;
-  const float max_ofs_siz = 0.05;   // TOOD: input
-  const float yuv_threshold = 0.9;  // TODO: input, >1.0f == no distort
+  const float max_ofs_siz = 0.05;
+  const float yuv_threshold = 0.9;
   const float time_frq = 16.0;
 
   vec2 uv = fragCoord.xy / iResolution.xy;
@@ -608,6 +614,7 @@ vec4 ShampainGlitch02(vec2 fragCoord) {
   return fragColor;
 }
 
+// Reference: https://www.shadertoy.com/view/4dtGzl
 vec4 GlitchShaderB(vec2 fragCoord) {
   vec4 fragColor;
 
@@ -622,32 +629,6 @@ vec4 GlitchShaderB(vec2 fragCoord) {
   fragColor = vec4(finalColor, 1.0);
 
   return fragColor;
-}
-
-vec4 CalcSwirl() {
-  const float kMaxAmount = 10.0f;
-  const float kSpeed = 0.1f;
-  const float kAngle = 0.8f;
-
-  const float amount = kMaxAmount * sin(postproc_inputs.time[0] * kSpeed);
-  const float radius = 300.0f * sin(postproc_inputs.time[0] * kSpeed);
-  const vec2 window_size = postproc_inputs.window_size;
-  const vec2 mouse_pos = comparison_bar.mouse_pos;
-  const vec2 reversed_mouse_pos =
-      vec2(mouse_pos.x, window_size.y - mouse_pos.y);
-  const vec2 center = reversed_mouse_pos;
-  vec2 tc = vs_tex_coords * window_size;
-  tc -= center;
-  float dist = length(tc);
-  if (dist < radius) {
-    float percent = (radius - dist) / radius;
-    float theta = percent * percent * kAngle * amount;
-    float s = sin(theta);
-    float c = cos(theta);
-    tc = vec2(dot(tc, vec2(c, -s)), dot(tc, vec2(s, c)));
-  }
-  tc += center;
-  return GetTexel(tc / window_size);
 }
 
 vec4 CalcSpecial() {
