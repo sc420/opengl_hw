@@ -32,9 +32,8 @@ void SetGLWindowInitRelativeCenterPos(const glm::vec2 &relative_window_pos,
 
 void SetGLWindowInitSize(const glm::ivec2 &window_size);
 
-bool LimitGLWindowSize(
-    const int width, const int height,
-    const glm::ivec2 &min_window_size = glm::ivec2(0),
-    const glm::ivec2 &max_window_size = glm::ivec2(INT32_MIN));
+bool LimitGLWindowSize(const int width, const int height,
+                       const glm::ivec2 &min_window_size = glm::ivec2(0),
+                       const glm::ivec2 &max_window_size = glm::ivec2(INT_MAX));
 
 };  // namespace as

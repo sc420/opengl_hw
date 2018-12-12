@@ -9,22 +9,18 @@ namespace fs = std::experimental::filesystem;
  * Constants
  ******************************************************************************/
 
-/* Models */
-constexpr auto SCENE_SIZE = 1;
-constexpr auto SKYBOX_SIZE = 1;
 /* Textures */
-constexpr auto NUM_MIPMAP_LEVEL = 5;
+static const auto kNumMipmapLevel = 5;
 /* User interfaces */
 static const auto kInitWindowRelativeCenterPos = glm::vec2(0.5f, 0.5f);
 static const auto kInitWindowSize = glm::ivec2(600, 600);
 static const auto kMinWindowSize = glm::ivec2(300, 300);
-static const auto kMaxWindowSize = glm::ivec2(INT32_MAX);
-constexpr auto KEYBOARD_KEY_SIZE = 256;
-constexpr auto CAMERA_MOVING_STEP = 0.2f;
-constexpr auto CAMERA_ROTATION_SENSITIVITY = 0.005f;
-constexpr auto CAMERA_ZOOMING_STEP = 5.0f;
+static const auto kNumKeyboardKeys = 256;
+static const auto kCameraMovingStep = 0.2f;
+static const auto kCameraRotationSensitivity = 0.005f;
+static const auto kCameraZoomingStep = 5.0f;
 /* Timers */
-constexpr auto TIMER_INTERVAL = 10;
+static const auto kTimerInterval = 10;
 
 /*******************************************************************************
  * Models
@@ -33,9 +29,9 @@ constexpr auto TIMER_INTERVAL = 10;
 // Screen quad
 as::Model screen_quad_model;
 // Scenes
-as::Model scene_model[SCENE_SIZE];
+as::Model scene_model;
 // Skyboxes
-as::Model skybox_model[SKYBOX_SIZE];
+as::Model skybox_model;
 
 /*******************************************************************************
  * Model States
@@ -143,7 +139,7 @@ bool window_closed = false;
 float window_aspect_ratio;
 
 /* Keyboard states */
-bool pressed_keys[KEYBOARD_KEY_SIZE] = {false};
+bool pressed_keys[kNumKeyboardKeys] = {false};
 
 /* Mouse states */
 bool mouse_left_down = false;
@@ -202,11 +198,10 @@ void LoadModels() {
       aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate;
   // Screen quad
   screen_quad_model.LoadFile("assets/models/quad/quad.obj", screen_quad_flags);
-  // First scene
-  scene_model[0].LoadFile("assets/models/crytek-sponza/sponza.obj",
-                          scene_flags);
-  // First skybox
-  skybox_model[0].LoadFile("assets/models/sea/skybox.obj", scene_flags);
+  // Scene
+  scene_model.LoadFile("assets/models/crytek-sponza/sponza.obj", scene_flags);
+  // Skybox
+  skybox_model.LoadFile("assets/models/sea/skybox.obj", scene_flags);
 }
 
 /*******************************************************************************
@@ -576,119 +571,109 @@ void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
 }
 
 void ConfigSceneBuffers() {
-  for (size_t scene_idx = 0; scene_idx < SCENE_SIZE; scene_idx++) {
-    const std::string group_name = GetSceneGroupName(scene_idx);
-    ConfigModelBuffers(scene_model[scene_idx], group_name);
-  }
+  const std::string group_name = GetSceneGroupName(0);
+  ConfigModelBuffers(scene_model, group_name);
 }
 
 void ConfigSceneTextures() {
-  for (size_t scene_idx = 0; scene_idx < SCENE_SIZE; scene_idx++) {
-    const std::vector<as::Mesh> &meshes = scene_model[scene_idx].GetMeshes();
-    for (const as::Mesh &mesh : meshes) {
-      const std::set<as::Texture> &textures = mesh.GetTextures();
-      for (const as::Texture &texture : textures) {
-        const std::string &path = texture.GetPath();
-        // Check if the texture has been loaded
-        if (texture_unit_idxs.count(path) > 0) {
-          continue;
-        }
-        // Calculate the new unit index
-        const GLuint unit_idx = texture_unit_idxs.size();
-        // Load the texture
-        GLsizei width, height;
-        int comp;
-        std::vector<GLubyte> texels;
-        as::LoadTextureByStb(path, 0, width, height, comp, texels);
-        // Convert the texels from 3 channels to 4 channels to avoid GL errors
-        texels = as::ConvertDataChannels3To4(texels);
-        // Generate the texture
-        texture_manager.GenTexture(path);
-        // Bind the texture
-        texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_idx);
-        // Initialize the texture
-        texture_manager.InitTexture2D(path, GL_TEXTURE_2D, NUM_MIPMAP_LEVEL,
-                                      GL_RGBA8, width, height);
-        // Update the texture
-        texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
-                                        height, GL_RGBA, GL_UNSIGNED_BYTE,
-                                        texels.data());
-        texture_manager.GenMipmap(path, GL_TEXTURE_2D);
-        texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
-                                           GL_TEXTURE_MIN_FILTER,
-                                           GL_LINEAR_MIPMAP_LINEAR);
-        texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
-                                           GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // Save the unit index
-        texture_unit_idxs[path] = unit_idx;
+  const std::vector<as::Mesh> &meshes = scene_model.GetMeshes();
+  for (const as::Mesh &mesh : meshes) {
+    const std::set<as::Texture> &textures = mesh.GetTextures();
+    for (const as::Texture &texture : textures) {
+      const std::string &path = texture.GetPath();
+      // Check if the texture has been loaded
+      if (texture_unit_idxs.count(path) > 0) {
+        continue;
       }
+      // Calculate the new unit index
+      const GLuint unit_idx = texture_unit_idxs.size();
+      // Load the texture
+      GLsizei width, height;
+      int comp;
+      std::vector<GLubyte> texels;
+      as::LoadTextureByStb(path, 0, width, height, comp, texels);
+      // Convert the texels from 3 channels to 4 channels to avoid GL errors
+      texels = as::ConvertDataChannels3To4(texels);
+      // Generate the texture
+      texture_manager.GenTexture(path);
+      // Bind the texture
+      texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_idx);
+      // Initialize the texture
+      texture_manager.InitTexture2D(path, GL_TEXTURE_2D, kNumMipmapLevel,
+                                    GL_RGBA8, width, height);
+      // Update the texture
+      texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
+                                      height, GL_RGBA, GL_UNSIGNED_BYTE,
+                                      texels.data());
+      texture_manager.GenMipmap(path, GL_TEXTURE_2D);
+      texture_manager.SetTextureParamInt(
+          path, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
+                                         GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      // Save the unit index
+      texture_unit_idxs[path] = unit_idx;
     }
   }
 }
 
 void ConfigSkyboxBuffers() {
-  for (size_t skybox_idx = 0; skybox_idx < SKYBOX_SIZE; skybox_idx++) {
-    const std::string group_name = GetSkyboxGroupName(skybox_idx);
-    ConfigModelBuffers(skybox_model[skybox_idx], group_name);
-  }
+  const std::string group_name = GetSkyboxGroupName(0);
+  ConfigModelBuffers(skybox_model, group_name);
 }
 
 void ConfigSkyboxTextures() {
   static const std::map<std::string, size_t> path_to_target_idx = {
       {"right.jpg", 0},  {"left.jpg", 1},  {"top.jpg", 2},
       {"bottom.jpg", 3}, {"front.jpg", 4}, {"back.jpg", 5}};
-  for (size_t scene_idx = 0; scene_idx < SKYBOX_SIZE; scene_idx++) {
-    const std::vector<as::Mesh> &meshes = skybox_model[scene_idx].GetMeshes();
-    for (const as::Mesh &mesh : meshes) {
-      const std::set<as::Texture> &textures = mesh.GetTextures();
-      for (const as::Texture &texture : textures) {
-        const std::string &path = texture.GetPath();
-        // Check if the texture has been loaded
-        if (texture_unit_idxs.count(path) > 0) {
-          continue;
-        }
-        // Get the file name
-        const fs::path fs_path(path);
-        const std::string file_name = fs_path.filename().string();
-        // Calculate the target
-        const size_t target_idx = path_to_target_idx.at(file_name);
-        const GLenum target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + target_idx;
-        // Calculate the new unit index
-        const GLuint unit_idx = texture_unit_idxs.size();
-        // Load the texture
-        GLsizei width, height;
-        int comp;
-        std::vector<GLubyte> texels;
-        as::LoadTextureByStb(path, 0, width, height, comp, texels);
-        // Convert the texels from 3 channels to 4 channels to avoid GL errors
-        texels = as::ConvertDataChannels3To4(texels);
-        // Generate the texture
-        texture_manager.GenTexture(path);
-        // Bind the texture
-        texture_manager.BindTexture(path, GL_TEXTURE_CUBE_MAP, unit_idx);
-        // Initialize the texture
-        texture_manager.InitTexture2D(path, GL_TEXTURE_CUBE_MAP,
-                                      NUM_MIPMAP_LEVEL, GL_RGBA8, width,
-                                      height);
-        // Update the texture
-        texture_manager.UpdateCubeMapTexture2D(path, target, 0, 0, 0, width,
-                                               height, GL_RGBA,
-                                               GL_UNSIGNED_BYTE, texels.data());
-        texture_manager.GenMipmap(path, GL_TEXTURE_CUBE_MAP);
-        texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                           GL_TEXTURE_MIN_FILTER,
-                                           GL_LINEAR_MIPMAP_LINEAR);
-        texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                           GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                           GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                           GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                           GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        // Save the unit index
-        texture_unit_idxs[path] = unit_idx;
+  const std::vector<as::Mesh> &meshes = skybox_model.GetMeshes();
+  for (const as::Mesh &mesh : meshes) {
+    const std::set<as::Texture> &textures = mesh.GetTextures();
+    for (const as::Texture &texture : textures) {
+      const std::string &path = texture.GetPath();
+      // Check if the texture has been loaded
+      if (texture_unit_idxs.count(path) > 0) {
+        continue;
       }
+      // Get the file name
+      const fs::path fs_path(path);
+      const std::string file_name = fs_path.filename().string();
+      // Calculate the target
+      const size_t target_idx = path_to_target_idx.at(file_name);
+      const GLenum target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + target_idx;
+      // Calculate the new unit index
+      const GLuint unit_idx = texture_unit_idxs.size();
+      // Load the texture
+      GLsizei width, height;
+      int comp;
+      std::vector<GLubyte> texels;
+      as::LoadTextureByStb(path, 0, width, height, comp, texels);
+      // Convert the texels from 3 channels to 4 channels to avoid GL errors
+      texels = as::ConvertDataChannels3To4(texels);
+      // Generate the texture
+      texture_manager.GenTexture(path);
+      // Bind the texture
+      texture_manager.BindTexture(path, GL_TEXTURE_CUBE_MAP, unit_idx);
+      // Initialize the texture
+      texture_manager.InitTexture2D(path, GL_TEXTURE_CUBE_MAP, kNumMipmapLevel,
+                                    GL_RGBA8, width, height);
+      // Update the texture
+      texture_manager.UpdateCubeMapTexture2D(path, target, 0, 0, 0, width,
+                                             height, GL_RGBA, GL_UNSIGNED_BYTE,
+                                             texels.data());
+      texture_manager.GenMipmap(path, GL_TEXTURE_CUBE_MAP);
+      texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
+                                         GL_TEXTURE_MIN_FILTER,
+                                         GL_LINEAR_MIPMAP_LINEAR);
+      texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
+                                         GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
+                                         GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
+                                         GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
+                                         GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+      // Save the unit index
+      texture_unit_idxs[path] = unit_idx;
     }
   }
 }
@@ -755,9 +740,8 @@ void UpdateGlobalMvpBuffer() {
 }
 
 void UpdateModelTransBuffer() {
-  const float scale_factors[SCENE_SIZE] = {0.01f};
-  model_trans.trans =
-      glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors[cur_scene_idx]));
+  const float scale_factors = 0.01f;
+  model_trans.trans = glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors));
   buffer_manager.UpdateBuffer("model_trans_buffer");
 }
 
@@ -820,16 +804,14 @@ void DrawMeshes(const std::string &program_name, const std::string &group_name,
 void DrawScenes() {
   program_manager.UseProgram("scene");
   const std::string scene_group_name = GetSceneGroupName(cur_scene_idx);
-  const std::vector<as::Mesh> scene_meshes =
-      scene_model[cur_scene_idx].GetMeshes();
+  const std::vector<as::Mesh> scene_meshes = scene_model.GetMeshes();
   DrawMeshes("scene", scene_group_name, scene_meshes);
 }
 
 void DrawSkyboxes() {
   program_manager.UseProgram("skybox");
   const std::string skybox_group_name = GetSkyboxGroupName(cur_skybox_idx);
-  const std::vector<as::Mesh> skybox_meshes =
-      skybox_model[cur_skybox_idx].GetMeshes();
+  const std::vector<as::Mesh> skybox_meshes = skybox_model.GetMeshes();
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
 }
 
@@ -928,7 +910,7 @@ void GLUTDisplayCallback() {
 
 void GLUTReshapeCallback(const int width, const int height) {
   // Limit the window size
-  if (as::LimitGLWindowSize(width, height, kMinWindowSize, kMaxWindowSize)) {
+  if (as::LimitGLWindowSize(width, height, kMinWindowSize)) {
     // If the window size has been limited, ignore the new size
     return;
   }
@@ -966,22 +948,7 @@ void GLUTKeyboardUpCallback(const unsigned char key, const int x, const int y) {
   pressed_keys[key] = false;
 }
 
-void GLUTSpecialCallback(const int key, const int x, const int y) {
-  switch (key) {
-    case GLUT_KEY_LEFT: {
-      cur_scene_idx = (cur_scene_idx + SCENE_SIZE - 1) % SCENE_SIZE;
-    } break;
-    case GLUT_KEY_RIGHT: {
-      cur_scene_idx = (cur_scene_idx + SCENE_SIZE + 1) % SCENE_SIZE;
-    } break;
-    case GLUT_KEY_UP: {
-      cur_skybox_idx = (cur_skybox_idx + SKYBOX_SIZE - 1) % SKYBOX_SIZE;
-    } break;
-    case GLUT_KEY_DOWN: {
-      cur_skybox_idx = (cur_skybox_idx + SKYBOX_SIZE + 1) % SKYBOX_SIZE;
-    } break;
-  }
-}
+void GLUTSpecialCallback(const int key, const int x, const int y) {}
 
 void GLUTMouseCallback(const int button, const int state, const int x,
                        const int y) {
@@ -1002,9 +969,9 @@ void GLUTMouseCallback(const int button, const int state, const int x,
 void GLUTMouseWheelCallback(const int button, const int dir, const int x,
                             const int y) {
   if (dir > 0) {
-    camera_trans.AddEye(CAMERA_ZOOMING_STEP * glm::vec3(0.0f, 0.0f, -1.0f));
+    camera_trans.AddEye(kCameraZoomingStep * glm::vec3(0.0f, 0.0f, -1.0f));
   } else {
-    camera_trans.AddEye(CAMERA_ZOOMING_STEP * glm::vec3(0.0f, 0.0f, 1.0f));
+    camera_trans.AddEye(kCameraZoomingStep * glm::vec3(0.0f, 0.0f, 1.0f));
   }
 }
 
@@ -1018,7 +985,7 @@ void GLUTMotionCallback(const int x, const int y) {
       } break;
       case Modes::navigation: {
         const glm::vec2 diff = mouse_pos - mouse_left_down_init_pos;
-        camera_trans.AddAngle(CAMERA_ROTATION_SENSITIVITY *
+        camera_trans.AddAngle(kCameraRotationSensitivity *
                               glm::vec3(diff.y, diff.x, 0.0f));
         mouse_left_down_init_pos = mouse_pos;
       } break;
@@ -1044,28 +1011,28 @@ void GLUTTimerCallback(const int val) {
 
   // Update camera transformation
   if (pressed_keys['w']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0f, 0.0f, -1.0f));
+    camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, -1.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['s']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(0.0f, 0.0f, 1.0f));
+    camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, 1.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['a']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(-1.0f, 0.0f, 0.0f));
+    camera_trans.AddEye(kCameraMovingStep * glm::vec3(-1.0f, 0.0f, 0.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['d']) {
-    camera_trans.AddEye(CAMERA_MOVING_STEP * glm::vec3(1.0f, 0.0f, 0.0f));
+    camera_trans.AddEye(kCameraMovingStep * glm::vec3(1.0f, 0.0f, 0.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['z']) {
-    camera_trans.AddEyeWorldSpace(CAMERA_MOVING_STEP *
+    camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, 1.0f, 0.0f));
     UpdateGlobalMvp();
   }
   if (pressed_keys['x']) {
-    camera_trans.AddEyeWorldSpace(CAMERA_MOVING_STEP *
+    camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, -1.0f, 0.0f));
     UpdateGlobalMvp();
   }
@@ -1075,7 +1042,7 @@ void GLUTTimerCallback(const int val) {
 
   // Register the timer callback again
   if (timer_enabled) {
-    glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, val);
+    glutTimerFunc(kTimerInterval, GLUTTimerCallback, val);
   }
 }
 
@@ -1142,7 +1109,7 @@ void GLUTTimerMenuCallback(const int id) {
     case TimerMenuItems::kTimerStart: {
       if (!timer_enabled) {
         timer_enabled = true;
-        glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
+        glutTimerFunc(kTimerInterval, GLUTTimerCallback, 0);
       }
     } break;
     case TimerMenuItems::kTimerStop: {
@@ -1172,7 +1139,7 @@ void RegisterGLUTCallbacks() {
   glutMotionFunc(GLUTMotionCallback);
   glutCloseFunc(GLUTCloseCallback);
   /* Timer */
-  glutTimerFunc(TIMER_INTERVAL, GLUTTimerCallback, 0);
+  glutTimerFunc(kTimerInterval, GLUTTimerCallback, 0);
 }
 
 void CreateGLUTMenus() {

@@ -13,6 +13,8 @@
 
 #include <algorithm>
 #include <cassert>
+#include <climits>
+#include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <map>
