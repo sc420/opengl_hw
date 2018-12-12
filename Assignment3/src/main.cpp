@@ -349,12 +349,18 @@ void ConfigScreenVertexArrays() {
                                               0);
     vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 1, 3, GL_FLOAT, GL_FALSE,
                                               0);
+    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 2, 2, GL_FLOAT, GL_FALSE,
+                                              0);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 0, 0);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 1, 1);
+    vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 2, 2);
     vertex_spec_manager.BindBufferToBindingPoint(
         va_name, buffer_name, 0, offsetof(as::Vertex, pos), sizeof(as::Vertex));
+    vertex_spec_manager.BindBufferToBindingPoint(va_name, buffer_name, 1,
+                                                 offsetof(as::Vertex, normal),
+                                                 sizeof(as::Vertex));
     vertex_spec_manager.BindBufferToBindingPoint(
-        va_name, buffer_name, 1, offsetof(as::Vertex, tex_coords),
+        va_name, buffer_name, 2, offsetof(as::Vertex, tex_coords),
         sizeof(as::Vertex));
   }
 }
@@ -566,13 +572,19 @@ void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
                                               GL_FALSE, 0);
     vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 1, 3, GL_FLOAT,
                                               GL_FALSE, 0);
+    vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 2, 2, GL_FLOAT,
+                                              GL_FALSE, 0);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 0, 0);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 1, 1);
+    vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 2, 2);
     vertex_spec_manager.BindBufferToBindingPoint(
         scene_va_name, scene_buffer_name, 0, offsetof(as::Vertex, pos),
         sizeof(as::Vertex));
     vertex_spec_manager.BindBufferToBindingPoint(
-        scene_va_name, scene_buffer_name, 1, offsetof(as::Vertex, tex_coords),
+        scene_va_name, scene_buffer_name, 1, offsetof(as::Vertex, normal),
+        sizeof(as::Vertex));
+    vertex_spec_manager.BindBufferToBindingPoint(
+        scene_va_name, scene_buffer_name, 2, offsetof(as::Vertex, tex_coords),
         sizeof(as::Vertex));
   }
 }

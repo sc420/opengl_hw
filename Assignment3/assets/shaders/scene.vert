@@ -11,7 +11,8 @@ uniform ModelTrans { mat4 trans; }
 model_trans;
 
 layout(location = 0) in vec3 in_pos;
-layout(location = 1) in vec2 in_tex_coords;
+layout(location = 1) in vec3 in_norm;
+layout(location = 2) in vec2 in_tex_coords;
 
 layout(location = 0) out vec2 vs_tex_coords;
 
