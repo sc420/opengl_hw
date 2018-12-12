@@ -1,5 +1,5 @@
 #include "as/common.hpp"
-#include "as/gl/gl_managers.hpp"
+#include "as/gl/gl_tools.hpp"
 #include "as/model/model_tools.hpp"
 #include "as/trans/camera.hpp"
 
@@ -184,7 +184,7 @@ void InitGLUT(int argc, char *argv[]) {
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
   glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-  glutInitWindowPosition(100, 100);
+  // glutInitWindowPosition(100, 100);
   glutInitWindowSize(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
   glutCreateWindow("Assignment 3");
 }

@@ -1,5 +1,5 @@
 #include "as/common.hpp"
-#include "as/gl/gl_managers.hpp"
+#include "as/gl/gl_tools.hpp"
 #include "as/model/loader.hpp"
 #include "as/trans/camera.hpp"
 
@@ -178,15 +178,6 @@ void InitGLUT(int argc, char *argv[]) {
   glutInitWindowPosition(100, 100);
   glutInitWindowSize(600, 600);
   glutCreateWindow("Assignment 1");
-}
-
-void InitGLEW() {
-  const GLenum err = glewInit();
-  if (err != GLEW_OK) {
-    std::cerr << "Error: " << glewGetErrorString(err) << std::endl;
-    throw std::runtime_error("Could not initialize GLEW");
-  }
-  // as::PrintGLContextInfo();
 }
 
 /*******************************************************************************
@@ -784,7 +775,7 @@ int main(int argc, char *argv[]) {
     LoadModels();
     LoadTextures();
     InitGLUT(argc, argv);
-    InitGLEW();
+    as::InitGLEW();
     ConfigGL();
     RegisterGLUTCallbacks();
     CreateGLUTMenus();

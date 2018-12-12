@@ -1,7 +1,6 @@
 #include "as/common.hpp"
-#include "as/gl/gl_managers.hpp"
-#include "as/model/loader.hpp"
-#include "as/model/model.hpp"
+#include "as/gl/gl_tools.hpp"
+#include "as/model/model_tools.hpp"
 #include "as/trans/camera.hpp"
 
 namespace fs = std::experimental::filesystem;
@@ -167,19 +166,6 @@ std::string GetMeshVAIdxsBufferName(const std::string &group_name,
  * GL Context Configuration
  ******************************************************************************/
 
-std::vector<GLubyte> ConvertChannels3To4(const std::vector<GLubyte> data) {
-  const size_t size = data.size();
-  const size_t num_pixel = size / 3;
-  const size_t new_size = num_pixel * 4;
-  std::vector<GLubyte> output(new_size, 0);
-  for (size_t i = 0; i < num_pixel; i++) {
-    for (size_t c = 0; c < 3; c++) {
-      output[4 * i + c] = data[3 * i + c];
-    }
-  }
-  return output;
-}
-
 void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
   const std::vector<as::Mesh> meshes = model.GetMeshes();
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
@@ -236,13 +222,19 @@ void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
                                               GL_FALSE, 0);
     vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 1, 3, GL_FLOAT,
                                               GL_FALSE, 0);
+    vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 2, 2, GL_FLOAT,
+                                              GL_FALSE, 0);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 0, 0);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 1, 1);
+    vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 2, 2);
     vertex_spec_manager.BindBufferToBindingPoint(
         scene_va_name, scene_buffer_name, 0, offsetof(as::Vertex, pos),
         sizeof(as::Vertex));
     vertex_spec_manager.BindBufferToBindingPoint(
-        scene_va_name, scene_buffer_name, 1, offsetof(as::Vertex, tex_coords),
+        scene_va_name, scene_buffer_name, 1, offsetof(as::Vertex, normal),
+        sizeof(as::Vertex));
+    vertex_spec_manager.BindBufferToBindingPoint(
+        scene_va_name, scene_buffer_name, 2, offsetof(as::Vertex, tex_coords),
         sizeof(as::Vertex));
   }
 }
@@ -273,7 +265,7 @@ void ConfigSceneTextures() {
         std::vector<GLubyte> texels;
         as::LoadTextureByStb(path, 0, width, height, comp, texels);
         // Convert the texels from 3 channels to 4 channels to avoid GL errors
-        texels = ConvertChannels3To4(texels);
+        texels = as::ConvertDataChannels3To4(texels);
         // Generate the texture
         texture_manager.GenTexture(path);
         // Bind the texture
@@ -333,7 +325,7 @@ void ConfigSkyboxTextures() {
         std::vector<GLubyte> texels;
         as::LoadTextureByStb(path, 0, width, height, comp, texels);
         // Convert the texels from 3 channels to 4 channels to avoid GL errors
-        texels = ConvertChannels3To4(texels);
+        texels = as::ConvertDataChannels3To4(texels);
         // Generate the texture
         texture_manager.GenTexture(path);
         // Bind the texture

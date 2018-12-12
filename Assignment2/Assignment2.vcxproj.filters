@@ -51,7 +51,7 @@
     <ClInclude Include="..\include\as\gl\framebuffer_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\as\gl\gl_managers.hpp">
+    <ClInclude Include="..\include\as\gl\gl_tools.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
     <ClInclude Include="..\include\as\gl\program_manager.hpp">
@@ -107,6 +107,9 @@
     <ClCompile Include="..\src\gl\framebuffer_manager.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\gl\gl_tools.cpp">
+      <Filter>src\gl</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\gl\program_manager.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
@@ -147,7 +150,7 @@
       <Filter>src\trans</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
-      <Filter>Assignment3\src</Filter>
+      <Filter>Assignment2\src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

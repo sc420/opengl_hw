@@ -55,16 +55,3 @@
 #pragma comment(lib, "assimp.lib")
 #pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "freeglut.lib")
-
-/*******************************************************************************
- * Declarations
- ******************************************************************************/
-
-namespace as {
-void InitGLEW();
-
-void PrintGLContextInfo(const bool print_entensions = false,
-                        const bool print_supported_glsl_versions = false);
-
-void EnableCatchingGLError(const bool stop_when_error = false);
-}  // namespace as
