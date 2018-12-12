@@ -19,9 +19,12 @@ class ShaderApp {
 
   void Init();
 
- private:
+  void Use() const;
+
+ protected:
   as::GLManagers *gl_managers_;
 
+ private:
   void CreateShaders();
 
   void CreatePrograms();

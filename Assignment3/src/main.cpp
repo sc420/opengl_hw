@@ -136,18 +136,6 @@ struct ModelTrans {
   glm::mat4 trans;
 };
 
-// Post-processing inputs
-struct PostprocInputs {
-  // Use int[2] instead of bool to avoid alignment mismatch problem (OpenGL
-  // will pad the memory for alignment, but C++ sizeof() won't)
-  int enabled[2];
-  glm::vec2 mouse_pos;
-  glm::vec2 window_size;
-  int effect_idx[2];
-  int pass_idx[2];
-  int time[2];
-};
-
 // Global MVP
 GlobalMvp global_mvp;
 
@@ -155,7 +143,7 @@ GlobalMvp global_mvp;
 ModelTrans model_trans;
 
 // Post-processing inputs
-PostprocInputs postproc_inputs;
+shader::PostprocShader::PostprocInputs postproc_inputs;
 
 /*******************************************************************************
  * Menus
@@ -249,6 +237,7 @@ void InitGLManagers() {
 }
 
 void InitShaders() {
+  // Post-processing
   postproc_shader.RegisterGLManagers(gl_managers);
   postproc_shader.Init();
 }
@@ -440,8 +429,6 @@ void CreateGLBuffers() {
   buffer_manager.GenBuffer("global_mvp_buffer");
   // Model transformation
   buffer_manager.GenBuffer("model_trans_buffer");
-  // Post-processing inputs
-  buffer_manager.GenBuffer("postproc_inputs_buffer");
 }
 
 void InitGLBuffers() {
@@ -451,9 +438,6 @@ void InitGLBuffers() {
   // Model transformation
   buffer_manager.InitBuffer("model_trans_buffer", GL_UNIFORM_BUFFER,
                             sizeof(ModelTrans), NULL, GL_STATIC_DRAW);
-  // Post-processing inputs
-  buffer_manager.InitBuffer("postproc_inputs_buffer", GL_UNIFORM_BUFFER,
-                            sizeof(PostprocInputs), NULL, GL_STATIC_DRAW);
 }
 
 void UpdateGLBuffers() {
@@ -463,9 +447,6 @@ void UpdateGLBuffers() {
   // Model transformation
   buffer_manager.UpdateBuffer("model_trans_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(ModelTrans), &model_trans);
-  // Post-processing inputs
-  buffer_manager.UpdateBuffer("postproc_inputs_buffer", GL_UNIFORM_BUFFER, 0,
-                              sizeof(PostprocInputs), &postproc_inputs);
 }
 
 void BindGLUniformBlocksToBuffers() {
@@ -477,8 +458,10 @@ void BindGLUniformBlocksToBuffers() {
   uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
   // Post-processing inputs
   uniform_manager.AssignUniformBlockToBindingPoint("postproc", "PostprocInputs",
-                                                   3);
-  uniform_manager.BindBufferBaseToBindingPoint("postproc_inputs_buffer", 3);
+                                                   2);
+  uniform_manager.BindBufferBaseToBindingPoint(
+      "postproc_inputs",
+      2);  // TODO: Use a centralized manager
 }
 
 void ConfigGLScenes() {
@@ -707,6 +690,7 @@ void UpdateGlobalMvp() {
 }
 
 void UpdatePostprocInputs() {
+  shader::PostprocShader::PostprocInputs postproc_inputs;
   postproc_inputs.enabled[0] =
       (cur_mode == Modes::comparison && mouse_left_down);
   postproc_inputs.mouse_pos = mouse_pos;
@@ -714,6 +698,7 @@ void UpdatePostprocInputs() {
   postproc_inputs.effect_idx[0] = cur_effect_idx;
   postproc_inputs.pass_idx[0] = cur_pass_idx;
   postproc_inputs.time[0] = timer_cnt;
+  postproc_shader.UpdatePostprocInputs(postproc_inputs);
 }
 
 /*******************************************************************************
@@ -735,15 +720,10 @@ void UpdateModelTransBuffer() {
   buffer_manager.UpdateBuffer("model_trans_buffer");
 }
 
-void UpdatePostprocInputsBuffer() {
-  UpdatePostprocInputs();
-  buffer_manager.UpdateBuffer("postproc_inputs_buffer");
-}
-
 void UpdateGLStateBuffers() {
   UpdateGlobalMvpBuffer();
   UpdateModelTransBuffer();
-  UpdatePostprocInputsBuffer();
+  UpdatePostprocInputs();
 }
 
 void UseScreenFramebuffer(const int framebuffer_idx) {
@@ -806,7 +786,7 @@ void DrawSkyboxes() {
 }
 
 void DrawScreenWithTexture(const int screen_tex_idx = 0) {
-  program_manager.UseProgram("postproc");
+  postproc_shader.Use();
 
   const std::vector<as::Mesh> meshes = screen_quad_model.GetMeshes();
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
@@ -848,7 +828,7 @@ void DrawScreen() {
     /* Draw to framebuffer 1 with texture 0 */
     // Update the current pass index
     cur_pass_idx = 0;
-    UpdatePostprocInputsBuffer();
+    UpdatePostprocInputs();
     // Draw to screen framebuffer
     UseScreenFramebuffer(1);
     DrawScreenWithTexture(0);
@@ -857,7 +837,7 @@ void DrawScreen() {
     for (int i = 1; i < 1 + kNumMultipass * 2; i++) {
       // Update the current pass index
       cur_pass_idx = i;
-      UpdatePostprocInputsBuffer();
+      UpdatePostprocInputs();
       // Draw to screen framebuffer
       const int source_idx = 1 + (i % 2);
       const int target_idx = 1 + ((i + 1) % 2);
@@ -868,7 +848,7 @@ void DrawScreen() {
     /* Draw to framebuffer 0 with texture 1 */
     // Update the current pass index
     cur_pass_idx = 1 + kNumMultipass * 2;
-    UpdatePostprocInputsBuffer();
+    UpdatePostprocInputs();
     // Draw to default framebuffer
     UseDefaultFramebuffer();
     DrawScreenWithTexture(1);

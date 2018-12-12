@@ -32,6 +32,12 @@ void app::ShaderApp::Init() {
   InitUniformBlocks();
 }
 
+void app::ShaderApp::Use() const {
+  const as::ProgramManager& program_manager = gl_managers_->GetProgramManager();
+  const std::string& program_name = GetProgramName();
+  program_manager.UseProgram(program_name);
+}
+
 void app::ShaderApp::CreateShaders() {
   as::ShaderManager& shader_manager = gl_managers_->GetShaderManager();
   const std::string& vertex_path = GetShaderPath(ShaderTypes::kVertex);
