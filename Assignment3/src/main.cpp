@@ -9,16 +9,20 @@ namespace fs = std::experimental::filesystem;
  * Constants
  ******************************************************************************/
 
+/* Models */
+constexpr auto SCENE_SIZE = 1;
+constexpr auto SKYBOX_SIZE = 1;
+/* Textures */
+constexpr auto NUM_MIPMAP_LEVEL = 5;
+/* User interfaces */
 constexpr auto INIT_WINDOW_WIDTH = 600;
 constexpr auto INIT_WINDOW_HEIGHT = 600;
-constexpr auto TIMER_INTERVAL = 10;
 constexpr auto KEYBOARD_KEY_SIZE = 256;
 constexpr auto CAMERA_MOVING_STEP = 0.2f;
 constexpr auto CAMERA_ROTATION_SENSITIVITY = 0.005f;
 constexpr auto CAMERA_ZOOMING_STEP = 5.0f;
-constexpr auto SCENE_SIZE = 1;
-constexpr auto SKYBOX_SIZE = 1;
-constexpr auto NUM_MIPMAP_LEVEL = 5;
+/* Timers */
+constexpr auto TIMER_INTERVAL = 10;
 
 /*******************************************************************************
  * Models
@@ -35,6 +39,9 @@ as::Model skybox_model[SKYBOX_SIZE];
  * Model States
  ******************************************************************************/
 
+// Modes
+enum class Modes { comparison, navigation };
+
 // Effects
 enum Effects {
   kEffectImgAbs,
@@ -46,17 +53,16 @@ enum Effects {
   kEffectSpecial,
 };
 
-// Modes
-enum class Modes { comparison, navigation };
+// Current scene
+int cur_scene_idx = 0;
 
-// Scene
-size_t cur_scene_idx = 0;
-size_t cur_skybox_idx = 0;
+// Current skybox
+int cur_skybox_idx = 0;
 
-// Modes
+// Current mode
 Modes cur_mode = Modes::comparison;
 
-// Effects
+// Current effects
 int cur_effect_idx = Effects::kEffectImgAbs;
 int cur_pass_idx = 0;
 
@@ -136,15 +142,15 @@ PostprocInputs postproc_inputs;
  * User Interface States
  ******************************************************************************/
 
-// Window states
+/* Window states */
 glm::vec2 window_size;
 bool window_closed = false;
 float window_aspect_ratio;
 
-// Keyboard states
+/* Keyboard states */
 bool pressed_keys[KEYBOARD_KEY_SIZE] = {false};
 
-// Mouse states
+/* Mouse states */
 bool mouse_left_down = false;
 glm::vec2 mouse_left_down_init_pos;
 glm::vec2 mouse_pos;
