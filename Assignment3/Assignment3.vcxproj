@@ -65,11 +65,11 @@
     <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)include;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)include;$(ProjectDir)include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -162,6 +162,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\gl\framebuffer_manager.hpp" />
     <ClInclude Include="..\include\as\gl\gl_tools.hpp" />
     <ClInclude Include="..\include\as\gl\program_manager.hpp" />
+    <ClInclude Include="..\include\as\gl\shader_app.hpp" />
     <ClInclude Include="..\include\as\gl\shader_manager.hpp" />
     <ClInclude Include="..\include\as\gl\texture_manager.hpp" />
     <ClInclude Include="..\include\as\gl\uniform_manager.hpp" />
@@ -175,6 +176,9 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\model\texture.hpp" />
     <ClInclude Include="..\include\as\model\vertex.hpp" />
     <ClInclude Include="..\include\as\trans\camera.hpp" />
+    <ClInclude Include="include\postproc_shader.hpp" />
+    <ClInclude Include="include\scene_shader.hpp" />
+    <ClInclude Include="include\skybox_shader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp" />
@@ -182,6 +186,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\gl\framebuffer_manager.cpp" />
     <ClCompile Include="..\src\gl\gl_tools.cpp" />
     <ClCompile Include="..\src\gl\program_manager.cpp" />
+    <ClCompile Include="..\src\gl\shader_app.cpp" />
     <ClCompile Include="..\src\gl\shader_manager.cpp" />
     <ClCompile Include="..\src\gl\texture_manager.cpp" />
     <ClCompile Include="..\src\gl\uniform_manager.cpp" />
@@ -195,6 +200,9 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\model\vertex.cpp" />
     <ClCompile Include="..\src\trans\camera.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\postproc_shader.cpp" />
+    <ClCompile Include="src\scene_shader.cpp" />
+    <ClCompile Include="src\skybox_shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="assets\shaders\postproc.frag">

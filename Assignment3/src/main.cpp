@@ -3,6 +3,8 @@
 #include "as/model/model_tools.hpp"
 #include "as/trans/camera.hpp"
 
+#include "postproc_shader.hpp"
+
 namespace fs = std::experimental::filesystem;
 
 /*******************************************************************************
@@ -87,6 +89,36 @@ as::UniformManager uniform_manager;
 as::VertexSpecManager vertex_spec_manager;
 
 /*******************************************************************************
+ * Shaders
+ ******************************************************************************/
+
+shader::PostprocShader postproc_shader;
+
+/*******************************************************************************
+ * User Interface States
+ ******************************************************************************/
+
+/* Window states */
+glm::vec2 window_size;
+bool window_closed = false;
+float window_aspect_ratio;
+
+/* Keyboard states */
+bool pressed_keys[kNumKeyboardKeys] = {false};
+
+/* Mouse states */
+bool mouse_left_down = false;
+glm::vec2 mouse_left_down_init_pos;
+glm::vec2 mouse_pos;
+
+/*******************************************************************************
+ * Timers
+ ******************************************************************************/
+
+unsigned int timer_cnt = 0;
+bool timer_enabled = true;
+
+/*******************************************************************************
  * GL States (Feed to GL)
  ******************************************************************************/
 
@@ -122,30 +154,6 @@ ModelTrans model_trans;
 
 // Post-processing inputs
 PostprocInputs postproc_inputs;
-
-/*******************************************************************************
- * User Interface States
- ******************************************************************************/
-
-/* Window states */
-glm::vec2 window_size;
-bool window_closed = false;
-float window_aspect_ratio;
-
-/* Keyboard states */
-bool pressed_keys[kNumKeyboardKeys] = {false};
-
-/* Mouse states */
-bool mouse_left_down = false;
-glm::vec2 mouse_left_down_init_pos;
-glm::vec2 mouse_pos;
-
-/*******************************************************************************
- * Timers
- ******************************************************************************/
-
-unsigned int timer_cnt = 0;
-bool timer_enabled = true;
 
 /*******************************************************************************
  * Menus
@@ -243,12 +251,12 @@ void InitGLManagers() {
   vertex_spec_manager.RegisterBufferManager(buffer_manager);
 }
 
+void InitShaders() {
+  postproc_shader.RegisterManagers(program_manager, shader_manager);
+  postproc_shader.Init();
+}
+
 void CreateGLShaders() {
-  // Post-processing
-  shader_manager.CreateShader("vertex/postproc", GL_VERTEX_SHADER,
-                              "assets/shaders/postproc.vert");
-  shader_manager.CreateShader("fragment/postproc", GL_FRAGMENT_SHADER,
-                              "assets/shaders/postproc.frag");
   // Scenes
   shader_manager.CreateShader("vertex/scene", GL_VERTEX_SHADER,
                               "assets/shaders/scene.vert");
@@ -262,12 +270,6 @@ void CreateGLShaders() {
 }
 
 void CreateGLPrograms() {
-  // Post-processing
-  program_manager.CreateProgram("postproc");
-  program_manager.AttachShader("postproc", "vertex/postproc");
-  program_manager.AttachShader("postproc", "fragment/postproc");
-  program_manager.LinkProgram("postproc");
-  program_manager.UseProgram("postproc");
   // Scenes
   program_manager.CreateProgram("scene");
   program_manager.AttachShader("scene", "vertex/scene");
@@ -682,6 +684,7 @@ void ConfigGL() {
   as::EnableCatchingGLError();
   ConfigGLSettings();
   InitGLManagers();
+  InitShaders();
   /* Configure program-wise contexts */
   LoadModels();
   CreateGLShaders();

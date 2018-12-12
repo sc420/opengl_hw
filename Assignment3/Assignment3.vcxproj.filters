@@ -10,6 +10,9 @@
     <Filter Include="Assignment3">
       <UniqueIdentifier>{34fd948e-325d-4a05-afc5-c0b3b3a147d9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Assignment3\include">
+      <UniqueIdentifier>{c125f081-68f7-4919-835a-7d7751f8abde}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Assignment3\src">
       <UniqueIdentifier>{241569b9-b50d-4433-9131-99752bf77d8a}</UniqueIdentifier>
     </Filter>
@@ -57,6 +60,9 @@
     <ClInclude Include="..\include\as\gl\program_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\gl\shader_app.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
     <ClInclude Include="..\include\as\gl\shader_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
@@ -96,6 +102,15 @@
     <ClInclude Include="..\include\as\trans\camera.hpp">
       <Filter>include\as\trans</Filter>
     </ClInclude>
+    <ClInclude Include="include\postproc_shader.hpp">
+      <Filter>Assignment3\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scene_shader.hpp">
+      <Filter>Assignment3\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\skybox_shader.hpp">
+      <Filter>Assignment3\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp">
@@ -111,6 +126,9 @@
       <Filter>src\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gl\program_manager.cpp">
+      <Filter>src\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gl\shader_app.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gl\shader_manager.cpp">
@@ -150,6 +168,15 @@
       <Filter>src\trans</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
+      <Filter>Assignment3\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\postproc_shader.cpp">
+      <Filter>Assignment3\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene_shader.cpp">
+      <Filter>Assignment3\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\skybox_shader.cpp">
       <Filter>Assignment3\src</Filter>
     </ClCompile>
   </ItemGroup>
