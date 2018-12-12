@@ -458,10 +458,6 @@ void BindGLUniformBlocksToBuffers() {
                                                    "model_trans");
   uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer",
                                                "model_trans");
-  uniform_manager.AssignUniformBlockToBindingPoint("postproc", "PostprocInputs",
-                                                   "postproc_input");
-  uniform_manager.BindBufferBaseToBindingPoint("postproc_inputs",
-                                               "postproc_input");
 }
 
 void ConfigGLScenes() {

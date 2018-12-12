@@ -4,13 +4,19 @@ std::string shader::PostprocShader::GetId() const { return "postproc"; }
 
 void shader::PostprocShader::InitUniformBlocks() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  // Initialize buffers
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
+  // Initialize the buffer
   const std::string &buffer_name = GetPostprocInputsBufferName();
   buffer_manager.GenBuffer(buffer_name);
   buffer_manager.InitBuffer(buffer_name, GL_UNIFORM_BUFFER,
                             sizeof(PostprocInputs), NULL, GL_STATIC_DRAW);
   buffer_manager.UpdateBuffer(buffer_name, GL_UNIFORM_BUFFER, 0,
                               sizeof(PostprocInputs), &postproc_inputs_);
+  // Bind the uniform block to the the buffer
+  uniform_manager.AssignUniformBlockToBindingPoint("postproc", "PostprocInputs",
+                                                   "postproc_input");
+  uniform_manager.BindBufferBaseToBindingPoint("postproc_inputs",
+                                               "postproc_input");
 }
 
 void shader::PostprocShader::UpdatePostprocInputs(
