@@ -10,7 +10,7 @@ void GLAPIENTRY GLMessageCallback(const GLenum source, const GLenum type,
                                   const void* userParam);
 
 /*******************************************************************************
- * Public Methods
+ * Tools
  ******************************************************************************/
 
 /**
@@ -74,7 +74,44 @@ void as::EnableCatchingGLError(const bool stop_when_error) {
 }
 
 /*******************************************************************************
- * Private Methods
+ * Window Position and Size
+ ******************************************************************************/
+
+void as::SetGLWindowInitCenterPos(const glm::ivec2& window_pos,
+                                  const glm::ivec2& window_size) {
+  glutInitWindowPosition(window_pos.x - window_size.x / 2,
+                         window_pos.y - window_size.y / 2);
+}
+
+void as::SetGLWindowInitRelativeCenterPos(const glm::vec2& relative_window_pos,
+                                          const glm::ivec2& window_size) {
+  const int screen_width = glutGet(GLUT_SCREEN_WIDTH);
+  const int screen_height = glutGet(GLUT_SCREEN_HEIGHT);
+  if (screen_width <= 0 || screen_height <= 0) {
+    return;
+  }
+  const glm::vec2 window_pos = glm::vec2(relative_window_pos.x * screen_width,
+                                         relative_window_pos.y * screen_height);
+  SetGLWindowInitCenterPos(window_pos, window_size);
+}
+
+void as::SetGLWindowInitSize(const glm::ivec2& window_size) {
+  glutInitWindowSize(window_size.x, window_size.y);
+}
+
+bool as::LimitGLWindowSize(const int width, const int height,
+                           const glm::ivec2& min_window_size,
+                           const glm::ivec2& max_window_size) {
+  const int new_width =
+      std::min(std::max(width, min_window_size.x), max_window_size.x);
+  const int new_height =
+      std::min(std::max(height, min_window_size.y), max_window_size.y);
+  glutReshapeWindow(new_width, new_height);
+  return new_width != width || new_height != height;
+}
+
+/*******************************************************************************
+ * Callbacks
  ******************************************************************************/
 
 void GLAPIENTRY GLMessageCallback(const GLenum source, const GLenum type,

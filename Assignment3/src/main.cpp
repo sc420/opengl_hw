@@ -15,8 +15,10 @@ constexpr auto SKYBOX_SIZE = 1;
 /* Textures */
 constexpr auto NUM_MIPMAP_LEVEL = 5;
 /* User interfaces */
-constexpr auto INIT_WINDOW_WIDTH = 600;
-constexpr auto INIT_WINDOW_HEIGHT = 600;
+static const auto kInitWindowRelativeCenterPos = glm::vec2(0.5f, 0.5f);
+static const auto kInitWindowSize = glm::ivec2(600, 600);
+static const auto kMinWindowSize = glm::ivec2(300, 300);
+static const auto kMaxWindowSize = glm::ivec2(INT32_MAX);
 constexpr auto KEYBOARD_KEY_SIZE = 256;
 constexpr auto CAMERA_MOVING_STEP = 0.2f;
 constexpr auto CAMERA_ROTATION_SENSITIVITY = 0.005f;
@@ -184,8 +186,9 @@ void InitGLUT(int argc, char *argv[]) {
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
   glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
   glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-  // glutInitWindowPosition(100, 100);
-  glutInitWindowSize(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
+  as::SetGLWindowInitRelativeCenterPos(kInitWindowRelativeCenterPos,
+                                       kInitWindowSize);
+  as::SetGLWindowInitSize(kInitWindowSize);
   glutCreateWindow("Assignment 3");
 }
 
@@ -440,8 +443,8 @@ void UpdateScreenRenderbuffers(const GLsizei width, const GLsizei height) {
 void ConfigGLScreens() {
   ConfigScreenVertexArrays();
   ConfigScreenFramebuffers();
-  UpdateScreenTextures(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
-  UpdateScreenRenderbuffers(INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT);
+  UpdateScreenTextures(kInitWindowSize.x, kInitWindowSize.y);
+  UpdateScreenRenderbuffers(kInitWindowSize.x, kInitWindowSize.y);
 }
 
 /*******************************************************************************
@@ -924,6 +927,11 @@ void GLUTDisplayCallback() {
 }
 
 void GLUTReshapeCallback(const int width, const int height) {
+  // Limit the window size
+  if (as::LimitGLWindowSize(width, height, kMinWindowSize, kMaxWindowSize)) {
+    // If the window size has been limited, ignore the new size
+    return;
+  }
   // Save the window size
   window_size = glm::vec2(width, height);
   // Update window aspect ratio

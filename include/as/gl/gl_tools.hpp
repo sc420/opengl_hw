@@ -24,4 +24,17 @@ void PrintGLContextInfo(const bool print_entensions = false,
 
 void EnableCatchingGLError(const bool stop_when_error = false);
 
+void SetGLWindowInitCenterPos(const glm::ivec2 &window_pos,
+                              const glm::ivec2 &window_size);
+
+void SetGLWindowInitRelativeCenterPos(const glm::vec2 &relative_window_pos,
+                                      const glm::ivec2 &window_size);
+
+void SetGLWindowInitSize(const glm::ivec2 &window_size);
+
+bool LimitGLWindowSize(
+    const int width, const int height,
+    const glm::ivec2 &min_window_size = glm::ivec2(0),
+    const glm::ivec2 &max_window_size = glm::ivec2(INT32_MIN));
+
 };  // namespace as
