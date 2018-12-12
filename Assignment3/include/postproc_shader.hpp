@@ -6,5 +6,7 @@ namespace shader {
 class PostprocShader : public app::ShaderApp {
  public:
   std::string GetId() const override;
+
+  void InitUniformBlocks() override;
 };
 }  // namespace shader

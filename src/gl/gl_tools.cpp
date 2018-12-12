@@ -111,6 +111,65 @@ bool as::LimitGLWindowSize(const int width, const int height,
 }
 
 /*******************************************************************************
+ * GL Manager Container
+ ******************************************************************************/
+
+void as::GLManagers::RegisterManagers(BufferManager& buffer_manager,
+                                      FramebufferManager& framebuffer_manager,
+                                      ProgramManager& program_manager,
+                                      ShaderManager& shader_manager,
+                                      TextureManager& texture_manager,
+                                      UniformManager& uniform_manager,
+                                      VertexSpecManager& vertex_spec_manager) {
+  buffer_manager_ = &buffer_manager;
+  framebuffer_manager_ = &framebuffer_manager;
+  program_manager_ = &program_manager;
+  shader_manager_ = &shader_manager;
+  texture_manager_ = &texture_manager;
+  uniform_manager_ = &uniform_manager;
+  vertex_spec_manager_ = &vertex_spec_manager;
+}
+
+void as::GLManagers::Init() {
+  // Initialize managers
+  texture_manager_->Init();
+  // Register managers
+  framebuffer_manager_->RegisterTextureManager(*texture_manager_);
+  program_manager_->RegisterShaderManager(*shader_manager_);
+  uniform_manager_->RegisterProgramManager(*program_manager_);
+  uniform_manager_->RegisterBufferManager(*buffer_manager_);
+  vertex_spec_manager_->RegisterBufferManager(*buffer_manager_);
+}
+
+as::BufferManager& as::GLManagers::GetBufferManager() const {
+  return *buffer_manager_;
+}
+
+as::FramebufferManager& as::GLManagers::GetFramebufferManager() const {
+  return *framebuffer_manager_;
+}
+
+as::ProgramManager& as::GLManagers::GetProgramManager() const {
+  return *program_manager_;
+}
+
+as::ShaderManager& as::GLManagers::GetShaderManager() const {
+  return *shader_manager_;
+}
+
+as::TextureManager& as::GLManagers::GetTextureManager() const {
+  return *texture_manager_;
+}
+
+as::UniformManager& as::GLManagers::GetUniformManager() const {
+  return *uniform_manager_;
+}
+
+as::VertexSpecManager& as::GLManagers::GetVertexSpecManager() const {
+  return *vertex_spec_manager_;
+}
+
+/*******************************************************************************
  * Callbacks
  ******************************************************************************/
 

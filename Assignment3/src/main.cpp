@@ -80,6 +80,8 @@ std::map<std::string, GLuint> texture_unit_idxs;
  * GL Managers
  ******************************************************************************/
 
+as::GLManagers gl_managers;
+
 as::BufferManager buffer_manager;
 as::FramebufferManager framebuffer_manager;
 as::ProgramManager program_manager;
@@ -240,19 +242,14 @@ void ConfigGLSettings() {
 }
 
 void InitGLManagers() {
-  // Initialize managers
-  texture_manager.Init();
-
-  // Register managers
-  framebuffer_manager.RegisterTextureManager(texture_manager);
-  program_manager.RegisterShaderManager(shader_manager);
-  uniform_manager.RegisterProgramManager(program_manager);
-  uniform_manager.RegisterBufferManager(buffer_manager);
-  vertex_spec_manager.RegisterBufferManager(buffer_manager);
+  gl_managers.RegisterManagers(buffer_manager, framebuffer_manager,
+                               program_manager, shader_manager, texture_manager,
+                               uniform_manager, vertex_spec_manager);
+  gl_managers.Init();
 }
 
 void InitShaders() {
-  postproc_shader.RegisterManagers(program_manager, shader_manager);
+  postproc_shader.RegisterGLManagers(gl_managers);
   postproc_shader.Init();
 }
 

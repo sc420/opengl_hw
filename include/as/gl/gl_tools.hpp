@@ -36,4 +36,40 @@ bool LimitGLWindowSize(const int width, const int height,
                        const glm::ivec2 &min_window_size = glm::ivec2(0),
                        const glm::ivec2 &max_window_size = glm::ivec2(INT_MAX));
 
+class GLManagers {
+ public:
+  void RegisterManagers(BufferManager &buffer_manager,
+                        FramebufferManager &framebuffer_manager,
+                        ProgramManager &program_manager,
+                        ShaderManager &shader_manager,
+                        TextureManager &texture_manager,
+                        UniformManager &uniform_manager,
+                        VertexSpecManager &vertex_spec_manager);
+
+  void Init();
+
+  BufferManager &GetBufferManager() const;
+
+  FramebufferManager &GetFramebufferManager() const;
+
+  ProgramManager &GetProgramManager() const;
+
+  ShaderManager &GetShaderManager() const;
+
+  TextureManager &GetTextureManager() const;
+
+  UniformManager &GetUniformManager() const;
+
+  VertexSpecManager &GetVertexSpecManager() const;
+
+ private:
+  BufferManager *buffer_manager_;
+  FramebufferManager *framebuffer_manager_;
+  ProgramManager *program_manager_;
+  ShaderManager *shader_manager_;
+  TextureManager *texture_manager_;
+  UniformManager *uniform_manager_;
+  VertexSpecManager *vertex_spec_manager_;
+};
+
 };  // namespace as
