@@ -133,6 +133,7 @@ void as::GLManagers::RegisterManagers(BufferManager& buffer_manager,
 void as::GLManagers::Init() {
   // Initialize managers
   texture_manager_->Init();
+  uniform_manager_->Init();
   // Register managers
   framebuffer_manager_->RegisterTextureManager(*texture_manager_);
   program_manager_->RegisterShaderManager(*shader_manager_);

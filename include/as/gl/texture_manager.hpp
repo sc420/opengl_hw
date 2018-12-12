@@ -96,5 +96,7 @@ class TextureManager {
       const std::string &tex_name) const;
 
   void GetLimits();
+
+  void CheckUnitIndex(const GLuint unit_idx) const;
 };
 }  // namespace as

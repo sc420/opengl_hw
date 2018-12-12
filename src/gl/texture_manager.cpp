@@ -22,11 +22,7 @@ void as::TextureManager::BindTexture(const std::string &tex_name,
                                      const GLuint unit_idx) {
   const GLuint tex_hdlr = GetTextureHdlr(tex_name);
   // Check the unit index
-  if (unit_idx >= max_combined_texture_image_units_) {
-    throw std::runtime_error(
-        "Unit index '" + std::to_string(unit_idx) + "' exceeds the limit '" +
-        std::to_string(max_combined_texture_image_units_) + "'");
-  }
+  CheckUnitIndex(unit_idx);
   // Select the texture unit
   glActiveTexture(GL_TEXTURE0 + unit_idx);
   // Bind the texture
@@ -189,4 +185,12 @@ void as::TextureManager::GetLimits() {
   GLint value;
   glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &value);
   max_combined_texture_image_units_ = static_cast<GLuint>(value);
+}
+
+void as::TextureManager::CheckUnitIndex(const GLuint unit_idx) const {
+  if (unit_idx >= max_combined_texture_image_units_) {
+    throw std::runtime_error(
+        "Unit index '" + std::to_string(unit_idx) + "' exceeds the limit '" +
+        std::to_string(max_combined_texture_image_units_) + "'");
+  }
 }

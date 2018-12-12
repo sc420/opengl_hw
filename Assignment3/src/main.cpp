@@ -450,18 +450,18 @@ void UpdateGLBuffers() {
 }
 
 void BindGLUniformBlocksToBuffers() {
-  // Global MVP
-  uniform_manager.AssignUniformBlockToBindingPoint("scene", "GlobalMvp", 0);
-  uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer", 0);
-  // Model transformation
-  uniform_manager.AssignUniformBlockToBindingPoint("scene", "ModelTrans", 1);
-  uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
-  // Post-processing inputs
+  uniform_manager.AssignUniformBlockToBindingPoint("scene", "GlobalMvp",
+                                                   "global_mvp");
+  uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer",
+                                               "global_mvp");
+  uniform_manager.AssignUniformBlockToBindingPoint("scene", "ModelTrans",
+                                                   "model_trans");
+  uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer",
+                                               "model_trans");
   uniform_manager.AssignUniformBlockToBindingPoint("postproc", "PostprocInputs",
-                                                   2);
-  uniform_manager.BindBufferBaseToBindingPoint(
-      "postproc_inputs",
-      2);  // TODO: Use a centralized manager
+                                                   "postproc_input");
+  uniform_manager.BindBufferBaseToBindingPoint("postproc_inputs",
+                                               "postproc_input");
 }
 
 void ConfigGLScenes() {
