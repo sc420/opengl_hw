@@ -51,12 +51,6 @@ enum Effects {
   kEffectSpecial,
 };
 
-// Current scene
-int cur_scene_idx = 0;
-
-// Current skybox
-int cur_skybox_idx = 0;
-
 // Current mode
 Modes cur_mode = Modes::comparison;
 
@@ -208,13 +202,9 @@ void LoadModels() {
  * GL Manager Name Handlers
  ******************************************************************************/
 
-std::string GetSceneGroupName(const size_t scene_idx) {
-  return "scene" + std::to_string(scene_idx);
-}
+std::string GetSceneGroupName() { return "scene"; }
 
-std::string GetSkyboxGroupName(const size_t scene_idx) {
-  return "skybox" + std::to_string(scene_idx);
-}
+std::string GetSkyboxGroupName() { return "skybox"; }
 
 std::string GetMeshVAName(const std::string &group_name,
                           const size_t mesh_idx) {
@@ -571,7 +561,7 @@ void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
 }
 
 void ConfigSceneBuffers() {
-  const std::string group_name = GetSceneGroupName(0);
+  const std::string group_name = GetSceneGroupName();
   ConfigModelBuffers(scene_model, group_name);
 }
 
@@ -617,7 +607,7 @@ void ConfigSceneTextures() {
 }
 
 void ConfigSkyboxBuffers() {
-  const std::string group_name = GetSkyboxGroupName(0);
+  const std::string group_name = GetSkyboxGroupName();
   ConfigModelBuffers(skybox_model, group_name);
 }
 
@@ -803,14 +793,14 @@ void DrawMeshes(const std::string &program_name, const std::string &group_name,
 
 void DrawScenes() {
   program_manager.UseProgram("scene");
-  const std::string scene_group_name = GetSceneGroupName(cur_scene_idx);
+  const std::string scene_group_name = GetSceneGroupName();
   const std::vector<as::Mesh> scene_meshes = scene_model.GetMeshes();
   DrawMeshes("scene", scene_group_name, scene_meshes);
 }
 
 void DrawSkyboxes() {
   program_manager.UseProgram("skybox");
-  const std::string skybox_group_name = GetSkyboxGroupName(cur_skybox_idx);
+  const std::string skybox_group_name = GetSkyboxGroupName();
   const std::vector<as::Mesh> skybox_meshes = skybox_model.GetMeshes();
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
 }
