@@ -110,18 +110,14 @@ struct ModelTrans {
   glm::mat4 trans;
 };
 
-// Comparison bar declaration
-struct ComparisonBar {
+// Post-processing inputs
+struct PostprocInputs {
   // Use int[2] instead of bool to avoid alignment mismatch problem (OpenGL
   // will pad the memory for alignment, but C++ sizeof() won't)
   int enabled[2];
   glm::vec2 mouse_pos;
-};
-
-// Post-processing inputs
-struct PostprocInputs {
-  int effect_idx[2];
   glm::vec2 window_size;
+  int effect_idx[2];
   int pass_idx[2];
   int time[2];
 };
@@ -131,9 +127,6 @@ GlobalMvp global_mvp;
 
 // Model transformations
 ModelTrans model_trans;
-
-// Comparison bar
-ComparisonBar comparison_bar;
 
 // Post-processing inputs
 PostprocInputs postproc_inputs;
@@ -460,9 +453,6 @@ void CreateGLBuffers() {
   buffer_manager.GenBuffer("global_mvp_buffer");
   // Model transformation
   buffer_manager.GenBuffer("model_trans_buffer");
-
-  // Comparison bar
-  buffer_manager.GenBuffer("comparison_bar_buffer");
   // Post-processing inputs
   buffer_manager.GenBuffer("postproc_inputs_buffer");
 }
@@ -474,10 +464,6 @@ void InitGLBuffers() {
   // Model transformation
   buffer_manager.InitBuffer("model_trans_buffer", GL_UNIFORM_BUFFER,
                             sizeof(ModelTrans), NULL, GL_STATIC_DRAW);
-
-  // Comparison bar
-  buffer_manager.InitBuffer("comparison_bar_buffer", GL_UNIFORM_BUFFER,
-                            sizeof(ComparisonBar), NULL, GL_STATIC_DRAW);
   // Post-processing inputs
   buffer_manager.InitBuffer("postproc_inputs_buffer", GL_UNIFORM_BUFFER,
                             sizeof(PostprocInputs), NULL, GL_STATIC_DRAW);
@@ -490,10 +476,6 @@ void UpdateGLBuffers() {
   // Model transformation
   buffer_manager.UpdateBuffer("model_trans_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(ModelTrans), &model_trans);
-
-  // Comparison bar
-  buffer_manager.UpdateBuffer("comparison_bar_buffer", GL_UNIFORM_BUFFER, 0,
-                              sizeof(ComparisonBar), &comparison_bar);
   // Post-processing inputs
   buffer_manager.UpdateBuffer("postproc_inputs_buffer", GL_UNIFORM_BUFFER, 0,
                               sizeof(PostprocInputs), &postproc_inputs);
@@ -506,11 +488,6 @@ void BindGLUniformBlocksToBuffers() {
   // Model transformation
   uniform_manager.AssignUniformBlockToBindingPoint("scene", "ModelTrans", 1);
   uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer", 1);
-
-  // Comparison bar
-  uniform_manager.AssignUniformBlockToBindingPoint("postproc", "ComparisonBar",
-                                                   2);
-  uniform_manager.BindBufferBaseToBindingPoint("comparison_bar_buffer", 2);
   // Post-processing inputs
   uniform_manager.AssignUniformBlockToBindingPoint("postproc", "PostprocInputs",
                                                    3);
@@ -751,15 +728,12 @@ void UpdateGlobalMvp() {
   global_mvp.model = identity;
 }
 
-void UpdateComparisonBar() {
-  comparison_bar.enabled[0] =
-      (cur_mode == Modes::comparison && mouse_left_down);
-  comparison_bar.mouse_pos = mouse_pos;
-}
-
 void UpdatePostprocInputs() {
-  postproc_inputs.effect_idx[0] = cur_effect_idx;
+  postproc_inputs.enabled[0] =
+      (cur_mode == Modes::comparison && mouse_left_down);
+  postproc_inputs.mouse_pos = mouse_pos;
   postproc_inputs.window_size = window_size;
+  postproc_inputs.effect_idx[0] = cur_effect_idx;
   postproc_inputs.pass_idx[0] = cur_pass_idx;
   postproc_inputs.time[0] = timer_cnt;
 }
@@ -784,11 +758,6 @@ void UpdateModelTransBuffer() {
   buffer_manager.UpdateBuffer("model_trans_buffer");
 }
 
-void UpdateComparisonBarBuffer() {
-  UpdateComparisonBar();
-  buffer_manager.UpdateBuffer("comparison_bar_buffer");
-}
-
 void UpdatePostprocInputsBuffer() {
   UpdatePostprocInputs();
   buffer_manager.UpdateBuffer("postproc_inputs_buffer");
@@ -797,8 +766,6 @@ void UpdatePostprocInputsBuffer() {
 void UpdateGLStateBuffers() {
   UpdateGlobalMvpBuffer();
   UpdateModelTransBuffer();
-
-  UpdateComparisonBarBuffer();
   UpdatePostprocInputsBuffer();
 }
 

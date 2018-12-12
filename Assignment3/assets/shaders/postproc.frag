@@ -31,17 +31,12 @@ const vec4 kErrorColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
  * Uniform Blocks
  ******************************************************************************/
 
-/* Comparison bar */
-uniform ComparisonBar {
-  int enabled[2];
-  vec2 mouse_pos;
-}
-comparison_bar;
-
 /* Post-processing inputs */
 uniform PostprocInputs {
-  int effect_idx[2];
+  int enabled[2];
+  vec2 mouse_pos;
   vec2 window_size;
+  int effect_idx[2];
   int pass_idx[2];
   int time[2];
 }
@@ -72,11 +67,11 @@ layout(location = 0) out vec4 fs_color;
  ******************************************************************************/
 
 int CalcDisplayMode() {
-  if (comparison_bar.enabled[0] == 0) {
+  if (postproc_inputs.enabled[0] == 0) {
     return kDisplayModeOriginal;
   }
   const int effect_idx = postproc_inputs.effect_idx[0];
-  const vec2 mouse_pos = comparison_bar.mouse_pos;
+  const vec2 mouse_pos = postproc_inputs.mouse_pos;
   const vec2 window_size = postproc_inputs.window_size;
   const vec2 reversed_mouse_pos =
       vec2(mouse_pos.x, window_size.y - mouse_pos.y);
@@ -342,7 +337,7 @@ vec4 CalcBloomEffect() {
 vec4 CalcMagnifier() {
   const float kMagnifyFactor = 2.0f;
 
-  const vec2 mouse_pos = comparison_bar.mouse_pos;
+  const vec2 mouse_pos = postproc_inputs.mouse_pos;
   const vec2 window_size = postproc_inputs.window_size;
   const vec2 center =
       vec2(mouse_pos.x, window_size.y - mouse_pos.y) / window_size;
@@ -511,7 +506,7 @@ vec4 ShampainGlitch01(vec2 fragCoord) {
   vec4 fragColor;
   const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
   const float iTime = postproc_inputs.time[0] / 100.0f;
-  const vec4 iMouse = vec4(comparison_bar.mouse_pos, 0.0f, 0.0f);
+  const vec4 iMouse = vec4(postproc_inputs.mouse_pos, 0.0f, 0.0f);
 
   float THRESHOLD = 0.1f + abs(sin(iTime)) * 0.5f;
   float time_s = mod(iTime, 32.0);
