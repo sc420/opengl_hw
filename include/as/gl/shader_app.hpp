@@ -1,6 +1,7 @@
 #pragma once
 
 #include "as/gl/gl_tools.hpp"
+#include "as/model/model.hpp"
 
 namespace app {
 enum class ShaderTypes { kVertex, kFragment };
@@ -11,22 +12,33 @@ class ShaderApp {
 
   void RegisterGLManagers(as::GLManagers &gl_managers);
 
-  void Init();
-
-  virtual void InitUniformBlocks() = 0;
+  virtual void Init();
 
   template <class T>
   void InitUniformBuffer(const std::string &buffer_name, const T &buffer_data);
 
+  void SetVertexArray(const as::Model &model,
+                      const GLuint start_attrib_idx = 0);
+
   /* GL drawing methods */
 
-  void Use() const;
+  virtual void Use() const;
+
+  virtual void UseMesh(const size_t mesh_idx) const;
+
+  virtual void Draw() = 0;
 
   /* Name management */
 
   virtual std::string GetId() const = 0;
 
   std::string GetProgramName() const;
+
+  std::string GetMeshVertexArrayName(const size_t mesh_idx) const;
+
+  std::string GetMeshVertexArrayBufferName(const size_t mesh_idx) const;
+
+  std::string GetMeshVertexArrayIdxsBufferName(const size_t mesh_idx) const;
 
  protected:
   as::GLManagers *gl_managers_;

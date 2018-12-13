@@ -15,13 +15,25 @@ class SceneShader : public app::ShaderApp {
     glm::mat4 trans;
   };
 
-  std::string GetId() const override;
+  /* GL initialization methods */
 
-  void InitUniformBlocks() override;
+  void Init() override;
+
+  void InitUniformBlocks();
+
+  /* GL drawing methods */
+
+  void Draw() override;
+
+  /* State updating methods */
 
   void UpdateGlobalMvp(const GlobalMvp &global_mvp);
 
   void UpdateModelTrans(const ModelTrans &model_trans);
+
+  /* Name management */
+
+  std::string GetId() const override;
 
  protected:
   std::string GetGlobalMvpBufferName() const;

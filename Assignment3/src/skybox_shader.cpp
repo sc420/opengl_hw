@@ -1,6 +1,13 @@
 #include "skybox_shader.hpp"
 
-std::string shader::SkyboxShader::GetId() const { return "skybox"; }
+/*******************************************************************************
+ * GL Initialization Methods
+ ******************************************************************************/
+
+void shader::SkyboxShader::Init() {
+  app::ShaderApp::Init();
+  InitUniformBlocks();
+}
 
 void shader::SkyboxShader::InitUniformBlocks() {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
@@ -14,3 +21,9 @@ void shader::SkyboxShader::InitUniformBlocks() {
   uniform_manager.AssignUniformBlockToBindingPoint(
       program_name, global_mvp_uniform_block_name, global_mvp_binding_name);
 }
+
+/*******************************************************************************
+ * Name Management
+ ******************************************************************************/
+
+std::string shader::SkyboxShader::GetId() const { return "skybox"; }

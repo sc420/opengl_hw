@@ -99,15 +99,15 @@ void as::SetGLWindowInitSize(const glm::ivec2& window_size) {
   glutInitWindowSize(window_size.x, window_size.y);
 }
 
-bool as::LimitGLWindowSize(const int width, const int height,
+bool as::LimitGLWindowSize(const glm::ivec2& window_size,
                            const glm::ivec2& min_window_size,
                            const glm::ivec2& max_window_size) {
   const int new_width =
-      std::min(std::max(width, min_window_size.x), max_window_size.x);
+      std::min(std::max(window_size.x, min_window_size.x), max_window_size.x);
   const int new_height =
-      std::min(std::max(height, min_window_size.y), max_window_size.y);
+      std::min(std::max(window_size.y, min_window_size.y), max_window_size.y);
   glutReshapeWindow(new_width, new_height);
-  return new_width != width || new_height != height;
+  return new_width != window_size.x || new_height != window_size.y;
 }
 
 /*******************************************************************************

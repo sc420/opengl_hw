@@ -13,7 +13,69 @@ void app::ShaderApp::RegisterGLManagers(as::GLManagers& gl_managers) {
 void app::ShaderApp::Init() {
   CreateShaders();
   CreatePrograms();
-  InitUniformBlocks();
+}
+
+void app::ShaderApp::SetVertexArray(const as::Model& model,
+                                    const GLuint start_attrib_idx) {
+  as::BufferManager& buffer_manager = gl_managers_->GetBufferManager();
+  as::VertexSpecManager& vertex_spec_manager =
+      gl_managers_->GetVertexSpecManager();
+  const std::vector<as::Mesh>& meshes = model.GetMeshes();
+  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+    const as::Mesh& mesh = meshes.at(mesh_idx);
+    // Get names
+    const std::string& va_name = GetMeshVertexArrayName(mesh_idx);
+    const std::string& buffer_name = GetMeshVertexArrayBufferName(mesh_idx);
+    const std::string& idxs_buffer_name =
+        GetMeshVertexArrayIdxsBufferName(mesh_idx);
+    // Get mesh data
+    const std::vector<as::Vertex>& vertices = mesh.GetVertices();
+    const std::vector<size_t>& idxs = mesh.GetIdxs();
+    // Get memory size of mesh data
+    const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
+    const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
+    /* Generate buffers */
+    // VA
+    buffer_manager.GenBuffer(buffer_name);
+    // VA indexes
+    buffer_manager.GenBuffer(idxs_buffer_name);
+    /* Initialize buffers */
+    // VA
+    buffer_manager.InitBuffer(buffer_name, GL_ARRAY_BUFFER, vertices_mem_sz,
+                              NULL, GL_STATIC_DRAW);
+    // VA indexes
+    buffer_manager.InitBuffer(idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
+                              idxs_mem_sz, NULL, GL_STATIC_DRAW);
+    /* Update buffers */
+    // VA
+    buffer_manager.UpdateBuffer(buffer_name, GL_ARRAY_BUFFER, 0,
+                                vertices_mem_sz, vertices.data());
+    // VA indexes
+    buffer_manager.UpdateBuffer(idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER, 0,
+                                idxs_mem_sz, idxs.data());
+    /* Create vertex arrays */
+    // VA
+    vertex_spec_manager.GenVertexArray(va_name);
+    /* Bind vertex arrays to buffers */
+    // VA
+    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, start_attrib_idx + 0, 3,
+                                              GL_FLOAT, GL_FALSE, 0);
+    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, start_attrib_idx + 1, 3,
+                                              GL_FLOAT, GL_FALSE, 0);
+    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, start_attrib_idx + 2, 2,
+                                              GL_FLOAT, GL_FALSE, 0);
+    vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 0, 0);
+    vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 1, 1);
+    vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 2, 2);
+    vertex_spec_manager.BindBufferToBindingPoint(
+        va_name, buffer_name, 0, offsetof(as::Vertex, pos), sizeof(as::Vertex));
+    vertex_spec_manager.BindBufferToBindingPoint(va_name, buffer_name, 1,
+                                                 offsetof(as::Vertex, normal),
+                                                 sizeof(as::Vertex));
+    vertex_spec_manager.BindBufferToBindingPoint(
+        va_name, buffer_name, 2, offsetof(as::Vertex, tex_coords),
+        sizeof(as::Vertex));
+  }
 }
 
 /*******************************************************************************
@@ -21,9 +83,29 @@ void app::ShaderApp::Init() {
  ******************************************************************************/
 
 void app::ShaderApp::Use() const {
+  // Get managers
   const as::ProgramManager& program_manager = gl_managers_->GetProgramManager();
+  // Get names
   const std::string& program_name = GetProgramName();
+  // Use the program
   program_manager.UseProgram(program_name);
+}
+
+void app::ShaderApp::UseMesh(const size_t mesh_idx) const {
+  // Get managers
+  as::BufferManager& buffer_manager = gl_managers_->GetBufferManager();
+  const as::VertexSpecManager& vertex_spec_manager =
+      gl_managers_->GetVertexSpecManager();
+  // Get names
+  const std::string& va_name = GetMeshVertexArrayName(mesh_idx);
+  const std::string& buffer_name = GetMeshVertexArrayBufferName(mesh_idx);
+  const std::string& idxs_buffer_name =
+      GetMeshVertexArrayIdxsBufferName(mesh_idx);
+  // Use the vertex array
+  vertex_spec_manager.BindVertexArray(va_name);
+  // Use the buffers
+  buffer_manager.BindBuffer(buffer_name);
+  buffer_manager.BindBuffer(idxs_buffer_name);
 }
 
 /*******************************************************************************
@@ -31,6 +113,21 @@ void app::ShaderApp::Use() const {
  ******************************************************************************/
 
 std::string app::ShaderApp::GetProgramName() const { return GetId(); }
+
+std::string app::ShaderApp::GetMeshVertexArrayName(
+    const size_t mesh_idx) const {
+  return GetProgramName() + "/mesh[" + std::to_string(mesh_idx) + "]";
+}
+
+std::string app::ShaderApp::GetMeshVertexArrayBufferName(
+    const size_t mesh_idx) const {
+  return GetProgramName() + "/va[" + std::to_string(mesh_idx) + "]";
+}
+
+std::string app::ShaderApp::GetMeshVertexArrayIdxsBufferName(
+    const size_t mesh_idx) const {
+  return GetProgramName() + "/va_idxs[" + std::to_string(mesh_idx) + "]";
+}
 
 /*******************************************************************************
  * GL Initialization Methods (Private)

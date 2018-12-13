@@ -7,9 +7,15 @@
 namespace shader {
 class SkyboxShader : public SceneShader {
  public:
-  std::string GetId() const override;
+  /* GL initialization methods */
 
-  void InitUniformBlocks() override;
+  void Init() override;
+
+  void InitUniformBlocks();
+
+  /* Name management */
+
+  std::string GetId() const override;
 
  private:
 };

@@ -1,6 +1,13 @@
 #include "scene_shader.hpp"
 
-std::string shader::SceneShader::GetId() const { return "scene"; }
+/*******************************************************************************
+ * GL Initialization Methods
+ ******************************************************************************/
+
+void shader::SceneShader::Init() {
+  app::ShaderApp::Init();
+  InitUniformBlocks();
+}
 
 void shader::SceneShader::InitUniformBlocks() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
@@ -30,6 +37,16 @@ void shader::SceneShader::InitUniformBlocks() {
                                                model_trans_binding_name);
 }
 
+/*******************************************************************************
+ * GL Drawing Methods
+ ******************************************************************************/
+
+void shader::SceneShader::Draw() {}
+
+/*******************************************************************************
+ * State Updating Methods
+ ******************************************************************************/
+
 void shader::SceneShader::UpdateGlobalMvp(const GlobalMvp &global_mvp) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Get names
@@ -48,6 +65,16 @@ void shader::SceneShader::UpdateModelTrans(const ModelTrans &model_trans) {
   const std::string &buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }
+
+/*******************************************************************************
+ * Name Management
+ ******************************************************************************/
+
+std::string shader::SceneShader::GetId() const { return "scene"; }
+
+/*******************************************************************************
+ * Name Management (Protected)
+ ******************************************************************************/
 
 std::string shader::SceneShader::GetGlobalMvpBufferName() const {
   return "global_mvp";

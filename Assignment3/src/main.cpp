@@ -30,8 +30,6 @@ static const auto kTimerInterval = 10;
  * Models
  ******************************************************************************/
 
-// Screen quad
-as::Model screen_quad_model;
 // Scenes
 as::Model scene_model;
 // Skyboxes
@@ -44,23 +42,8 @@ as::Model skybox_model;
 // Modes
 enum class Modes { comparison, navigation };
 
-// Effects
-enum Effects {
-  kEffectImgAbs,
-  kEffectLaplacian,
-  kEffectSharpness,
-  kEffectPixelation,
-  kEffectBloomEffect,
-  kEffectMagnifier,
-  kEffectSpecial,
-};
-
 // Current mode
 Modes cur_mode = Modes::comparison;
-
-// Current effects
-int cur_effect_idx = Effects::kEffectImgAbs;
-int cur_pass_idx = 0;
 
 /*******************************************************************************
  * Camera States
@@ -98,7 +81,6 @@ shader::SkyboxShader skybox_shader;
  ******************************************************************************/
 
 /* Window states */
-glm::vec2 window_size;
 bool window_closed = false;
 float window_aspect_ratio;
 
@@ -108,7 +90,6 @@ bool pressed_keys[kNumKeyboardKeys] = {false};
 /* Mouse states */
 bool mouse_left_down = false;
 glm::vec2 mouse_left_down_init_pos;
-glm::vec2 mouse_pos;
 
 /*******************************************************************************
  * Timers
@@ -164,11 +145,8 @@ void InitGLUT(int argc, char *argv[]) {
  ******************************************************************************/
 
 void LoadModels() {
-  const unsigned int screen_quad_flags = 0;
   const unsigned int scene_flags =
       aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate;
-  // Screen quad
-  screen_quad_model.LoadFile("assets/models/quad/quad.obj", screen_quad_flags);
   // Scene
   scene_model.LoadFile("assets/models/crytek-sponza/sponza.obj", scene_flags);
   // Skybox
@@ -231,87 +209,10 @@ void InitShaders() {
  * GL Context Configuration / Screens
  ******************************************************************************/
 
-void ConfigScreenVertexArrays() {
-  const std::vector<as::Mesh> meshes = screen_quad_model.GetMeshes();
-  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
-    // There should be only one mesh
-    assert(mesh_idx <= 0);
-
-    const as::Mesh &mesh = meshes.at(mesh_idx);
-    // Decide the names
-    const std::string va_name = "screen_va";
-    const std::string buffer_name = "screen_buffer";
-    const std::string idxs_buffer_name = "screen_idxs_buffer";
-    // Get mesh data
-    const std::vector<as::Vertex> vertices = mesh.GetVertices();
-    const std::vector<size_t> idxs = mesh.GetIdxs();
-    // Get memory size of mesh data
-    const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
-    const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
-
-    /* Generate buffers */
-    // VA
-    buffer_manager.GenBuffer(buffer_name);
-    // VA indexes
-    buffer_manager.GenBuffer(idxs_buffer_name);
-
-    /* Initialize buffers */
-    // VA
-    buffer_manager.InitBuffer(buffer_name, GL_ARRAY_BUFFER, vertices_mem_sz,
-                              NULL, GL_STATIC_DRAW);
-    // VA indexes
-    buffer_manager.InitBuffer(idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
-                              idxs_mem_sz, NULL, GL_STATIC_DRAW);
-
-    /* Update buffers */
-    // VA
-    buffer_manager.UpdateBuffer(buffer_name, GL_ARRAY_BUFFER, 0,
-                                vertices_mem_sz, vertices.data());
-    // VA indexes
-    buffer_manager.UpdateBuffer(idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER, 0,
-                                idxs_mem_sz, idxs.data());
-
-    /* Create vertex arrays */
-    // VA
-    vertex_spec_manager.GenVertexArray(va_name);
-
-    /* Bind vertex arrays to buffers */
-    // VA
-    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 0, 3, GL_FLOAT, GL_FALSE,
-                                              0);
-    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 1, 3, GL_FLOAT, GL_FALSE,
-                                              0);
-    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 2, 2, GL_FLOAT, GL_FALSE,
-                                              0);
-    vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 0, 0);
-    vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 1, 1);
-    vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 2, 2);
-    vertex_spec_manager.BindBufferToBindingPoint(
-        va_name, buffer_name, 0, offsetof(as::Vertex, pos), sizeof(as::Vertex));
-    vertex_spec_manager.BindBufferToBindingPoint(va_name, buffer_name, 1,
-                                                 offsetof(as::Vertex, normal),
-                                                 sizeof(as::Vertex));
-    vertex_spec_manager.BindBufferToBindingPoint(
-        va_name, buffer_name, 2, offsetof(as::Vertex, tex_coords),
-        sizeof(as::Vertex));
-  }
-}
-
-void ConfigScreenFramebuffers() {
-  // Create framebuffers
-  // 1st framebuffer is the original screen
-  // 2nd and 3rd framebuffers are ping pong screen for multi-pass filtering
-  for (int i = 0; i < 3; i++) {
-    framebuffer_manager.GenFramebuffer("screen_framebuffer[" +
-                                       std::to_string(i) + "]");
-  }
-}
-
 void UpdateScreenTextures(const GLsizei width, const GLsizei height) {
   for (int i = 0; i < 3; i++) {
     // Decide the framebuffer name
-    const std::string framebuffer_name =
-        "screen_framebuffer[" + std::to_string(i) + "]";
+    const std::string framebuffer_name = "screen[" + std::to_string(i) + "]";
     // Decide the texture name
     const std::string tex_name = "screen_tex[" + std::to_string(i) + "]";
     // Decide the unit name
@@ -344,8 +245,7 @@ void UpdateScreenTextures(const GLsizei width, const GLsizei height) {
 void UpdateScreenRenderbuffers(const GLsizei width, const GLsizei height) {
   for (int i = 0; i < 3; i++) {
     // Decide the framebuffer name
-    const std::string framebuffer_name =
-        "screen_framebuffer[" + std::to_string(i) + "]";
+    const std::string framebuffer_name = "screen[" + std::to_string(i) + "]";
     // Decide the renderbuffer name
     const std::string renderbuffer_name =
         "screen_depth_renderbuffer[" + std::to_string(i) + "]";
@@ -366,8 +266,6 @@ void UpdateScreenRenderbuffers(const GLsizei width, const GLsizei height) {
 }
 
 void ConfigGLScreens() {
-  ConfigScreenVertexArrays();
-  ConfigScreenFramebuffers();
   UpdateScreenTextures(kInitWindowSize.x, kInitWindowSize.y);
   UpdateScreenRenderbuffers(kInitWindowSize.x, kInitWindowSize.y);
 }
@@ -586,16 +484,8 @@ void UpdateGlobalMvp() {
 }
 
 void UpdatePostprocInputs() {
-  shader::PostprocShader::PostprocInputs postproc_inputs;
-  postproc_inputs.enabled[0] =
-      (cur_mode == Modes::comparison && mouse_left_down);
-  postproc_inputs.mouse_pos = mouse_pos;
-  postproc_inputs.window_size = window_size;
-  postproc_inputs.effect_idx[0] = cur_effect_idx;
-  postproc_inputs.pass_idx[0] = cur_pass_idx;
-  postproc_inputs.time[0] = timer_cnt;
-
-  postproc_shader.UpdatePostprocInputs(postproc_inputs);
+  postproc_shader.UpdateEnabled(cur_mode == Modes::comparison &&
+                                mouse_left_down);
 }
 
 /*******************************************************************************
@@ -617,12 +507,8 @@ void UpdateGLStateBuffers() {
 }
 
 void UseScreenFramebuffer(const int framebuffer_idx) {
-  framebuffer_manager.BindFramebuffer("screen_framebuffer[" +
+  framebuffer_manager.BindFramebuffer("screen[" +
                                       std::to_string(framebuffer_idx) + "]");
-}
-
-void UseDefaultFramebuffer() {
-  framebuffer_manager.BindDefaultFramebuffer(GL_FRAMEBUFFER);
 }
 
 void DrawMeshes(const std::string &program_name, const std::string &group_name,
@@ -675,80 +561,6 @@ void DrawSkyboxes() {
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
 }
 
-void DrawScreenWithTexture(const int screen_tex_idx = 0) {
-  postproc_shader.Use();
-
-  const std::vector<as::Mesh> meshes = screen_quad_model.GetMeshes();
-  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
-    // There should be only one mesh
-    assert(mesh_idx <= 0);
-
-    // Decide the names
-    const std::string va_name = "screen_va";
-    const std::string tex_name =
-        "screen_tex[" + std::to_string(screen_tex_idx) + "]";
-    const std::string buffer_name = "screen_buffer";
-    const std::string idxs_buffer_name = "screen_idxs_buffer";
-    const as::Mesh &mesh = meshes.at(mesh_idx);
-    // Get the array indexes
-    const std::vector<size_t> &idxs = mesh.GetIdxs();
-
-    // Get the unit indexes
-    const GLuint orig_unit_idx = texture_manager.GetUnitIdx("screen_tex[0]");
-    const GLuint multipass_unit_idx1 =
-        texture_manager.GetUnitIdx("screen_tex[1]");
-    const GLuint multipass_unit_idx2 =
-        texture_manager.GetUnitIdx("screen_tex[2]");
-    // Set the texture handlers to the unit indexes
-    uniform_manager.SetUniform1Int("postproc", "screen_tex", orig_unit_idx);
-    uniform_manager.SetUniform1Int("postproc", "multipass_tex1",
-                                   multipass_unit_idx1);
-    uniform_manager.SetUniform1Int("postproc", "multipass_tex2",
-                                   multipass_unit_idx2);
-
-    vertex_spec_manager.BindVertexArray("screen_va");
-    texture_manager.BindTexture(tex_name);
-    buffer_manager.BindBuffer("screen_buffer");
-    buffer_manager.BindBuffer("screen_idxs_buffer");
-    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, 0);
-  }
-}
-
-void DrawScreen() {
-  if (cur_effect_idx == Effects::kEffectBloomEffect) {
-    const int kNumMultipass = 10;
-    /* Draw to framebuffer 1 with texture 0 */
-    // Update the current pass index
-    cur_pass_idx = 0;
-    UpdatePostprocInputs();
-    // Draw to screen framebuffer
-    UseScreenFramebuffer(1);
-    DrawScreenWithTexture(0);
-
-    /* Draw to framebuffer 2(1) with texture 1(2) */
-    for (int i = 1; i < 1 + kNumMultipass * 2; i++) {
-      // Update the current pass index
-      cur_pass_idx = i;
-      UpdatePostprocInputs();
-      // Draw to screen framebuffer
-      const int source_idx = 1 + (i % 2);
-      const int target_idx = 1 + ((i + 1) % 2);
-      UseScreenFramebuffer(target_idx);
-      DrawScreenWithTexture(source_idx);
-    }
-
-    /* Draw to framebuffer 0 with texture 1 */
-    // Update the current pass index
-    cur_pass_idx = 1 + kNumMultipass * 2;
-    UpdatePostprocInputs();
-    // Draw to default framebuffer
-    UseDefaultFramebuffer();
-    DrawScreenWithTexture(1);
-  } else {
-    DrawScreenWithTexture();
-  }
-}
-
 /*******************************************************************************
  * GLUT Callbacks / Display
  ******************************************************************************/
@@ -763,21 +575,18 @@ void GLUTDisplayCallback() {
   DrawScenes();
   DrawSkyboxes();
   // Draw the post-processing effects
-  UseDefaultFramebuffer();
-  as::ClearDepthBuffer();
-  DrawScreen();
+  postproc_shader.Draw();
   // Swap double buffers
   glutSwapBuffers();
 }
 
 void GLUTReshapeCallback(const int width, const int height) {
+  const glm::ivec2 window_size = glm::vec2(width, height);
   // Limit the window size
-  if (as::LimitGLWindowSize(width, height, kMinWindowSize)) {
+  if (as::LimitGLWindowSize(window_size, kMinWindowSize)) {
     // If the window size has been limited, ignore the new size
     return;
   }
-  // Save the window size
-  window_size = glm::vec2(width, height);
   // Update window aspect ratio
   window_aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
   // Set the viewport
@@ -786,6 +595,8 @@ void GLUTReshapeCallback(const int width, const int height) {
   UpdateScreenTextures(width, height);
   // Update screen renderbuffers
   UpdateScreenRenderbuffers(width, height);
+  // Update window size
+  postproc_shader.UpdateWindowSize(window_size);
 }
 
 /*******************************************************************************
@@ -814,18 +625,19 @@ void GLUTSpecialCallback(const int key, const int x, const int y) {}
 
 void GLUTMouseCallback(const int button, const int state, const int x,
                        const int y) {
-  // Save mouse position
-  mouse_pos = glm::vec2(x, y);
+  const glm::vec2 mouse_pos = glm::vec2(x, y);
   // Check which mouse button is clicked
   switch (state) {
     case GLUT_DOWN: {
-      mouse_left_down_init_pos = glm::vec2(x, y);
+      mouse_left_down_init_pos = mouse_pos;
       mouse_left_down = true;
     } break;
     case GLUT_UP: {
       mouse_left_down = false;
     } break;
   }
+  // Update mouse position
+  postproc_shader.UpdateMousePos(mouse_pos);
 }
 
 void GLUTMouseWheelCallback(const int button, const int dir, const int x,
@@ -838,8 +650,7 @@ void GLUTMouseWheelCallback(const int button, const int dir, const int x,
 }
 
 void GLUTMotionCallback(const int x, const int y) {
-  // Save mouse position
-  mouse_pos = glm::vec2(x, y);
+  const glm::vec2 mouse_pos = glm::vec2(x, y);
   // Check whether the left mouse button is down
   if (mouse_left_down) {
     switch (cur_mode) {
@@ -854,6 +665,8 @@ void GLUTMotionCallback(const int x, const int y) {
       default: { throw new std::runtime_error("Unknown mode"); }
     }
   }
+  // Update mouse position
+  postproc_shader.UpdateMousePos(mouse_pos);
 }
 
 void GLUTCloseCallback() { window_closed = true; }
@@ -902,6 +715,9 @@ void GLUTTimerCallback(const int val) {
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();
 
+  // Update timer count
+  postproc_shader.UpdateTime(timer_cnt);
+
   // Register the timer callback again
   if (timer_enabled) {
     glutTimerFunc(kTimerInterval, GLUTTimerCallback, val);
@@ -917,29 +733,31 @@ void GLUTMainMenuCallback(const int id) {
     case MainMenuItems::kMainMidLevelSep: {
     } break;
     case MainMenuItems::kMainImgAbs: {
-      cur_effect_idx = kEffectImgAbs;
+      postproc_shader.UpdateEffectIdx(shader::PostprocShader::kEffectImgAbs);
     } break;
     case MainMenuItems::kMainLaplacian: {
-      cur_effect_idx = kEffectLaplacian;
+      postproc_shader.UpdateEffectIdx(shader::PostprocShader::kEffectLaplacian);
     } break;
     case MainMenuItems::kMainSharpness: {
-      cur_effect_idx = kEffectSharpness;
+      postproc_shader.UpdateEffectIdx(shader::PostprocShader::kEffectSharpness);
     } break;
     case MainMenuItems::kMainPixelation: {
-      cur_effect_idx = kEffectPixelation;
+      postproc_shader.UpdateEffectIdx(
+          shader::PostprocShader::kEffectPixelation);
     } break;
     case MainMenuItems::kMainAdvancedSep: {
     } break;
     case MainMenuItems::kMainBloomEffect: {
-      cur_effect_idx = kEffectBloomEffect;
+      postproc_shader.UpdateEffectIdx(
+          shader::PostprocShader::kEffectBloomEffect);
     } break;
     case MainMenuItems::kMainMagnifier: {
-      cur_effect_idx = kEffectMagnifier;
+      postproc_shader.UpdateEffectIdx(shader::PostprocShader::kEffectMagnifier);
     } break;
     case MainMenuItems::kMainCool: {
     } break;
     case MainMenuItems::kMainSpecial: {
-      cur_effect_idx = kEffectSpecial;
+      postproc_shader.UpdateEffectIdx(shader::PostprocShader::kEffectSpecial);
     } break;
     case MainMenuItems::kMainExit: {
       glutLeaveMainLoop();
