@@ -82,7 +82,7 @@ void app::ShaderApp::SetVertexArray(const as::Model& model,
  * GL Drawing Methods
  ******************************************************************************/
 
-void app::ShaderApp::Use() const {
+void app::ShaderApp::UseProgram() const {
   // Get managers
   const as::ProgramManager& program_manager = gl_managers_->GetProgramManager();
   // Get names

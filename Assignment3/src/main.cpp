@@ -209,65 +209,10 @@ void InitShaders() {
  * GL Context Configuration / Screens
  ******************************************************************************/
 
-void UpdateScreenTextures(const GLsizei width, const GLsizei height) {
-  for (int i = 0; i < 3; i++) {
-    // Decide the framebuffer name
-    const std::string framebuffer_name = "screen[" + std::to_string(i) + "]";
-    // Decide the texture name
-    const std::string tex_name = "screen_tex[" + std::to_string(i) + "]";
-    // Decide the unit name
-    const std::string tex_unit_name = tex_name;
-    // Check whether to delete old texture
-    if (texture_manager.HasTexture(tex_name)) {
-      texture_manager.DeleteTexture(tex_name);
-    }
-    // Generate texture
-    texture_manager.GenTexture(tex_name);
-    // Update texture
-    texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, tex_unit_name);
-    texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 1, GL_RGB8, width,
-                                  height);
-    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                       GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                       GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                       GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                       GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // Attach textures to framebuffers
-    framebuffer_manager.AttachTexture2DToFramebuffer(
-        framebuffer_name, tex_name, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D, 0);
-  }
-}
-
-void UpdateScreenRenderbuffers(const GLsizei width, const GLsizei height) {
-  for (int i = 0; i < 3; i++) {
-    // Decide the framebuffer name
-    const std::string framebuffer_name = "screen[" + std::to_string(i) + "]";
-    // Decide the renderbuffer name
-    const std::string renderbuffer_name =
-        "screen_depth_renderbuffer[" + std::to_string(i) + "]";
-    // Check whether to delete old renderbuffer
-    if (framebuffer_manager.HasRenderbuffer(renderbuffer_name)) {
-      framebuffer_manager.DeleteRenderbuffer(renderbuffer_name);
-    }
-    // Create renderbuffers
-    framebuffer_manager.GenRenderbuffer(renderbuffer_name);
-    // Initialize renderbuffers
-    framebuffer_manager.InitRenderbuffer(renderbuffer_name, GL_RENDERBUFFER,
-                                         GL_DEPTH_COMPONENT, width, height);
-    // Attach renderbuffers to framebuffers
-    framebuffer_manager.AttachRenderbufferToFramebuffer(
-        framebuffer_name, renderbuffer_name, GL_FRAMEBUFFER,
-        GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER);
-  }
-}
-
 void ConfigGLScreens() {
-  UpdateScreenTextures(kInitWindowSize.x, kInitWindowSize.y);
-  UpdateScreenRenderbuffers(kInitWindowSize.x, kInitWindowSize.y);
+  postproc_shader.UpdateScreenTextures(kInitWindowSize.x, kInitWindowSize.y);
+  postproc_shader.UpdateScreenRenderbuffers(kInitWindowSize.x,
+                                            kInitWindowSize.y);
 }
 
 /*******************************************************************************
@@ -548,14 +493,14 @@ void DrawMeshes(const std::string &program_name, const std::string &group_name,
 }
 
 void DrawScenes() {
-  scene_shader.Use();
+  scene_shader.UseProgram();
   const std::string scene_group_name = GetSceneGroupName();
   const std::vector<as::Mesh> scene_meshes = scene_model.GetMeshes();
   DrawMeshes("scene", scene_group_name, scene_meshes);
 }
 
 void DrawSkyboxes() {
-  skybox_shader.Use();
+  skybox_shader.UseProgram();
   const std::string skybox_group_name = GetSkyboxGroupName();
   const std::vector<as::Mesh> skybox_meshes = skybox_model.GetMeshes();
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
@@ -592,9 +537,9 @@ void GLUTReshapeCallback(const int width, const int height) {
   // Set the viewport
   glViewport(0, 0, width, height);
   // Update screen textures
-  UpdateScreenTextures(width, height);
-  // Update screen renderbuffers
-  UpdateScreenRenderbuffers(width, height);
+  postproc_shader.UpdateScreenTextures(width, height);
+  // Update screen depth renderbuffers
+  postproc_shader.UpdateScreenRenderbuffers(width, height);
   // Update window size
   postproc_shader.UpdateWindowSize(window_size);
 }

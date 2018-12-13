@@ -22,7 +22,7 @@ class ShaderApp {
 
   /* GL drawing methods */
 
-  virtual void Use() const;
+  virtual void UseProgram() const;
 
   virtual void UseMesh(const size_t mesh_idx) const;
 

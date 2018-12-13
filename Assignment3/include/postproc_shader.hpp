@@ -40,6 +40,10 @@ class PostprocShader : public app::ShaderApp {
 
   /* GL drawing methods */
 
+  void UpdateScreenTextures(const GLsizei width, const GLsizei height);
+
+  void UpdateScreenRenderbuffers(const GLsizei width, const GLsizei height);
+
   void Draw() override;
 
   void UseDefaultFramebuffer();
@@ -71,6 +75,10 @@ class PostprocShader : public app::ShaderApp {
 
   std::string GetScreenFramebufferName(const int screen_idx) const;
 
+  std::string GetScreenTextureName(const int screen_idx) const;
+
+  std::string GetScreenDepthRenderbufferName(const int screen_idx) const;
+
  private:
   static const int kNumFramebuffers;
   static const int kNumMultipass;
@@ -80,6 +88,8 @@ class PostprocShader : public app::ShaderApp {
   PostprocInputs postproc_inputs_;
 
   /* GL drawing methods */
+
+  void SetTextureUnitIdxs();
 
   void DrawScreenWithTexture(const int tex_idx);
 };

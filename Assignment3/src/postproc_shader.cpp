@@ -55,6 +55,70 @@ void shader::PostprocShader::InitUniformBlocks() {
  * GL Drawing Methods
  ******************************************************************************/
 
+void shader::PostprocShader::UpdateScreenTextures(const GLsizei width,
+                                                  const GLsizei height) {
+  // Get managers
+  as::FramebufferManager &framebuffer_manager =
+      gl_managers_->GetFramebufferManager();
+  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  // Configure textures
+  for (int screen_idx = 0; screen_idx < kNumFramebuffers; screen_idx++) {
+    // Get names
+    const std::string framebuffer_name = GetScreenFramebufferName(screen_idx);
+    const std::string tex_name = GetScreenTextureName(screen_idx);
+    const std::string &tex_unit_name = tex_name;
+    // Check whether to delete old texture
+    if (texture_manager.HasTexture(tex_name)) {
+      texture_manager.DeleteTexture(tex_name);
+    }
+    // Generate texture
+    texture_manager.GenTexture(tex_name);
+    // Update texture
+    texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, tex_unit_name);
+    texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 1, GL_RGB8, width,
+                                  height);
+    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
+                                       GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
+                                       GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
+                                       GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
+                                       GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    // Attach textures to framebuffers
+    framebuffer_manager.AttachTexture2DToFramebuffer(
+        framebuffer_name, tex_name, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D, 0);
+  }
+}
+
+void shader::PostprocShader::UpdateScreenRenderbuffers(const GLsizei width,
+                                                       const GLsizei height) {
+  // Get managers
+  as::FramebufferManager &framebuffer_manager =
+      gl_managers_->GetFramebufferManager();
+  // Configure textures
+  for (int screen_idx = 0; screen_idx < kNumFramebuffers; screen_idx++) {
+    // Get names
+    const std::string framebuffer_name = GetScreenFramebufferName(screen_idx);
+    const std::string renderbuffer_name =
+        GetScreenDepthRenderbufferName(screen_idx);
+    // Check whether to delete old renderbuffer
+    if (framebuffer_manager.HasRenderbuffer(renderbuffer_name)) {
+      framebuffer_manager.DeleteRenderbuffer(renderbuffer_name);
+    }
+    // Create renderbuffers
+    framebuffer_manager.GenRenderbuffer(renderbuffer_name);
+    // Initialize renderbuffers
+    framebuffer_manager.InitRenderbuffer(renderbuffer_name, GL_RENDERBUFFER,
+                                         GL_DEPTH_COMPONENT, width, height);
+    // Attach renderbuffers to framebuffers
+    framebuffer_manager.AttachRenderbufferToFramebuffer(
+        framebuffer_name, renderbuffer_name, GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER);
+  }
+}
+
 void shader::PostprocShader::Draw() {
   // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
@@ -63,11 +127,14 @@ void shader::PostprocShader::Draw() {
   // Get names
   const std::string &buffer_name = GetPostprocInputsBufferName();
   // Use the program
-  Use();
+  UseProgram();
   // Use default framebuffer
-  framebuffer_manager.BindDefaultFramebuffer(GL_FRAMEBUFFER);
+  UseDefaultFramebuffer();
   // Clear the depth buffer
   as::ClearDepthBuffer();
+
+  // Set texture unit indexes
+  SetTextureUnitIdxs();
   // Update the buffer
   buffer_manager.UpdateBuffer(buffer_name);
   // Check whether to enable multi-pass filtering
@@ -168,6 +235,16 @@ std::string shader::PostprocShader::GetScreenFramebufferName(
   return "screen[" + std::to_string(screen_idx) + "]";
 }
 
+std::string shader::PostprocShader::GetScreenTextureName(
+    const int screen_idx) const {
+  return "screen[" + std::to_string(screen_idx) + "]";
+}
+
+std::string shader::PostprocShader::GetScreenDepthRenderbufferName(
+    const int screen_idx) const {
+  return "screen[" + std::to_string(screen_idx) + "]";
+}
+
 /*******************************************************************************
  * Constants (Private)
  ******************************************************************************/
@@ -179,33 +256,41 @@ const int shader::PostprocShader::kNumMultipass = 10;
  * GL Drawing Methods (Private)
  ******************************************************************************/
 
+void shader::PostprocShader::SetTextureUnitIdxs() {
+  // Get managers
+  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
+  // Get names
+  const std::string &program_name = GetProgramName();
+  const std::string &screen_tex1_name = GetScreenTextureName(0);
+  const std::string &screen_tex2_name = GetScreenTextureName(1);
+  const std::string &screen_tex3_name = GetScreenTextureName(2);
+  // Get the unit indexes
+  const GLuint unit_idx1 = texture_manager.GetUnitIdx(screen_tex1_name);
+  const GLuint unit_idx2 = texture_manager.GetUnitIdx(screen_tex2_name);
+  const GLuint unit_idx3 = texture_manager.GetUnitIdx(screen_tex3_name);
+  // Set the texture handlers to the unit indexes
+  uniform_manager.SetUniform1Int(program_name, "screen_tex", unit_idx1);
+  uniform_manager.SetUniform1Int(program_name, "multipass_tex1", unit_idx2);
+  uniform_manager.SetUniform1Int(program_name, "multipass_tex2", unit_idx3);
+}
+
 void shader::PostprocShader::DrawScreenWithTexture(const int tex_idx) {
   // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
-  const std::string tex_name = "screen_tex[" + std::to_string(tex_idx) + "]";
+  const std::string &tex_name = GetScreenTextureName(tex_idx);
   // Get the mesh
   const std::vector<as::Mesh> &meshes = screen_quad_model_.GetMeshes();
   const as::Mesh &mesh = meshes.front();
   // Get the array indexes
   const std::vector<size_t> &idxs = mesh.GetIdxs();
-
-  // Get the unit indexes
-  const GLuint orig_unit_idx = texture_manager.GetUnitIdx("screen_tex[0]");
-  const GLuint multipass_unit_idx1 =
-      texture_manager.GetUnitIdx("screen_tex[1]");
-  const GLuint multipass_unit_idx2 =
-      texture_manager.GetUnitIdx("screen_tex[2]");
-  // Set the texture handlers to the unit indexes
-  uniform_manager.SetUniform1Int("postproc", "screen_tex", orig_unit_idx);
-  uniform_manager.SetUniform1Int("postproc", "multipass_tex1",
-                                 multipass_unit_idx1);
-  uniform_manager.SetUniform1Int("postproc", "multipass_tex2",
-                                 multipass_unit_idx2);
-
+  // Use the first mesh
   UseMesh(0);
+  // Bind the texture
   texture_manager.BindTexture(tex_name);
+  // Draw the mesh
   glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, 0);
 }
