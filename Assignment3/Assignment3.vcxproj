@@ -186,7 +186,6 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\gl\buffer_manager.cpp" />
     <ClCompile Include="..\src\gl\framebuffer_manager.cpp" />
     <ClCompile Include="..\src\gl\gl_tools.cpp" />
-    <ClInclude Include="..\src\gl\index_manager.cpp" />
     <ClCompile Include="..\src\gl\program_manager.cpp" />
     <ClCompile Include="..\src\gl\shader_app.cpp" />
     <ClCompile Include="..\src\gl\shader_manager.cpp" />
