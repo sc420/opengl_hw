@@ -1,6 +1,17 @@
 #include "scene_shader.hpp"
 
 /*******************************************************************************
+ * Model Handlers
+ ******************************************************************************/
+
+void shader::SceneShader::LoadModel() {
+  as::Model &model = GetModel();
+  model.LoadFile(
+      "assets/models/crytek-sponza/sponza.obj",
+      aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate);
+}
+
+/*******************************************************************************
  * GL Initialization Methods
  ******************************************************************************/
 
@@ -12,13 +23,10 @@ void shader::SceneShader::Init() {
   InitTextures();
 }
 
-void shader::SceneShader::LoadModel() {
-  scene_model_.LoadFile(
-      "assets/models/crytek-sponza/sponza.obj",
-      aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate);
+void shader::SceneShader::InitVertexArrays() {
+  const as::Model &model = GetModel();
+  InitVertexArray(model);
 }
-
-void shader::SceneShader::InitVertexArrays() { InitVertexArray(scene_model_); }
 
 void shader::SceneShader::InitUniformBlocks() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
@@ -51,8 +59,10 @@ void shader::SceneShader::InitUniformBlocks() {
 void shader::SceneShader::InitTextures() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  // Get models
+  const as::Model &model = GetModel();
   // Initialize textures in each mesh
-  const std::vector<as::Mesh> &meshes = scene_model_.GetMeshes();
+  const std::vector<as::Mesh> &meshes = model.GetMeshes();
   for (const as::Mesh &mesh : meshes) {
     const std::set<as::Texture> &textures = mesh.GetTextures();
     for (const as::Texture &texture : textures) {
@@ -61,8 +71,8 @@ void shader::SceneShader::InitTextures() {
       if (texture_manager.HasTexture(path)) {
         continue;
       }
-      // Decide the unit name
-      const std::string unit_name = path;
+      // Set names
+      const std::string &unit_name = path;
       // Load the texture
       GLsizei width, height;
       int comp;
@@ -75,7 +85,8 @@ void shader::SceneShader::InitTextures() {
       // Bind the texture
       texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_name);
       // Initialize the texture
-      texture_manager.InitTexture2D(path, GL_TEXTURE_2D, kNumMipmapLevels,
+      const GLsizei num_mipmap_levels = GetNumMipmapLevels();
+      texture_manager.InitTexture2D(path, GL_TEXTURE_2D, num_mipmap_levels,
                                     GL_RGBA8, width, height);
       // Update the texture
       texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
@@ -100,12 +111,14 @@ void shader::SceneShader::Draw() {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &program_name = GetProgramName();
+  // Get models
+  as::Model &model = GetModel();
+  // Get meshes
+  const std::vector<as::Mesh> &meshes = model.GetMeshes();
 
   // Use the program
   UseProgram();
-
   // Draw each mesh with its own texture
-  const std::vector<as::Mesh> &meshes = scene_model_.GetMeshes();
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
     const as::Mesh &mesh = meshes.at(mesh_idx);
     // Get names
@@ -164,10 +177,16 @@ void shader::SceneShader::UpdateModelTrans(const ModelTrans &model_trans) {
 std::string shader::SceneShader::GetId() const { return "scene"; }
 
 /*******************************************************************************
- * Constants (Protected)
+ * Model Handlers (Protected)
  ******************************************************************************/
 
-const GLsizei shader::SceneShader::kNumMipmapLevels = 5;
+as::Model &shader::SceneShader::GetModel() { return scene_model_; }
+
+/*******************************************************************************
+ * GL Initialization Methods (Protected)
+ ******************************************************************************/
+
+GLsizei shader::SceneShader::GetNumMipmapLevels() const { return 5; }
 
 /*******************************************************************************
  * Name Management (Protected)

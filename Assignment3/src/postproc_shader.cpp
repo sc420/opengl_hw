@@ -13,7 +13,8 @@ void shader::PostprocShader::Init() {
 }
 
 void shader::PostprocShader::LoadModel() {
-  screen_quad_model_.LoadFile("assets/models/quad/quad.obj", 0);
+  as::Model &model = GetModel();
+  model.LoadFile("assets/models/quad/quad.obj", 0);
 }
 
 void shader::PostprocShader::InitFramebuffers() {
@@ -30,7 +31,8 @@ void shader::PostprocShader::InitFramebuffers() {
 }
 
 void shader::PostprocShader::InitVertexArrays() {
-  InitVertexArray(screen_quad_model_);
+  const as::Model &model = GetModel();
+  InitVertexArray(model);
 }
 
 void shader::PostprocShader::InitUniformBlocks() {
@@ -220,6 +222,12 @@ void shader::PostprocShader::UpdateTime(const int time) {
 std::string shader::PostprocShader::GetId() const { return "postproc"; }
 
 /*******************************************************************************
+ * Model Handlers (Protected)
+ ******************************************************************************/
+
+as::Model &shader::PostprocShader::GetModel() { return screen_quad_model_; }
+
+/*******************************************************************************
  * Name Management (Protected)
  ******************************************************************************/
 
@@ -283,8 +291,10 @@ void shader::PostprocShader::DrawScreenWithTexture(const int tex_idx) {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &tex_name = GetScreenTextureName(tex_idx);
+  // Get models
+  const as::Model &model = GetModel();
   // Get the mesh
-  const std::vector<as::Mesh> &meshes = screen_quad_model_.GetMeshes();
+  const std::vector<as::Mesh> &meshes = model.GetMeshes();
   const as::Mesh &mesh = meshes.front();
   // Get the array indexes
   const std::vector<size_t> &idxs = mesh.GetIdxs();

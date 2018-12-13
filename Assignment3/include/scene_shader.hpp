@@ -15,11 +15,13 @@ class SceneShader : public Shader {
     glm::mat4 trans;
   };
 
+  /* Model handlers */
+
+  void LoadModel();
+
   /* GL initialization methods */
 
   void Init() override;
-
-  void LoadModel();
 
   void InitVertexArrays();
 
@@ -42,7 +44,15 @@ class SceneShader : public Shader {
   std::string GetId() const override;
 
  protected:
-  static const GLsizei kNumMipmapLevels;
+  /* Model handlers */
+
+  virtual as::Model &GetModel() override;
+
+  /* GL initialization methods */
+
+  GLsizei GetNumMipmapLevels() const;
+
+  /* Name management */
 
   std::string GetGlobalMvpBufferName() const;
 

@@ -15,6 +15,29 @@ void shader::Shader::Init() {
   CreatePrograms();
 }
 
+/*******************************************************************************
+ * GL Drawing Methods
+ ******************************************************************************/
+
+void shader::Shader::UseProgram() const {
+  // Get managers
+  const as::ProgramManager& program_manager = gl_managers_->GetProgramManager();
+  // Get names
+  const std::string& program_name = GetProgramName();
+  // Use the program
+  program_manager.UseProgram(program_name);
+}
+
+/*******************************************************************************
+ * Name Management
+ ******************************************************************************/
+
+std::string shader::Shader::GetProgramName() const { return GetId(); }
+
+/*******************************************************************************
+ * GL Initialization Methods (Protected)
+ ******************************************************************************/
+
 void shader::Shader::InitVertexArray(const as::Model& model) {
   as::BufferManager& buffer_manager = gl_managers_->GetBufferManager();
   as::VertexSpecManager& vertex_spec_manager =
@@ -78,17 +101,8 @@ void shader::Shader::InitVertexArray(const as::Model& model) {
 }
 
 /*******************************************************************************
- * GL Drawing Methods
+ * GL Drawing Methods (Protected)
  ******************************************************************************/
-
-void shader::Shader::UseProgram() const {
-  // Get managers
-  const as::ProgramManager& program_manager = gl_managers_->GetProgramManager();
-  // Get names
-  const std::string& program_name = GetProgramName();
-  // Use the program
-  program_manager.UseProgram(program_name);
-}
 
 void shader::Shader::UseMesh(const size_t mesh_idx) const {
   // Get managers
@@ -108,10 +122,8 @@ void shader::Shader::UseMesh(const size_t mesh_idx) const {
 }
 
 /*******************************************************************************
- * Name Management
+ * Name Management (Protected)
  ******************************************************************************/
-
-std::string shader::Shader::GetProgramName() const { return GetId(); }
 
 std::string shader::Shader::GetMeshVertexArrayName(
     const size_t mesh_idx) const {

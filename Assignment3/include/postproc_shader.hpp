@@ -69,6 +69,12 @@ class PostprocShader : public Shader {
   std::string GetId() const override;
 
  protected:
+  /* Model handlers */
+
+  virtual as::Model &GetModel() override;
+
+  /* Name management */
+
   std::string GetPostprocInputsBufferName() const;
 
   std::string GetPostprocInputsUniformBlockName() const;

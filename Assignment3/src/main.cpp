@@ -141,40 +141,6 @@ void InitGLUT(int argc, char *argv[]) {
 }
 
 /*******************************************************************************
- * Model Handlers
- ******************************************************************************/
-
-void LoadModels() {
-  const unsigned int scene_flags =
-      aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate;
-  // Skybox
-  skybox_model.LoadFile("assets/models/sea/skybox.obj", scene_flags);
-}
-
-/*******************************************************************************
- * GL Manager Name Handlers
- ******************************************************************************/
-
-std::string GetSceneGroupName() { return "scene"; }
-
-std::string GetSkyboxGroupName() { return "skybox"; }
-
-std::string GetMeshVAName(const std::string &group_name,
-                          const size_t mesh_idx) {
-  return "va/" + group_name + "/" + std::to_string(mesh_idx);
-}
-
-std::string GetMeshVABufferName(const std::string &group_name,
-                                const size_t mesh_idx) {
-  return "va_buffer/" + group_name + "/" + std::to_string(mesh_idx);
-}
-
-std::string GetMeshVAIdxsBufferName(const std::string &group_name,
-                                    const size_t mesh_idx) {
-  return "va_idxs/" + group_name + "/" + std::to_string(mesh_idx);
-}
-
-/*******************************************************************************
  * GL Context Configuration / Global
  ******************************************************************************/
 
@@ -217,151 +183,14 @@ void ConfigGLScreens() {
  * GL Context Configuration / Models
  ******************************************************************************/
 
-void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
-  const std::vector<as::Mesh> meshes = model.GetMeshes();
-  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
-    const as::Mesh &mesh = meshes.at(mesh_idx);
-    // Decide the vertex spec name
-    const std::string scene_va_name = GetMeshVAName(group_name, mesh_idx);
-    // Decide the buffer names
-    const std::string scene_buffer_name =
-        GetMeshVABufferName(group_name, mesh_idx);
-    const std::string scene_idxs_buffer_name =
-        GetMeshVAIdxsBufferName(group_name, mesh_idx);
-    // Get mesh data
-    const std::vector<as::Vertex> vertices = mesh.GetVertices();
-    const std::vector<size_t> idxs = mesh.GetIdxs();
-    // Get memory size of mesh data
-    const size_t vertices_mem_sz = mesh.GetVerticesMemSize();
-    const size_t idxs_mem_sz = mesh.GetIdxsMemSize();
-
-    /* Generate buffers */
-    // VA
-    buffer_manager.GenBuffer(scene_buffer_name);
-    // VA indexes
-    buffer_manager.GenBuffer(scene_idxs_buffer_name);
-
-    /* Initialize buffers */
-    // VA
-    buffer_manager.InitBuffer(scene_buffer_name, GL_ARRAY_BUFFER,
-                              vertices_mem_sz, NULL, GL_STATIC_DRAW);
-    // VA indexes
-    buffer_manager.InitBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
-                              idxs_mem_sz, NULL, GL_STATIC_DRAW);
-
-    /* Update buffers */
-    // VA
-    buffer_manager.UpdateBuffer(scene_buffer_name, GL_ARRAY_BUFFER, 0,
-                                vertices_mem_sz, vertices.data());
-    // VA indexes
-    buffer_manager.UpdateBuffer(scene_idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
-                                0, idxs_mem_sz, idxs.data());
-
-    /* Create vertex arrays */
-    // VA
-    vertex_spec_manager.GenVertexArray(scene_va_name);
-
-    /* Bind vertex arrays to buffers */
-    // VA
-    vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 0, 3, GL_FLOAT,
-                                              GL_FALSE, 0);
-    vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 1, 3, GL_FLOAT,
-                                              GL_FALSE, 0);
-    vertex_spec_manager.SpecifyVertexArrayOrg(scene_va_name, 2, 2, GL_FLOAT,
-                                              GL_FALSE, 0);
-    vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 0, 0);
-    vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 1, 1);
-    vertex_spec_manager.AssocVertexAttribToBindingPoint(scene_va_name, 2, 2);
-    vertex_spec_manager.BindBufferToBindingPoint(
-        scene_va_name, scene_buffer_name, 0, offsetof(as::Vertex, pos),
-        sizeof(as::Vertex));
-    vertex_spec_manager.BindBufferToBindingPoint(
-        scene_va_name, scene_buffer_name, 1, offsetof(as::Vertex, normal),
-        sizeof(as::Vertex));
-    vertex_spec_manager.BindBufferToBindingPoint(
-        scene_va_name, scene_buffer_name, 2, offsetof(as::Vertex, tex_coords),
-        sizeof(as::Vertex));
-  }
-}
-
-void ConfigSkyboxBuffers() {
-  const std::string group_name = GetSkyboxGroupName();
-  ConfigModelBuffers(skybox_model, group_name);
-}
-
-void ConfigSkyboxTextures() {
-  static const std::map<std::string, size_t> path_to_target_idx = {
-      {"right.jpg", 0},  {"left.jpg", 1},  {"top.jpg", 2},
-      {"bottom.jpg", 3}, {"front.jpg", 4}, {"back.jpg", 5}};
-  const std::vector<as::Mesh> &meshes = skybox_model.GetMeshes();
-  for (const as::Mesh &mesh : meshes) {
-    const std::set<as::Texture> &textures = mesh.GetTextures();
-    for (const as::Texture &texture : textures) {
-      const std::string &path = texture.GetPath();
-      // Check if the texture has been loaded
-      if (texture_manager.HasTexture(path)) {
-        continue;
-      }
-      // Decide the unit name
-      const std::string unit_name = path;
-      // Get the file name
-      const fs::path fs_path(path);
-      const std::string file_name = fs_path.filename().string();
-      // Calculate the target
-      const size_t target_idx = path_to_target_idx.at(file_name);
-      const GLenum target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + target_idx;
-      // Load the texture
-      GLsizei width, height;
-      int comp;
-      std::vector<GLubyte> texels;
-      as::LoadTextureByStb(path, 0, width, height, comp, texels);
-      // Convert the texels from 3 channels to 4 channels to avoid GL errors
-      texels = as::ConvertDataChannels3To4(texels);
-      // Generate the texture
-      texture_manager.GenTexture(path);
-      // Bind the texture
-      texture_manager.BindTexture(path, GL_TEXTURE_CUBE_MAP, unit_name);
-      // Initialize the texture
-      texture_manager.InitTexture2D(path, GL_TEXTURE_CUBE_MAP, kNumMipmapLevel,
-                                    GL_RGBA8, width, height);
-      // Update the texture
-      texture_manager.UpdateCubeMapTexture2D(path, target, 0, 0, 0, width,
-                                             height, GL_RGBA, GL_UNSIGNED_BYTE,
-                                             texels.data());
-      texture_manager.GenMipmap(path, GL_TEXTURE_CUBE_MAP);
-      texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                         GL_TEXTURE_MIN_FILTER,
-                                         GL_LINEAR_MIPMAP_LINEAR);
-      texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                         GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                         GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                         GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
-                                         GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    }
-  }
-}
-
-void ConfigGLModels() {
-  // Skyboxes
-  ConfigSkyboxBuffers();
-  ConfigSkyboxTextures();
-}
-
 void ConfigGL() {
   /* Configure global contexts */
   as::EnableCatchingGLError();
   ConfigGLSettings();
   InitGLManagers();
   InitShaders();
-  /* Configure program-wise contexts */
-  LoadModels();
   /* Configure screen-wise contexts */
   ConfigGLScreens();
-  /* Configure model-wise contexts */
-  ConfigGLModels();
 }
 
 /*******************************************************************************
@@ -379,6 +208,14 @@ void UpdateGlobalMvp() {
   scene_shader.UpdateGlobalMvp(global_mvp);
 }
 
+void UpdateModelTrans() {
+  shader::SceneShader::ModelTrans model_trans;
+  const float scale_factors = 0.01f;
+  model_trans.trans = glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors));
+
+  scene_shader.UpdateModelTrans(model_trans);
+}
+
 void UpdatePostprocInputs() {
   postproc_shader.UpdateEnabled(cur_mode == Modes::comparison &&
                                 mouse_left_down);
@@ -388,15 +225,7 @@ void UpdatePostprocInputs() {
  * Drawing Methods
  ******************************************************************************/
 
-void UpdateModelTrans() {
-  shader::SceneShader::ModelTrans model_trans;
-  const float scale_factors = 0.01f;
-  model_trans.trans = glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors));
-
-  scene_shader.UpdateModelTrans(model_trans);
-}
-
-void UpdateGLStateBuffers() {
+void UpdateGLStates() {
   UpdateGlobalMvp();
   UpdateModelTrans();
   UpdatePostprocInputs();
@@ -407,62 +236,19 @@ void UseScreenFramebuffer(const int framebuffer_idx) {
                                       std::to_string(framebuffer_idx) + "]");
 }
 
-void DrawMeshes(const std::string &program_name, const std::string &group_name,
-                const std::vector<as::Mesh> &meshes) {
-  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
-    const as::Mesh &mesh = meshes.at(mesh_idx);
-    // Decide the vertex spec name
-    const std::string scene_va_name = GetMeshVAName(group_name, mesh_idx);
-    // Decide the buffer names
-    const std::string scene_buffer_name =
-        GetMeshVABufferName(group_name, mesh_idx);
-    const std::string scene_idxs_buffer_name =
-        GetMeshVAIdxsBufferName(group_name, mesh_idx);
-    // Get the array indexes
-    const std::vector<size_t> &idxs = mesh.GetIdxs();
-    // Get the textures
-    const std::set<as::Texture> &textures = mesh.GetTextures();
-
-    /* Update textures */
-    // TODO: There is only diffuse texture
-    for (const as::Texture &texture : textures) {
-      const std::string &path = texture.GetPath();
-      // Bind the texture
-      texture_manager.BindTexture(path);
-      // Get the unit index
-      const GLuint unit_idx = texture_manager.GetUnitIdx(path);
-      // Set the texture handler to the unit index
-      uniform_manager.SetUniform1Int(program_name, "tex_hdlr", unit_idx);
-    }
-
-    /* Draw vertex arrays */
-    vertex_spec_manager.BindVertexArray(scene_va_name);
-    buffer_manager.BindBuffer(scene_buffer_name);
-    buffer_manager.BindBuffer(scene_idxs_buffer_name);
-    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, 0);
-  }
-}
-
-void DrawSkyboxes() {
-  skybox_shader.UseProgram();
-  const std::string skybox_group_name = GetSkyboxGroupName();
-  const std::vector<as::Mesh> skybox_meshes = skybox_model.GetMeshes();
-  DrawMeshes("skybox", skybox_group_name, skybox_meshes);
-}
-
 /*******************************************************************************
  * GLUT Callbacks / Display
  ******************************************************************************/
 
 void GLUTDisplayCallback() {
   // Update scene-wise contexts
-  UpdateGLStateBuffers();
+  UpdateGLStates();
   // Draw the scenes
   UseScreenFramebuffer(0);
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
   scene_shader.Draw();
-  DrawSkyboxes();
+  skybox_shader.Draw();
   // Draw the post-processing effects
   postproc_shader.Draw();
   // Swap double buffers
