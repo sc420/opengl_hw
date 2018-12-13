@@ -24,25 +24,6 @@ static const auto kCameraZoomingStep = 5.0f;
 static const auto kTimerInterval = 10;
 
 /*******************************************************************************
- * Models
- ******************************************************************************/
-
-// Scenes
-as::Model scene_model;
-// Skyboxes
-as::Model skybox_model;
-
-/*******************************************************************************
- * Model States
- ******************************************************************************/
-
-// Modes
-enum class Modes { comparison, navigation };
-
-// Current mode
-Modes cur_mode = Modes::comparison;
-
-/*******************************************************************************
  * Camera States
  ******************************************************************************/
 
@@ -54,14 +35,6 @@ as::CameraTrans camera_trans(glm::vec3(-12.0f, 2.0f, 0.0f),
 /*******************************************************************************
  * GL Managers
  ******************************************************************************/
-
-as::BufferManager buffer_manager;
-as::FramebufferManager framebuffer_manager;
-as::ProgramManager program_manager;
-as::ShaderManager shader_manager;
-as::TextureManager texture_manager;
-as::UniformManager uniform_manager;
-as::VertexSpecManager vertex_spec_manager;
 
 as::GLManagers gl_managers;
 
@@ -77,6 +50,12 @@ shader::SkyboxShader skybox_shader;
  * User Interface States
  ******************************************************************************/
 
+// Modes
+enum class Modes { comparison, navigation };
+
+// Current mode
+Modes cur_mode = Modes::comparison;
+
 /* Window states */
 bool window_closed = false;
 float window_aspect_ratio;
@@ -88,10 +67,7 @@ bool pressed_keys[kNumKeyboardKeys] = {false};
 bool mouse_left_down = false;
 glm::vec2 mouse_left_down_init_pos;
 
-/*******************************************************************************
- * Timers
- ******************************************************************************/
-
+/* Timer */
 unsigned int timer_cnt = 0;
 bool timer_enabled = true;
 
