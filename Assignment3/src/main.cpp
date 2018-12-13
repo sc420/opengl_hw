@@ -4,6 +4,7 @@
 #include "as/trans/camera.hpp"
 
 #include "postproc_shader.hpp"
+#include "skybox_shader.hpp"
 
 namespace fs = std::experimental::filesystem;
 
@@ -80,8 +81,6 @@ std::map<std::string, GLuint> texture_unit_idxs;
  * GL Managers
  ******************************************************************************/
 
-as::GLManagers gl_managers;
-
 as::BufferManager buffer_manager;
 as::FramebufferManager framebuffer_manager;
 as::ProgramManager program_manager;
@@ -90,11 +89,14 @@ as::TextureManager texture_manager;
 as::UniformManager uniform_manager;
 as::VertexSpecManager vertex_spec_manager;
 
+as::GLManagers gl_managers;
+
 /*******************************************************************************
  * Shaders
  ******************************************************************************/
 
 shader::PostprocShader postproc_shader;
+shader::SkyboxShader skybox_shader;
 
 /*******************************************************************************
  * User Interface States
@@ -237,6 +239,9 @@ void InitGLManagers() {
 }
 
 void InitShaders() {
+  // Skybox
+  skybox_shader.RegisterGLManagers(gl_managers);
+  skybox_shader.Init();
   // Post-processing
   postproc_shader.RegisterGLManagers(gl_managers);
   postproc_shader.Init();
@@ -248,11 +253,6 @@ void CreateGLShaders() {
                               "assets/shaders/scene.vert");
   shader_manager.CreateShader("fragment/scene", GL_FRAGMENT_SHADER,
                               "assets/shaders/scene.frag");
-  // Skyboxes
-  shader_manager.CreateShader("vertex/skybox", GL_VERTEX_SHADER,
-                              "assets/shaders/skybox.vert");
-  shader_manager.CreateShader("fragment/skybox", GL_FRAGMENT_SHADER,
-                              "assets/shaders/skybox.frag");
 }
 
 void CreateGLPrograms() {
@@ -262,12 +262,6 @@ void CreateGLPrograms() {
   program_manager.AttachShader("scene", "fragment/scene");
   program_manager.LinkProgram("scene");
   program_manager.UseProgram("scene");
-  // Skyboxes
-  program_manager.CreateProgram("skybox");
-  program_manager.AttachShader("skybox", "vertex/skybox");
-  program_manager.AttachShader("skybox", "fragment/skybox");
-  program_manager.LinkProgram("skybox");
-  program_manager.UseProgram("skybox");
 }
 
 /*******************************************************************************
