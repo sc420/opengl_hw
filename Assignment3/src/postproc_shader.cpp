@@ -23,7 +23,7 @@ void shader::PostprocShader::InitFramebuffers() {
   // Create framebuffers
   // 1st framebuffer is the original screen
   // 2nd and 3rd framebuffers are ping pong screen for multi-pass filtering
-  for (int screen_idx = 0; screen_idx < 3; screen_idx++) {
+  for (int screen_idx = 0; screen_idx < kNumFramebuffers; screen_idx++) {
     const std::string &name = GetScreenFramebufferName(screen_idx);
     framebuffer_manager.GenFramebuffer(name);
   }
@@ -72,7 +72,6 @@ void shader::PostprocShader::Draw() {
   buffer_manager.UpdateBuffer(buffer_name);
   // Check whether to enable multi-pass filtering
   if (postproc_inputs_.effect_idx[0] == Effects::kEffectBloomEffect) {
-    const int kNumMultipass = 10;
     /* Draw to framebuffer 1 with texture 0 */
     // Update the current pass index
     UpdatePassIdx(0);
@@ -82,7 +81,7 @@ void shader::PostprocShader::Draw() {
     DrawScreenWithTexture(0);
 
     /* Draw to framebuffer 2(1) with texture 1(2) */
-    for (int i = 1; i < 1 + kNumMultipass * 2; i++) {
+    for (int i = 1; i < 1 + 2 * kNumMultipass; i++) {
       // Update the current pass index
       UpdatePassIdx(i);
       buffer_manager.UpdateBuffer(buffer_name);
@@ -95,7 +94,7 @@ void shader::PostprocShader::Draw() {
 
     /* Draw to framebuffer 0 with texture 1 */
     // Update the current pass index
-    UpdatePassIdx(1 + kNumMultipass * 2);
+    UpdatePassIdx(1 + 2 * kNumMultipass);
     buffer_manager.UpdateBuffer(buffer_name);
     // Draw to default framebuffer
     UseDefaultFramebuffer();
@@ -168,6 +167,13 @@ std::string shader::PostprocShader::GetScreenFramebufferName(
     const int screen_idx) const {
   return "screen[" + std::to_string(screen_idx) + "]";
 }
+
+/*******************************************************************************
+ * Constants (Private)
+ ******************************************************************************/
+
+const int shader::PostprocShader::kNumFramebuffers = 3;
+const int shader::PostprocShader::kNumMultipass = 10;
 
 /*******************************************************************************
  * GL Drawing Methods (Private)

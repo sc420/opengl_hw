@@ -72,6 +72,9 @@ class PostprocShader : public app::ShaderApp {
   std::string GetScreenFramebufferName(const int screen_idx) const;
 
  private:
+  static const int kNumFramebuffers;
+  static const int kNumMultipass;
+
   as::Model screen_quad_model_;
 
   PostprocInputs postproc_inputs_;
