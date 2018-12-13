@@ -17,12 +17,16 @@
  ******************************************************************************/
 
 namespace as {
+/* Tools */
+
 void InitGLEW();
 
 void PrintGLContextInfo(const bool print_entensions = false,
                         const bool print_supported_glsl_versions = false);
 
 void EnableCatchingGLError(const bool stop_when_error = false);
+
+/* Window Position and Size */
 
 void SetGLWindowInitCenterPos(const glm::ivec2 &window_pos,
                               const glm::ivec2 &window_size);
@@ -35,6 +39,14 @@ void SetGLWindowInitSize(const glm::ivec2 &window_size);
 bool LimitGLWindowSize(const int width, const int height,
                        const glm::ivec2 &min_window_size = glm::ivec2(0),
                        const glm::ivec2 &max_window_size = glm::ivec2(INT_MAX));
+
+/* Drawing Methods */
+
+void ClearColorBuffer();
+
+void ClearDepthBuffer();
+
+/* GL Manager Container */
 
 class GLManagers {
  public:

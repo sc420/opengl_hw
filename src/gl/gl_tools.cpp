@@ -111,6 +111,14 @@ bool as::LimitGLWindowSize(const int width, const int height,
 }
 
 /*******************************************************************************
+ * Drawing Methods
+ ******************************************************************************/
+
+void as::ClearColorBuffer() { glClear(GL_COLOR_BUFFER_BIT); }
+
+void as::ClearDepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT); }
+
+/*******************************************************************************
  * GL Manager Container
  ******************************************************************************/
 

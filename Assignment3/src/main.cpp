@@ -618,10 +618,6 @@ void UpdatePostprocInputs() {
  * Drawing Methods
  ******************************************************************************/
 
-void ClearColorBuffer() { glClear(GL_COLOR_BUFFER_BIT); }
-
-void ClearDepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT); }
-
 void UpdateModelTrans() {
   shader::SceneShader::ModelTrans model_trans;
   const float scale_factors = 0.01f;
@@ -776,13 +772,13 @@ void GLUTDisplayCallback() {
   UpdateGLStateBuffers();
   // Draw the scenes
   UseScreenFramebuffer(0);
-  ClearColorBuffer();
-  ClearDepthBuffer();
+  as::ClearColorBuffer();
+  as::ClearDepthBuffer();
   DrawScenes();
   DrawSkyboxes();
   // Draw the post-processing effects
   UseDefaultFramebuffer();
-  ClearDepthBuffer();
+  as::ClearDepthBuffer();
   DrawScreen();
   // Swap double buffers
   glutSwapBuffers();
