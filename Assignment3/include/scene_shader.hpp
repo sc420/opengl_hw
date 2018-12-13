@@ -19,7 +19,13 @@ class SceneShader : public app::ShaderApp {
 
   void Init() override;
 
+  void LoadModel();
+
+  void InitVertexArrays();
+
   void InitUniformBlocks();
+
+  void InitTextures();
 
   /* GL drawing methods */
 
@@ -36,6 +42,8 @@ class SceneShader : public app::ShaderApp {
   std::string GetId() const override;
 
  protected:
+  static const GLsizei kNumMipmapLevels;
+
   std::string GetGlobalMvpBufferName() const;
 
   std::string GetModelTransBufferName() const;
@@ -45,6 +53,8 @@ class SceneShader : public app::ShaderApp {
   std::string GetModelTransUniformBlockName() const;
 
  private:
+  as::Model scene_model_;
+
   GlobalMvp global_mvp_;
 
   ModelTrans model_trans_;

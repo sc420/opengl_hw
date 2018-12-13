@@ -30,7 +30,7 @@ void shader::PostprocShader::InitFramebuffers() {
 }
 
 void shader::PostprocShader::InitVertexArrays() {
-  SetVertexArray(screen_quad_model_);
+  InitVertexArray(screen_quad_model_);
 }
 
 void shader::PostprocShader::InitUniformBlocks() {
@@ -126,6 +126,7 @@ void shader::PostprocShader::Draw() {
       gl_managers_->GetFramebufferManager();
   // Get names
   const std::string &buffer_name = GetPostprocInputsBufferName();
+
   // Use the program
   UseProgram();
   // Use default framebuffer

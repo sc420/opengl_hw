@@ -1,6 +1,7 @@
 #pragma once
 
 #include "as/gl/gl_tools.hpp"
+#include "as/model/converter.hpp"
 #include "as/model/model.hpp"
 
 namespace app {
@@ -17,8 +18,7 @@ class ShaderApp {
   template <class T>
   void InitUniformBuffer(const std::string &buffer_name, const T &buffer_data);
 
-  void SetVertexArray(const as::Model &model,
-                      const GLuint start_attrib_idx = 0);
+  void InitVertexArray(const as::Model &model);
 
   /* GL drawing methods */
 

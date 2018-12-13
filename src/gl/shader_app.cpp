@@ -15,8 +15,7 @@ void app::ShaderApp::Init() {
   CreatePrograms();
 }
 
-void app::ShaderApp::SetVertexArray(const as::Model& model,
-                                    const GLuint start_attrib_idx) {
+void app::ShaderApp::InitVertexArray(const as::Model& model) {
   as::BufferManager& buffer_manager = gl_managers_->GetBufferManager();
   as::VertexSpecManager& vertex_spec_manager =
       gl_managers_->GetVertexSpecManager();
@@ -58,12 +57,12 @@ void app::ShaderApp::SetVertexArray(const as::Model& model,
     vertex_spec_manager.GenVertexArray(va_name);
     /* Bind vertex arrays to buffers */
     // VA
-    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, start_attrib_idx + 0, 3,
-                                              GL_FLOAT, GL_FALSE, 0);
-    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, start_attrib_idx + 1, 3,
-                                              GL_FLOAT, GL_FALSE, 0);
-    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, start_attrib_idx + 2, 2,
-                                              GL_FLOAT, GL_FALSE, 0);
+    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 0, 3, GL_FLOAT, GL_FALSE,
+                                              0);
+    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 1, 3, GL_FLOAT, GL_FALSE,
+                                              0);
+    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 2, 2, GL_FLOAT, GL_FALSE,
+                                              0);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 0, 0);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 1, 1);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 2, 2);

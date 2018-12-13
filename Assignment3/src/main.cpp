@@ -147,8 +147,6 @@ void InitGLUT(int argc, char *argv[]) {
 void LoadModels() {
   const unsigned int scene_flags =
       aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate;
-  // Scene
-  scene_model.LoadFile("assets/models/crytek-sponza/sponza.obj", scene_flags);
   // Skybox
   skybox_model.LoadFile("assets/models/sea/skybox.obj", scene_flags);
 }
@@ -286,50 +284,6 @@ void ConfigModelBuffers(const as::Model &model, const std::string &group_name) {
   }
 }
 
-void ConfigSceneBuffers() {
-  const std::string group_name = GetSceneGroupName();
-  ConfigModelBuffers(scene_model, group_name);
-}
-
-void ConfigSceneTextures() {
-  const std::vector<as::Mesh> &meshes = scene_model.GetMeshes();
-  for (const as::Mesh &mesh : meshes) {
-    const std::set<as::Texture> &textures = mesh.GetTextures();
-    for (const as::Texture &texture : textures) {
-      const std::string &path = texture.GetPath();
-      // Check if the texture has been loaded
-      if (texture_manager.HasTexture(path)) {
-        continue;
-      }
-      // Decide the unit name
-      const std::string unit_name = path;
-      // Load the texture
-      GLsizei width, height;
-      int comp;
-      std::vector<GLubyte> texels;
-      as::LoadTextureByStb(path, 0, width, height, comp, texels);
-      // Convert the texels from 3 channels to 4 channels to avoid GL errors
-      texels = as::ConvertDataChannels3To4(texels);
-      // Generate the texture
-      texture_manager.GenTexture(path);
-      // Bind the texture
-      texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_name);
-      // Initialize the texture
-      texture_manager.InitTexture2D(path, GL_TEXTURE_2D, kNumMipmapLevel,
-                                    GL_RGBA8, width, height);
-      // Update the texture
-      texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
-                                      height, GL_RGBA, GL_UNSIGNED_BYTE,
-                                      texels.data());
-      texture_manager.GenMipmap(path, GL_TEXTURE_2D);
-      texture_manager.SetTextureParamInt(
-          path, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
-                                         GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
-  }
-}
-
 void ConfigSkyboxBuffers() {
   const std::string group_name = GetSkyboxGroupName();
   ConfigModelBuffers(skybox_model, group_name);
@@ -391,9 +345,6 @@ void ConfigSkyboxTextures() {
 }
 
 void ConfigGLModels() {
-  // Scenes
-  ConfigSceneBuffers();
-  ConfigSceneTextures();
   // Skyboxes
   ConfigSkyboxBuffers();
   ConfigSkyboxTextures();
@@ -492,13 +443,6 @@ void DrawMeshes(const std::string &program_name, const std::string &group_name,
   }
 }
 
-void DrawScenes() {
-  scene_shader.UseProgram();
-  const std::string scene_group_name = GetSceneGroupName();
-  const std::vector<as::Mesh> scene_meshes = scene_model.GetMeshes();
-  DrawMeshes("scene", scene_group_name, scene_meshes);
-}
-
 void DrawSkyboxes() {
   skybox_shader.UseProgram();
   const std::string skybox_group_name = GetSkyboxGroupName();
@@ -517,7 +461,7 @@ void GLUTDisplayCallback() {
   UseScreenFramebuffer(0);
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
-  DrawScenes();
+  scene_shader.Draw();
   DrawSkyboxes();
   // Draw the post-processing effects
   postproc_shader.Draw();
