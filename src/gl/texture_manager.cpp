@@ -149,6 +149,14 @@ void as::TextureManager::SetTextureParamIntVector(const std::string &tex_name,
   glTexParameteriv(target, pname, params);
 }
 
+void as::TextureManager::UnbindTexture(const std::string &tex_name,
+                                       const GLenum target) {
+  const auto index_manager_target = std::make_tuple(tex_name, target);
+  index_manager_.UnbindTarget1(index_manager_target);
+  // Bind to unit index 0 to avoid programming errors
+  BindTexture(tex_name, target, 0);
+}
+
 void as::TextureManager::DeleteTexture(const std::string &tex_name) {
   const GLuint tex_hdlr = GetTextureHdlr(tex_name);
   glDeleteTextures(1, &tex_hdlr);

@@ -77,6 +77,8 @@ class TextureManager {
                                 const GLenum target, const GLenum pname,
                                 const GLint *params);
 
+  void UnbindTexture(const std::string &tex_name, const GLenum target);
+
   void DeleteTexture(const std::string &tex_name);
 
   GLuint GetTextureHdlr(const std::string &tex_name) const;
