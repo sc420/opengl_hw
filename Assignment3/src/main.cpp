@@ -1,6 +1,5 @@
 #include "as/common.hpp"
 #include "as/gl/gl_tools.hpp"
-#include "as/model/model_tools.hpp"
 #include "as/trans/camera.hpp"
 
 #include "postproc_shader.hpp"
@@ -13,8 +12,6 @@ namespace fs = std::experimental::filesystem;
  * Constants
  ******************************************************************************/
 
-/* Textures */
-static const auto kNumMipmapLevel = 5;
 /* User interfaces */
 static const auto kInitWindowRelativeCenterPos = glm::vec2(0.5f, 0.5f);
 static const auto kInitWindowSize = glm::ivec2(600, 600);
@@ -99,13 +96,6 @@ unsigned int timer_cnt = 0;
 bool timer_enabled = true;
 
 /*******************************************************************************
- * GL States (Feed to GL)
- ******************************************************************************/
-
-// Post-processing inputs
-shader::PostprocShader::PostprocInputs postproc_inputs;
-
-/*******************************************************************************
  * Menus
  ******************************************************************************/
 
@@ -141,7 +131,7 @@ void InitGLUT(int argc, char *argv[]) {
 }
 
 /*******************************************************************************
- * GL Context Configuration / Global
+ * GL Context Configuration
  ******************************************************************************/
 
 void ConfigGLSettings() {
@@ -150,12 +140,7 @@ void ConfigGLSettings() {
   glEnable(GL_DEPTH_TEST);
 }
 
-void InitGLManagers() {
-  gl_managers.RegisterManagers(buffer_manager, framebuffer_manager,
-                               program_manager, shader_manager, texture_manager,
-                               uniform_manager, vertex_spec_manager);
-  gl_managers.Init();
-}
+void InitGLManagers() { gl_managers.Init(); }
 
 void InitShaders() {
   // Post-processing
@@ -169,32 +154,15 @@ void InitShaders() {
   skybox_shader.Init();
 }
 
-/*******************************************************************************
- * GL Context Configuration / Screens
- ******************************************************************************/
-
-void ConfigGLScreens() {
-  postproc_shader.UpdateScreenTextures(kInitWindowSize.x, kInitWindowSize.y);
-  postproc_shader.UpdateScreenRenderbuffers(kInitWindowSize.x,
-                                            kInitWindowSize.y);
-}
-
-/*******************************************************************************
- * GL Context Configuration / Models
- ******************************************************************************/
-
 void ConfigGL() {
-  /* Configure global contexts */
   as::EnableCatchingGLError();
   ConfigGLSettings();
   InitGLManagers();
   InitShaders();
-  /* Configure screen-wise contexts */
-  ConfigGLScreens();
 }
 
 /*******************************************************************************
- * GL States Handling Methods
+ * GL States Updating Methods
  ******************************************************************************/
 
 void UpdateGlobalMvp() {
@@ -221,19 +189,10 @@ void UpdatePostprocInputs() {
                                 mouse_left_down);
 }
 
-/*******************************************************************************
- * Drawing Methods
- ******************************************************************************/
-
-void UpdateGLStates() {
+void UpdateStates() {
   UpdateGlobalMvp();
   UpdateModelTrans();
   UpdatePostprocInputs();
-}
-
-void UseScreenFramebuffer(const int framebuffer_idx) {
-  framebuffer_manager.BindFramebuffer("screen[" +
-                                      std::to_string(framebuffer_idx) + "]");
 }
 
 /*******************************************************************************
@@ -241,15 +200,17 @@ void UseScreenFramebuffer(const int framebuffer_idx) {
  ******************************************************************************/
 
 void GLUTDisplayCallback() {
-  // Update scene-wise contexts
-  UpdateGLStates();
-  // Draw the scenes
-  UseScreenFramebuffer(0);
+  // Update states
+  UpdateStates();
+  // Draw the scenes on framebuffer 0
+  postproc_shader.UseScreenFramebuffer(0);
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
   scene_shader.Draw();
   skybox_shader.Draw();
-  // Draw the post-processing effects
+  // Draw post-processing effects on default framebuffer
+  postproc_shader.UseDefaultFramebuffer();
+  as::ClearDepthBuffer();
   postproc_shader.Draw();
   // Swap double buffers
   glutSwapBuffers();

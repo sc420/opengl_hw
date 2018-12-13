@@ -131,11 +131,6 @@ void shader::PostprocShader::Draw() {
 
   // Use the program
   UseProgram();
-  // Use default framebuffer
-  UseDefaultFramebuffer();
-  // Clear the depth buffer
-  as::ClearDepthBuffer();
-
   // Set texture unit indexes
   SetTextureUnitIdxs();
   // Update the buffer

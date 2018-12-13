@@ -122,23 +122,15 @@ void as::ClearDepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT); }
  * GL Manager Container
  ******************************************************************************/
 
-void as::GLManagers::RegisterManagers(BufferManager& buffer_manager,
-                                      FramebufferManager& framebuffer_manager,
-                                      ProgramManager& program_manager,
-                                      ShaderManager& shader_manager,
-                                      TextureManager& texture_manager,
-                                      UniformManager& uniform_manager,
-                                      VertexSpecManager& vertex_spec_manager) {
-  buffer_manager_ = &buffer_manager;
-  framebuffer_manager_ = &framebuffer_manager;
-  program_manager_ = &program_manager;
-  shader_manager_ = &shader_manager;
-  texture_manager_ = &texture_manager;
-  uniform_manager_ = &uniform_manager;
-  vertex_spec_manager_ = &vertex_spec_manager;
-}
-
 void as::GLManagers::Init() {
+  // Create managers
+  buffer_manager_ = std::make_unique<BufferManager>();
+  framebuffer_manager_ = std::make_unique<FramebufferManager>();
+  program_manager_ = std::make_unique<ProgramManager>();
+  shader_manager_ = std::make_unique<ShaderManager>();
+  texture_manager_ = std::make_unique<TextureManager>();
+  uniform_manager_ = std::make_unique<UniformManager>();
+  vertex_spec_manager_ = std::make_unique<VertexSpecManager>();
   // Initialize managers
   texture_manager_->Init();
   uniform_manager_->Init();
