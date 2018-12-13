@@ -22,9 +22,12 @@ class PostprocShader : public app::ShaderApp {
 
   void UpdatePostprocInputs(const PostprocInputs &postproc_inputs);
 
+ protected:
+  std::string GetPostprocInputsBufferName() const;
+
+  std::string GetPostprocInputsUniformBlockName() const;
+
  private:
   PostprocInputs postproc_inputs_;
-
-  std::string GetPostprocInputsBufferName() const;
 };
 }  // namespace shader

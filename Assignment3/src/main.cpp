@@ -4,6 +4,7 @@
 #include "as/trans/camera.hpp"
 
 #include "postproc_shader.hpp"
+#include "scene_shader.hpp"
 #include "skybox_shader.hpp"
 
 namespace fs = std::experimental::filesystem;
@@ -96,6 +97,7 @@ as::GLManagers gl_managers;
  ******************************************************************************/
 
 shader::PostprocShader postproc_shader;
+shader::SceneShader scene_shader;
 shader::SkyboxShader skybox_shader;
 
 /*******************************************************************************
@@ -125,24 +127,6 @@ bool timer_enabled = true;
 /*******************************************************************************
  * GL States (Feed to GL)
  ******************************************************************************/
-
-// Global MVP declaration
-struct GlobalMvp {
-  glm::mat4 model;
-  glm::mat4 view;
-  glm::mat4 proj;
-};
-
-// Model transformation declaration
-struct ModelTrans {
-  glm::mat4 trans;
-};
-
-// Global MVP
-GlobalMvp global_mvp;
-
-// Model transformations
-ModelTrans model_trans;
 
 // Post-processing inputs
 shader::PostprocShader::PostprocInputs postproc_inputs;
@@ -239,29 +223,15 @@ void InitGLManagers() {
 }
 
 void InitShaders() {
-  // Skybox
-  skybox_shader.RegisterGLManagers(gl_managers);
-  skybox_shader.Init();
   // Post-processing
   postproc_shader.RegisterGLManagers(gl_managers);
   postproc_shader.Init();
-}
-
-void CreateGLShaders() {
-  // Scenes
-  shader_manager.CreateShader("vertex/scene", GL_VERTEX_SHADER,
-                              "assets/shaders/scene.vert");
-  shader_manager.CreateShader("fragment/scene", GL_FRAGMENT_SHADER,
-                              "assets/shaders/scene.frag");
-}
-
-void CreateGLPrograms() {
-  // Scenes
-  program_manager.CreateProgram("scene");
-  program_manager.AttachShader("scene", "vertex/scene");
-  program_manager.AttachShader("scene", "fragment/scene");
-  program_manager.LinkProgram("scene");
-  program_manager.UseProgram("scene");
+  // Scene
+  scene_shader.RegisterGLManagers(gl_managers);
+  scene_shader.Init();
+  // Skybox
+  skybox_shader.RegisterGLManagers(gl_managers);
+  skybox_shader.Init();
 }
 
 /*******************************************************************************
@@ -412,53 +382,6 @@ void ConfigGLScreens() {
   ConfigScreenFramebuffers();
   UpdateScreenTextures(kInitWindowSize.x, kInitWindowSize.y);
   UpdateScreenRenderbuffers(kInitWindowSize.x, kInitWindowSize.y);
-}
-
-/*******************************************************************************
- * GL Context Configuration / Scenes
- ******************************************************************************/
-
-void CreateGLBuffers() {
-  // Global MVP
-  buffer_manager.GenBuffer("global_mvp_buffer");
-  // Model transformation
-  buffer_manager.GenBuffer("model_trans_buffer");
-}
-
-void InitGLBuffers() {
-  // Global MVP
-  buffer_manager.InitBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER,
-                            sizeof(GlobalMvp), NULL, GL_STATIC_DRAW);
-  // Model transformation
-  buffer_manager.InitBuffer("model_trans_buffer", GL_UNIFORM_BUFFER,
-                            sizeof(ModelTrans), NULL, GL_STATIC_DRAW);
-}
-
-void UpdateGLBuffers() {
-  // Global MVP
-  buffer_manager.UpdateBuffer("global_mvp_buffer", GL_UNIFORM_BUFFER, 0,
-                              sizeof(GlobalMvp), &global_mvp);
-  // Model transformation
-  buffer_manager.UpdateBuffer("model_trans_buffer", GL_UNIFORM_BUFFER, 0,
-                              sizeof(ModelTrans), &model_trans);
-}
-
-void BindGLUniformBlocksToBuffers() {
-  uniform_manager.AssignUniformBlockToBindingPoint("scene", "GlobalMvp",
-                                                   "global_mvp");
-  uniform_manager.BindBufferBaseToBindingPoint("global_mvp_buffer",
-                                               "global_mvp");
-  uniform_manager.AssignUniformBlockToBindingPoint("scene", "ModelTrans",
-                                                   "model_trans");
-  uniform_manager.BindBufferBaseToBindingPoint("model_trans_buffer",
-                                               "model_trans");
-}
-
-void ConfigGLScenes() {
-  CreateGLBuffers();
-  InitGLBuffers();
-  UpdateGLBuffers();
-  BindGLUniformBlocksToBuffers();
 }
 
 /*******************************************************************************
@@ -657,12 +580,8 @@ void ConfigGL() {
   InitShaders();
   /* Configure program-wise contexts */
   LoadModels();
-  CreateGLShaders();
-  CreateGLPrograms();
   /* Configure screen-wise contexts */
   ConfigGLScreens();
-  /* Configure scene-wise contexts */
-  ConfigGLScenes();
   /* Configure model-wise contexts */
   ConfigGLModels();
 }
@@ -672,11 +591,14 @@ void ConfigGL() {
  ******************************************************************************/
 
 void UpdateGlobalMvp() {
+  shader::SceneShader::GlobalMvp global_mvp;
   const glm::mat4 identity(1.0f);
   global_mvp.proj =
       glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 1000.0f);
   global_mvp.view = camera_trans.GetTrans();
   global_mvp.model = identity;
+
+  scene_shader.UpdateGlobalMvp(global_mvp);
 }
 
 void UpdatePostprocInputs() {
@@ -688,6 +610,7 @@ void UpdatePostprocInputs() {
   postproc_inputs.effect_idx[0] = cur_effect_idx;
   postproc_inputs.pass_idx[0] = cur_pass_idx;
   postproc_inputs.time[0] = timer_cnt;
+
   postproc_shader.UpdatePostprocInputs(postproc_inputs);
 }
 
@@ -699,20 +622,17 @@ void ClearColorBuffer() { glClear(GL_COLOR_BUFFER_BIT); }
 
 void ClearDepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT); }
 
-void UpdateGlobalMvpBuffer() {
-  UpdateGlobalMvp();
-  buffer_manager.UpdateBuffer("global_mvp_buffer");
-}
-
-void UpdateModelTransBuffer() {
+void UpdateModelTrans() {
+  shader::SceneShader::ModelTrans model_trans;
   const float scale_factors = 0.01f;
   model_trans.trans = glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors));
-  buffer_manager.UpdateBuffer("model_trans_buffer");
+
+  scene_shader.UpdateModelTrans(model_trans);
 }
 
 void UpdateGLStateBuffers() {
-  UpdateGlobalMvpBuffer();
-  UpdateModelTransBuffer();
+  UpdateGlobalMvp();
+  UpdateModelTrans();
   UpdatePostprocInputs();
 }
 
@@ -762,14 +682,14 @@ void DrawMeshes(const std::string &program_name, const std::string &group_name,
 }
 
 void DrawScenes() {
-  program_manager.UseProgram("scene");
+  scene_shader.Use();
   const std::string scene_group_name = GetSceneGroupName();
   const std::vector<as::Mesh> scene_meshes = scene_model.GetMeshes();
   DrawMeshes("scene", scene_group_name, scene_meshes);
 }
 
 void DrawSkyboxes() {
-  program_manager.UseProgram("skybox");
+  skybox_shader.Use();
   const std::string skybox_group_name = GetSkyboxGroupName();
   const std::vector<as::Mesh> skybox_meshes = skybox_model.GetMeshes();
   DrawMeshes("skybox", skybox_group_name, skybox_meshes);
