@@ -5,7 +5,7 @@
  ******************************************************************************/
 
 void shader::SceneShader::Init() {
-  app::ShaderApp::Init();
+  Shader::Init();
   LoadModel();
   InitVertexArrays();
   InitUniformBlocks();

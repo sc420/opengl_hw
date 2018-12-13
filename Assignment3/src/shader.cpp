@@ -1,4 +1,4 @@
-#include "as/gl/shader_app.hpp"
+#include "shader.hpp"
 
 namespace fs = std::experimental::filesystem;
 
@@ -6,16 +6,16 @@ namespace fs = std::experimental::filesystem;
  * GL Initialization Methods
  ******************************************************************************/
 
-void app::ShaderApp::RegisterGLManagers(as::GLManagers& gl_managers) {
+void shader::Shader::RegisterGLManagers(as::GLManagers& gl_managers) {
   gl_managers_ = &gl_managers;
 }
 
-void app::ShaderApp::Init() {
+void shader::Shader::Init() {
   CreateShaders();
   CreatePrograms();
 }
 
-void app::ShaderApp::InitVertexArray(const as::Model& model) {
+void shader::Shader::InitVertexArray(const as::Model& model) {
   as::BufferManager& buffer_manager = gl_managers_->GetBufferManager();
   as::VertexSpecManager& vertex_spec_manager =
       gl_managers_->GetVertexSpecManager();
@@ -81,7 +81,7 @@ void app::ShaderApp::InitVertexArray(const as::Model& model) {
  * GL Drawing Methods
  ******************************************************************************/
 
-void app::ShaderApp::UseProgram() const {
+void shader::Shader::UseProgram() const {
   // Get managers
   const as::ProgramManager& program_manager = gl_managers_->GetProgramManager();
   // Get names
@@ -90,7 +90,7 @@ void app::ShaderApp::UseProgram() const {
   program_manager.UseProgram(program_name);
 }
 
-void app::ShaderApp::UseMesh(const size_t mesh_idx) const {
+void shader::Shader::UseMesh(const size_t mesh_idx) const {
   // Get managers
   as::BufferManager& buffer_manager = gl_managers_->GetBufferManager();
   const as::VertexSpecManager& vertex_spec_manager =
@@ -111,19 +111,19 @@ void app::ShaderApp::UseMesh(const size_t mesh_idx) const {
  * Name Management
  ******************************************************************************/
 
-std::string app::ShaderApp::GetProgramName() const { return GetId(); }
+std::string shader::Shader::GetProgramName() const { return GetId(); }
 
-std::string app::ShaderApp::GetMeshVertexArrayName(
+std::string shader::Shader::GetMeshVertexArrayName(
     const size_t mesh_idx) const {
   return GetProgramName() + "/mesh[" + std::to_string(mesh_idx) + "]";
 }
 
-std::string app::ShaderApp::GetMeshVertexArrayBufferName(
+std::string shader::Shader::GetMeshVertexArrayBufferName(
     const size_t mesh_idx) const {
   return GetProgramName() + "/va[" + std::to_string(mesh_idx) + "]";
 }
 
-std::string app::ShaderApp::GetMeshVertexArrayIdxsBufferName(
+std::string shader::Shader::GetMeshVertexArrayIdxsBufferName(
     const size_t mesh_idx) const {
   return GetProgramName() + "/va_idxs[" + std::to_string(mesh_idx) + "]";
 }
@@ -132,7 +132,7 @@ std::string app::ShaderApp::GetMeshVertexArrayIdxsBufferName(
  * GL Initialization Methods (Private)
  ******************************************************************************/
 
-void app::ShaderApp::CreateShaders() {
+void shader::Shader::CreateShaders() {
   as::ShaderManager& shader_manager = gl_managers_->GetShaderManager();
   const std::string& vertex_path = GetShaderPath(ShaderTypes::kVertex);
   const std::string& fragment_path = GetShaderPath(ShaderTypes::kFragment);
@@ -140,7 +140,7 @@ void app::ShaderApp::CreateShaders() {
   shader_manager.CreateShader(fragment_path, GL_FRAGMENT_SHADER, fragment_path);
 }
 
-void app::ShaderApp::CreatePrograms() {
+void shader::Shader::CreatePrograms() {
   as::ProgramManager& program_manager = gl_managers_->GetProgramManager();
   const std::string& program_name = GetProgramName();
   const std::string& vertex_path = GetShaderPath(ShaderTypes::kVertex);
@@ -155,7 +155,7 @@ void app::ShaderApp::CreatePrograms() {
  * Path Management (Private)
  ******************************************************************************/
 
-std::string app::ShaderApp::GetShaderPath(
+std::string shader::Shader::GetShaderPath(
     const ShaderTypes& shader_type) const {
   const std::string& id = GetId();
   std::string ext;

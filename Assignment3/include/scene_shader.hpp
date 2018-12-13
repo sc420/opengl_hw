@@ -1,9 +1,9 @@
 #pragma once
 
-#include "as/gl/shader_app.hpp"
+#include "shader.hpp"
 
 namespace shader {
-class SceneShader : public app::ShaderApp {
+class SceneShader : public Shader {
  public:
   struct GlobalMvp {
     glm::mat4 model;

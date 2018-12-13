@@ -5,7 +5,7 @@
  ******************************************************************************/
 
 void shader::PostprocShader::Init() {
-  app::ShaderApp::Init();
+  Shader::Init();
   LoadModel();
   InitFramebuffers();
   InitVertexArrays();

@@ -163,7 +163,6 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\gl\gl_tools.hpp" />
     <ClInclude Include="..\include\as\gl\index_manager.hpp" />
     <ClInclude Include="..\include\as\gl\program_manager.hpp" />
-    <ClInclude Include="..\include\as\gl\shader_app.hpp" />
     <ClInclude Include="..\include\as\gl\shader_manager.hpp" />
     <ClInclude Include="..\include\as\gl\texture_manager.hpp" />
     <ClInclude Include="..\include\as\gl\uniform_manager.hpp" />
@@ -179,6 +178,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\trans\camera.hpp" />
     <ClInclude Include="include\postproc_shader.hpp" />
     <ClInclude Include="include\scene_shader.hpp" />
+    <ClInclude Include="include\shader.hpp" />
     <ClInclude Include="include\skybox_shader.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -187,7 +187,6 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\gl\framebuffer_manager.cpp" />
     <ClCompile Include="..\src\gl\gl_tools.cpp" />
     <ClCompile Include="..\src\gl\program_manager.cpp" />
-    <ClCompile Include="..\src\gl\shader_app.cpp" />
     <ClCompile Include="..\src\gl\shader_manager.cpp" />
     <ClCompile Include="..\src\gl\texture_manager.cpp" />
     <ClCompile Include="..\src\gl\uniform_manager.cpp" />
@@ -203,6 +202,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\postproc_shader.cpp" />
     <ClCompile Include="src\scene_shader.cpp" />
+    <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\skybox_shader.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "as/gl/shader_app.hpp"
+#include "shader.hpp"
 
 namespace shader {
-class PostprocShader : public app::ShaderApp {
+class PostprocShader : public Shader {
  public:
   enum Effects {
     kEffectImgAbs,

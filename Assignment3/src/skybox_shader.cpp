@@ -5,7 +5,7 @@
  ******************************************************************************/
 
 void shader::SkyboxShader::Init() {
-  app::ShaderApp::Init();
+  Shader::Init();
   InitUniformBlocks();
 }
 

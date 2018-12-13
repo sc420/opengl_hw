@@ -1,7 +1,5 @@
 #pragma once
 
-#include "as/gl/shader_app.hpp"
-
 #include "scene_shader.hpp"
 
 namespace shader {

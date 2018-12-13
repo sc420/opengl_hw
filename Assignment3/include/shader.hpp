@@ -4,10 +4,10 @@
 #include "as/model/converter.hpp"
 #include "as/model/model.hpp"
 
-namespace app {
+namespace shader {
 enum class ShaderTypes { kVertex, kFragment };
 
-class ShaderApp {
+class Shader {
  public:
   /* GL initialization methods */
 
@@ -56,8 +56,8 @@ class ShaderApp {
 };
 
 template <class T>
-inline void ShaderApp::InitUniformBuffer(const std::string &buffer_name,
-                                         const T &buffer_data) {
+inline void Shader::InitUniformBuffer(const std::string &buffer_name,
+                                      const T &buffer_data) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   buffer_manager.GenBuffer(buffer_name);
   buffer_manager.InitBuffer(buffer_name, GL_UNIFORM_BUFFER, sizeof(T), NULL,
@@ -66,4 +66,4 @@ inline void ShaderApp::InitUniformBuffer(const std::string &buffer_name,
                               &buffer_data);
 }
 
-}  // namespace app
+}  // namespace shader

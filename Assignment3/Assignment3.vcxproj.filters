@@ -63,9 +63,6 @@
     <ClInclude Include="..\include\as\gl\program_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\as\gl\shader_app.hpp">
-      <Filter>include\as\gl</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\as\gl\shader_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
@@ -111,6 +108,9 @@
     <ClInclude Include="include\scene_shader.hpp">
       <Filter>Assignment3\include</Filter>
     </ClInclude>
+    <ClInclude Include="include\shader.hpp">
+      <Filter>Assignment3\include</Filter>
+    </ClInclude>
     <ClInclude Include="include\skybox_shader.hpp">
       <Filter>Assignment3\include</Filter>
     </ClInclude>
@@ -130,9 +130,6 @@
       <Filter>src\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gl\program_manager.cpp">
-      <Filter>src\gl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gl\shader_app.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gl\shader_manager.cpp">
@@ -178,6 +175,9 @@
       <Filter>Assignment3\src</Filter>
     </ClCompile>
     <ClCompile Include="src\scene_shader.cpp">
+      <Filter>Assignment3\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\shader.cpp">
       <Filter>Assignment3\src</Filter>
     </ClCompile>
     <ClCompile Include="src\skybox_shader.cpp">
