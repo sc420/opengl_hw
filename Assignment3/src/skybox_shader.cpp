@@ -45,6 +45,8 @@ void shader::SkyboxShader::InitUniformBlocks() {
 void shader::SkyboxShader::InitTextures() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  // Get names
+  const std::string &unit_name = GetProgramName();
   // Get models
   const as::Model &model = GetModel();
   // Set the path-to-target index map
@@ -60,8 +62,6 @@ void shader::SkyboxShader::InitTextures() {
       if (texture_manager.HasTexture(path)) {
         continue;
       }
-      // Decide the unit name
-      const std::string unit_name = path;
       // Get the file name
       const fs::path fs_path(path);
       const std::string file_name = fs_path.filename().string();

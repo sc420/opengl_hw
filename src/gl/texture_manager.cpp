@@ -53,6 +53,14 @@ void as::TextureManager::BindTexture(const std::string &tex_name) {
   BindTexture(tex_name, prev_params.target, prev_params.unit_idx);
 }
 
+void as::TextureManager::BindDefaultTexture(const GLenum target,
+                                            const GLuint unit_idx) {
+  // Select the texture unit
+  glActiveTexture(GL_TEXTURE0 + unit_idx);
+  // Bind the texture
+  glBindTexture(target, 0);
+}
+
 void as::TextureManager::InitTexture2D(const std::string &tex_name,
                                        const GLenum target,
                                        const GLsizei num_mipmap_level,

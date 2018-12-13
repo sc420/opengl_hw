@@ -83,6 +83,8 @@ class PostprocShader : public Shader {
 
   std::string GetScreenTextureName(const int screen_idx) const;
 
+  std::string GetScreenTextureUnitName(const int screen_idx) const;
+
   std::string GetScreenDepthRenderbufferName(const int screen_idx) const;
 
  private:

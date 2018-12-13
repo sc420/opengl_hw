@@ -27,6 +27,10 @@ void as::VertexSpecManager::BindVertexArray(const std::string& va_name) const {
   glBindVertexArray(va_hdlr);
 }
 
+void as::VertexSpecManager::DeselectVertexArray() const {
+  glBindVertexArray(0);
+}
+
 void as::VertexSpecManager::SpecifyVertexArrayOrg(
     const std::string& va_name, const GLuint attrib_idx, const GLint size,
     const GLenum type, const GLboolean normalized,

@@ -41,6 +41,8 @@ class TextureManager {
 
   void BindTexture(const std::string &tex_name);
 
+  void BindDefaultTexture(const GLenum target, const GLuint unit_idx);
+
   void InitTexture2D(const std::string &tex_name, const GLenum target,
                      const GLsizei num_mipmap_level, const GLenum internal_fmt,
                      const GLsizei width, const GLsizei height);

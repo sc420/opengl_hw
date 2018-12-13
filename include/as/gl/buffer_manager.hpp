@@ -24,6 +24,8 @@ class BufferManager {
 
   void BindBuffer(const std::string &buffer_name);
 
+  void DeselectBuffer(const GLenum target);
+
   void InitBuffer(const std::string &buffer_name, const GLenum target,
                   const GLsizeiptr size, const GLvoid *data,
                   const GLenum usage);

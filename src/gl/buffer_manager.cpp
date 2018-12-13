@@ -30,6 +30,10 @@ void as::BufferManager::BindBuffer(const std::string &buffer_name) {
   BindBuffer(buffer_name, prev_params.target);
 }
 
+void as::BufferManager::DeselectBuffer(const GLenum target) {
+  glBindBuffer(target, 0);
+}
+
 void as::BufferManager::InitBuffer(const std::string &buffer_name,
                                    const GLenum target, const GLsizeiptr size,
                                    const GLvoid *data, const GLenum usage) {

@@ -22,7 +22,7 @@ class ProgramManager {
 
   void UseProgram(const std::string &program_name) const;
 
-  void UseDefaultProgram() const;
+  void UseInvalidProgram() const;
 
   void DeleteProgram(const std::string &program_name) const;
 

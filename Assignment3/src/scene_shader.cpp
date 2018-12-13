@@ -59,6 +59,8 @@ void shader::SceneShader::InitUniformBlocks() {
 void shader::SceneShader::InitTextures() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  // Get names
+  const std::string &unit_name = GetProgramName();
   // Get models
   const as::Model &model = GetModel();
   // Initialize textures in each mesh
@@ -71,8 +73,6 @@ void shader::SceneShader::InitTextures() {
       if (texture_manager.HasTexture(path)) {
         continue;
       }
-      // Set names
-      const std::string &unit_name = path;
       // Load the texture
       GLsizei width, height;
       int comp;

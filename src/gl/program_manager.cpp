@@ -39,7 +39,7 @@ void as::ProgramManager::UseProgram(const std::string &program_name) const {
   glUseProgram(program_hdlr);
 }
 
-void as::ProgramManager::UseDefaultProgram() const { glUseProgram(0); }
+void as::ProgramManager::UseInvalidProgram() const { glUseProgram(0); }
 
 void as::ProgramManager::DeleteProgram(const std::string &program_name) const {
   const GLuint program_hdlr = GetProgramHdlr(program_name);

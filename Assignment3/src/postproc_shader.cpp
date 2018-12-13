@@ -68,7 +68,7 @@ void shader::PostprocShader::UpdateScreenTextures(const GLsizei width,
     // Get names
     const std::string framebuffer_name = GetScreenFramebufferName(screen_idx);
     const std::string tex_name = GetScreenTextureName(screen_idx);
-    const std::string &tex_unit_name = tex_name;
+    const std::string &unit_name = GetScreenTextureUnitName(screen_idx);
     // Check whether to delete old texture
     if (texture_manager.HasTexture(tex_name)) {
       texture_manager.DeleteTexture(tex_name);
@@ -76,7 +76,7 @@ void shader::PostprocShader::UpdateScreenTextures(const GLsizei width,
     // Generate texture
     texture_manager.GenTexture(tex_name);
     // Update texture
-    texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, tex_unit_name);
+    texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, unit_name);
     texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 1, GL_RGB8, width,
                                   height);
     texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
@@ -242,6 +242,11 @@ std::string shader::PostprocShader::GetScreenFramebufferName(
 std::string shader::PostprocShader::GetScreenTextureName(
     const int screen_idx) const {
   return "screen[" + std::to_string(screen_idx) + "]";
+}
+
+std::string shader::PostprocShader::GetScreenTextureUnitName(
+    const int screen_idx) const {
+  return GetProgramName() + "/screen[" + std::to_string(screen_idx) + "]";
 }
 
 std::string shader::PostprocShader::GetScreenDepthRenderbufferName(

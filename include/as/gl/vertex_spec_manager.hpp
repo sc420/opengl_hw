@@ -21,6 +21,8 @@ class VertexSpecManager {
 
   void BindVertexArray(const std::string &va_name) const;
 
+  void DeselectVertexArray() const;
+
   void SpecifyVertexArrayOrg(const std::string &va_name,
                              const GLuint attrib_idx, const GLint size,
                              const GLenum type, const GLboolean normalized,
