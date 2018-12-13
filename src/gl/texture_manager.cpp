@@ -1,6 +1,6 @@
 #include "as/gl/texture_manager.hpp"
 
-as::TextureManager::TextureManager() : max_combined_texture_image_units_(0) {}
+as::TextureManager::TextureManager() {}
 
 as::TextureManager::~TextureManager() {
   // Delete all textures
@@ -9,7 +9,7 @@ as::TextureManager::~TextureManager() {
   }
 }
 
-void as::TextureManager::Init() { GetLimits(); }
+void as::TextureManager::Init() { InitLimits(); }
 
 void as::TextureManager::GenTexture(const std::string &tex_name) {
   GLuint tex_hdlr;
@@ -22,7 +22,7 @@ void as::TextureManager::BindTexture(const std::string &tex_name,
                                      const GLuint unit_idx) {
   const GLuint tex_hdlr = GetTextureHdlr(tex_name);
   // Check the unit index
-  CheckUnitIndex(unit_idx);
+  index_manager_.CheckMaxIdx(unit_idx);
   // Select the texture unit
   glActiveTexture(GL_TEXTURE0 + unit_idx);
   // Bind the texture
@@ -30,6 +30,16 @@ void as::TextureManager::BindTexture(const std::string &tex_name,
   // Save the parameters
   BindTexturePrevParams prev_params = {target, unit_idx};
   bind_texture_prev_params_[tex_name] = prev_params;
+}
+
+void as::TextureManager::BindTexture(const std::string &tex_name,
+                                     const GLenum target,
+                                     const std::string &unit_name) {
+  const auto index_manager_target = std::make_tuple(tex_name, target);
+  const GLuint unit_idx =
+      index_manager_.BindTarget1(index_manager_target, unit_name);
+  // Bind with the unit index
+  BindTexture(tex_name, target, unit_idx);
 }
 
 void as::TextureManager::BindTexture(const std::string &tex_name,
@@ -181,16 +191,8 @@ as::TextureManager::GetUpdateTexture2DPrevParams(
   return update_texture_2d_prev_params_.at(tex_name);
 }
 
-void as::TextureManager::GetLimits() {
+void as::TextureManager::InitLimits() {
   GLint value;
   glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &value);
-  max_combined_texture_image_units_ = static_cast<GLuint>(value);
-}
-
-void as::TextureManager::CheckUnitIndex(const GLuint unit_idx) const {
-  if (unit_idx >= max_combined_texture_image_units_) {
-    throw std::runtime_error(
-        "Unit index '" + std::to_string(unit_idx) + "' exceeds the limit '" +
-        std::to_string(max_combined_texture_image_units_) + "'");
-  }
+  index_manager_.SetMaxIdx(value);
 }

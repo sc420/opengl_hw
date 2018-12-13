@@ -1,6 +1,7 @@
 #pragma once
 
 #include "as/common.hpp"
+#include "as/gl/index_manager.hpp"
 
 namespace as {
 class TextureManager {
@@ -32,6 +33,9 @@ class TextureManager {
 
   void BindTexture(const std::string &tex_name, const GLenum target,
                    const GLuint unit_idx);
+
+  void BindTexture(const std::string &tex_name, const GLenum target,
+                   const std::string &unit_name);
 
   void BindTexture(const std::string &tex_name, const GLenum target);
 
@@ -80,9 +84,10 @@ class TextureManager {
   bool HasTexture(const std::string &tex_name) const;
 
  private:
-  GLuint max_combined_texture_image_units_;
-
   std::map<std::string, GLuint> hdlrs_;
+
+  IndexManager<std::tuple<std::string, GLenum>, std::string, GLuint>
+      index_manager_;
 
   std::map<std::string, BindTexturePrevParams> bind_texture_prev_params_;
 
@@ -95,8 +100,6 @@ class TextureManager {
   const UpdateTexture2DPrevParams &GetUpdateTexture2DPrevParams(
       const std::string &tex_name) const;
 
-  void GetLimits();
-
-  void CheckUnitIndex(const GLuint unit_idx) const;
+  void InitLimits();
 };
 }  // namespace as
