@@ -157,6 +157,11 @@ void as::TextureManager::UnbindTexture(const std::string &tex_name,
   BindTexture(tex_name, target, 0);
 }
 
+void as::TextureManager::UnbindTexture(const std::string &tex_name) {
+  const BindTexturePrevParams &prev_params = GetBindTexturePrevParams(tex_name);
+  UnbindTexture(tex_name, prev_params.target);
+}
+
 void as::TextureManager::DeleteTexture(const std::string &tex_name) {
   const GLuint tex_hdlr = GetTextureHdlr(tex_name);
   glDeleteTextures(1, &tex_hdlr);
@@ -175,6 +180,17 @@ GLuint as::TextureManager::GetTextureHdlr(const std::string &tex_name) const {
 
 bool as::TextureManager::HasTexture(const std::string &tex_name) const {
   return hdlrs_.count(tex_name) > 0;
+}
+
+GLuint as::TextureManager::GetUnitIdx(const std::string &tex_name,
+                                      const GLenum target) const {
+  const auto index_manager_target = std::make_tuple(tex_name, target);
+  return index_manager_.GetTarget1Idx(index_manager_target);
+}
+
+GLuint as::TextureManager::GetUnitIdx(const std::string &tex_name) const {
+  const BindTexturePrevParams &prev_params = GetBindTexturePrevParams(tex_name);
+  return GetUnitIdx(tex_name, prev_params.target);
 }
 
 const as::TextureManager::BindTexturePrevParams &

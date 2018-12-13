@@ -72,13 +72,6 @@ as::CameraTrans camera_trans(glm::vec3(-12.0f, 2.0f, 0.0f),
                                        glm::half_pi<float>(), 0.0f));
 
 /*******************************************************************************
- * Textures
- ******************************************************************************/
-
-// Texture unit indexes
-std::map<std::string, GLuint> texture_unit_idxs;
-
-/*******************************************************************************
  * GL Managers
  ******************************************************************************/
 
@@ -321,21 +314,16 @@ void UpdateScreenTextures(const GLsizei width, const GLsizei height) {
         "screen_framebuffer[" + std::to_string(i) + "]";
     // Decide the texture name
     const std::string tex_name = "screen_tex[" + std::to_string(i) + "]";
+    // Decide the unit name
+    const std::string tex_unit_name = tex_name;
     // Check whether to delete old texture
-    GLuint unit_idx;
     if (texture_manager.HasTexture(tex_name)) {
       texture_manager.DeleteTexture(tex_name);
-      unit_idx = texture_unit_idxs[tex_name];
-    } else {
-      // Calculate the new unit index
-      unit_idx = texture_unit_idxs.size();
-      // Save the unit index
-      texture_unit_idxs[tex_name] = unit_idx;
     }
     // Generate texture
     texture_manager.GenTexture(tex_name);
     // Update texture
-    texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, unit_idx);
+    texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, tex_unit_name);
     texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 1, GL_RGB8, width,
                                   height);
     texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
@@ -467,11 +455,11 @@ void ConfigSceneTextures() {
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();
       // Check if the texture has been loaded
-      if (texture_unit_idxs.count(path) > 0) {
+      if (texture_manager.HasTexture(path)) {
         continue;
       }
-      // Calculate the new unit index
-      const GLuint unit_idx = texture_unit_idxs.size();
+      // Decide the unit name
+      const std::string unit_name = path;
       // Load the texture
       GLsizei width, height;
       int comp;
@@ -482,7 +470,7 @@ void ConfigSceneTextures() {
       // Generate the texture
       texture_manager.GenTexture(path);
       // Bind the texture
-      texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_idx);
+      texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_name);
       // Initialize the texture
       texture_manager.InitTexture2D(path, GL_TEXTURE_2D, kNumMipmapLevel,
                                     GL_RGBA8, width, height);
@@ -495,8 +483,6 @@ void ConfigSceneTextures() {
           path, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
       texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
                                          GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      // Save the unit index
-      texture_unit_idxs[path] = unit_idx;
     }
   }
 }
@@ -516,17 +502,17 @@ void ConfigSkyboxTextures() {
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();
       // Check if the texture has been loaded
-      if (texture_unit_idxs.count(path) > 0) {
+      if (texture_manager.HasTexture(path)) {
         continue;
       }
+      // Decide the unit name
+      const std::string unit_name = path;
       // Get the file name
       const fs::path fs_path(path);
       const std::string file_name = fs_path.filename().string();
       // Calculate the target
       const size_t target_idx = path_to_target_idx.at(file_name);
       const GLenum target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + target_idx;
-      // Calculate the new unit index
-      const GLuint unit_idx = texture_unit_idxs.size();
       // Load the texture
       GLsizei width, height;
       int comp;
@@ -537,7 +523,7 @@ void ConfigSkyboxTextures() {
       // Generate the texture
       texture_manager.GenTexture(path);
       // Bind the texture
-      texture_manager.BindTexture(path, GL_TEXTURE_CUBE_MAP, unit_idx);
+      texture_manager.BindTexture(path, GL_TEXTURE_CUBE_MAP, unit_name);
       // Initialize the texture
       texture_manager.InitTexture2D(path, GL_TEXTURE_CUBE_MAP, kNumMipmapLevel,
                                     GL_RGBA8, width, height);
@@ -557,8 +543,6 @@ void ConfigSkyboxTextures() {
                                          GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
       texture_manager.SetTextureParamInt(path, GL_TEXTURE_CUBE_MAP,
                                          GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-      // Save the unit index
-      texture_unit_idxs[path] = unit_idx;
     }
   }
 }
@@ -664,7 +648,7 @@ void DrawMeshes(const std::string &program_name, const std::string &group_name,
       // Bind the texture
       texture_manager.BindTexture(path);
       // Get the unit index
-      const GLuint unit_idx = texture_unit_idxs.at(path);
+      const GLuint unit_idx = texture_manager.GetUnitIdx(path);
       // Set the texture handler to the unit index
       uniform_manager.SetUniform1Int(program_name, "tex_hdlr", unit_idx);
     }
@@ -710,9 +694,11 @@ void DrawScreenWithTexture(const int screen_tex_idx = 0) {
     const std::vector<size_t> &idxs = mesh.GetIdxs();
 
     // Get the unit indexes
-    const GLuint orig_unit_idx = texture_unit_idxs.at("screen_tex[0]");
-    const GLuint multipass_unit_idx1 = texture_unit_idxs.at("screen_tex[1]");
-    const GLuint multipass_unit_idx2 = texture_unit_idxs.at("screen_tex[2]");
+    const GLuint orig_unit_idx = texture_manager.GetUnitIdx("screen_tex[0]");
+    const GLuint multipass_unit_idx1 =
+        texture_manager.GetUnitIdx("screen_tex[1]");
+    const GLuint multipass_unit_idx2 =
+        texture_manager.GetUnitIdx("screen_tex[2]");
     // Set the texture handlers to the unit indexes
     uniform_manager.SetUniform1Int("postproc", "screen_tex", orig_unit_idx);
     uniform_manager.SetUniform1Int("postproc", "multipass_tex1",

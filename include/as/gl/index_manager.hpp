@@ -6,7 +6,7 @@ namespace as {
 /**
  * Index manager.
  *
- * Mapping Relationship:
+ * item Relationship:
  * 1. The target only binds a name (target-to-name)
  * 2. The name only binds an index (name-to-index)
  * 3. The index can be bound by many names (index-to-names)
@@ -34,6 +34,10 @@ class IndexManager {
   TIndex UnbindTarget1(const TTarget1 &target);
 
   TIndex UnbindTarget2(const TTarget2 &target);
+
+  TIndex GetTarget1Idx(const TTarget1 &target) const;
+
+  TIndex GetTarget2Idx(const TTarget1 &target) const;
 
  private:
   TIndex max_idx_;
@@ -113,6 +117,26 @@ inline TIndex IndexManager<TTarget1, TTarget2, TIndex>::UnbindTarget2(
 }
 
 template <class TTarget1, class TTarget2, class TIndex>
+inline TIndex IndexManager<TTarget1, TTarget2, TIndex>::GetTarget1Idx(
+    const TTarget1 &target) const {
+  if (target1_to_name_.count(target) == 0) {
+    throw std::runtime_error("Could not find the target-to-name item");
+  }
+  const std::string &name = target1_to_name_.at(target);
+  return name_to_idx_.at(name);
+}
+
+template <class TTarget1, class TTarget2, class TIndex>
+inline TIndex IndexManager<TTarget1, TTarget2, TIndex>::GetTarget2Idx(
+    const TTarget1 &target) const {
+  if (target2_to_name_.count(target) == 0) {
+    throw std::runtime_error("Could not find the target-to-name item");
+  }
+  const std::string &name = target2_to_name_.at(target);
+  return name_to_idx_.at(name);
+}
+
+template <class TTarget1, class TTarget2, class TIndex>
 inline void IndexManager<TTarget1, TTarget2, TIndex>::InitUsedIdxs() {
   // Use 0 as default index to avoid programming errors
   used_idxs_.insert(0);
@@ -135,9 +159,9 @@ inline TIndex IndexManager<TTarget1, TTarget2, TIndex>::GetNameToIdx(
   } else {
     // Get an unused index
     const TIndex idx = GetUnusedIdx();
-    // Save name-to-index mapping
+    // Save name-to-index item
     name_to_idx_[name] = idx;
-    // Save index-to-names mapping
+    // Save index-to-names item
     idx_to_names_[idx].insert(name);
     return idx;
   }

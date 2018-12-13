@@ -79,11 +79,19 @@ class TextureManager {
 
   void UnbindTexture(const std::string &tex_name, const GLenum target);
 
+  void UnbindTexture(const std::string &tex_name);
+
   void DeleteTexture(const std::string &tex_name);
+
+  /* Tools */
 
   GLuint GetTextureHdlr(const std::string &tex_name) const;
 
   bool HasTexture(const std::string &tex_name) const;
+
+  GLuint GetUnitIdx(const std::string &tex_name, const GLenum target) const;
+
+  GLuint GetUnitIdx(const std::string &tex_name) const;
 
  private:
   std::map<std::string, GLuint> hdlrs_;
