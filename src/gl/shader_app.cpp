@@ -2,25 +2,9 @@
 
 namespace fs = std::experimental::filesystem;
 
-std::string app::ShaderApp::GetProgramName() const { return GetId(); }
-
-std::string app::ShaderApp::GetShaderPath(
-    const ShaderTypes& shader_type) const {
-  const std::string& id = GetId();
-  std::string ext;
-  switch (shader_type) {
-    case ShaderTypes::kVertex: {
-      ext = ".vert";
-    } break;
-    case ShaderTypes::kFragment: {
-      ext = ".frag";
-    } break;
-    default: { throw std::runtime_error("Unknown shader type"); }
-  }
-  fs::path path("assets/shaders");
-  path = path / (id + ext);
-  return path.string();
-}
+/*******************************************************************************
+ * GL Initialization Methods
+ ******************************************************************************/
 
 void app::ShaderApp::RegisterGLManagers(as::GLManagers& gl_managers) {
   gl_managers_ = &gl_managers;
@@ -32,11 +16,25 @@ void app::ShaderApp::Init() {
   InitUniformBlocks();
 }
 
+/*******************************************************************************
+ * GL Drawing Methods
+ ******************************************************************************/
+
 void app::ShaderApp::Use() const {
   const as::ProgramManager& program_manager = gl_managers_->GetProgramManager();
   const std::string& program_name = GetProgramName();
   program_manager.UseProgram(program_name);
 }
+
+/*******************************************************************************
+ * Name Management
+ ******************************************************************************/
+
+std::string app::ShaderApp::GetProgramName() const { return GetId(); }
+
+/*******************************************************************************
+ * GL Initialization Methods (Private)
+ ******************************************************************************/
 
 void app::ShaderApp::CreateShaders() {
   as::ShaderManager& shader_manager = gl_managers_->GetShaderManager();
@@ -55,4 +53,26 @@ void app::ShaderApp::CreatePrograms() {
   program_manager.AttachShader(program_name, vertex_path);
   program_manager.AttachShader(program_name, fragment_path);
   program_manager.LinkProgram(program_name);
+}
+
+/*******************************************************************************
+ * Path Management (Private)
+ ******************************************************************************/
+
+std::string app::ShaderApp::GetShaderPath(
+    const ShaderTypes& shader_type) const {
+  const std::string& id = GetId();
+  std::string ext;
+  switch (shader_type) {
+    case ShaderTypes::kVertex: {
+      ext = ".vert";
+    } break;
+    case ShaderTypes::kFragment: {
+      ext = ".frag";
+    } break;
+    default: { throw std::runtime_error("Unknown shader type"); }
+  }
+  fs::path path("assets/shaders");
+  path = path / (id + ext);
+  return path.string();
 }
