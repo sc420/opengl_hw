@@ -114,7 +114,6 @@
     <ClInclude Include="include\skybox_shader.hpp">
       <Filter>Assignment3\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\gl\index_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common.cpp">

@@ -66,10 +66,10 @@ void shader::Shader::InitVertexArray(const as::Model& model) {
     /* Initialize buffers */
     // VA
     buffer_manager.InitBuffer(buffer_name, GL_ARRAY_BUFFER, vertices_mem_sz,
-                              NULL, GL_STATIC_DRAW);
+                              nullptr, GL_STATIC_DRAW);
     // VA indexes
     buffer_manager.InitBuffer(idxs_buffer_name, GL_ELEMENT_ARRAY_BUFFER,
-                              idxs_mem_sz, NULL, GL_STATIC_DRAW);
+                              idxs_mem_sz, nullptr, GL_STATIC_DRAW);
     /* Update buffers */
     // VA
     buffer_manager.UpdateBuffer(buffer_name, GL_ARRAY_BUFFER, 0,

@@ -32,7 +32,6 @@ void shader::SceneShader::InitVertexArrays() {
 }
 
 void shader::SceneShader::InitUniformBlocks() {
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &program_name = GetProgramName();
@@ -146,7 +145,7 @@ void shader::SceneShader::Draw() {
     }
     /* Draw vertex arrays */
     UseMesh(mesh_idx);
-    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
   }
 }
 

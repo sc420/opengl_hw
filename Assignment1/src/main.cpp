@@ -297,6 +297,7 @@ void ConfigGL() {
 
   /* Initialize managers */
   texture_manager.Init();
+  uniform_manager.Init();
 
   /* Register managers */
   program_manager.RegisterShaderManager(shader_manager);

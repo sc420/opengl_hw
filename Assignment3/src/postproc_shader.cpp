@@ -39,7 +39,6 @@ void shader::PostprocShader::InitVertexArrays() {
 
 void shader::PostprocShader::InitUniformBlocks() {
   // Get managers
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &program_name = GetProgramName();
@@ -126,8 +125,6 @@ void shader::PostprocShader::UpdateScreenRenderbuffers(const GLsizei width,
 void shader::PostprocShader::Draw() {
   // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  as::FramebufferManager &framebuffer_manager =
-      gl_managers_->GetFramebufferManager();
   // Get names
   const std::string &buffer_name = GetPostprocInputsBufferName();
 
@@ -189,7 +186,7 @@ void shader::PostprocShader::UseScreenFramebuffer(const int screen_idx) {
  ******************************************************************************/
 
 void shader::PostprocShader::UpdateEnabled(const bool enabled) {
-  postproc_inputs_.enabled[0] = enabled;
+  postproc_inputs_.enabled[0] = static_cast<int>(enabled);
 }
 
 void shader::PostprocShader::UpdateMousePos(const glm::ivec2 &mouse_pos) {
@@ -288,9 +285,7 @@ void shader::PostprocShader::SetTextureUnitIdxs() {
 
 void shader::PostprocShader::DrawScreenWithTexture(const int tex_idx) {
   // Get managers
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
-  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &tex_name = GetScreenTextureName(tex_idx);
   // Get models
@@ -305,5 +300,5 @@ void shader::PostprocShader::DrawScreenWithTexture(const int tex_idx) {
   // Bind the texture
   texture_manager.BindTexture(tex_name);
   // Draw the mesh
-  glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
 }

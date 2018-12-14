@@ -54,6 +54,9 @@
     <ClInclude Include="..\include\as\gl\gl_tools.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\gl\index_manager.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
     <ClInclude Include="..\include\as\gl\program_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
