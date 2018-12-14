@@ -205,7 +205,7 @@ void shader::PostprocShader::UpdatePassIdx(const int pass_idx) {
   postproc_inputs_.pass_idx[0] = pass_idx;
 }
 
-void shader::PostprocShader::UpdateTime(const int time) {
+void shader::PostprocShader::UpdateTime(const float time) {
   postproc_inputs_.time[0] = time;
 }
 

@@ -23,7 +23,7 @@ class PostprocShader : public Shader {
     glm::vec2 window_size;
     int effect_idx[2];
     int pass_idx[2];
-    int time[2];
+    float time[2];
   };
 
   PostprocShader();
@@ -64,7 +64,7 @@ class PostprocShader : public Shader {
 
   void UpdatePassIdx(const int pass_idx);
 
-  void UpdateTime(const int time);
+  void UpdateTime(const float time);
 
   /* Name management */
 

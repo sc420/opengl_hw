@@ -129,6 +129,7 @@ as::GLManagers::GLManagers() {
   program_manager_ = ProgramManager();
   shader_manager_ = ShaderManager();
   texture_manager_ = TextureManager();
+  ui_manager_ = UiManager();
   uniform_manager_ = UniformManager();
   vertex_spec_manager_ = VertexSpecManager();
   // Initialize managers
@@ -161,6 +162,8 @@ as::ShaderManager& as::GLManagers::GetShaderManager() {
 as::TextureManager& as::GLManagers::GetTextureManager() {
   return texture_manager_;
 }
+
+as::UiManager& as::GLManagers::GetUiManager() { return ui_manager_; }
 
 as::UniformManager& as::GLManagers::GetUniformManager() {
   return uniform_manager_;

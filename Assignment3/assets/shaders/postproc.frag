@@ -38,7 +38,7 @@ uniform PostprocInputs {
   vec2 window_size;
   int effect_idx[2];
   int pass_idx[2];
-  int time[2];
+  float time[2];
 }
 postproc_inputs;
 
@@ -449,7 +449,7 @@ vec4 downsample(sampler2D sampler, vec2 uv, float pixelSize) {
 
 vec3 edge(sampler2D sampler, vec2 uv, float sampleSize) {
   const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
-  const float iTime = postproc_inputs.time[0] / 100.0f;
+  const float iTime = postproc_inputs.time[0];
 
   float dx = sampleSize / iResolution.x;
   float dy = sampleSize / iResolution.y;
@@ -476,7 +476,7 @@ vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
   const float kTileSize = 16;
 
   const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
-  const float iTime = postproc_inputs.time[0] / 100.0f;
+  const float iTime = postproc_inputs.time[0];
   const float Amount = 0.1f + 0.5f * abs(sin(iTime));
 
   vec2 pixel = vec2(1.0) / iResolution.xy;
@@ -505,7 +505,7 @@ vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
 vec4 ShampainGlitch01(vec2 fragCoord) {
   vec4 fragColor;
   const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
-  const float iTime = postproc_inputs.time[0] / 100.0f;
+  const float iTime = postproc_inputs.time[0];
   const vec4 iMouse = vec4(postproc_inputs.mouse_pos, 0.0f, 0.0f);
 
   float THRESHOLD = 0.1f + abs(sin(iTime)) * 0.5f;
@@ -550,7 +550,7 @@ vec4 ShampainGlitch01(vec2 fragCoord) {
 vec4 ShampainGlitch02(vec2 fragCoord) {
   vec4 fragColor;
   const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
-  const float iTime = postproc_inputs.time[0] / 100.0f;
+  const float iTime = postproc_inputs.time[0];
 
   float aspect = iResolution.x / iResolution.y;
   vec2 uv = fragCoord.xy / iResolution.xy;
@@ -614,7 +614,7 @@ vec4 GlitchShaderB(vec2 fragCoord) {
   vec4 fragColor;
 
   const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
-  const float iTime = postproc_inputs.time[0] / 100.0f;
+  const float iTime = postproc_inputs.time[0];
 
   vec2 uv = fragCoord.xy / iResolution.xy;
 

@@ -63,6 +63,8 @@ class GLManagers {
 
   TextureManager &GetTextureManager();
 
+  UiManager &GetUiManager();
+
   UniformManager &GetUniformManager();
 
   VertexSpecManager &GetVertexSpecManager();
@@ -73,6 +75,7 @@ class GLManagers {
   ProgramManager program_manager_;
   ShaderManager shader_manager_;
   TextureManager texture_manager_;
+  UiManager ui_manager_;
   UniformManager uniform_manager_;
   VertexSpecManager vertex_spec_manager_;
 };

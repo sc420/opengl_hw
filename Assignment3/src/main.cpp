@@ -16,7 +16,6 @@ namespace fs = std::experimental::filesystem;
 static const auto kInitWindowRelativeCenterPos = glm::vec2(0.5f, 0.5f);
 static const auto kInitWindowSize = glm::ivec2(600, 600);
 static const auto kMinWindowSize = glm::ivec2(300, 300);
-static const auto kNumKeyboardKeys = 256;
 static const auto kCameraMovingStep = 0.2f;
 static const auto kCameraRotationSensitivity = 0.005f;
 static const auto kCameraZoomingStep = 5.0f;
@@ -37,6 +36,7 @@ as::CameraTrans camera_trans(glm::vec3(-12.0f, 2.0f, 0.0f),
  ******************************************************************************/
 
 as::GLManagers gl_managers;
+as::UiManager ui_manager;
 
 /*******************************************************************************
  * Shaders
@@ -55,21 +55,6 @@ enum class Modes { comparison, navigation };
 
 // Current mode
 Modes cur_mode = Modes::comparison;
-
-/* Window states */
-bool window_closed = false;
-float window_aspect_ratio;
-
-/* Keyboard states */
-bool pressed_keys[kNumKeyboardKeys] = {false};
-
-/* Mouse states */
-bool mouse_left_down = false;
-glm::vec2 mouse_left_down_init_pos;
-
-/* Timer */
-unsigned int timer_cnt = 0;
-bool timer_enabled = true;
 
 /*******************************************************************************
  * Menus
@@ -116,6 +101,13 @@ void ConfigGLSettings() {
   glEnable(GL_DEPTH_TEST);
 }
 
+void InitUiManager() {
+  // Get the UI manager
+  ui_manager = gl_managers.GetUiManager();
+  // Start the clock
+  ui_manager.StartClock();
+}
+
 void InitShaders() {
   // Post-processing
   postproc_shader.RegisterGLManagers(gl_managers);
@@ -131,6 +123,7 @@ void InitShaders() {
 void ConfigGL() {
   as::EnableCatchingGLError();
   ConfigGLSettings();
+  InitUiManager();
   InitShaders();
 }
 
@@ -141,8 +134,9 @@ void ConfigGL() {
 void UpdateGlobalMvp() {
   shader::SceneShader::GlobalMvp global_mvp;
   const glm::mat4 identity(1.0f);
+  const float aspect_ratio = ui_manager.GetWindowAspectRatio();
   global_mvp.proj =
-      glm::perspective(glm::radians(45.0f), window_aspect_ratio, 0.1f, 1000.0f);
+      glm::perspective(glm::radians(45.0f), aspect_ratio, 0.1f, 1000.0f);
   global_mvp.view = camera_trans.GetTrans();
   global_mvp.model = identity;
 
@@ -159,7 +153,7 @@ void UpdateModelTrans() {
 
 void UpdatePostprocInputs() {
   postproc_shader.UpdateEnabled(cur_mode == Modes::comparison &&
-                                mouse_left_down);
+                                ui_manager.IsMouseDown(GLUT_LEFT_BUTTON));
 }
 
 void UpdateStates() {
@@ -196,8 +190,8 @@ void GLUTReshapeCallback(const int width, const int height) {
     // If the window size has been limited, ignore the new size
     return;
   }
-  // Update window aspect ratio
-  window_aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
+  // Save window size
+  ui_manager.SaveWindowSize(window_size);
   // Set the viewport
   glViewport(0, 0, width, height);
   // Update screen textures
@@ -213,7 +207,6 @@ void GLUTReshapeCallback(const int width, const int height) {
  ******************************************************************************/
 
 void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
-  pressed_keys[key] = true;
   switch (key) {
     case 'r': {
       // Reset camera transformation
@@ -224,10 +217,13 @@ void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
       glutLeaveMainLoop();
     } break;
   }
+  // Mark key state down
+  ui_manager.MarkKeyDown(key);
 }
 
 void GLUTKeyboardUpCallback(const unsigned char key, const int x, const int y) {
-  pressed_keys[key] = false;
+  // Mark key state up
+  ui_manager.MarkKeyUp(key);
 }
 
 void GLUTSpecialCallback(const int key, const int x, const int y) {}
@@ -238,11 +234,10 @@ void GLUTMouseCallback(const int button, const int state, const int x,
   // Check which mouse button is clicked
   switch (state) {
     case GLUT_DOWN: {
-      mouse_left_down_init_pos = mouse_pos;
-      mouse_left_down = true;
+      ui_manager.MarkMouseDown(button, mouse_pos);
     } break;
     case GLUT_UP: {
-      mouse_left_down = false;
+      ui_manager.MarkMouseUp(button, mouse_pos);
     } break;
   }
   // Update mouse position
@@ -259,26 +254,27 @@ void GLUTMouseWheelCallback(const int button, const int dir, const int x,
 }
 
 void GLUTMotionCallback(const int x, const int y) {
-  const glm::vec2 mouse_pos = glm::vec2(x, y);
+  const glm::ivec2 mouse_pos = glm::vec2(x, y);
   // Check whether the left mouse button is down
-  if (mouse_left_down) {
+  if (ui_manager.IsMouseDown(GLUT_LEFT_BUTTON)) {
     switch (cur_mode) {
       case Modes::comparison: {
       } break;
       case Modes::navigation: {
-        const glm::vec2 diff = mouse_pos - mouse_left_down_init_pos;
+        const glm::ivec2 diff = mouse_pos - ui_manager.GetMousePos();
         camera_trans.AddAngle(kCameraRotationSensitivity *
                               glm::vec3(diff.y, diff.x, 0.0f));
-        mouse_left_down_init_pos = mouse_pos;
       } break;
       default: { throw new std::runtime_error("Unknown mode"); }
     }
   }
   // Update mouse position
   postproc_shader.UpdateMousePos(mouse_pos);
+  // Save mouse position
+  ui_manager.MarkMouseMotion(mouse_pos);
 }
 
-void GLUTCloseCallback() { window_closed = true; }
+void GLUTCloseCallback() { ui_manager.MarkWindowClosed(); }
 
 /*******************************************************************************
  * GLUT Callbacks / Timer
@@ -286,36 +282,33 @@ void GLUTCloseCallback() { window_closed = true; }
 
 void GLUTTimerCallback(const int val) {
   // Check whether the window has closed
-  if (window_closed) {
+  if (ui_manager.IsWindowClosed()) {
     return;
   }
 
-  // Increment the counter
-  timer_cnt++;
-
   // Update camera transformation
-  if (pressed_keys['w']) {  // TODO: Use a function (unsigned char)
+  if (ui_manager.IsKeyDown('w')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, -1.0f));
     UpdateGlobalMvp();
   }
-  if (pressed_keys['s']) {
+  if (ui_manager.IsKeyDown('s')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, 1.0f));
     UpdateGlobalMvp();
   }
-  if (pressed_keys['a']) {
+  if (ui_manager.IsKeyDown('a')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(-1.0f, 0.0f, 0.0f));
     UpdateGlobalMvp();
   }
-  if (pressed_keys['d']) {
+  if (ui_manager.IsKeyDown('d')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(1.0f, 0.0f, 0.0f));
     UpdateGlobalMvp();
   }
-  if (pressed_keys['z']) {
+  if (ui_manager.IsKeyDown('z')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, 1.0f, 0.0f));
     UpdateGlobalMvp();
   }
-  if (pressed_keys['x']) {
+  if (ui_manager.IsKeyDown('x')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, -1.0f, 0.0f));
     UpdateGlobalMvp();
@@ -324,13 +317,13 @@ void GLUTTimerCallback(const int val) {
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();
 
-  // Update timer count
-  postproc_shader.UpdateTime(timer_cnt);
+  // Update time
+  const float elapsed_time =
+      static_cast<float>(ui_manager.CalcElapsedSeconds());
+  postproc_shader.UpdateTime(elapsed_time);
 
   // Register the timer callback again
-  if (timer_enabled) {
-    glutTimerFunc(kTimerInterval, GLUTTimerCallback, val);
-  }
+  glutTimerFunc(kTimerInterval, GLUTTimerCallback, val);
 }
 
 /*******************************************************************************
@@ -396,13 +389,10 @@ void GLUTModeMenuCallback(const int id) {
 void GLUTTimerMenuCallback(const int id) {
   switch (id) {
     case TimerMenuItems::kTimerStart: {
-      if (!timer_enabled) {
-        timer_enabled = true;
-        glutTimerFunc(kTimerInterval, GLUTTimerCallback, 0);
-      }
+      ui_manager.StartClock();
     } break;
     case TimerMenuItems::kTimerStop: {
-      timer_enabled = false;
+      ui_manager.StopClock();
     } break;
     default: {
       throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
