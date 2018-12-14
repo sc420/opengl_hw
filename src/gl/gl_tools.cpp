@@ -122,52 +122,52 @@ void as::ClearDepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT); }
  * GL Manager Container
  ******************************************************************************/
 
-void as::GLManagers::Init() {
+as::GLManagers::GLManagers() {
   // Create managers
-  buffer_manager_ = std::make_unique<BufferManager>();
-  framebuffer_manager_ = std::make_unique<FramebufferManager>();
-  program_manager_ = std::make_unique<ProgramManager>();
-  shader_manager_ = std::make_unique<ShaderManager>();
-  texture_manager_ = std::make_unique<TextureManager>();
-  uniform_manager_ = std::make_unique<UniformManager>();
-  vertex_spec_manager_ = std::make_unique<VertexSpecManager>();
+  buffer_manager_ = BufferManager();
+  framebuffer_manager_ = FramebufferManager();
+  program_manager_ = ProgramManager();
+  shader_manager_ = ShaderManager();
+  texture_manager_ = TextureManager();
+  uniform_manager_ = UniformManager();
+  vertex_spec_manager_ = VertexSpecManager();
   // Initialize managers
-  texture_manager_->Init();
-  uniform_manager_->Init();
+  texture_manager_.Init();
+  uniform_manager_.Init();
   // Register managers
-  framebuffer_manager_->RegisterTextureManager(*texture_manager_);
-  program_manager_->RegisterShaderManager(*shader_manager_);
-  uniform_manager_->RegisterProgramManager(*program_manager_);
-  uniform_manager_->RegisterBufferManager(*buffer_manager_);
-  vertex_spec_manager_->RegisterBufferManager(*buffer_manager_);
+  framebuffer_manager_.RegisterTextureManager(texture_manager_);
+  program_manager_.RegisterShaderManager(shader_manager_);
+  uniform_manager_.RegisterProgramManager(program_manager_);
+  uniform_manager_.RegisterBufferManager(buffer_manager_);
+  vertex_spec_manager_.RegisterBufferManager(buffer_manager_);
 }
 
-as::BufferManager& as::GLManagers::GetBufferManager() const {
-  return *buffer_manager_;
+as::BufferManager& as::GLManagers::GetBufferManager() {
+  return buffer_manager_;
 }
 
-as::FramebufferManager& as::GLManagers::GetFramebufferManager() const {
-  return *framebuffer_manager_;
+as::FramebufferManager& as::GLManagers::GetFramebufferManager() {
+  return framebuffer_manager_;
 }
 
-as::ProgramManager& as::GLManagers::GetProgramManager() const {
-  return *program_manager_;
+as::ProgramManager& as::GLManagers::GetProgramManager() {
+  return program_manager_;
 }
 
-as::ShaderManager& as::GLManagers::GetShaderManager() const {
-  return *shader_manager_;
+as::ShaderManager& as::GLManagers::GetShaderManager() {
+  return shader_manager_;
 }
 
-as::TextureManager& as::GLManagers::GetTextureManager() const {
-  return *texture_manager_;
+as::TextureManager& as::GLManagers::GetTextureManager() {
+  return texture_manager_;
 }
 
-as::UniformManager& as::GLManagers::GetUniformManager() const {
-  return *uniform_manager_;
+as::UniformManager& as::GLManagers::GetUniformManager() {
+  return uniform_manager_;
 }
 
-as::VertexSpecManager& as::GLManagers::GetVertexSpecManager() const {
-  return *vertex_spec_manager_;
+as::VertexSpecManager& as::GLManagers::GetVertexSpecManager() {
+  return vertex_spec_manager_;
 }
 
 /*******************************************************************************

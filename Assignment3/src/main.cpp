@@ -116,8 +116,6 @@ void ConfigGLSettings() {
   glEnable(GL_DEPTH_TEST);
 }
 
-void InitGLManagers() { gl_managers.Init(); }
-
 void InitShaders() {
   // Post-processing
   postproc_shader.RegisterGLManagers(gl_managers);
@@ -133,7 +131,6 @@ void InitShaders() {
 void ConfigGL() {
   as::EnableCatchingGLError();
   ConfigGLSettings();
-  InitGLManagers();
   InitShaders();
 }
 

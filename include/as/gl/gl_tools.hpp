@@ -51,30 +51,30 @@ void ClearDepthBuffer();
 
 class GLManagers {
  public:
-  void Init();
+  GLManagers();
 
-  BufferManager &GetBufferManager() const;
+  BufferManager &GetBufferManager();
 
-  FramebufferManager &GetFramebufferManager() const;
+  FramebufferManager &GetFramebufferManager();
 
-  ProgramManager &GetProgramManager() const;
+  ProgramManager &GetProgramManager();
 
-  ShaderManager &GetShaderManager() const;
+  ShaderManager &GetShaderManager();
 
-  TextureManager &GetTextureManager() const;
+  TextureManager &GetTextureManager();
 
-  UniformManager &GetUniformManager() const;
+  UniformManager &GetUniformManager();
 
-  VertexSpecManager &GetVertexSpecManager() const;
+  VertexSpecManager &GetVertexSpecManager();
 
  private:
-  std::unique_ptr<BufferManager> buffer_manager_;
-  std::unique_ptr<FramebufferManager> framebuffer_manager_;
-  std::unique_ptr<ProgramManager> program_manager_;
-  std::unique_ptr<ShaderManager> shader_manager_;
-  std::unique_ptr<TextureManager> texture_manager_;
-  std::unique_ptr<UniformManager> uniform_manager_;
-  std::unique_ptr<VertexSpecManager> vertex_spec_manager_;
+  BufferManager buffer_manager_;
+  FramebufferManager framebuffer_manager_;
+  ProgramManager program_manager_;
+  ShaderManager shader_manager_;
+  TextureManager texture_manager_;
+  UniformManager uniform_manager_;
+  VertexSpecManager vertex_spec_manager_;
 };
 
 };  // namespace as
