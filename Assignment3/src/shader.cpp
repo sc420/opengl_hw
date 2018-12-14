@@ -6,6 +6,8 @@ namespace fs = std::experimental::filesystem;
  * GL Initialization Methods
  ******************************************************************************/
 
+shader::Shader::Shader() : gl_managers_(nullptr) {}
+
 void shader::Shader::RegisterGLManagers(as::GLManagers& gl_managers) {
   gl_managers_ = &gl_managers;
 }

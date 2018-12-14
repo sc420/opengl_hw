@@ -4,6 +4,9 @@
  * Model Handlers
  ******************************************************************************/
 
+shader::SceneShader::SceneShader()
+    : global_mvp_(GlobalMvp()), model_trans_(ModelTrans()) {}
+
 void shader::SceneShader::LoadModel() {
   as::Model &model = GetModel();
   model.LoadFile(

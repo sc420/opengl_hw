@@ -26,6 +26,8 @@ class PostprocShader : public Shader {
     int time[2];
   };
 
+  PostprocShader();
+
   /* GL initialization methods */
 
   void Init() override;

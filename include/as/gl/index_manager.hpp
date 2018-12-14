@@ -66,7 +66,7 @@ class IndexManager {
 };
 
 template <class TTarget1, class TTarget2, class TIndex>
-inline IndexManager<TTarget1, TTarget2, TIndex>::IndexManager() {
+inline IndexManager<TTarget1, TTarget2, TIndex>::IndexManager() : max_idx_(0) {
   InitUsedIdxs();
 }
 

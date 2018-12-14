@@ -9,6 +9,8 @@ enum class ShaderTypes { kVertex, kFragment };
 
 class Shader {
  public:
+  Shader();
+
   /* GL initialization methods */
 
   void RegisterGLManagers(as::GLManagers &gl_managers);

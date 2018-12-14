@@ -15,6 +15,8 @@ class SceneShader : public Shader {
     glm::mat4 trans;
   };
 
+  SceneShader();
+
   /* Model handlers */
 
   void LoadModel();
