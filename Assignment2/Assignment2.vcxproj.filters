@@ -66,6 +66,9 @@
     <ClInclude Include="..\include\as\gl\texture_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\gl\ui_manager.hpp">
+      <Filter>include\as\gl</Filter>
+    </ClInclude>
     <ClInclude Include="..\include\as\gl\uniform_manager.hpp">
       <Filter>include\as\gl</Filter>
     </ClInclude>
@@ -120,6 +123,9 @@
       <Filter>src\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gl\texture_manager.cpp">
+      <Filter>src\gl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gl\ui_manager.cpp">
       <Filter>src\gl</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gl\uniform_manager.cpp">
