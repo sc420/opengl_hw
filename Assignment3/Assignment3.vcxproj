@@ -165,6 +165,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\gl\program_manager.hpp" />
     <ClInclude Include="..\include\as\gl\shader_manager.hpp" />
     <ClInclude Include="..\include\as\gl\texture_manager.hpp" />
+    <ClInclude Include="..\include\as\gl\ui_manager.hpp" />
     <ClInclude Include="..\include\as\gl\uniform_manager.hpp" />
     <ClInclude Include="..\include\as\gl\vertex_spec_manager.hpp" />
     <ClInclude Include="..\include\as\model\converter.hpp" />
@@ -189,6 +190,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\gl\program_manager.cpp" />
     <ClCompile Include="..\src\gl\shader_manager.cpp" />
     <ClCompile Include="..\src\gl\texture_manager.cpp" />
+    <ClCompile Include="..\src\gl\ui_manager.cpp" />
     <ClCompile Include="..\src\gl\uniform_manager.cpp" />
     <ClCompile Include="..\src\gl\vertex_spec_manager.cpp" />
     <ClCompile Include="..\src\model\converter.cpp" />

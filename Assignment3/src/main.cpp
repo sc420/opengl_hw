@@ -297,7 +297,7 @@ void GLUTTimerCallback(const int val) {
   timer_cnt++;
 
   // Update camera transformation
-  if (pressed_keys['w']) {
+  if (pressed_keys['w']) {  // TODO: Use a function (unsigned char)
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, -1.0f));
     UpdateGlobalMvp();
   }
