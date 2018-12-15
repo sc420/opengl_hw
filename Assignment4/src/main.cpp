@@ -14,11 +14,11 @@ namespace fs = std::experimental::filesystem;
 
 /* User interfaces */
 static const auto kInitWindowRelativeCenterPos = glm::vec2(0.5f, 0.5f);
-static const auto kInitWindowSize = glm::ivec2(600, 600);
-static const auto kMinWindowSize = glm::ivec2(300, 300);
-static const auto kCameraMovingStep = 0.2f;
-static const auto kCameraRotationSensitivity = 0.005f;
-static const auto kCameraZoomingStep = 5.0f;
+static const auto kInitWindowSize = glm::ivec2(720, 450);
+static const auto kMinWindowSize = glm::ivec2(720, 450);
+static const auto kCameraMovingStep = 0.05f;
+static const auto kCameraRotationSensitivity = 0.003f;
+static const auto kCameraZoomingStep = 1.0f;
 /* Timers */
 static const auto kTimerInterval = 10;
 
@@ -27,9 +27,9 @@ static const auto kTimerInterval = 10;
  ******************************************************************************/
 
 // Camera transformations
-as::CameraTrans camera_trans(glm::vec3(-12.0f, 2.0f, 0.0f),
-                             glm::vec3(-0.15f * glm::half_pi<float>(),
-                                       glm::half_pi<float>(), 0.0f));
+as::CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 0.0f),
+                             glm::vec3(glm::radians(10.0f),
+                                       glm::radians(-45.0f), 0.0f));
 
 /*******************************************************************************
  * GL Managers
@@ -54,7 +54,7 @@ shader::SkyboxShader skybox_shader;
 enum class Modes { comparison, navigation };
 
 // Current mode
-Modes cur_mode = Modes::comparison;
+Modes cur_mode = Modes::navigation;
 
 /*******************************************************************************
  * Menus
@@ -136,7 +136,7 @@ void UpdateGlobalMvp() {
   const glm::mat4 identity(1.0f);
   const float aspect_ratio = ui_manager.GetWindowAspectRatio();
   global_mvp.proj =
-      glm::perspective(glm::radians(45.0f), aspect_ratio, 0.1f, 1000.0f);
+      glm::perspective(glm::radians(80.0f), aspect_ratio, 0.1f, 1000.0f);
   global_mvp.view = camera_trans.GetTrans();
   global_mvp.model = identity;
 
@@ -145,8 +145,10 @@ void UpdateGlobalMvp() {
 
 void UpdateModelTrans() {
   shader::SceneShader::ModelTrans model_trans;
-  const float scale_factors = 0.01f;
-  model_trans.trans = glm::scale(glm::mat4(1.0f), glm::vec3(scale_factors));
+  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
+  const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
+  model_trans.trans = glm::translate(glm::scale(glm::mat4(1.0f), scale_factors),
+                                     translate_factors);
 
   scene_shader.UpdateModelTrans(model_trans);
 }

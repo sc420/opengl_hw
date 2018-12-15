@@ -10,7 +10,7 @@ shader::SceneShader::SceneShader()
 void shader::SceneShader::LoadModel() {
   as::Model &model = GetModel();
   model.LoadFile(
-      "assets/models/crytek-sponza/sponza.obj",
+      "assets/models/nanosuit/nanosuit.obj",
       aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate);
 }
 
@@ -81,7 +81,9 @@ void shader::SceneShader::InitTextures() {
       std::vector<GLubyte> texels;
       as::LoadTextureByStb(path, 0, width, height, comp, texels);
       // Convert the texels from 3 channels to 4 channels to avoid GL errors
-      texels = as::ConvertDataChannels3To4(texels);
+      if (comp == 3) {
+        texels = as::ConvertDataChannels3To4(texels);
+      }
       // Generate the texture
       texture_manager.GenTexture(path);
       // Bind the texture
@@ -188,7 +190,7 @@ as::Model &shader::SceneShader::GetModel() { return scene_model_; }
  * GL Initialization Methods (Protected)
  ******************************************************************************/
 
-GLsizei shader::SceneShader::GetNumMipmapLevels() const { return 5; }
+GLsizei shader::SceneShader::GetNumMipmapLevels() const { return 1; }
 
 /*******************************************************************************
  * Name Management (Protected)
