@@ -34,13 +34,16 @@
     <Filter Include="src">
       <UniqueIdentifier>{bcc2fea6-cd53-450f-917b-563a4cf5ab55}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\gl">
+    <Filter Include="src\as">
+      <UniqueIdentifier>{03e0012a-f1ec-47e2-875d-89647e2c6232}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\as\gl">
       <UniqueIdentifier>{ec19cf54-08c6-48d4-99c9-570566091727}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\model">
+    <Filter Include="src\as\model">
       <UniqueIdentifier>{1aa9c770-ffc8-4fac-88fb-38224f38f25f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\trans">
+    <Filter Include="src\as\trans">
       <UniqueIdentifier>{5406f30e-c62b-4d43-b914-56d5cad59dea}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -119,59 +122,59 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\src\as\common.cpp">
+      <Filter>src\as</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\buffer_manager.cpp">
-      <Filter>src\gl</Filter>
+    <ClCompile Include="..\src\as\gl\buffer_manager.cpp">
+      <Filter>src\as\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\framebuffer_manager.cpp">
-      <Filter>src\gl</Filter>
+    <ClCompile Include="..\src\as\gl\framebuffer_manager.cpp">
+      <Filter>src\as\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\gl_tools.cpp">
-      <Filter>src\gl</Filter>
+    <ClCompile Include="..\src\as\gl\gl_tools.cpp">
+      <Filter>src\as\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\program_manager.cpp">
-      <Filter>src\gl</Filter>
+    <ClCompile Include="..\src\as\gl\program_manager.cpp">
+      <Filter>src\as\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\shader_manager.cpp">
-      <Filter>src\gl</Filter>
+    <ClCompile Include="..\src\as\gl\shader_manager.cpp">
+      <Filter>src\as\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\texture_manager.cpp">
-      <Filter>src\gl</Filter>
+    <ClCompile Include="..\src\as\gl\texture_manager.cpp">
+      <Filter>src\as\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\ui_manager.cpp">
-      <Filter>src\gl</Filter>
+    <ClCompile Include="..\src\as\gl\ui_manager.cpp">
+      <Filter>src\as\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\uniform_manager.cpp">
-      <Filter>src\gl</Filter>
+    <ClCompile Include="..\src\as\gl\uniform_manager.cpp">
+      <Filter>src\as\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gl\vertex_spec_manager.cpp">
-      <Filter>src\gl</Filter>
+    <ClCompile Include="..\src\as\gl\vertex_spec_manager.cpp">
+      <Filter>src\as\gl</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\model\converter.cpp">
-      <Filter>src\model</Filter>
+    <ClCompile Include="..\src\as\model\converter.cpp">
+      <Filter>src\as\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\model\loader.cpp">
-      <Filter>src\model</Filter>
+    <ClCompile Include="..\src\as\model\loader.cpp">
+      <Filter>src\as\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\model\mesh.cpp">
-      <Filter>src\model</Filter>
+    <ClCompile Include="..\src\as\model\mesh.cpp">
+      <Filter>src\as\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\model\model.cpp">
-      <Filter>src\model</Filter>
+    <ClCompile Include="..\src\as\model\model.cpp">
+      <Filter>src\as\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\model\node.cpp">
-      <Filter>src\model</Filter>
+    <ClCompile Include="..\src\as\model\node.cpp">
+      <Filter>src\as\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\model\texture.cpp">
-      <Filter>src\model</Filter>
+    <ClCompile Include="..\src\as\model\texture.cpp">
+      <Filter>src\as\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\model\vertex.cpp">
-      <Filter>src\model</Filter>
+    <ClCompile Include="..\src\as\model\vertex.cpp">
+      <Filter>src\as\model</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\trans\camera.cpp">
-      <Filter>src\trans</Filter>
+    <ClCompile Include="..\src\as\trans\camera.cpp">
+      <Filter>src\as\trans</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Assignment3\src</Filter>
