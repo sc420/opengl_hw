@@ -6,9 +6,9 @@
 
 void shader::SkyboxShader::LoadModel() {
   as::Model &model = GetModel();
-  model.LoadFile("assets/models/sea/skybox.obj", aiProcess_FlipUVs |
-                                                     aiProcess_GenNormals |
-                                                     aiProcess_Triangulate);
+  model.LoadFile(
+      "assets/models/venice-low/skybox.obj",
+      aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate);
 }
 
 /*******************************************************************************

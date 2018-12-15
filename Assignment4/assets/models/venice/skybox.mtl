@@ -1,0 +1,53 @@
+newmtl right
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 10.0
+d 1
+illum 1
+map_Kd textures/right.jpg
+
+newmtl left
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 10.0
+d 1
+illum 1
+map_Kd textures/left.jpg
+
+newmtl top
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 10.0
+d 1
+illum 1
+map_Kd textures/top.jpg
+
+newmtl bottom
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 10.0
+d 1
+illum 1
+map_Kd textures/bottom.jpg
+
+newmtl front
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 10.0
+d 1
+illum 1
+map_Kd textures/front.jpg
+
+newmtl back
+Ka 1 1 1
+Kd 1 1 1
+Ks 0 0 0
+Ns 10.0
+d 1
+illum 1
+map_Kd textures/back.jpg
