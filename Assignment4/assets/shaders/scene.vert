@@ -44,8 +44,9 @@ void main() {
   // Pass texture coordinates
   vs_tex.coords = in_tex_coords;
   // Calculate fragment position
-  vs_surface.pos =
-      vec3(global_trans.model * model_trans.trans * vec4(in_pos, 1.0f));
+  const mat4 model = global_trans.model * model_trans.trans;
+  vs_surface.pos = vec3(model * vec4(in_pos, 1.0f));
   // Pass normal
-  vs_surface.norm = in_norm;
+  vs_surface.norm =
+      mat3(transpose(inverse(model))) * in_norm;  // TODO: Pass by uniform
 }

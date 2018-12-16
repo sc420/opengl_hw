@@ -16,8 +16,10 @@ class SceneShader : public Shader {
   };
 
   struct Lighting {
-    glm::vec4 color;
-    glm::vec4 pos;
+    glm::vec4 light_color;
+    glm::vec4 light_pos;
+    glm::vec4 light_intensity;
+    glm::vec4 view_pos;
   };
 
   SceneShader();
@@ -47,6 +49,8 @@ class SceneShader : public Shader {
   void UpdateGlobalTrans(const GlobalTrans &global_trans);
 
   void UpdateModelTrans(const ModelTrans &model_trans);
+
+  void UpdateViewPos(const glm::vec3 &view_pos);
 
   /* Name management */
 

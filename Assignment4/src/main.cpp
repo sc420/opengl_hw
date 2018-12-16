@@ -154,6 +154,11 @@ void UpdateModelTrans() {
   scene_shader.UpdateModelTrans(model_trans);
 }
 
+void UpdateLighting() {
+  const glm::vec3 &eye = camera_trans.GetEye();
+  scene_shader.UpdateViewPos(eye);
+}
+
 void UpdatePostprocInputs() {
   postproc_shader.UpdateEnabled(cur_mode == Modes::comparison &&
                                 ui_manager.IsMouseDown(GLUT_LEFT_BUTTON));
@@ -162,6 +167,7 @@ void UpdatePostprocInputs() {
 void UpdateStates() {
   UpdateGlobalTrans();
   UpdateModelTrans();
+  UpdateLighting();
   UpdatePostprocInputs();
 }
 
@@ -213,6 +219,7 @@ void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
       // Reset camera transformation
       camera_trans.ResetTrans();
       UpdateGlobalTrans();
+      UpdateLighting();
     } break;
     case 27: {  // Escape
       glutLeaveMainLoop();
@@ -291,28 +298,34 @@ void GLUTTimerCallback(const int val) {
   if (ui_manager.IsKeyDown('w')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, -1.0f));
     UpdateGlobalTrans();
+    UpdateLighting();
   }
   if (ui_manager.IsKeyDown('s')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, 1.0f));
     UpdateGlobalTrans();
+    UpdateLighting();
   }
   if (ui_manager.IsKeyDown('a')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(-1.0f, 0.0f, 0.0f));
     UpdateGlobalTrans();
+    UpdateLighting();
   }
   if (ui_manager.IsKeyDown('d')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(1.0f, 0.0f, 0.0f));
     UpdateGlobalTrans();
+    UpdateLighting();
   }
   if (ui_manager.IsKeyDown('z')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, 1.0f, 0.0f));
     UpdateGlobalTrans();
+    UpdateLighting();
   }
   if (ui_manager.IsKeyDown('x')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, -1.0f, 0.0f));
     UpdateGlobalTrans();
+    UpdateLighting();
   }
 
   // Mark the current window as needing to be redisplayed

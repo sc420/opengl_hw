@@ -92,8 +92,9 @@ void shader::SceneShader::InitTextures() {
 
 void shader::SceneShader::InitLighting() {
   Lighting lighting;
-  lighting.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-  lighting.pos = glm::vec4(-31.75f, 26.05f, -97.72f, 1.0f);
+  lighting.light_color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+  lighting.light_pos = glm::vec4(-31.75f, 26.05f, -97.72f, 1.0f);
+  lighting.light_intensity = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
   lighting_ = lighting;
 }
 
@@ -163,6 +164,15 @@ void shader::SceneShader::UpdateModelTrans(const ModelTrans &model_trans) {
   model_trans_ = model_trans;
   // Update the buffer
   const std::string &buffer_name = GetModelTransBufferName();
+  buffer_manager.UpdateBuffer(buffer_name);
+}
+
+void shader::SceneShader::UpdateViewPos(const glm::vec3 &view_pos) {
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Update lighting
+  lighting_.view_pos = glm::vec4(view_pos, 1.0f);
+  // Update the buffer
+  const std::string &buffer_name = GetLightingBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
