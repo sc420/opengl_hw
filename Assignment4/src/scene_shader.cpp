@@ -23,10 +23,10 @@ void shader::SceneShader::LoadModel() {
 void shader::SceneShader::Init() {
   Shader::Init();
   LoadModel();
+  InitLighting();
   InitVertexArrays();
   InitUniformBlocks();
   InitTextures();
-  InitLighting();
 }
 
 void shader::SceneShader::InitVertexArrays() {
@@ -92,7 +92,8 @@ void shader::SceneShader::InitTextures() {
 
 void shader::SceneShader::InitLighting() {
   Lighting lighting;
-  lighting.pos = glm::vec3(-31.75f, 26.05f, -97.72f);
+  lighting.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+  lighting.pos = glm::vec4(-31.75f, 26.05f, -97.72f, 1.0f);
   lighting_ = lighting;
 }
 

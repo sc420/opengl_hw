@@ -16,7 +16,8 @@ class SceneShader : public Shader {
   };
 
   struct Lighting {
-    glm::vec3 pos;
+    glm::vec4 color;
+    glm::vec4 pos;
   };
 
   SceneShader();
