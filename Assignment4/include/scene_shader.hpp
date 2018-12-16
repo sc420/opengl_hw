@@ -5,7 +5,7 @@
 namespace shader {
 class SceneShader : public Shader {
  public:
-  struct GlobalMvp {
+  struct GlobalTrans {
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 proj;
@@ -13,6 +13,10 @@ class SceneShader : public Shader {
 
   struct ModelTrans {
     glm::mat4 trans;
+  };
+
+  struct Light {
+    glm::vec3 pos;
   };
 
   SceneShader();
@@ -37,7 +41,7 @@ class SceneShader : public Shader {
 
   /* State updating methods */
 
-  void UpdateGlobalMvp(const GlobalMvp &global_mvp);
+  void UpdateGlobalTrans(const GlobalTrans &global_trans);
 
   void UpdateModelTrans(const ModelTrans &model_trans);
 
@@ -56,18 +60,18 @@ class SceneShader : public Shader {
 
   /* Name management */
 
-  std::string GetGlobalMvpBufferName() const;
+  std::string GetGlobalTransBufferName() const;
 
   std::string GetModelTransBufferName() const;
 
-  std::string GetGlobalMvpUniformBlockName() const;
+  std::string GetGlobalTransUniformBlockName() const;
 
   std::string GetModelTransUniformBlockName() const;
 
  private:
   as::Model scene_model_;
 
-  GlobalMvp global_mvp_;
+  GlobalTrans global_trans_;
 
   ModelTrans model_trans_;
 };

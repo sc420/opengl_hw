@@ -131,16 +131,16 @@ void ConfigGL() {
  * GL States Updating Methods
  ******************************************************************************/
 
-void UpdateGlobalMvp() {
-  shader::SceneShader::GlobalMvp global_mvp;
+void UpdateGlobalTrans() {
+  shader::SceneShader::GlobalTrans global_trans;
   const glm::mat4 identity(1.0f);
   const float aspect_ratio = ui_manager.GetWindowAspectRatio();
-  global_mvp.proj =
+  global_trans.proj =
       glm::perspective(glm::radians(80.0f), aspect_ratio, 0.1f, 1000.0f);
-  global_mvp.view = camera_trans.GetTrans();
-  global_mvp.model = identity;
+  global_trans.view = camera_trans.GetTrans();
+  global_trans.model = identity;
 
-  scene_shader.UpdateGlobalMvp(global_mvp);
+  scene_shader.UpdateGlobalTrans(global_trans);
 }
 
 void UpdateModelTrans() {
@@ -159,7 +159,7 @@ void UpdatePostprocInputs() {
 }
 
 void UpdateStates() {
-  UpdateGlobalMvp();
+  UpdateGlobalTrans();
   UpdateModelTrans();
   UpdatePostprocInputs();
 }
@@ -211,7 +211,7 @@ void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
     case 'r': {
       // Reset camera transformation
       camera_trans.ResetTrans();
-      UpdateGlobalMvp();
+      UpdateGlobalTrans();
     } break;
     case 27: {  // Escape
       glutLeaveMainLoop();
@@ -289,29 +289,29 @@ void GLUTTimerCallback(const int val) {
   // Update camera transformation
   if (ui_manager.IsKeyDown('w')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, -1.0f));
-    UpdateGlobalMvp();
+    UpdateGlobalTrans();
   }
   if (ui_manager.IsKeyDown('s')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, 1.0f));
-    UpdateGlobalMvp();
+    UpdateGlobalTrans();
   }
   if (ui_manager.IsKeyDown('a')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(-1.0f, 0.0f, 0.0f));
-    UpdateGlobalMvp();
+    UpdateGlobalTrans();
   }
   if (ui_manager.IsKeyDown('d')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(1.0f, 0.0f, 0.0f));
-    UpdateGlobalMvp();
+    UpdateGlobalTrans();
   }
   if (ui_manager.IsKeyDown('z')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, 1.0f, 0.0f));
-    UpdateGlobalMvp();
+    UpdateGlobalTrans();
   }
   if (ui_manager.IsKeyDown('x')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, -1.0f, 0.0f));
-    UpdateGlobalMvp();
+    UpdateGlobalTrans();
   }
 
   // Mark the current window as needing to be redisplayed

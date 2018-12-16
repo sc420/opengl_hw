@@ -33,9 +33,9 @@ void shader::SkyboxShader::InitUniformBlocks() {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &program_name = GetProgramName();
-  const std::string &global_mvp_buffer_name = GetGlobalMvpBufferName();
+  const std::string &global_mvp_buffer_name = GetGlobalTransBufferName();
   const std::string &global_mvp_uniform_block_name =
-      GetGlobalMvpUniformBlockName();
+      GetGlobalTransUniformBlockName();
   const std::string &global_mvp_binding_name = global_mvp_buffer_name;
   // Bind the uniform block to the the buffer
   uniform_manager.AssignUniformBlockToBindingPoint(
