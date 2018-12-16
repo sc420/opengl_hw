@@ -28,8 +28,9 @@ static const auto kTimerInterval = 10;
 
 // Camera transformations
 as::CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 0.0f),
-                             glm::vec3(glm::radians(10.0f),
-                                       glm::radians(-45.0f), 0.0f));
+                             glm::vec3(glm::radians(20.0f),
+                                       glm::radians(-45.0f),
+                                       glm::radians(0.0f)));
 
 /*******************************************************************************
  * GL Managers
