@@ -26,6 +26,7 @@ void shader::SceneShader::Init() {
   InitVertexArrays();
   InitUniformBlocks();
   InitTextures();
+  InitLighting();
 }
 
 void shader::SceneShader::InitVertexArrays() {
@@ -38,6 +39,8 @@ void shader::SceneShader::InitUniformBlocks() {
                          GetGlobalTransUniformBlockName(), global_trans_);
   LinkDataToUniformBlock(GetModelTransBufferName(),
                          GetModelTransUniformBlockName(), model_trans_);
+  LinkDataToUniformBlock(GetLightingBufferName(), GetLightingUniformBlockName(),
+                         lighting_);
 }
 
 void shader::SceneShader::InitTextures() {
@@ -85,6 +88,12 @@ void shader::SceneShader::InitTextures() {
                                          GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
   }
+}
+
+void shader::SceneShader::InitLighting() {
+  Lighting lighting;
+  lighting.pos = glm::vec3(-31.75f, 26.05f, -97.72f);
+  lighting_ = lighting;
 }
 
 /*******************************************************************************
@@ -186,10 +195,18 @@ std::string shader::SceneShader::GetModelTransBufferName() const {
   return "model_trans";
 }
 
+std::string shader::SceneShader::GetLightingBufferName() const {
+  return "lighting";
+}
+
 std::string shader::SceneShader::GetGlobalTransUniformBlockName() const {
   return "GlobalTrans";
 }
 
 std::string shader::SceneShader::GetModelTransUniformBlockName() const {
   return "ModelTrans";
+}
+
+std::string shader::SceneShader::GetLightingUniformBlockName() const {
+  return "Lighting";
 }

@@ -35,6 +35,8 @@ class SceneShader : public Shader {
 
   void InitTextures();
 
+  void InitLighting();
+
   /* GL drawing methods */
 
   void Draw() override;
@@ -64,9 +66,13 @@ class SceneShader : public Shader {
 
   std::string GetModelTransBufferName() const;
 
+  std::string GetLightingBufferName() const;
+
   std::string GetGlobalTransUniformBlockName() const;
 
   std::string GetModelTransUniformBlockName() const;
+
+  std::string GetLightingUniformBlockName() const;
 
  private:
   as::Model scene_model_;

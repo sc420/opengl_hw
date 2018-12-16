@@ -10,6 +10,9 @@ global_trans;
 uniform ModelTrans { mat4 trans; }
 model_trans;
 
+uniform Lighting { vec3 pos; }
+lighting;
+
 layout(location = 0) in vec3 in_pos;
 layout(location = 1) in vec3 in_norm;
 layout(location = 2) in vec2 in_tex_coords;
