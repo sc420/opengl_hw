@@ -39,6 +39,11 @@ class Shader {
   /* GL initialization methods */
 
   template <class T>
+  void LinkDataToUniformBlock(const std::string &buffer_name,
+                              const std::string &uniform_block_name,
+                              const T &buffer_data);
+
+  template <class T>
   void InitUniformBuffer(const std::string &buffer_name, const T &buffer_data);
 
   void InitVertexArray(const as::Model &model);
@@ -66,6 +71,23 @@ class Shader {
 
   std::string GetShaderPath(const ShaderTypes &shader_type) const;
 };
+
+template <class T>
+inline void Shader::LinkDataToUniformBlock(
+    const std::string &buffer_name, const std::string &uniform_block_name,
+    const T &buffer_data) {
+  // Get managers
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
+  // Get names
+  const std::string &program_name = GetProgramName();
+  // Initialize uniform buffer
+  InitUniformBuffer(buffer_name, buffer_data);
+  // Bind the uniform block to the binding point
+  uniform_manager.AssignUniformBlockToBindingPoint(
+      program_name, uniform_block_name, buffer_name);
+  // Bind the buffer to the binding point
+  uniform_manager.BindBufferBaseToBindingPoint(buffer_name, buffer_name);
+}
 
 template <class T>
 inline void Shader::InitUniformBuffer(const std::string &buffer_name,

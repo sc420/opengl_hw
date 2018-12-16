@@ -15,7 +15,7 @@ class SceneShader : public Shader {
     glm::mat4 trans;
   };
 
-  struct Light {
+  struct Lighting {
     glm::vec3 pos;
   };
 
@@ -74,5 +74,7 @@ class SceneShader : public Shader {
   GlobalTrans global_trans_;
 
   ModelTrans model_trans_;
+
+  Lighting lighting_;
 };
 }  // namespace shader

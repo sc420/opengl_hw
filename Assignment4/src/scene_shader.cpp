@@ -5,7 +5,9 @@
  ******************************************************************************/
 
 shader::SceneShader::SceneShader()
-    : global_trans_(GlobalTrans()), model_trans_(ModelTrans()) {}
+    : global_trans_(GlobalTrans()),
+      model_trans_(ModelTrans()),
+      lighting_(Lighting()) {}
 
 void shader::SceneShader::LoadModel() {
   as::Model &model = GetModel();
@@ -32,30 +34,10 @@ void shader::SceneShader::InitVertexArrays() {
 }
 
 void shader::SceneShader::InitUniformBlocks() {
-  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
-  // Get names
-  const std::string &program_name = GetProgramName();
-  const std::string &global_trans_buffer_name = GetGlobalTransBufferName();
-  const std::string &model_trans_buffer_name = GetModelTransBufferName();
-  const std::string &global_trans_uniform_block_name =
-      GetGlobalTransUniformBlockName();
-  const std::string &model_trans_uniform_block_name =
-      GetModelTransUniformBlockName();
-  const std::string &global_trans_binding_name = global_trans_buffer_name;
-  const std::string &model_trans_binding_name = model_trans_buffer_name;
-  // Initialize the buffers
-  InitUniformBuffer(global_trans_buffer_name, global_trans_);
-  InitUniformBuffer(model_trans_buffer_name, model_trans_);
-  // Bind the uniform blocks to the the buffer
-  uniform_manager.AssignUniformBlockToBindingPoint(
-      program_name, global_trans_uniform_block_name, global_trans_binding_name);
-  uniform_manager.AssignUniformBlockToBindingPoint(
-      program_name, model_trans_uniform_block_name, model_trans_binding_name);
-  // Bind the buffers to the uniform blocks
-  uniform_manager.BindBufferBaseToBindingPoint(global_trans_buffer_name,
-                                               global_trans_binding_name);
-  uniform_manager.BindBufferBaseToBindingPoint(model_trans_buffer_name,
-                                               model_trans_binding_name);
+  LinkDataToUniformBlock(GetGlobalTransBufferName(),
+                         GetGlobalTransUniformBlockName(), global_trans_);
+  LinkDataToUniformBlock(GetModelTransBufferName(),
+                         GetModelTransUniformBlockName(), model_trans_);
 }
 
 void shader::SceneShader::InitTextures() {

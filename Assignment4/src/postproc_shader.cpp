@@ -38,20 +38,8 @@ void shader::PostprocShader::InitVertexArrays() {
 }
 
 void shader::PostprocShader::InitUniformBlocks() {
-  // Get managers
-  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
-  // Get names
-  const std::string &program_name = GetProgramName();
-  const std::string &buffer_name = GetPostprocInputsBufferName();
-  const std::string &uniform_block_name = GetPostprocInputsUniformBlockName();
-  const std::string &binding_name = buffer_name;
-  // Initialize the buffer
-  InitUniformBuffer(buffer_name, postproc_inputs_);
-  // Bind the uniform block to the the buffer
-  uniform_manager.AssignUniformBlockToBindingPoint(
-      program_name, uniform_block_name, binding_name);
-  // Bind the buffer to the uniform block
-  uniform_manager.BindBufferBaseToBindingPoint(buffer_name, binding_name);
+  LinkDataToUniformBlock(GetPostprocInputsBufferName(),
+                         GetPostprocInputsUniformBlockName(), postproc_inputs_);
 }
 
 /*******************************************************************************
