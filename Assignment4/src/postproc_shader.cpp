@@ -193,10 +193,6 @@ void shader::PostprocShader::UpdateMousePos(const glm::ivec2 &mouse_pos) {
   postproc_inputs_.mouse_pos = mouse_pos;
 }
 
-void shader::PostprocShader::UpdateWindowSize(const glm::ivec2 &window_size) {
-  postproc_inputs_.window_size = window_size;
-}
-
 void shader::PostprocShader::UpdateEffectIdx(const int effect_idx) {
   postproc_inputs_.effect_idx[0] = effect_idx;
 }

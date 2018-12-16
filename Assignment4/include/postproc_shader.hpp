@@ -20,7 +20,6 @@ class PostprocShader : public Shader {
     // will pad the memory for alignment, but C++ sizeof() won't)
     int enabled[2];
     glm::vec2 mouse_pos;
-    glm::vec2 window_size;
     int effect_idx[2];
     int pass_idx[2];
     float time[2];
@@ -57,8 +56,6 @@ class PostprocShader : public Shader {
   void UpdateEnabled(const bool enabled);
 
   void UpdateMousePos(const glm::ivec2 &mouse_pos);
-
-  void UpdateWindowSize(const glm::ivec2 &window_size);
 
   void UpdateEffectIdx(const int effect_idx);
 

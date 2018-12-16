@@ -35,7 +35,6 @@ const vec4 kErrorColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
 uniform PostprocInputs {
   int enabled[2];
   vec2 mouse_pos;
-  vec2 window_size;
   int effect_idx[2];
   int pass_idx[2];
   float time[2];
@@ -63,6 +62,18 @@ layout(location = 0) in vec2 vs_tex_coords;
 layout(location = 0) out vec4 fs_color;
 
 /*******************************************************************************
+ * Texture Handlers
+ ******************************************************************************/
+
+vec4 GetTexel(vec2 coord) { return texture(screen_tex, coord); }
+
+vec4 GetMultipassTexel(sampler2D tex, vec2 coord) {
+  return texture(tex, coord);
+}
+
+vec2 GetTextureSize() { return textureSize(screen_tex, 0); }
+
+/*******************************************************************************
  * Display Mode Handlers
  ******************************************************************************/
 
@@ -72,14 +83,13 @@ int CalcDisplayMode() {
   }
   const int effect_idx = postproc_inputs.effect_idx[0];
   const vec2 mouse_pos = postproc_inputs.mouse_pos;
-  const vec2 window_size = postproc_inputs.window_size;
+  const vec2 window_size = GetTextureSize();
   const vec2 reversed_mouse_pos =
       vec2(mouse_pos.x, window_size.y - mouse_pos.y);
   const vec2 dist = vec2(gl_FragCoord) - reversed_mouse_pos;
   if (effect_idx == kPostprocEffectMagnifier) {
     const float radius = sqrt(pow(dist.x, 2.0f) + pow(dist.y, 2.0f));
-    const float min_window_len =
-        min(postproc_inputs.window_size.x, postproc_inputs.window_size.y);
+    const float min_window_len = min(window_size.x, window_size.y);
     if (radius / min_window_len <= kMagnifierRadius) {
       return kDisplayModeMagnified;
     } else {
@@ -94,16 +104,6 @@ int CalcDisplayMode() {
       return kDisplayModeBar;
     }
   }
-}
-
-/*******************************************************************************
- * Texture Handlers
- ******************************************************************************/
-
-vec4 GetTexel(vec2 coord) { return texture(screen_tex, coord); }
-
-vec4 GetMultipassTexel(sampler2D tex, vec2 coord) {
-  return texture(tex, coord);
 }
 
 /*******************************************************************************
@@ -127,6 +127,7 @@ mat3 NormalizeKernel(mat3 kernel) {
 }
 
 vec4 ApplyKernel(mat3 kernel) {
+  const vec2 window_size = GetTextureSize();
   const int kHalfWidth = 1;
   const int kHalfHeight = 1;
   const mat3 norm_kernel = NormalizeKernel(kernel);
@@ -134,7 +135,7 @@ vec4 ApplyKernel(mat3 kernel) {
   for (int x = -1 * kHalfWidth; x <= kHalfWidth; x++) {
     for (int y = -1 * kHalfHeight; y <= kHalfHeight; y++) {
       const float kernel_val = norm_kernel[y + kHalfHeight][x + kHalfWidth];
-      const vec2 ofs = vec2(x, y) / postproc_inputs.window_size;
+      const vec2 ofs = vec2(x, y) / window_size;
       sum += kernel_val * GetTexel(vs_tex_coords + ofs);
     }
   }
@@ -174,6 +175,7 @@ vec4 CalcDoG() {
   const float twoSigmaRSquared = 2.0f * sigma_r * sigma_r;
   const int halfWidth = int(ceil(2.0f * sigma_r));
 
+  const vec2 window_size = GetTextureSize();
   vec2 sum = vec2(0.0f);
   vec2 norm = vec2(0.0f);
   for (int i = -halfWidth; i <= halfWidth; ++i) {
@@ -181,8 +183,7 @@ vec4 CalcDoG() {
       float d = length(vec2(i, j));
       vec2 kernel =
           vec2(exp(-d * d / twoSigmaESquared), exp(-d * d / twoSigmaRSquared));
-      vec4 c =
-          GetTexel(vs_tex_coords + vec2(i, j) / postproc_inputs.window_size);
+      vec4 c = GetTexel(vs_tex_coords + vec2(i, j) / window_size);
       vec2 L = vec2(0.299f * c.r + 0.587f * c.g + 0.114f * c.b);
       norm += 2.0f * kernel;
       sum += kernel * L;
@@ -251,7 +252,7 @@ vec4 CalcPixelation() {
 
   const float texel_size = kCellWidth * kCellHeight;
   const vec2 cell_size = vec2(kCellWidth, kCellHeight);
-  const vec2 window_size = postproc_inputs.window_size;
+  const vec2 window_size = GetTextureSize();
   const vec2 screen_coords = vs_tex_coords * window_size;
   const vec2 low_pos = floor(screen_coords / cell_size) * cell_size;
   const vec2 high_pos = low_pos + cell_size;
@@ -287,7 +288,7 @@ vec4 CalcGaussianBlur(sampler2D tex, bool horizontal) {
   const int len = 5;
   const float weight[len] =
       float[](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);
-  vec2 window_size = postproc_inputs.window_size;
+  const vec2 window_size = GetTextureSize();
   vec4 sum = weight[0] * GetMultipassTexel(tex, vs_tex_coords);
   if (horizontal) {
     for (int x = 1; x < len; x++) {
@@ -337,8 +338,8 @@ vec4 CalcBloomEffect() {
 vec4 CalcMagnifier() {
   const float kMagnifyFactor = 2.0f;
 
+  const vec2 window_size = GetTextureSize();
   const vec2 mouse_pos = postproc_inputs.mouse_pos;
-  const vec2 window_size = postproc_inputs.window_size;
   const vec2 center =
       vec2(mouse_pos.x, window_size.y - mouse_pos.y) / window_size;
   const vec2 dist = vs_tex_coords - center;
@@ -442,13 +443,13 @@ vec3 posterize(vec3 color, float steps) { return floor(color * steps) / steps; }
 float quantize(float n, float steps) { return floor(n * steps) / steps; }
 
 vec4 downsample(sampler2D sampler, vec2 uv, float pixelSize) {
-  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const vec2 iResolution = GetTextureSize();
 
-  return texture(sampler, uv - mod(uv, vec2(pixelSize) / iResolution.xy));
+  return texture(sampler, uv - mod(uv, vec2(pixelSize) / iResolution));
 }
 
 vec3 edge(sampler2D sampler, vec2 uv, float sampleSize) {
-  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const vec2 iResolution = GetTextureSize();
   const float iTime = postproc_inputs.time[0];
 
   float dx = sampleSize / iResolution.x;
@@ -475,11 +476,11 @@ float noise(float p) {
 vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
   const float kTileSize = 16;
 
-  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const vec2 iResolution = GetTextureSize();
   const float iTime = postproc_inputs.time[0];
   const float Amount = 0.1f + 0.5f * abs(sin(iTime));
 
-  vec2 pixel = vec2(1.0) / iResolution.xy;
+  vec2 pixel = vec2(1.0) / iResolution;
   vec3 field = rgb2hsv(edge(sampler, uv, edgeSize));
   vec2 distort = pixel * sin((field.rb) * kPi * 2.0);
   float shiftx =
@@ -504,7 +505,7 @@ vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
 // Reference: https://www.shadertoy.com/view/MdfGD2
 vec4 ShampainGlitch01(vec2 fragCoord) {
   vec4 fragColor;
-  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const vec2 iResolution = GetTextureSize();
   const float iTime = postproc_inputs.time[0];
   const vec4 iMouse = vec4(postproc_inputs.mouse_pos, 0.0f, 0.0f);
 
@@ -516,7 +517,7 @@ vec4 ShampainGlitch01(vec2 fragCoord) {
   const float yuv_threshold = 0.9;
   const float time_frq = 16.0;
 
-  vec2 uv = fragCoord.xy / iResolution.xy;
+  vec2 uv = fragCoord.xy / iResolution;
   //  uv.y = 1.0 - uv.y;
 
   const float min_change_frq = 4.0;
@@ -549,11 +550,11 @@ vec4 ShampainGlitch01(vec2 fragCoord) {
 // Reference: https://www.shadertoy.com/view/lsfGD2
 vec4 ShampainGlitch02(vec2 fragCoord) {
   vec4 fragColor;
-  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const vec2 iResolution = GetTextureSize();
   const float iTime = postproc_inputs.time[0];
 
   float aspect = iResolution.x / iResolution.y;
-  vec2 uv = fragCoord.xy / iResolution.xy;
+  vec2 uv = fragCoord.xy / iResolution;
   // uv.y = 1.0 - uv.y;
 
   float time = mod(iTime, 32.0);  // + modelmat[0].x + modelmat[0].z;
@@ -613,10 +614,10 @@ vec4 ShampainGlitch02(vec2 fragCoord) {
 vec4 GlitchShaderB(vec2 fragCoord) {
   vec4 fragColor;
 
-  const vec3 iResolution = vec3(postproc_inputs.window_size, 0.0f);
+  const vec2 iResolution = GetTextureSize();
   const float iTime = postproc_inputs.time[0];
 
-  vec2 uv = fragCoord.xy / iResolution.xy;
+  vec2 uv = fragCoord.xy / iResolution;
 
   float wow = clamp(mod(noise(iTime + uv.y), 1.0), 0.0, 1.0) * 2.0 - 1.0;
   vec3 finalColor;
@@ -627,7 +628,8 @@ vec4 GlitchShaderB(vec2 fragCoord) {
 }
 
 vec4 CalcSpecial() {
-  const vec2 window_tex_coords = vs_tex_coords * postproc_inputs.window_size;
+  const vec2 window_size = GetTextureSize();
+  const vec2 window_tex_coords = vs_tex_coords * window_size;
   return 0.4f * ShampainGlitch01(window_tex_coords) +
          0.4f * ShampainGlitch02(window_tex_coords) +
          0.2f * GlitchShaderB(window_tex_coords);

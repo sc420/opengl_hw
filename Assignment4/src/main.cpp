@@ -200,8 +200,6 @@ void GLUTReshapeCallback(const int width, const int height) {
   postproc_shader.UpdateScreenTextures(width, height);
   // Update screen depth renderbuffers
   postproc_shader.UpdateScreenRenderbuffers(width, height);
-  // Update window size
-  postproc_shader.UpdateWindowSize(window_size);
 }
 
 /*******************************************************************************
