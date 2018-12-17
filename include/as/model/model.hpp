@@ -54,7 +54,7 @@ class Model {
   const std::set<Texture> ProcessMaterialTextures(
       const fs::path &dir, const aiMaterial *ai_material) const;
 
-  const std::set<Texture> ProcessMaterialTexturesOfType(
+  std::set<Texture> ProcessMaterialTexturesOfType(
       const fs::path &dir, const aiMaterial *ai_material,
       const aiTextureType ai_texture_type) const;
 

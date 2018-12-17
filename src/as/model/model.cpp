@@ -130,12 +130,20 @@ const as::Material as::Model::ProcessMeshMaterial(const fs::path &dir,
 
 const std::set<as::Texture> as::Model::ProcessMaterialTextures(
     const fs::path &dir, const aiMaterial *ai_material) const {
+  std::set<Texture> ambient_textures =
+      ProcessMaterialTexturesOfType(dir, ai_material, aiTextureType_AMBIENT);
   std::set<Texture> diffuse_textures =
       ProcessMaterialTexturesOfType(dir, ai_material, aiTextureType_DIFFUSE);
-  return diffuse_textures;
+  std::set<Texture> specular_textures =
+      ProcessMaterialTexturesOfType(dir, ai_material, aiTextureType_SPECULAR);
+  // Merge all textures
+  std::set<Texture> all_textures(ambient_textures);
+  all_textures.insert(diffuse_textures.begin(), diffuse_textures.end());
+  all_textures.insert(specular_textures.begin(), specular_textures.end());
+  return all_textures;
 }
 
-const std::set<as::Texture> as::Model::ProcessMaterialTexturesOfType(
+std::set<as::Texture> as::Model::ProcessMaterialTexturesOfType(
     const fs::path &dir, const aiMaterial *ai_material,
     const aiTextureType ai_texture_type) const {
   std::set<Texture> textures;

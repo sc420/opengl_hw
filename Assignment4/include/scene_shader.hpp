@@ -15,6 +15,12 @@ class SceneShader : public Shader {
     glm::mat4 trans;
   };
 
+  struct ModelMaterial {
+    glm::vec4 ambient_color;
+    glm::vec4 diffuse_color;
+    glm::vec4 specular_color;
+  };
+
   struct Lighting {
     glm::vec4 light_color;
     glm::vec4 light_pos;
@@ -50,6 +56,8 @@ class SceneShader : public Shader {
 
   void UpdateModelTrans(const ModelTrans &model_trans);
 
+  void UpdateModelMaterial(const as::Material &material);
+
   void UpdateViewPos(const glm::vec3 &view_pos);
 
   /* Name management */
@@ -71,13 +79,19 @@ class SceneShader : public Shader {
 
   std::string GetModelTransBufferName() const;
 
+  std::string GetModelMaterialBufferName() const;
+
   std::string GetLightingBufferName() const;
 
   std::string GetGlobalTransUniformBlockName() const;
 
   std::string GetModelTransUniformBlockName() const;
 
+  std::string GetModelMaterialUniformBlockName() const;
+
   std::string GetLightingUniformBlockName() const;
+
+  std::string GetTextureUnitName(const as::Texture &texture) const;
 
  private:
   as::Model scene_model_;
@@ -85,6 +99,8 @@ class SceneShader : public Shader {
   GlobalTrans global_trans_;
 
   ModelTrans model_trans_;
+
+  ModelMaterial model_material_;
 
   Lighting lighting_;
 };

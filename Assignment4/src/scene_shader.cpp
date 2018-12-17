@@ -41,13 +41,13 @@ void shader::SceneShader::InitUniformBlocks() {
                          GetModelTransUniformBlockName(), model_trans_);
   LinkDataToUniformBlock(GetLightingBufferName(), GetLightingUniformBlockName(),
                          lighting_);
+  LinkDataToUniformBlock(GetModelMaterialBufferName(),
+                         GetModelMaterialUniformBlockName(), model_material_);
 }
 
 void shader::SceneShader::InitTextures() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
-  // Get names
-  const std::string &unit_name = GetProgramName();
   // Get models
   const as::Model &model = GetModel();
   // Initialize textures in each mesh
@@ -61,6 +61,8 @@ void shader::SceneShader::InitTextures() {
       if (texture_manager.HasTexture(path)) {
         continue;
       }
+      // Get names
+      const std::string &unit_name = GetTextureUnitName(texture);
       // Load the texture
       GLsizei width, height;
       int comp;
@@ -131,15 +133,26 @@ void shader::SceneShader::Draw() {
     const as::Material &material = mesh.GetMaterial();
     // Get the textures
     const std::set<as::Texture> &textures = material.GetTextures();
+    /* Update material colors */
+    UpdateModelMaterial(material);
     /* Update textures */
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();
+      const std::string &type = texture.GetType();
       // Bind the texture
       texture_manager.BindTexture(path);
       // Get the unit index
       const GLuint unit_idx = texture_manager.GetUnitIdx(path);
       // Set the texture handler to the unit index
-      uniform_manager.SetUniform1Int(program_name, "tex_hdlr", unit_idx);
+      if (type == "AMBIENT") {
+        uniform_manager.SetUniform1Int(program_name, "ambient_tex", unit_idx);
+      } else if (type == "DIFFUSE") {
+        uniform_manager.SetUniform1Int(program_name, "diffuse_tex", unit_idx);
+      } else if (type == "SPECULAR") {
+        uniform_manager.SetUniform1Int(program_name, "specular_tex", unit_idx);
+      } else {
+        throw std::runtime_error("Unknown type '" + type + "'");
+      }
     }
     /* Draw vertex arrays */
     UseMesh(mesh_idx);
@@ -167,6 +180,17 @@ void shader::SceneShader::UpdateModelTrans(const ModelTrans &model_trans) {
   model_trans_ = model_trans;
   // Update the buffer
   const std::string &buffer_name = GetModelTransBufferName();
+  buffer_manager.UpdateBuffer(buffer_name);
+}
+
+void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Update material
+  model_material_.ambient_color = material.GetAmbientColor();
+  model_material_.diffuse_color = material.GetDiffuseColor();
+  model_material_.specular_color = material.GetSpecularColor();
+  // Update the buffer
+  const std::string &buffer_name = GetModelMaterialBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
@@ -209,6 +233,10 @@ std::string shader::SceneShader::GetModelTransBufferName() const {
   return "model_trans";
 }
 
+std::string shader::SceneShader::GetModelMaterialBufferName() const {
+  return "model_material";
+}
+
 std::string shader::SceneShader::GetLightingBufferName() const {
   return "lighting";
 }
@@ -221,6 +249,15 @@ std::string shader::SceneShader::GetModelTransUniformBlockName() const {
   return "ModelTrans";
 }
 
+std::string shader::SceneShader::GetModelMaterialUniformBlockName() const {
+  return "ModelMaterial";
+}
+
 std::string shader::SceneShader::GetLightingUniformBlockName() const {
   return "Lighting";
+}
+
+std::string shader::SceneShader::GetTextureUnitName(
+    const as::Texture &texture) const {
+  return GetProgramName() + "/" + texture.GetType();
 }

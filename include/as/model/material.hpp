@@ -9,21 +9,21 @@ class Material {
  public:
   Material();
 
-  Material(const glm::vec3 &ambient_color, const glm::vec3 &diffuse_color,
-           const glm::vec3 &specular_color, const std::set<Texture> &textures);
+  Material(const glm::vec4 &ambient_color, const glm::vec4 &diffuse_color,
+           const glm::vec4 &specular_color, const std::set<Texture> &textures);
 
-  glm::vec3 GetAmbientColor() const;
+  glm::vec4 GetAmbientColor() const;
 
-  glm::vec3 GetDiffuseColor() const;
+  glm::vec4 GetDiffuseColor() const;
 
-  glm::vec3 GetSpecularColor() const;
+  glm::vec4 GetSpecularColor() const;
 
   std::set<Texture> GetTextures() const;
 
  private:
-  glm::vec3 ambient_color_;
-  glm::vec3 diffuse_color_;
-  glm::vec3 specular_color_;
+  glm::vec4 ambient_color_;
+  glm::vec4 diffuse_color_;
+  glm::vec4 specular_color_;
   std::set<Texture> textures_;
 };
 }  // namespace as
