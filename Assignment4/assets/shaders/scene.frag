@@ -5,6 +5,7 @@
  ******************************************************************************/
 
 uniform ModelMaterial {
+  ivec4 use_tex;
   vec4 ambient_color;
   vec4 diffuse_color;
   vec4 specular_color;
@@ -46,11 +47,35 @@ vs_surface;
 
 layout(location = 0) out vec4 fs_color;
 
+vec4 GetAmbientColor() {
+  if (model_material.use_tex.x > 0) {
+    return texture(ambient_tex, vs_tex.coords);
+  } else {
+    return model_material.ambient_color;
+  }
+}
+
+vec4 GetDiffuseColor() {
+  if (model_material.use_tex.y > 0) {
+    return texture(diffuse_tex, vs_tex.coords);
+  } else {
+    return model_material.diffuse_color;
+  }
+}
+
+vec4 GetSpecularColor() {
+  if (model_material.use_tex.z > 0) {
+    return texture(specular_tex, vs_tex.coords);
+  } else {
+    return model_material.specular_color;
+  }
+}
+
 void main() {
-  // Get texture color
-  const vec4 tex_ambient_color = texture(ambient_tex, vs_tex.coords);
-  const vec4 tex_diffuse_color = texture(diffuse_tex, vs_tex.coords);
-  const vec4 tex_specular_color = texture(specular_tex, vs_tex.coords);
+  // Get material colors
+  const vec4 tex_ambient_color = GetAmbientColor();
+  const vec4 tex_diffuse_color = GetDiffuseColor();
+  const vec4 tex_specular_color = GetSpecularColor();
   // Get directional vectors
   const vec3 norm = normalize(vs_surface.frag_norm);
   const vec3 light_dir =
@@ -70,9 +95,9 @@ void main() {
   const vec4 specular_color =
       lighting.light_intensity.z * specular_strength * lighting.light_color;
   // Calculate lighting color
-  const vec4 lighting_color = ambient_color +
+  const vec4 lighting_color = ambient_color * tex_ambient_color +
                               diffuse_color * tex_diffuse_color +
                               specular_color * tex_specular_color;
 
-  fs_color = tex_specular_color;
+  fs_color = lighting_color;
 }

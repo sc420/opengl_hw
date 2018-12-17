@@ -16,6 +16,7 @@ class SceneShader : public Shader {
   };
 
   struct ModelMaterial {
+    glm::ivec4 use_tex;
     glm::vec4 ambient_color;
     glm::vec4 diffuse_color;
     glm::vec4 specular_color;

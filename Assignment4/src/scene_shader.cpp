@@ -186,6 +186,9 @@ void shader::SceneShader::UpdateModelTrans(const ModelTrans &model_trans) {
 void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update material
+  model_material_.use_tex.x = static_cast<int>(material.HasAmbientTexture());
+  model_material_.use_tex.y = static_cast<int>(material.HasDiffuseTexture());
+  model_material_.use_tex.z = static_cast<int>(material.HasSpecularTexture());
   model_material_.ambient_color = material.GetAmbientColor();
   model_material_.diffuse_color = material.GetDiffuseColor();
   model_material_.specular_color = material.GetSpecularColor();
