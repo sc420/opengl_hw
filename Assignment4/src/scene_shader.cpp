@@ -138,25 +138,32 @@ void shader::SceneShader::Draw() {
     /* Update textures */
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();
-      const std::string &type = texture.GetType();
+      const aiTextureType type = texture.GetType();
       // Bind the texture
       texture_manager.BindTexture(path);
       // Get the unit index
       const GLuint unit_idx = texture_manager.GetUnitIdx(path);
       // Set the texture handler to the unit index
-      if (type == "AMBIENT") {
-        uniform_manager.SetUniform1Int(program_name, "ambient_tex", unit_idx);
-      } else if (type == "DIFFUSE") {
-        uniform_manager.SetUniform1Int(program_name, "diffuse_tex", unit_idx);
-      } else if (type == "SPECULAR") {
-        uniform_manager.SetUniform1Int(program_name, "specular_tex", unit_idx);
-      } else {
-        throw std::runtime_error("Unknown type '" + type + "'");
+      switch (type) {
+        case aiTextureType_AMBIENT: {
+          uniform_manager.SetUniform1Int(program_name, "ambient_tex", unit_idx);
+        } break;
+        case aiTextureType_DIFFUSE: {
+          uniform_manager.SetUniform1Int(program_name, "diffuse_tex", unit_idx);
+        } break;
+        case aiTextureType_SPECULAR: {
+          uniform_manager.SetUniform1Int(program_name, "specular_tex",
+                                         unit_idx);
+        } break;
+        default: {
+          throw std::runtime_error("Unknown type '" + std ::to_string(type) +
+                                   "'");
+        }
       }
+      /* Draw vertex arrays */
+      UseMesh(mesh_idx);
+      glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
     }
-    /* Draw vertex arrays */
-    UseMesh(mesh_idx);
-    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
   }
 }
 
@@ -262,5 +269,5 @@ std::string shader::SceneShader::GetLightingUniformBlockName() const {
 
 std::string shader::SceneShader::GetTextureUnitName(
     const as::Texture &texture) const {
-  return GetProgramName() + "/" + texture.GetType();
+  return GetProgramName() + "/type[" + std::to_string(texture.GetType()) + "]";
 }

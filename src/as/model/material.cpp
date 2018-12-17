@@ -16,15 +16,15 @@ as::Material::Material(const glm::vec4& ambient_color,
       textures_(textures) {}
 
 bool as::Material::HasAmbientTexture() const {
-  return HasTextureType("AMBIENT");
+  return HasTextureType(aiTextureType_AMBIENT);
 }
 
 bool as::Material::HasDiffuseTexture() const {
-  return HasTextureType("DIFFUSE");
+  return HasTextureType(aiTextureType_DIFFUSE);
 }
 
 bool as::Material::HasSpecularTexture() const {
-  return HasTextureType("SPECULAR");
+  return HasTextureType(aiTextureType_SPECULAR);
 }
 
 glm::vec4 as::Material::GetAmbientColor() const { return ambient_color_; }
@@ -35,7 +35,7 @@ glm::vec4 as::Material::GetSpecularColor() const { return specular_color_; }
 
 std::set<as::Texture> as::Material::GetTextures() const { return textures_; }
 
-bool as::Material::HasTextureType(const std::string& type) const {
+bool as::Material::HasTextureType(const aiTextureType type) const {
   for (const Texture& texture : textures_) {
     if (texture.GetType() == type) {
       return true;

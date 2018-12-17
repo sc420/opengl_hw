@@ -32,6 +32,6 @@ class Material {
   glm::vec4 specular_color_;
   std::set<Texture> textures_;
 
-  bool HasTextureType(const std::string &type) const;
+  bool HasTextureType(const aiTextureType type) const;
 };
 }  // namespace as

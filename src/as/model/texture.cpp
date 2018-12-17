@@ -1,6 +1,6 @@
 #include "as/model/texture.hpp"
 
-as::Texture::Texture(const std::string &path, const std::string &type)
+as::Texture::Texture(const std::string &path, const aiTextureType type)
     : path_(path), type_(type) {}
 
 bool as::Texture::operator<(const Texture &rhs) const {
@@ -17,4 +17,4 @@ bool as::Texture::operator<(const Texture &rhs) const {
 
 std::string as::Texture::GetPath() const { return path_; }
 
-std::string as::Texture::GetType() const { return type_; }
+aiTextureType as::Texture::GetType() const { return type_; }

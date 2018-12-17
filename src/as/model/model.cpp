@@ -154,57 +154,10 @@ std::set<as::Texture> as::Model::ProcessMaterialTexturesOfType(
     // Build the full path
     const fs::path full_path = dir / fs::path(path.C_Str());
     // Get type name
-    const std::string type = AiTextureTypeToStr(ai_texture_type);
-    const Texture texture = Texture(full_path.string(), type);
+    const Texture texture = Texture(full_path.string(), ai_texture_type);
     textures.insert(texture);
   }
   return textures;
-}
-
-const std::string as::Model::AiTextureTypeToStr(
-    const aiTextureType ai_texture_type) const {
-  switch (ai_texture_type) {
-    case aiTextureType_DIFFUSE: {
-      return "DIFFUSE";
-    } break;
-    case aiTextureType_SPECULAR: {
-      return "SPECULAR";
-    } break;
-    case aiTextureType_AMBIENT: {
-      return "AMBIENT";
-    } break;
-    case aiTextureType_EMISSIVE: {
-      return "EMISSIVE";
-    } break;
-    case aiTextureType_HEIGHT: {
-      return "HEIGHT";
-    } break;
-    case aiTextureType_NORMALS: {
-      return "NORMALS";
-    } break;
-    case aiTextureType_SHININESS: {
-      return "SHININESS";
-    } break;
-    case aiTextureType_OPACITY: {
-      return "OPACITY";
-    } break;
-    case aiTextureType_DISPLACEMENT: {
-      return "DISPLACEMENT";
-    } break;
-    case aiTextureType_LIGHTMAP: {
-      return "LIGHTMAP";
-    } break;
-    case aiTextureType_REFLECTION: {
-      return "REFLECTION";
-    } break;
-    case aiTextureType_UNKNOWN: {
-      return "UNKNOWN";
-    } break;
-    default: {
-      throw std::runtime_error("Unknown texture type '" +
-                               std::to_string(ai_texture_type) + "'");
-    }
-  }
 }
 
 const glm::vec4 as::Model::GetMaterialColor(const aiMaterial *ai_material,

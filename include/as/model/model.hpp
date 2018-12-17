@@ -58,9 +58,6 @@ class Model {
       const fs::path &dir, const aiMaterial *ai_material,
       const aiTextureType ai_texture_type) const;
 
-  const std::string AiTextureTypeToStr(
-      const aiTextureType ai_texture_type) const;
-
   const glm::vec4 GetMaterialColor(const aiMaterial *ai_material,
                                    const std::string &key) const;
 
