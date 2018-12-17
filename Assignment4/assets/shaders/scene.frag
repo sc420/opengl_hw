@@ -1,6 +1,12 @@
 #version 440
 
 /*******************************************************************************
+ * Constants
+ ******************************************************************************/
+
+const float kPi = 3.1415926535897932384626433832795;
+
+/*******************************************************************************
  * Uniform Blocks
  ******************************************************************************/
 
@@ -58,15 +64,11 @@ vec3 GetLightDir() {
   return normalize(vec3(lighting.light_pos) - vs_surface.frag_pos);
 }
 
-vec3 GetReflectDir() {
-  const vec3 light_dir = GetLightDir();
-  const vec3 norm = GetNorm();
-  return reflect(-light_dir, norm);
-}
-
 vec3 GetViewDir() {
   return normalize(vec3(lighting.view_pos) - vs_surface.frag_pos);
 }
+
+vec3 GetHalfwayDir() { return normalize(GetLightDir() + GetViewDir()); }
 
 vec4 GetAmbientColor() {
   vec4 tex_color;
@@ -102,12 +104,15 @@ vec4 GetSpecularColor() {
   } else {
     tex_color = model_material.specular_color;
   }
-  const vec3 view_dir = GetViewDir();
-  const vec3 reflect_dir = GetReflectDir();
+  const vec3 norm = GetNorm();
+  const vec3 halfway_dir = GetHalfwayDir();
+  const float shininess = model_material.shininess.x;
+  const float energy_conservation = (8.0f + shininess) / (8.0f * kPi);
   const float specular_strength =
-      pow(max(dot(view_dir, reflect_dir), 0.0f), model_material.shininess.x);
-  const vec4 affecting_color =
-      lighting.light_intensity.z * specular_strength * lighting.light_color;
+      pow(max(dot(norm, halfway_dir), 0.0f), shininess);
+  const vec4 affecting_color = lighting.light_intensity.z *
+                               energy_conservation * specular_strength *
+                               lighting.light_color;
   return affecting_color * tex_color;
 }
 
