@@ -211,8 +211,7 @@ const glm::vec4 as::Model::GetMaterialColor(const aiMaterial *ai_material,
                                             const std::string &key) const {
   aiColor4D ai_color;
   glm::vec4 ambient_color(0.0f);
-  if (aiGetMaterialColor(ai_material, key.c_str(), 0, 0, &ai_color) ==
-      AI_SUCCESS) {
+  if (ai_material->Get(key.c_str(), 0, 0, ai_color) == AI_SUCCESS) {
     return ConvertAiColorToVec(ai_color);
   } else {
     return glm::vec4(0.0f);
