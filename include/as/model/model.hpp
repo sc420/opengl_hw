@@ -14,6 +14,7 @@
 /* Project libraries */
 #include "as/common.hpp"
 #include "as/model/loader.hpp"
+#include "as/model/material.hpp"
 #include "as/model/mesh.hpp"
 #include "as/model/node.hpp"
 #include "as/model/texture.hpp"
@@ -42,18 +43,27 @@ class Model {
   const Mesh ProcessMesh(const fs::path &dir, const aiScene *ai_scene,
                          const aiMesh *ai_mesh);
 
-  std::vector<Vertex> ProcessMeshVertices(const aiMesh *ai_mesh) const;
+  const std::vector<Vertex> ProcessMeshVertices(const aiMesh *ai_mesh) const;
 
-  std::vector<size_t> ProcessMeshIdxs(const aiMesh *ai_mesh) const;
+  const std::vector<size_t> ProcessMeshIdxs(const aiMesh *ai_mesh) const;
 
-  std::set<Texture> ProcessMeshTextures(const fs::path &dir,
-                                        const aiScene *ai_scene,
-                                        const aiMesh *ai_mesh) const;
+  const Material ProcessMeshMaterial(const fs::path &dir,
+                                     const aiScene *ai_scene,
+                                     const aiMesh *ai_mesh) const;
 
-  std::set<Texture> ProcessMaterialTextures(
+  const std::set<Texture> ProcessMaterialTextures(
+      const fs::path &dir, const aiMaterial *ai_material) const;
+
+  const std::set<Texture> ProcessMaterialTexturesOfType(
       const fs::path &dir, const aiMaterial *ai_material,
       const aiTextureType ai_texture_type) const;
 
-  std::string AiTextureTypeToStr(const aiTextureType ai_texture_type) const;
+  const std::string AiTextureTypeToStr(
+      const aiTextureType ai_texture_type) const;
+
+  const glm::vec4 GetMaterialColor(const aiMaterial *ai_material,
+                                   const std::string &key) const;
+
+  glm::vec4 ConvertAiColorToVec(const aiColor4D &ai_color) const;
 };
 }  // namespace as

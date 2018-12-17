@@ -170,6 +170,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\gl\vertex_spec_manager.hpp" />
     <ClInclude Include="..\include\as\model\converter.hpp" />
     <ClInclude Include="..\include\as\model\loader.hpp" />
+    <ClInclude Include="..\include\as\model\material.hpp" />
     <ClInclude Include="..\include\as\model\mesh.hpp" />
     <ClInclude Include="..\include\as\model\model.hpp" />
     <ClInclude Include="..\include\as\model\model_tools.hpp" />
@@ -195,6 +196,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\as\gl\vertex_spec_manager.cpp" />
     <ClCompile Include="..\src\as\model\converter.cpp" />
     <ClCompile Include="..\src\as\model\loader.cpp" />
+    <ClCompile Include="..\src\as\model\material.cpp" />
     <ClCompile Include="..\src\as\model\mesh.cpp" />
     <ClCompile Include="..\src\as\model\model.cpp" />
     <ClCompile Include="..\src\as\model\node.cpp" />

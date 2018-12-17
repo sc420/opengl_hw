@@ -53,7 +53,8 @@ void shader::SceneShader::InitTextures() {
   // Initialize textures in each mesh
   const std::vector<as::Mesh> &meshes = model.GetMeshes();
   for (const as::Mesh &mesh : meshes) {
-    const std::set<as::Texture> &textures = mesh.GetTextures();
+    const as::Material &material = mesh.GetMaterial();
+    const std::set<as::Texture> &textures = material.GetTextures();
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();
       // Check if the texture has been loaded
@@ -126,8 +127,10 @@ void shader::SceneShader::Draw() {
         GetMeshVertexArrayIdxsBufferName(mesh_idx);
     // Get the array indexes
     const std::vector<size_t> &idxs = mesh.GetIdxs();
+    // Get the material
+    const as::Material &material = mesh.GetMaterial();
     // Get the textures
-    const std::set<as::Texture> &textures = mesh.GetTextures();
+    const std::set<as::Texture> &textures = material.GetTextures();
     /* Update textures */
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();

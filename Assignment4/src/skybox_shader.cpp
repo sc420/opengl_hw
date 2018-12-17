@@ -55,7 +55,8 @@ void shader::SkyboxShader::InitTextures() {
       {"bottom.jpg", 3}, {"front.jpg", 4}, {"back.jpg", 5}};
   const std::vector<as::Mesh> &meshes = model.GetMeshes();
   for (const as::Mesh &mesh : meshes) {
-    const std::set<as::Texture> &textures = mesh.GetTextures();
+    const as::Material &material = mesh.GetMaterial();
+    const std::set<as::Texture> &textures = material.GetTextures();
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();
       // Check if the texture has been loaded

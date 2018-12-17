@@ -87,6 +87,9 @@
     <ClInclude Include="..\include\as\model\loader.hpp">
       <Filter>include\as\model</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\as\model\material.hpp">
+      <Filter>include\as\model</Filter>
+    </ClInclude>
     <ClInclude Include="..\include\as\model\mesh.hpp">
       <Filter>include\as\model</Filter>
     </ClInclude>
@@ -156,6 +159,9 @@
       <Filter>src\as\model</Filter>
     </ClCompile>
     <ClCompile Include="..\src\as\model\loader.cpp">
+      <Filter>src\as\model</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\as\model\material.cpp">
       <Filter>src\as\model</Filter>
     </ClCompile>
     <ClCompile Include="..\src\as\model\mesh.cpp">

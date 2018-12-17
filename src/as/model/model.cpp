@@ -69,12 +69,11 @@ const as::Mesh as::Model::ProcessMesh(const fs::path &dir,
                                       const aiMesh *ai_mesh) {
   const std::vector<Vertex> vertices = ProcessMeshVertices(ai_mesh);
   const std::vector<size_t> idxs = ProcessMeshIdxs(ai_mesh);
-  const std::set<Texture> textures =
-      ProcessMeshTextures(dir, ai_scene, ai_mesh);
-  return Mesh(ai_mesh->mName.C_Str(), vertices, idxs, textures);
+  const Material material = ProcessMeshMaterial(dir, ai_scene, ai_mesh);
+  return Mesh(ai_mesh->mName.C_Str(), vertices, idxs, material);
 }
 
-std::vector<as::Vertex> as::Model::ProcessMeshVertices(
+const std::vector<as::Vertex> as::Model::ProcessMeshVertices(
     const aiMesh *ai_mesh) const {
   std::vector<Vertex> vertices;
   for (size_t vtx_idx = 0; vtx_idx < ai_mesh->mNumVertices; vtx_idx++) {
@@ -98,7 +97,8 @@ std::vector<as::Vertex> as::Model::ProcessMeshVertices(
   return vertices;
 }
 
-std::vector<size_t> as::Model::ProcessMeshIdxs(const aiMesh *ai_mesh) const {
+const std::vector<size_t> as::Model::ProcessMeshIdxs(
+    const aiMesh *ai_mesh) const {
   std::vector<size_t> idxs;
   for (size_t face_idx = 0; face_idx < ai_mesh->mNumFaces; face_idx++) {
     const aiFace &face = ai_mesh->mFaces[face_idx];
@@ -110,17 +110,32 @@ std::vector<size_t> as::Model::ProcessMeshIdxs(const aiMesh *ai_mesh) const {
   return idxs;
 }
 
-std::set<as::Texture> as::Model::ProcessMeshTextures(
-    const fs::path &dir, const aiScene *ai_scene, const aiMesh *ai_mesh) const {
-  // if (ai_mesh->mMaterialIndex >= 0) {
+const as::Material as::Model::ProcessMeshMaterial(const fs::path &dir,
+                                                  const aiScene *ai_scene,
+                                                  const aiMesh *ai_mesh) const {
+  if (ai_mesh->mMaterialIndex < 0) {
+    return Material();
+  }
+  // Get the material
   const aiMaterial *ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
-  std::set<Texture> diffuse_textures =
-      ProcessMaterialTextures(dir, ai_material, aiTextureType_DIFFUSE);
-  return diffuse_textures;
-  //}
+  // Get the material colors
+  const glm::vec4 ambient_color = GetMaterialColor(ai_material, "$clr.ambient");
+  const glm::vec4 diffuse_color = GetMaterialColor(ai_material, "$clr.diffuse");
+  const glm::vec4 specular_color =
+      GetMaterialColor(ai_material, "$clr.specular");
+  // Get the material textures
+  const std::set<Texture> textures = ProcessMaterialTextures(dir, ai_material);
+  return Material(ambient_color, diffuse_color, specular_color, textures);
 }
 
-std::set<as::Texture> as::Model::ProcessMaterialTextures(
+const std::set<as::Texture> as::Model::ProcessMaterialTextures(
+    const fs::path &dir, const aiMaterial *ai_material) const {
+  std::set<Texture> diffuse_textures =
+      ProcessMaterialTexturesOfType(dir, ai_material, aiTextureType_DIFFUSE);
+  return diffuse_textures;
+}
+
+const std::set<as::Texture> as::Model::ProcessMaterialTexturesOfType(
     const fs::path &dir, const aiMaterial *ai_material,
     const aiTextureType ai_texture_type) const {
   std::set<Texture> textures;
@@ -138,7 +153,7 @@ std::set<as::Texture> as::Model::ProcessMaterialTextures(
   return textures;
 }
 
-std::string as::Model::AiTextureTypeToStr(
+const std::string as::Model::AiTextureTypeToStr(
     const aiTextureType ai_texture_type) const {
   switch (ai_texture_type) {
     case aiTextureType_DIFFUSE: {
@@ -182,4 +197,20 @@ std::string as::Model::AiTextureTypeToStr(
                                std::to_string(ai_texture_type) + "'");
     }
   }
+}
+
+const glm::vec4 as::Model::GetMaterialColor(const aiMaterial *ai_material,
+                                            const std::string &key) const {
+  aiColor4D ai_color;
+  glm::vec4 ambient_color(0.0f);
+  if (aiGetMaterialColor(ai_material, key.c_str(), 0, 0, &ai_color) ==
+      AI_SUCCESS) {
+    return ConvertAiColorToVec(ai_color);
+  } else {
+    return glm::vec4(0.0f);
+  }
+}
+
+glm::vec4 as::Model::ConvertAiColorToVec(const aiColor4D &ai_color) const {
+  return glm::vec4(ai_color.r, ai_color.g, ai_color.b, ai_color.a);
 }

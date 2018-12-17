@@ -1,6 +1,8 @@
 #pragma once
 
 #include "as/common.hpp"
+
+#include "as/model/material.hpp"
 #include "as/model/texture.hpp"
 #include "as/model/vertex.hpp"
 
@@ -10,7 +12,7 @@ class Mesh {
   Mesh();
 
   Mesh(const std::string &name, const std::vector<Vertex> &vertices,
-       const std::vector<size_t> &idxs, const std::set<Texture> &textures);
+       const std::vector<size_t> &idxs, const Material &material);
 
   std::string GetName() const;
 
@@ -18,7 +20,7 @@ class Mesh {
 
   std::vector<size_t> GetIdxs() const;
 
-  std::set<Texture> GetTextures() const;
+  Material GetMaterial() const;
 
   size_t GetVerticesMemSize() const;
 
@@ -31,6 +33,6 @@ class Mesh {
 
   std::vector<size_t> idxs_;
 
-  std::set<Texture> textures_;
+  Material material_;
 };
 }  // namespace as
