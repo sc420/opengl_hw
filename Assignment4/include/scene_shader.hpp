@@ -20,6 +20,7 @@ class SceneShader : public Shader {
     glm::vec4 ambient_color;
     glm::vec4 diffuse_color;
     glm::vec4 specular_color;
+    glm::vec4 albedo;
   };
 
   struct Lighting {

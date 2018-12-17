@@ -9,6 +9,7 @@ uniform ModelMaterial {
   vec4 ambient_color;
   vec4 diffuse_color;
   vec4 specular_color;
+  vec4 albedo;
 }
 model_material;
 
@@ -47,57 +48,74 @@ vs_surface;
 
 layout(location = 0) out vec4 fs_color;
 
+/*******************************************************************************
+ * Blinn-Phong Model Methods
+ ******************************************************************************/
+
+vec3 GetNorm() { return normalize(vs_surface.frag_norm); }
+
+vec3 GetLightDir() {
+  return normalize(vec3(lighting.light_pos) - vs_surface.frag_pos);
+}
+
+vec3 GetReflectDir() {
+  const vec3 light_dir = GetLightDir();
+  const vec3 norm = GetNorm();
+  return reflect(-light_dir, norm);
+}
+
+vec3 GetViewDir() {
+  return normalize(vec3(lighting.view_pos) - vs_surface.frag_pos);
+}
+
 vec4 GetAmbientColor() {
+  vec4 tex_color;
   if (model_material.use_tex.x > 0) {
-    return texture(ambient_tex, vs_tex.coords);
+    tex_color = texture(ambient_tex, vs_tex.coords);
   } else {
-    return model_material.ambient_color;
+    tex_color = model_material.ambient_color;
   }
+  const vec4 affecting_color =
+      lighting.light_intensity.x * lighting.light_color;
+  return affecting_color * tex_color;
 }
 
 vec4 GetDiffuseColor() {
+  vec4 tex_color;
   if (model_material.use_tex.y > 0) {
-    return texture(diffuse_tex, vs_tex.coords);
+    tex_color = texture(diffuse_tex, vs_tex.coords);
   } else {
-    return model_material.diffuse_color;
+    tex_color = model_material.diffuse_color;
   }
+  const vec3 norm = GetNorm();
+  const vec3 light_dir = GetLightDir();
+  const float diffuse_strength = max(dot(norm, light_dir), 0.0f);
+  const vec4 affecting_color =
+      lighting.light_intensity.y * diffuse_strength * lighting.light_color;
+  return affecting_color * tex_color;
 }
 
 vec4 GetSpecularColor() {
+  vec4 tex_color;
   if (model_material.use_tex.z > 0) {
-    return texture(specular_tex, vs_tex.coords);
+    tex_color = texture(specular_tex, vs_tex.coords);
   } else {
-    return model_material.specular_color;
+    tex_color = model_material.specular_color;
   }
-}
-
-void main() {
-  // Get material colors
-  const vec4 tex_ambient_color = GetAmbientColor();
-  const vec4 tex_diffuse_color = GetDiffuseColor();
-  const vec4 tex_specular_color = GetSpecularColor();
-  // Get directional vectors
-  const vec3 norm = normalize(vs_surface.frag_norm);
-  const vec3 light_dir =
-      normalize(vec3(lighting.light_pos) - vs_surface.frag_pos);
-  const vec3 reflect_dir = reflect(-light_dir, norm);
-  const vec3 view_dir =
-      normalize(vec3(lighting.view_pos) - vs_surface.frag_pos);
-  // Calculate ambient color
-  const vec4 ambient_color = lighting.light_intensity.x * lighting.light_color;
-  // Calculate diffuse color
-  const float diffuse_strength = max(dot(norm, light_dir), 0.0f);
-  const vec4 diffuse_color =
-      lighting.light_intensity.y * diffuse_strength * lighting.light_color;
-  // Calculate specular color
+  const vec3 view_dir = GetViewDir();
+  const vec3 reflect_dir = GetReflectDir();
   const float specular_strength =
       pow(max(dot(view_dir, reflect_dir), 0.0f), 8.0f);
-  const vec4 specular_color =
+  const vec4 affecting_color =
       lighting.light_intensity.z * specular_strength * lighting.light_color;
-  // Calculate lighting color
-  const vec4 lighting_color = ambient_color * tex_ambient_color +
-                              diffuse_color * tex_diffuse_color +
-                              specular_color * tex_specular_color;
-
-  fs_color = lighting_color;
+  return affecting_color * tex_color;
 }
+
+vec4 GetBlinnPhongColor() {
+  const vec4 ambient_color = GetAmbientColor();
+  const vec4 diffuse_color = GetDiffuseColor();
+  const vec4 specular_color = GetSpecularColor();
+  return ambient_color + diffuse_color + specular_color;
+}
+
+void main() { fs_color = GetBlinnPhongColor(); }
