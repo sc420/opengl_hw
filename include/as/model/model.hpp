@@ -58,9 +58,41 @@ class Model {
       const fs::path &dir, const aiMaterial *ai_material,
       const aiTextureType ai_texture_type) const;
 
-  const glm::vec4 GetMaterialColor(const aiMaterial *ai_material,
-                                   const std::string &key) const;
+  template <class TReturn, class TAiValue>
+  const TReturn GetMaterialProperty(const aiMaterial *ai_material,
+                                    const std::string &key) const;
+
+  template <>
+  const glm::vec4 GetMaterialProperty<glm::vec4, aiColor4D>(
+      const aiMaterial *ai_material, const std::string &key) const;
+
+  template <>
+  const float GetMaterialProperty<float, float>(const aiMaterial *ai_material,
+                                                const std::string &key) const;
 
   glm::vec4 ConvertAiColorToVec(const aiColor4D &ai_color) const;
 };
+
+template <>
+inline const glm::vec4 Model::GetMaterialProperty<glm::vec4, aiColor4D>(
+    const aiMaterial *ai_material, const std::string &key) const {
+  aiColor4D value;
+  if (ai_material->Get(key.c_str(), 0, 0, value) == AI_SUCCESS) {
+    return ConvertAiColorToVec(value);
+  } else {
+    return glm::vec4(0.0f);
+  }
+}
+
+template <>
+inline const float Model::GetMaterialProperty<float, float>(
+    const aiMaterial *ai_material, const std::string &key) const {
+  float value;
+  if (ai_material->Get(key.c_str(), 0, 0, value) == AI_SUCCESS) {
+    return value;
+  } else {
+    return 0.0f;
+  }
+}
+
 }  // namespace as

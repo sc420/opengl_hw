@@ -119,13 +119,19 @@ const as::Material as::Model::ProcessMeshMaterial(const fs::path &dir,
   // Get the material
   const aiMaterial *ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
   // Get the material colors
-  const glm::vec4 ambient_color = GetMaterialColor(ai_material, "$clr.ambient");
-  const glm::vec4 diffuse_color = GetMaterialColor(ai_material, "$clr.diffuse");
+  const glm::vec4 ambient_color =
+      GetMaterialProperty<glm::vec4, aiColor4D>(ai_material, "$clr.ambient");
+  const glm::vec4 diffuse_color =
+      GetMaterialProperty<glm::vec4, aiColor4D>(ai_material, "$clr.diffuse");
   const glm::vec4 specular_color =
-      GetMaterialColor(ai_material, "$clr.specular");
+      GetMaterialProperty<glm::vec4, aiColor4D>(ai_material, "$clr.specular");
+  // Get the material shininess
+  const float shininess =
+      GetMaterialProperty<float, float>(ai_material, "$mat.shininess");
   // Get the material textures
   const std::set<Texture> textures = ProcessMaterialTextures(dir, ai_material);
-  return Material(ambient_color, diffuse_color, specular_color, textures);
+  return Material(ambient_color, diffuse_color, specular_color, shininess,
+                  textures);
 }
 
 const std::set<as::Texture> as::Model::ProcessMaterialTextures(
@@ -158,17 +164,6 @@ std::set<as::Texture> as::Model::ProcessMaterialTexturesOfType(
     textures.insert(texture);
   }
   return textures;
-}
-
-const glm::vec4 as::Model::GetMaterialColor(const aiMaterial *ai_material,
-                                            const std::string &key) const {
-  aiColor4D ai_color;
-  glm::vec4 ambient_color(0.0f);
-  if (ai_material->Get(key.c_str(), 0, 0, ai_color) == AI_SUCCESS) {
-    return ConvertAiColorToVec(ai_color);
-  } else {
-    return glm::vec4(0.0f);
-  }
 }
 
 glm::vec4 as::Model::ConvertAiColorToVec(const aiColor4D &ai_color) const {

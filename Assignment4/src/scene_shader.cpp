@@ -199,6 +199,7 @@ void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
   model_material_.ambient_color = material.GetAmbientColor();
   model_material_.diffuse_color = material.GetDiffuseColor();
   model_material_.specular_color = material.GetSpecularColor();
+  model_material_.shininess = glm::vec4(material.GetShininess());
   // Update the buffer
   const std::string &buffer_name = GetModelMaterialBufferName();
   buffer_manager.UpdateBuffer(buffer_name);

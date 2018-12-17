@@ -9,7 +9,7 @@ uniform ModelMaterial {
   vec4 ambient_color;
   vec4 diffuse_color;
   vec4 specular_color;
-  vec4 albedo;
+  vec4 shininess;
 }
 model_material;
 
@@ -105,7 +105,7 @@ vec4 GetSpecularColor() {
   const vec3 view_dir = GetViewDir();
   const vec3 reflect_dir = GetReflectDir();
   const float specular_strength =
-      pow(max(dot(view_dir, reflect_dir), 0.0f), 8.0f);
+      pow(max(dot(view_dir, reflect_dir), 0.0f), model_material.shininess.x);
   const vec4 affecting_color =
       lighting.light_intensity.z * specular_strength * lighting.light_color;
   return affecting_color * tex_color;
