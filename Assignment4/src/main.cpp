@@ -146,10 +146,14 @@ void UpdateGlobalTrans() {
 
 void UpdateModelTrans() {
   shader::SceneShader::ModelTrans model_trans;
-  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
   const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
-  model_trans.trans = glm::translate(glm::scale(glm::mat4(1.0f), scale_factors),
-                                     translate_factors);
+  // const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
+  const glm::vec3 translate_factors = glm::vec3(0.0f);
+  model_trans.trans =
+      glm::translate(glm::rotate(glm::scale(glm::mat4(1.0f), scale_factors),
+                                 (float)ui_manager.CalcElapsedSeconds(),
+                                 glm::vec3(0.0, 1.0, 0.0)),
+                     translate_factors);
 
   scene_shader.UpdateModelTrans(model_trans);
 }
@@ -327,6 +331,8 @@ void GLUTTimerCallback(const int val) {
     UpdateGlobalTrans();
     UpdateLighting();
   }
+
+  UpdateModelTrans();
 
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();
