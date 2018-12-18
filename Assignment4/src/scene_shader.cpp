@@ -182,6 +182,8 @@ void shader::SceneShader::UpdateGlobalTrans(const GlobalTrans &global_trans) {
   global_trans_ = global_trans;
   // Update the buffer
   buffer_manager.UpdateBuffer(buffer_name);
+  // Update also the fixed normal model
+  UpdateFixedNormModel();
 }
 
 void shader::SceneShader::UpdateModelTrans(const ModelTrans &model_trans) {
@@ -191,6 +193,8 @@ void shader::SceneShader::UpdateModelTrans(const ModelTrans &model_trans) {
   // Update the buffer
   const std::string &buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
+  // Update also the fixed normal model
+  UpdateFixedNormModel();
 }
 
 void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
@@ -279,4 +283,19 @@ std::string shader::SceneShader::GetLightingUniformBlockName() const {
 std::string shader::SceneShader::GetTextureUnitName(
     const as::Texture &texture) const {
   return GetProgramName() + "/type[" + std::to_string(texture.GetType()) + "]";
+}
+
+/*******************************************************************************
+ * State Updating Methods (Private)
+ ******************************************************************************/
+
+void shader::SceneShader::UpdateFixedNormModel() {
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Update fixed normal model
+  const glm::mat4 model = global_trans_.model * model_trans_.trans;
+  lighting_.fixed_norm_model =
+      glm::mat4(glm::transpose(glm::inverse(glm::mat3(model))));
+  // Update the buffer
+  const std::string &buffer_name = GetLightingBufferName();
+  buffer_manager.UpdateBuffer(buffer_name);
 }

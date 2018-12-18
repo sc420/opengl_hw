@@ -23,6 +23,7 @@ uniform ModelMaterial {
 model_material;
 
 uniform Lighting {
+  mat4 fixed_norm_model;
   vec4 light_color;
   vec4 light_pos;
   vec4 light_intensity;

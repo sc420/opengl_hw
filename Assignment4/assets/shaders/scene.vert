@@ -15,6 +15,7 @@ uniform ModelTrans { mat4 trans; }
 model_trans;
 
 uniform Lighting {
+  mat4 fixed_norm_model;
   vec4 light_color;
   vec4 light_pos;
   vec4 light_intensity;
@@ -63,11 +64,10 @@ mat4 CalcModel() { return global_trans.model * model_trans.trans; }
  ******************************************************************************/
 
 void OutputTangentLighting() {
+  const mat3 fixed_norm_model = mat3(lighting.fixed_norm_model);
   const mat4 model = CalcModel();
-  // TODO: Pass by uniform
-  const mat3 fixed_model = transpose(inverse(mat3(model)));
-  const vec3 tangent_n = normalize(fixed_model * in_norm);
-  vec3 tangent_t = normalize(fixed_model * in_tangent);
+  const vec3 tangent_n = normalize(fixed_norm_model * in_norm);
+  vec3 tangent_t = normalize(fixed_norm_model * in_tangent);
   tangent_t = normalize(tangent_t - dot(tangent_t, tangent_n) * tangent_n);
   const vec3 tangent_b = cross(tangent_n, tangent_t);
   const mat3 tangent_mat = transpose(mat3(tangent_t, tangent_b, tangent_n));

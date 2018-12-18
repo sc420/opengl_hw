@@ -27,6 +27,7 @@ class SceneShader : public Shader {
   };
 
   struct Lighting {
+    glm::mat4 fixed_norm_model;
     glm::vec4 light_color;
     glm::vec4 light_pos;
     glm::vec4 light_intensity;
@@ -108,5 +109,9 @@ class SceneShader : public Shader {
   ModelMaterial model_material_;
 
   Lighting lighting_;
+
+  /* State updating methods */
+
+  void UpdateFixedNormModel();
 };
 }  // namespace shader
