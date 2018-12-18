@@ -44,7 +44,10 @@ void shader::SkyboxShader::InitUniformBlocks() {
 void shader::SkyboxShader::InitTextures() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
+  const std::string &program_name = GetProgramName();
+  const std::string &tex_name = GetProgramName();
   const std::string &unit_name = GetProgramName();
   // Get models
   const as::Model &model = GetModel();
@@ -52,15 +55,14 @@ void shader::SkyboxShader::InitTextures() {
   static const std::map<std::string, size_t> path_to_target_idx = {
       {"right.jpg", 0},  {"left.jpg", 1},  {"top.jpg", 2},
       {"bottom.jpg", 3}, {"front.jpg", 4}, {"back.jpg", 5}};
-  const std::vector<as::Mesh> &meshes = model.GetMeshes();
 
   // Generate the texture
-  texture_manager.GenTexture("skybox");
+  texture_manager.GenTexture(tex_name);
   // Bind the texture
-  texture_manager.BindTexture("skybox", GL_TEXTURE_CUBE_MAP, unit_name);
-
-  bool initialized = false;
-
+  texture_manager.BindTexture(tex_name, GL_TEXTURE_CUBE_MAP, unit_name);
+  // Update the textures
+  bool tex_initialized = false;
+  const std::vector<as::Mesh> &meshes = model.GetMeshes();
   for (const as::Mesh &mesh : meshes) {
     const as::Material &material = mesh.GetMaterial();
     const std::set<as::Texture> &textures = material.GetTextures();
@@ -83,34 +85,30 @@ void shader::SkyboxShader::InitTextures() {
       as::LoadTextureByStb(path, 0, width, height, comp, texels);
       // Convert the texels from 3 channels to 4 channels to avoid GL errors
       texels = as::ConvertDataChannels3To4(texels);
-
-      // Initialize the texture
+      // Initialize the texture once
       const GLsizei num_mipmap_levels = GetNumMipmapLevels();
-      if (!initialized) {
-        texture_manager.InitTexture2D("skybox", GL_TEXTURE_CUBE_MAP,
+      if (!tex_initialized) {
+        texture_manager.InitTexture2D(tex_name, GL_TEXTURE_CUBE_MAP,
                                       num_mipmap_levels, GL_RGBA8, width,
                                       height);
-        initialized = true;
+        tex_initialized = true;
       }
-
       // Update the texture
-      texture_manager.UpdateCubeMapTexture2D("skybox", target, 0, 0, 0, width,
+      texture_manager.UpdateCubeMapTexture2D(tex_name, target, 0, 0, 0, width,
                                              height, GL_RGBA, GL_UNSIGNED_BYTE,
                                              texels.data());
-      texture_manager.GenMipmap("skybox", GL_TEXTURE_CUBE_MAP);
-      texture_manager.SetTextureParamInt("skybox", GL_TEXTURE_CUBE_MAP,
+      texture_manager.GenMipmap(tex_name, GL_TEXTURE_CUBE_MAP);
+      texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_CUBE_MAP,
                                          GL_TEXTURE_MIN_FILTER,
                                          GL_LINEAR_MIPMAP_LINEAR);
-      texture_manager.SetTextureParamInt("skybox", GL_TEXTURE_CUBE_MAP,
+      texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_CUBE_MAP,
                                          GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      texture_manager.SetTextureParamInt("skybox", GL_TEXTURE_CUBE_MAP,
+      texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_CUBE_MAP,
                                          GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      texture_manager.SetTextureParamInt("skybox", GL_TEXTURE_CUBE_MAP,
+      texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_CUBE_MAP,
                                          GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      texture_manager.SetTextureParamInt("skybox", GL_TEXTURE_CUBE_MAP,
+      texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_CUBE_MAP,
                                          GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-      std::cerr << "set\n";
     }
   }
 }
@@ -125,6 +123,7 @@ void shader::SkyboxShader::Draw() {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &program_name = GetProgramName();
+  const std::string &tex_name = GetProgramName();
   // Get models
   as::Model &model = GetModel();
   // Get meshes
@@ -132,6 +131,12 @@ void shader::SkyboxShader::Draw() {
 
   // Use the program
   UseProgram();
+  // Bind the texture
+  texture_manager.BindTexture(tex_name);
+  // Get the unit index
+  const GLuint unit_idx = texture_manager.GetUnitIdx(tex_name);
+  // Set the texture handler to the unit index
+  uniform_manager.SetUniform1Int(program_name, "skybox_tex", unit_idx);
   // Draw each mesh with its own texture
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
     const as::Mesh &mesh = meshes.at(mesh_idx);
@@ -151,14 +156,6 @@ void shader::SkyboxShader::Draw() {
     UpdateModelMaterial(material);
     /* Update textures */
     for (const as::Texture &texture : textures) {
-      const std::string &path = "skybox";
-      const aiTextureType type = texture.GetType();
-      // Bind the texture
-      texture_manager.BindTexture(path);
-      // Get the unit index
-      const GLuint unit_idx = texture_manager.GetUnitIdx(path);
-      // Set the texture handler to the unit index
-      uniform_manager.SetUniform1Int(program_name, "skybox_tex", unit_idx);
       /* Draw vertex arrays */
       UseMesh(mesh_idx);
       glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
