@@ -90,13 +90,10 @@ void shader::Shader::InitVertexArray(const as::Model& model) {
                                               0);
     vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 3, 3, GL_FLOAT, GL_FALSE,
                                               0);
-    vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 4, 3, GL_FLOAT, GL_FALSE,
-                                              0);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 0, 0);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 1, 1);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 2, 2);
     vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 3, 3);
-    vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 4, 4);
     vertex_spec_manager.BindBufferToBindingPoint(
         va_name, buffer_name, 0, offsetof(as::Vertex, pos), sizeof(as::Vertex));
     vertex_spec_manager.BindBufferToBindingPoint(
@@ -108,9 +105,6 @@ void shader::Shader::InitVertexArray(const as::Model& model) {
     vertex_spec_manager.BindBufferToBindingPoint(va_name, buffer_name, 3,
                                                  offsetof(as::Vertex, tangent),
                                                  sizeof(as::Vertex));
-    vertex_spec_manager.BindBufferToBindingPoint(
-        va_name, buffer_name, 4, offsetof(as::Vertex, bitangent),
-        sizeof(as::Vertex));
   }
 }
 

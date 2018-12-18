@@ -31,7 +31,6 @@ layout(location = 0) in vec3 in_pos;
 layout(location = 1) in vec2 in_tex_coords;
 layout(location = 2) in vec3 in_norm;
 layout(location = 3) in vec3 in_tangent;
-layout(location = 4) in vec3 in_bitangent;
 
 /*******************************************************************************
  * Outputs
@@ -70,10 +69,12 @@ void OutputTangentLighting() {
   // Calculate world to tangent space converter
   const mat3 fixed_norm_model = mat3(lighting.fixed_norm_model);
   const vec3 tangent_t = normalize(fixed_norm_model * in_tangent);
-  const vec3 tangent_b = normalize(fixed_norm_model * in_bitangent);
   const vec3 tangent_n = normalize(fixed_norm_model * in_norm);
+  const vec3 ortho_tangent_t =
+      normalize(tangent_t - dot(tangent_t, tangent_n) * tangent_n);
+  const vec3 ortho_tangent_b = cross(tangent_n, ortho_tangent_t);
   const mat3 world_to_tang_conv =
-      transpose(mat3(tangent_t, tangent_b, tangent_n));
+      transpose(mat3(ortho_tangent_t, ortho_tangent_b, tangent_n));
   // Calculate tangent to world space converter
   vs_tangent_lighting.tang_to_world_conv = transpose(world_to_tang_conv);
   // Calculate positions, normal, light position and view position in tangent
