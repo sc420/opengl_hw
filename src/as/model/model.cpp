@@ -173,10 +173,10 @@ std::set<as::Texture> as::Model::ProcessMaterialTexturesOfType(
   return textures;
 }
 
-glm::vec3 as::Model::ConvertAiVectorToVec(const aiVector3D &ai_color) const {
+glm::vec3 as::Model::ConvertAiVectorToVec(const aiVector3D &ai_color) {
   return glm::vec3(ai_color.x, ai_color.y, ai_color.z);
 }
 
-glm::vec4 as::Model::ConvertAiColorToVec(const aiColor4D &ai_color) const {
+glm::vec4 as::Model::ConvertAiColorToVec(const aiColor4D &ai_color) {
   return glm::vec4(ai_color.r, ai_color.g, ai_color.b, ai_color.a);
 }

@@ -14,6 +14,14 @@ global_trans;
 uniform ModelTrans { mat4 trans; }
 model_trans;
 
+uniform Lighting {
+  vec4 light_color;
+  vec4 light_pos;
+  vec4 light_intensity;
+  vec4 view_pos;
+}
+lighting;
+
 /*******************************************************************************
  * Inputs
  ******************************************************************************/
@@ -31,24 +39,53 @@ layout(location = 4) in vec3 in_bitangent;
 layout(location = 0) out VSTex { vec2 coords; }
 vs_tex;
 
-layout(location = 1) out VSSurface {
+layout(location = 1) out VSTangentLighting {
   vec3 pos;
   vec3 norm;
+  vec3 light_pos;
+  vec3 view_pos;
 }
-vs_surface;
+vs_tangent_lighting;
+
+/*******************************************************************************
+ * Transformations
+ ******************************************************************************/
+
+mat4 CalcTrans() {
+  return global_trans.proj * global_trans.view * global_trans.model *
+         model_trans.trans;
+}
+
+mat4 CalcModel() { return global_trans.model * model_trans.trans; }
+
+/*******************************************************************************
+ * Lighting Calculations
+ ******************************************************************************/
+
+void OutputTangentLighting() {
+  const mat4 model = CalcModel();
+  // TODO: Pass by uniform
+  const mat3 fixed_model = transpose(inverse(mat3(model)));
+  const vec3 tangent_n = normalize(fixed_model * in_norm);
+  vec3 tangent_t = normalize(fixed_model * in_tangent);
+  tangent_t = normalize(tangent_t - dot(tangent_t, tangent_n) * tangent_n);
+  const vec3 tangent_b = cross(tangent_n, tangent_t);
+  const mat3 tangent_mat = transpose(mat3(tangent_t, tangent_b, tangent_n));
+  vs_tangent_lighting.pos = tangent_mat * vec3(model * vec4(in_pos, 1.0f));
+  vs_tangent_lighting.norm = tangent_mat * in_norm;
+  vs_tangent_lighting.light_pos = tangent_mat * vec3(lighting.light_pos);
+  vs_tangent_lighting.view_pos = tangent_mat * vec3(lighting.view_pos);
+}
+
+/*******************************************************************************
+ * Entry Point
+ ******************************************************************************/
 
 void main() {
-  // Calculate MVP
-  const mat4 global_mvp =
-      global_trans.proj * global_trans.view * global_trans.model;
   // Calculate vertex position
-  gl_Position = global_mvp * model_trans.trans * vec4(in_pos, 1.0f);
+  gl_Position = CalcTrans() * vec4(in_pos, 1.0f);
   // Pass texture coordinates
   vs_tex.coords = in_tex_coords;
-  // Calculate fragment position
-  const mat4 model = global_trans.model * model_trans.trans;
-  vs_surface.pos = vec3(model * vec4(in_pos, 1.0f));
-  // Pass normal
-  vs_surface.norm =
-      mat3(transpose(inverse(model))) * in_norm;  // TODO: Pass by uniform
+  // Calculate tangent lighting
+  OutputTangentLighting();
 }

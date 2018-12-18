@@ -46,11 +46,13 @@ uniform sampler2D normals_tex;
 layout(location = 0) in VSTex { vec2 coords; }
 vs_tex;
 
-layout(location = 1) in VSSurface {
-  vec3 frag_pos;
-  vec3 frag_norm;
+layout(location = 1) in VSTangentLighting {
+  vec3 pos;
+  vec3 norm;
+  vec3 light_pos;
+  vec3 view_pos;
 }
-vs_surface;
+vs_tangent_lighting;
 
 /*******************************************************************************
  * Outputs
@@ -63,20 +65,20 @@ layout(location = 0) out vec4 fs_color;
  ******************************************************************************/
 
 vec3 GetNorm() {
-  //  if (model_material.use_normals_tex.x > 0) {
-  //    const vec3 norm = vec3(texture(normals_tex, vs_tex.coords));
-  //    return normalize(norm * 2.0f - 1.0f);
-  //  } else {
-  return normalize(vs_surface.frag_norm);
-  //  }
+  if (model_material.use_normals_tex.x > 0) {
+    const vec3 norm = vec3(texture(normals_tex, vs_tex.coords));
+    return normalize(norm * 2.0f - 1.0f);
+  } else {
+    return normalize(vs_tangent_lighting.norm);
+  }
 }
 
 vec3 GetLightDir() {
-  return normalize(vec3(lighting.light_pos) - vs_surface.frag_pos);
+  return normalize(vs_tangent_lighting.light_pos - vs_tangent_lighting.pos);
 }
 
 vec3 GetViewDir() {
-  return normalize(vec3(lighting.view_pos) - vs_surface.frag_pos);
+  return normalize(vs_tangent_lighting.view_pos - vs_tangent_lighting.pos);
 }
 
 vec3 GetHalfwayDir() { return normalize(GetLightDir() + GetViewDir()); }
@@ -133,5 +135,9 @@ vec4 GetBlinnPhongColor() {
   const vec4 specular_color = GetSpecularColor();
   return ambient_color + diffuse_color + specular_color;
 }
+
+/*******************************************************************************
+ * Entry Point
+ ******************************************************************************/
 
 void main() { fs_color = GetBlinnPhongColor(); }
