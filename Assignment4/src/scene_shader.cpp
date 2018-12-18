@@ -111,7 +111,6 @@ void shader::SceneShader::InitLighting() {
 
 void shader::SceneShader::SetSkyboxTexture() {
   // Get managers
-  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   // Get names
   const std::string &skybox_tex_name = skybox_shader_->GetTextureName();

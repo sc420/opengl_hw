@@ -54,9 +54,7 @@ void shader::SkyboxShader::InitUniformBlocks() {
 void shader::SkyboxShader::InitTextures() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
-  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
-  // Get names
-  const std::string &program_name = GetProgramName();
+  // Get names=
   const std::string &tex_name = GetTextureName();
   const std::string &unit_name = GetTextureName();
   // Get models
@@ -150,24 +148,11 @@ void shader::SkyboxShader::Draw() {
   // Draw each mesh with its own texture
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
     const as::Mesh &mesh = meshes.at(mesh_idx);
-    // Get names
-    const std::string scene_va_name = GetMeshVertexArrayName(mesh_idx);
-    const std::string scene_buffer_name =
-        GetMeshVertexArrayBufferName(mesh_idx);
-    const std::string scene_idxs_buffer_name =
-        GetMeshVertexArrayIdxsBufferName(mesh_idx);
     // Get the array indexes
     const std::vector<size_t> &idxs = mesh.GetIdxs();
-    // Get the material
-    const as::Material &material = mesh.GetMaterial();
-    // Get the textures
-    const std::set<as::Texture> &textures = material.GetTextures();
-    /* Update textures */
-    for (const as::Texture &texture : textures) {
-      /* Draw vertex arrays */
-      UseMesh(mesh_idx);
-      glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
-    }
+    /* Draw vertex arrays */
+    UseMesh(mesh_idx);
+    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
   }
 }
 
