@@ -29,6 +29,10 @@ bool as::Material::HasSpecularTexture() const {
   return HasTextureType(aiTextureType_SPECULAR);
 }
 
+bool as::Material::HasNormalsTexture() const {
+  return HasTextureType(aiTextureType_NORMALS);
+}
+
 glm::vec4 as::Material::GetAmbientColor() const { return ambient_color_; }
 
 glm::vec4 as::Material::GetDiffuseColor() const { return diffuse_color_; }

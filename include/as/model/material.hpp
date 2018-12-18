@@ -19,6 +19,8 @@ class Material {
 
   bool HasSpecularTexture() const;
 
+  bool HasNormalsTexture() const;
+
   glm::vec4 GetAmbientColor() const;
 
   glm::vec4 GetDiffuseColor() const;

@@ -11,9 +11,9 @@ shader::SceneShader::SceneShader()
 
 void shader::SceneShader::LoadModel() {
   as::Model &model = GetModel();
-  model.LoadFile(
-      "assets/models/nanosuit/nanosuit.obj",
-      aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_Triangulate);
+  model.LoadFile("assets/models/nanosuit/nanosuit.obj",
+                 aiProcess_CalcTangentSpace | aiProcess_Triangulate |
+                     aiProcess_GenNormals | aiProcess_FlipUVs);
 }
 
 /*******************************************************************************
@@ -155,6 +155,9 @@ void shader::SceneShader::Draw() {
           uniform_manager.SetUniform1Int(program_name, "specular_tex",
                                          unit_idx);
         } break;
+        case aiTextureType_NORMALS: {
+          uniform_manager.SetUniform1Int(program_name, "normals_tex", unit_idx);
+        } break;
         default: {
           throw std::runtime_error("Unknown type '" + std ::to_string(type) +
                                    "'");
@@ -193,9 +196,14 @@ void shader::SceneShader::UpdateModelTrans(const ModelTrans &model_trans) {
 void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update material
-  model_material_.use_tex.x = static_cast<int>(material.HasAmbientTexture());
-  model_material_.use_tex.y = static_cast<int>(material.HasDiffuseTexture());
-  model_material_.use_tex.z = static_cast<int>(material.HasSpecularTexture());
+  model_material_.use_ambient_tex.x =
+      static_cast<int>(material.HasAmbientTexture());
+  model_material_.use_diffuse_tex.x =
+      static_cast<int>(material.HasDiffuseTexture());
+  model_material_.use_specular_tex.x =
+      static_cast<int>(material.HasSpecularTexture());
+  model_material_.use_normals_tex.x =
+      static_cast<int>(material.HasNormalsTexture());
   model_material_.ambient_color = material.GetAmbientColor();
   model_material_.diffuse_color = material.GetDiffuseColor();
   model_material_.specular_color = material.GetSpecularColor();

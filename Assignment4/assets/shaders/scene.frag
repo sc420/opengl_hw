@@ -11,7 +11,10 @@ const float kPi = 3.1415926535897932384626433832795;
  ******************************************************************************/
 
 uniform ModelMaterial {
-  ivec4 use_tex;
+  ivec4 use_ambient_tex;
+  ivec4 use_diffuse_tex;
+  ivec4 use_specular_tex;
+  ivec4 use_normals_tex;
   vec4 ambient_color;
   vec4 diffuse_color;
   vec4 specular_color;
@@ -34,6 +37,7 @@ lighting;
 uniform sampler2D ambient_tex;
 uniform sampler2D diffuse_tex;
 uniform sampler2D specular_tex;
+uniform sampler2D normals_tex;
 
 /*******************************************************************************
  * Inputs
@@ -58,7 +62,14 @@ layout(location = 0) out vec4 fs_color;
  * Blinn-Phong Model Methods
  ******************************************************************************/
 
-vec3 GetNorm() { return normalize(vs_surface.frag_norm); }
+vec3 GetNorm() {
+  //  if (model_material.use_normals_tex.x > 0) {
+  //    const vec3 norm = vec3(texture(normals_tex, vs_tex.coords));
+  //    return normalize(norm * 2.0f - 1.0f);
+  //  } else {
+  return normalize(vs_surface.frag_norm);
+  //  }
+}
 
 vec3 GetLightDir() {
   return normalize(vec3(lighting.light_pos) - vs_surface.frag_pos);
@@ -72,7 +83,7 @@ vec3 GetHalfwayDir() { return normalize(GetLightDir() + GetViewDir()); }
 
 vec4 GetAmbientColor() {
   vec4 tex_color;
-  if (model_material.use_tex.x > 0) {
+  if (model_material.use_ambient_tex.x > 0) {
     tex_color = texture(ambient_tex, vs_tex.coords);
   } else {
     tex_color = model_material.ambient_color;
@@ -84,7 +95,7 @@ vec4 GetAmbientColor() {
 
 vec4 GetDiffuseColor() {
   vec4 tex_color;
-  if (model_material.use_tex.y > 0) {
+  if (model_material.use_diffuse_tex.x > 0) {
     tex_color = texture(diffuse_tex, vs_tex.coords);
   } else {
     tex_color = model_material.diffuse_color;
@@ -99,7 +110,7 @@ vec4 GetDiffuseColor() {
 
 vec4 GetSpecularColor() {
   vec4 tex_color;
-  if (model_material.use_tex.z > 0) {
+  if (model_material.use_specular_tex.x > 0) {
     tex_color = texture(specular_tex, vs_tex.coords);
   } else {
     tex_color = model_material.specular_color;
