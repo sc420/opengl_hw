@@ -79,18 +79,22 @@ const std::vector<as::Vertex> as::Model::ProcessMeshVertices(
   for (size_t vtx_idx = 0; vtx_idx < ai_mesh->mNumVertices; vtx_idx++) {
     Vertex vertex;
     if (ai_mesh->HasPositions()) {
-      const aiVector3D &m_vertex = ai_mesh->mVertices[vtx_idx];
-      vertex.pos = glm::vec3(m_vertex.x, m_vertex.y, m_vertex.z);
-    }
-    if (ai_mesh->HasNormals()) {
-      const aiVector3D &m_normal = ai_mesh->mNormals[vtx_idx];
-      vertex.normal = glm::vec3(m_normal.x, m_normal.y, m_normal.z);
+      const aiVector3D &ai_vertex = ai_mesh->mVertices[vtx_idx];
+      vertex.pos = ConvertAiVectorToVec(ai_vertex);
     }
     if (ai_mesh->mTextureCoords[0]) {
-      const aiVector3D &m_tex_coords = ai_mesh->mTextureCoords[0][vtx_idx];
-      vertex.tex_coords = glm::vec2(m_tex_coords.x, m_tex_coords.y);
-    } else {
-      vertex.tex_coords = glm::vec2(0.0f);
+      const aiVector3D &ai_tex_coords = ai_mesh->mTextureCoords[0][vtx_idx];
+      vertex.tex_coords = glm::vec2(ConvertAiVectorToVec(ai_tex_coords));
+    }
+    if (ai_mesh->HasNormals()) {
+      const aiVector3D &ai_normal = ai_mesh->mNormals[vtx_idx];
+      vertex.normal = ConvertAiVectorToVec(ai_normal);
+    }
+    if (ai_mesh->HasTangentsAndBitangents()) {
+      const aiVector3D &ai_tangent = ai_mesh->mTangents[vtx_idx];
+      const aiVector3D &ai_bitangent = ai_mesh->mBitangents[vtx_idx];
+      vertex.tangent = ConvertAiVectorToVec(ai_tangent);
+      vertex.bitangent = ConvertAiVectorToVec(ai_bitangent);
     }
     vertices.push_back(vertex);
   }
@@ -167,6 +171,10 @@ std::set<as::Texture> as::Model::ProcessMaterialTexturesOfType(
     textures.insert(texture);
   }
   return textures;
+}
+
+glm::vec3 as::Model::ConvertAiVectorToVec(const aiVector3D &ai_color) const {
+  return glm::vec3(ai_color.x, ai_color.y, ai_color.z);
 }
 
 glm::vec4 as::Model::ConvertAiColorToVec(const aiColor4D &ai_color) const {
