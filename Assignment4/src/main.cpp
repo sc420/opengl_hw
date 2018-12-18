@@ -110,16 +110,18 @@ void InitUiManager() {
 }
 
 void InitShaders() {
-  // Post-processing
+  // Register shaders
+  scene_shader.RegisterSkyboxShader(skybox_shader);
+  skybox_shader.RegisterSceneShader(scene_shader);
+  // Register managers
   postproc_shader.RegisterGLManagers(gl_managers);
-  postproc_shader.Init();
-  // Scene
   scene_shader.RegisterGLManagers(gl_managers);
-  scene_shader.Init();
-  // Skybox
   skybox_shader.RegisterGLManagers(gl_managers);
+  // Initialize shaders
+  postproc_shader.Init();
+  scene_shader.Init();
   skybox_shader.Init();
-  // Link data
+  // Set skybox texture
   scene_shader.SetSkyboxTexture();
 }
 

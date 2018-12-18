@@ -1,14 +1,23 @@
 #include "scene_shader.hpp"
 
-/*******************************************************************************
- * Model Handlers
- ******************************************************************************/
-
 shader::SceneShader::SceneShader()
     : global_trans_(GlobalTrans()),
       model_trans_(ModelTrans()),
       model_material_(ModelMaterial()),
       lighting_(Lighting()) {}
+
+/*******************************************************************************
+ * Shader Registrations
+ ******************************************************************************/
+
+void shader::SceneShader::RegisterSkyboxShader(
+    const SkyboxShader &skybox_shader) {
+  skybox_shader_ = std::make_shared<SkyboxShader>(skybox_shader);
+}
+
+/*******************************************************************************
+ * Model Handlers
+ ******************************************************************************/
 
 void shader::SceneShader::LoadModel() {
   as::Model &model = GetModel();
@@ -106,10 +115,12 @@ void shader::SceneShader::SetSkyboxTexture() {
   // Get managers
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
-  // Set skybox texture
-  const std::string skybox_tex_name = "skybox";
-  const std::string unit_name = GetProgramName() + "/skybox";
-  texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP, unit_name);
+  // Get names
+  const std::string &skybox_tex_name = skybox_shader_->GetTextureName();
+  const std::string &skybox_unit_name = GetSkyboxTextureUnitName();
+  // Reuse the skybox texture
+  texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP,
+                              skybox_unit_name);
 }
 
 /*******************************************************************************
@@ -122,6 +133,8 @@ void shader::SceneShader::Draw() {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &program_name = GetProgramName();
+  const std::string &skybox_tex_name = skybox_shader_->GetTextureName();
+  const std::string &skybox_unit_name = GetSkyboxTextureUnitName();
   // Get models
   as::Model &model = GetModel();
   // Get meshes
@@ -180,10 +193,12 @@ void shader::SceneShader::Draw() {
     }
   }
 
-  const std::string unit_name = GetProgramName() + "/skybox";
-  const GLuint unit_idx = texture_manager.GetUnitIdx("skybox");
-  texture_manager.BindTexture("skybox", GL_TEXTURE_CUBE_MAP, unit_name);
-  uniform_manager.SetUniform1Int(GetProgramName(), "skybox_tex", unit_idx);
+  // Bind the skybox texture
+  const GLuint skybox_unit_idx = texture_manager.GetUnitIdx(skybox_tex_name);
+  texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP,
+                              skybox_unit_name);
+  uniform_manager.SetUniform1Int(GetProgramName(), "skybox_tex",
+                                 skybox_unit_idx);
 }
 
 /*******************************************************************************
@@ -248,6 +263,14 @@ void shader::SceneShader::UpdateViewPos(const glm::vec3 &view_pos) {
 
 std::string shader::SceneShader::GetId() const { return "scene"; }
 
+std::string shader::SceneShader::GetGlobalTransBufferName() const {
+  return "global_trans";
+}
+
+std::string shader::SceneShader::GetGlobalTransUniformBlockName() const {
+  return "GlobalTrans";
+}
+
 /*******************************************************************************
  * Model Handlers (Protected)
  ******************************************************************************/
@@ -258,15 +281,11 @@ as::Model &shader::SceneShader::GetModel() { return scene_model_; }
  * GL Initialization Methods (Protected)
  ******************************************************************************/
 
-GLsizei shader::SceneShader::GetNumMipmapLevels() const { return 3; }
+GLsizei shader::SceneShader::GetNumMipmapLevels() const { return 5; }
 
 /*******************************************************************************
  * Name Management (Protected)
  ******************************************************************************/
-
-std::string shader::SceneShader::GetGlobalTransBufferName() const {
-  return "global_trans";
-}
 
 std::string shader::SceneShader::GetModelTransBufferName() const {
   return "model_trans";
@@ -278,10 +297,6 @@ std::string shader::SceneShader::GetModelMaterialBufferName() const {
 
 std::string shader::SceneShader::GetLightingBufferName() const {
   return "lighting";
-}
-
-std::string shader::SceneShader::GetGlobalTransUniformBlockName() const {
-  return "GlobalTrans";
 }
 
 std::string shader::SceneShader::GetModelTransUniformBlockName() const {
@@ -299,6 +314,10 @@ std::string shader::SceneShader::GetLightingUniformBlockName() const {
 std::string shader::SceneShader::GetTextureUnitName(
     const as::Texture &texture) const {
   return GetProgramName() + "/type[" + std::to_string(texture.GetType()) + "]";
+}
+
+std::string shader::SceneShader::GetSkyboxTextureUnitName() const {
+  return GetProgramName() + "/skybox";
 }
 
 /*******************************************************************************

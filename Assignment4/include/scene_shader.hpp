@@ -1,8 +1,11 @@
 #pragma once
 
 #include "shader.hpp"
+#include "skybox_shader.hpp"
 
 namespace shader {
+class SkyboxShader;
+
 class SceneShader : public Shader {
  public:
   struct GlobalTrans {
@@ -35,6 +38,10 @@ class SceneShader : public Shader {
   };
 
   SceneShader();
+
+  /* Shader registrations */
+
+  void RegisterSkyboxShader(const SkyboxShader &skybox_shader);
 
   /* Model handlers */
 
@@ -72,6 +79,10 @@ class SceneShader : public Shader {
 
   std::string GetId() const override;
 
+  std::string GetGlobalTransBufferName() const;
+
+  std::string GetGlobalTransUniformBlockName() const;
+
  protected:
   /* Model handlers */
 
@@ -83,15 +94,11 @@ class SceneShader : public Shader {
 
   /* Name management */
 
-  std::string GetGlobalTransBufferName() const;
-
   std::string GetModelTransBufferName() const;
 
   std::string GetModelMaterialBufferName() const;
 
   std::string GetLightingBufferName() const;
-
-  std::string GetGlobalTransUniformBlockName() const;
 
   std::string GetModelTransUniformBlockName() const;
 
@@ -101,15 +108,14 @@ class SceneShader : public Shader {
 
   std::string GetTextureUnitName(const as::Texture &texture) const;
 
+  std::string GetSkyboxTextureUnitName() const;
+
  private:
+  std::shared_ptr<SkyboxShader> skybox_shader_;
   as::Model scene_model_;
-
   GlobalTrans global_trans_;
-
   ModelTrans model_trans_;
-
   ModelMaterial model_material_;
-
   Lighting lighting_;
 
   /* State updating methods */

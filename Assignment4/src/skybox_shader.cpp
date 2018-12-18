@@ -1,6 +1,15 @@
 #include "skybox_shader.hpp"
 
 /*******************************************************************************
+ * Shader Registrations
+ ******************************************************************************/
+
+void shader::SkyboxShader::RegisterSceneShader(
+    const SceneShader &scene_shader) {
+  scene_shader_ = std::make_shared<SceneShader>(scene_shader);
+}
+
+/*******************************************************************************
  * Model Handlers
  ******************************************************************************/
 
@@ -32,9 +41,10 @@ void shader::SkyboxShader::InitUniformBlocks() {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &program_name = GetProgramName();
-  const std::string &global_trans_buffer_name = GetGlobalTransBufferName();
+  const std::string &global_trans_buffer_name =
+      scene_shader_->GetGlobalTransBufferName();
   const std::string &global_trans_uniform_block_name =
-      GetGlobalTransUniformBlockName();
+      scene_shader_->GetGlobalTransUniformBlockName();
   const std::string &global_trans_binding_name = global_trans_buffer_name;
   // Bind the uniform block to the the buffer
   uniform_manager.AssignUniformBlockToBindingPoint(
@@ -47,8 +57,8 @@ void shader::SkyboxShader::InitTextures() {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &program_name = GetProgramName();
-  const std::string &tex_name = GetProgramName();
-  const std::string &unit_name = GetProgramName();
+  const std::string &tex_name = GetTextureName();
+  const std::string &unit_name = GetTextureName();
   // Get models
   const as::Model &model = GetModel();
   // Set the path-to-target index map
@@ -123,7 +133,7 @@ void shader::SkyboxShader::Draw() {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string &program_name = GetProgramName();
-  const std::string &tex_name = GetProgramName();
+  const std::string &tex_name = GetTextureName();
   // Get models
   as::Model &model = GetModel();
   // Get meshes
@@ -152,8 +162,6 @@ void shader::SkyboxShader::Draw() {
     const as::Material &material = mesh.GetMaterial();
     // Get the textures
     const std::set<as::Texture> &textures = material.GetTextures();
-    /* Update material colors */
-    UpdateModelMaterial(material);
     /* Update textures */
     for (const as::Texture &texture : textures) {
       /* Draw vertex arrays */
@@ -169,8 +177,18 @@ void shader::SkyboxShader::Draw() {
 
 std::string shader::SkyboxShader::GetId() const { return "skybox"; }
 
+std::string shader::SkyboxShader::GetTextureName() const {
+  return GetProgramName() + "/skybox";
+}
+
 /*******************************************************************************
  * Model Handlers (Protected)
  ******************************************************************************/
 
 as::Model &shader::SkyboxShader::GetModel() { return skybox_model_; }
+
+/*******************************************************************************
+ * GL Initialization Methods (Protected)
+ ******************************************************************************/
+
+GLsizei shader::SkyboxShader::GetNumMipmapLevels() const { return 3; }
