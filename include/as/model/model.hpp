@@ -70,9 +70,9 @@ class Model {
   const float GetMaterialProperty<float, float>(const aiMaterial *ai_material,
                                                 const std::string &key) const;
 
-  glm::vec3 ConvertAiVectorToVec(const aiVector3D &ai_color) const;
+  static glm::vec3 ConvertAiVectorToVec(const aiVector3D &ai_color);
 
-  glm::vec4 ConvertAiColorToVec(const aiColor4D &ai_color) const;
+  static glm::vec4 ConvertAiColorToVec(const aiColor4D &ai_color);
 };
 
 template <>
