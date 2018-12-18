@@ -7,6 +7,7 @@
 shader::SceneShader::SceneShader()
     : global_trans_(GlobalTrans()),
       model_trans_(ModelTrans()),
+      model_material_(ModelMaterial()),
       lighting_(Lighting()) {}
 
 void shader::SceneShader::LoadModel() {
