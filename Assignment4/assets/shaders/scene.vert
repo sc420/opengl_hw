@@ -66,9 +66,9 @@ mat4 CalcModel() { return global_trans.model * model_trans.trans; }
 void OutputTangentLighting() {
   const mat3 fixed_norm_model = mat3(lighting.fixed_norm_model);
   const mat4 model = CalcModel();
-  const vec3 tangent_n = normalize(fixed_norm_model * in_norm);
   const vec3 tangent_t = normalize(fixed_norm_model * in_tangent);
   const vec3 tangent_b = normalize(fixed_norm_model * in_bitangent);
+  const vec3 tangent_n = normalize(fixed_norm_model * in_norm);
   const mat3 tangent_mat = transpose(mat3(tangent_t, tangent_b, tangent_n));
   vs_tangent_lighting.pos = tangent_mat * vec3(model * vec4(in_pos, 1.0f));
   vs_tangent_lighting.norm = tangent_mat * vec3(model * vec4(in_norm, 1.0f));

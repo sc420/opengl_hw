@@ -98,7 +98,7 @@ void shader::SceneShader::InitLighting() {
   Lighting lighting;
   lighting.light_color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
   lighting.light_pos = glm::vec4(-31.75f, 26.05f, -97.72f, 1.0f);
-  lighting.light_intensity = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+  lighting.light_intensity = glm::vec4(1.0f, 1.0f, 0.5f, 1.0f);
   lighting_ = lighting;
 }
 
