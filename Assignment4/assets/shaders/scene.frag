@@ -5,6 +5,7 @@
  ******************************************************************************/
 
 const float kPi = 3.1415926535897932384626433832795;
+const float kEnvMapBlendRatio = 0.35f;
 
 /*******************************************************************************
  * Uniform Blocks
@@ -143,13 +144,16 @@ vec4 GetBlinnPhongColor() {
  ******************************************************************************/
 
 vec4 GetEnvironmentMapColor() {
-  vec3 I = GetViewDir();
-  vec3 R = reflect(-I, GetNorm());
-  return texture(skybox_tex, R);
+  vec3 view_dir = GetViewDir();
+  vec3 reflect_dir = reflect(-view_dir, GetNorm());
+  return texture(skybox_tex, reflect_dir);
 }
 
 /*******************************************************************************
  * Entry Point
  ******************************************************************************/
 
-void main() { fs_color = GetEnvironmentMapColor(); }
+void main() {
+  fs_color = (1.0f - kEnvMapBlendRatio) * GetBlinnPhongColor() +
+             kEnvMapBlendRatio * GetEnvironmentMapColor();
+}
