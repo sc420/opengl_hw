@@ -22,5 +22,5 @@
 ## Assets
 
 * [McGuire Computer Graphics Archive](https://casual-effects.com/data/)
+* [Free3D.com](https://free3d.com/)
 * [Skyboxes for download - Custom Map Makers](http://www.custommapmakers.org/skyboxes.php)
-

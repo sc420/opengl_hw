@@ -93,8 +93,8 @@ void shader::SkyboxShader::InitTextures() {
       int comp;
       std::vector<GLubyte> texels;
       as::LoadTextureByStb(path, 0, width, height, comp, texels);
-      // Convert the texels from 3 channels to 4 channels to avoid GL errors
-      texels = as::ConvertDataChannels3To4(texels);
+      // Convert the texels to 4 channels to avoid GL errors
+      texels = as::ConvertDataChannels(comp, 4, texels);
       // Initialize the texture once
       const GLsizei num_mipmap_levels = GetNumMipmapLevels();
       if (!tex_initialized) {

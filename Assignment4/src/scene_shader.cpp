@@ -78,10 +78,8 @@ void shader::SceneShader::InitTextures() {
       int comp;
       std::vector<GLubyte> texels;
       as::LoadTextureByStb(path, 0, width, height, comp, texels);
-      // Convert the texels from 3 channels to 4 channels to avoid GL errors
-      if (comp == 3) {
-        texels = as::ConvertDataChannels3To4(texels);
-      }
+      // Convert the texels to 4 channels to avoid GL errors
+      texels = as::ConvertDataChannels(comp, 4, texels);
       // Generate the texture
       texture_manager.GenTexture(path);
       // Bind the texture

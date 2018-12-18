@@ -50,6 +50,7 @@ layout(location = 0) in VSTex { vec2 coords; }
 vs_tex;
 
 layout(location = 1) in VSTangentLighting {
+  mat3 tang_to_world_mat;
   vec3 pos;
   vec3 norm;
   vec3 light_pos;
@@ -67,7 +68,7 @@ layout(location = 0) out vec4 fs_color;
  * Blinn-Phong Model Methods
  ******************************************************************************/
 
-vec3 GetNorm() {
+vec3 GetTangentNorm() {
   if (model_material.use_normals_tex.x > 0) {
     const vec3 norm = vec3(texture(normals_tex, vs_tex.coords));
     return normalize(norm * 2.0f - 1.0f);
@@ -76,15 +77,17 @@ vec3 GetNorm() {
   }
 }
 
-vec3 GetLightDir() {
+vec3 GetTangentLightDir() {
   return normalize(vs_tangent_lighting.light_pos - vs_tangent_lighting.pos);
 }
 
-vec3 GetViewDir() {
+vec3 GetTangentViewDir() {
   return normalize(vs_tangent_lighting.view_pos - vs_tangent_lighting.pos);
 }
 
-vec3 GetHalfwayDir() { return normalize(GetLightDir() + GetViewDir()); }
+vec3 GetTangentHalfwayDir() {
+  return normalize(GetTangentLightDir() + GetTangentViewDir());
+}
 
 vec4 GetAmbientColor() {
   vec4 tex_color;
@@ -105,8 +108,8 @@ vec4 GetDiffuseColor() {
   } else {
     tex_color = model_material.diffuse_color;
   }
-  const vec3 norm = GetNorm();
-  const vec3 light_dir = GetLightDir();
+  const vec3 norm = GetTangentNorm();
+  const vec3 light_dir = GetTangentLightDir();
   const float diffuse_strength = max(dot(norm, light_dir), 0.0f);
   const vec4 affecting_color =
       lighting.light_intensity.y * diffuse_strength * lighting.light_color;
@@ -120,8 +123,8 @@ vec4 GetSpecularColor() {
   } else {
     tex_color = model_material.specular_color;
   }
-  const vec3 norm = GetNorm();
-  const vec3 halfway_dir = GetHalfwayDir();
+  const vec3 norm = GetTangentNorm();
+  const vec3 halfway_dir = GetTangentHalfwayDir();
   const float shininess = model_material.shininess.x;
   const float energy_conservation = (8.0f + shininess) / (8.0f * kPi);
   const float specular_strength =
@@ -144,9 +147,11 @@ vec4 GetBlinnPhongColor() {
  ******************************************************************************/
 
 vec4 GetEnvironmentMapColor() {
-  vec3 view_dir = GetViewDir();
-  vec3 reflect_dir = reflect(-view_dir, GetNorm());
-  return texture(skybox_tex, reflect_dir);
+  const vec3 view_dir = GetTangentViewDir();
+  const vec3 reflect_dir = reflect(-view_dir, GetTangentNorm());
+  const vec3 world_reflect_dir =
+      vs_tangent_lighting.tang_to_world_mat * reflect_dir;
+  return texture(skybox_tex, world_reflect_dir);
 }
 
 /*******************************************************************************
