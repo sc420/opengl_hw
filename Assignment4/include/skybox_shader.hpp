@@ -19,6 +19,10 @@ class SkyboxShader : public SceneShader {
 
   void InitTextures();
 
+  /* GL drawing methods */
+
+  void Draw() override;
+
   /* Name management */
 
   std::string GetId() const override;

@@ -52,6 +52,8 @@ class SceneShader : public Shader {
 
   void InitLighting();
 
+  void SetSkyboxTexture();
+
   /* GL drawing methods */
 
   void Draw() override;

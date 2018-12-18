@@ -119,6 +119,8 @@ void InitShaders() {
   // Skybox
   skybox_shader.RegisterGLManagers(gl_managers);
   skybox_shader.Init();
+  // Link data
+  scene_shader.SetSkyboxTexture();
 }
 
 void ConfigGL() {

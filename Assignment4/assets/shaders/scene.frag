@@ -39,6 +39,7 @@ uniform sampler2D ambient_tex;
 uniform sampler2D diffuse_tex;
 uniform sampler2D specular_tex;
 uniform sampler2D normals_tex;
+uniform samplerCube skybox_tex;
 
 /*******************************************************************************
  * Inputs
@@ -138,7 +139,17 @@ vec4 GetBlinnPhongColor() {
 }
 
 /*******************************************************************************
+ * Environment Mapping
+ ******************************************************************************/
+
+vec4 GetEnvironmentMapColor() {
+  vec3 I = GetViewDir();
+  vec3 R = reflect(-I, GetNorm());
+  return texture(skybox_tex, R);
+}
+
+/*******************************************************************************
  * Entry Point
  ******************************************************************************/
 
-void main() { fs_color = GetBlinnPhongColor(); }
+void main() { fs_color = GetEnvironmentMapColor(); }

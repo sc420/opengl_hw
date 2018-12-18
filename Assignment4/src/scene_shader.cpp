@@ -102,6 +102,16 @@ void shader::SceneShader::InitLighting() {
   lighting_ = lighting;
 }
 
+void shader::SceneShader::SetSkyboxTexture() {
+  // Get managers
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
+  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  // Set skybox texture
+  const std::string skybox_tex_name = "skybox";
+  const std::string unit_name = GetProgramName() + "/skybox";
+  texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP, unit_name);
+}
+
 /*******************************************************************************
  * GL Drawing Methods
  ******************************************************************************/
@@ -169,6 +179,11 @@ void shader::SceneShader::Draw() {
       glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
     }
   }
+
+  const std::string unit_name = GetProgramName() + "/skybox";
+  const GLuint unit_idx = texture_manager.GetUnitIdx("skybox");
+  texture_manager.BindTexture("skybox", GL_TEXTURE_CUBE_MAP, unit_name);
+  uniform_manager.SetUniform1Int(GetProgramName(), "skybox_tex", unit_idx);
 }
 
 /*******************************************************************************
@@ -243,7 +258,7 @@ as::Model &shader::SceneShader::GetModel() { return scene_model_; }
  * GL Initialization Methods (Protected)
  ******************************************************************************/
 
-GLsizei shader::SceneShader::GetNumMipmapLevels() const { return 1; }
+GLsizei shader::SceneShader::GetNumMipmapLevels() const { return 3; }
 
 /*******************************************************************************
  * Name Management (Protected)
