@@ -123,7 +123,7 @@ void shader::PostprocShader::Draw() {
   // Update the buffer
   buffer_manager.UpdateBuffer(buffer_name);
   // Check whether to enable multi-pass filtering
-  if (postproc_inputs_.effect_idx[0] == Effects::kEffectBloomEffect) {
+  if (postproc_inputs_.effect_idx == Effects::kEffectBloomEffect) {
     /* Draw to framebuffer 1 with texture 0 */
     // Update the current pass index
     UpdatePassIdx(0);
@@ -174,7 +174,7 @@ void shader::PostprocShader::UseScreenFramebuffer(const int screen_idx) {
  ******************************************************************************/
 
 void shader::PostprocShader::UpdateEnabled(const bool enabled) {
-  postproc_inputs_.enabled[0] = static_cast<int>(enabled);
+  postproc_inputs_.enabled = enabled;
 }
 
 void shader::PostprocShader::UpdateMousePos(const glm::ivec2 &mouse_pos) {
@@ -182,15 +182,15 @@ void shader::PostprocShader::UpdateMousePos(const glm::ivec2 &mouse_pos) {
 }
 
 void shader::PostprocShader::UpdateEffectIdx(const int effect_idx) {
-  postproc_inputs_.effect_idx[0] = effect_idx;
+  postproc_inputs_.effect_idx = effect_idx;
 }
 
 void shader::PostprocShader::UpdatePassIdx(const int pass_idx) {
-  postproc_inputs_.pass_idx[0] = pass_idx;
+  postproc_inputs_.pass_idx = pass_idx;
 }
 
 void shader::PostprocShader::UpdateTime(const float time) {
-  postproc_inputs_.time[0] = time;
+  postproc_inputs_.time = time;
 }
 
 /*******************************************************************************

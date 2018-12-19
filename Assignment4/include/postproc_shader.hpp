@@ -16,13 +16,13 @@ class PostprocShader : public Shader {
   };
 
   struct PostprocInputs {
-    // Use int[2] instead of bool to avoid alignment mismatch problem (OpenGL
-    // will pad the memory for alignment, but C++ sizeof() won't)
-    int enabled[2];
-    glm::vec2 mouse_pos;
-    int effect_idx[2];
-    int pass_idx[2];
-    float time[2];
+    bool enabled;  // 4*0=0, +1->1
+
+    bool pad_mouse_pos[7];  // +7->8
+    glm::vec2 mouse_pos;    // 8*1=8, +8->16
+    int effect_idx;         // 4*4=16, +4->20
+    int pass_idx;           // 4*5=20, +4->24
+    float time;             // 4*6=24, +4->28
   };
 
   PostprocShader();

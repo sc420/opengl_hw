@@ -33,11 +33,11 @@ const vec4 kErrorColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 /* Post-processing inputs */
 layout(std140) uniform PostprocInputs {
-  int enabled[2];
+  bool enabled;
   vec2 mouse_pos;
-  int effect_idx[2];
-  int pass_idx[2];
-  float time[2];
+  int effect_idx;
+  int pass_idx;
+  float time;
 }
 postproc_inputs;
 
@@ -78,16 +78,15 @@ vec2 GetTextureSize() { return textureSize(screen_tex, 0); }
  ******************************************************************************/
 
 int CalcDisplayMode() {
-  if (postproc_inputs.enabled[0] == 0) {
+  if (!postproc_inputs.enabled) {
     return kDisplayModeOriginal;
   }
-  const int effect_idx = postproc_inputs.effect_idx[0];
   const vec2 mouse_pos = postproc_inputs.mouse_pos;
   const vec2 window_size = GetTextureSize();
   const vec2 reversed_mouse_pos =
       vec2(mouse_pos.x, window_size.y - mouse_pos.y);
   const vec2 dist = vec2(gl_FragCoord) - reversed_mouse_pos;
-  if (effect_idx == kPostprocEffectMagnifier) {
+  if (postproc_inputs.effect_idx == kPostprocEffectMagnifier) {
     const float radius = sqrt(pow(dist.x, 2.0f) + pow(dist.y, 2.0f));
     const float min_window_len = min(window_size.x, window_size.y);
     if (radius / min_window_len <= kMagnifierRadius) {
@@ -313,7 +312,7 @@ vec4 CalcBloomEffectMixedColor(vec4 orig_color, vec4 blurred_color) {
 vec4 CalcBloomEffect() {
   const int kNumMultipass = 10;
 
-  const int pass_idx = postproc_inputs.pass_idx[0];
+  const int pass_idx = postproc_inputs.pass_idx;
   if (pass_idx == 0) {
     return 0.8f * GetTexel(vs_tex_coords) +
            0.5f * CalcBrightness(GetTexel(vs_tex_coords));
@@ -450,7 +449,7 @@ vec4 downsample(sampler2D sampler, vec2 uv, float pixelSize) {
 
 vec3 edge(sampler2D sampler, vec2 uv, float sampleSize) {
   const vec2 iResolution = GetTextureSize();
-  const float iTime = postproc_inputs.time[0];
+  const float iTime = postproc_inputs.time;
 
   float dx = sampleSize / iResolution.x;
   float dy = sampleSize / iResolution.y;
@@ -477,7 +476,7 @@ vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
   const float kTileSize = 16;
 
   const vec2 iResolution = GetTextureSize();
-  const float iTime = postproc_inputs.time[0];
+  const float iTime = postproc_inputs.time;
   const float Amount = 0.1f + 0.5f * abs(sin(iTime));
 
   vec2 pixel = vec2(1.0) / iResolution;
@@ -506,7 +505,7 @@ vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
 vec4 ShampainGlitch01(vec2 fragCoord) {
   vec4 fragColor;
   const vec2 iResolution = GetTextureSize();
-  const float iTime = postproc_inputs.time[0];
+  const float iTime = postproc_inputs.time;
   const vec4 iMouse = vec4(postproc_inputs.mouse_pos, 0.0f, 0.0f);
 
   float THRESHOLD = 0.1f + abs(sin(iTime)) * 0.5f;
@@ -551,7 +550,7 @@ vec4 ShampainGlitch01(vec2 fragCoord) {
 vec4 ShampainGlitch02(vec2 fragCoord) {
   vec4 fragColor;
   const vec2 iResolution = GetTextureSize();
-  const float iTime = postproc_inputs.time[0];
+  const float iTime = postproc_inputs.time;
 
   float aspect = iResolution.x / iResolution.y;
   vec2 uv = fragCoord.xy / iResolution;
@@ -615,7 +614,7 @@ vec4 GlitchShaderB(vec2 fragCoord) {
   vec4 fragColor;
 
   const vec2 iResolution = GetTextureSize();
-  const float iTime = postproc_inputs.time[0];
+  const float iTime = postproc_inputs.time;
 
   vec2 uv = fragCoord.xy / iResolution;
 
@@ -640,8 +639,7 @@ vec4 CalcSpecial() {
  ******************************************************************************/
 
 vec4 CalcPostproc() {
-  int effect_idx = postproc_inputs.effect_idx[0];
-  switch (effect_idx) {
+  switch (postproc_inputs.effect_idx) {
     case kPostprocEffectImgAbs: {
       return CalcImageAbstraction();
     } break;
