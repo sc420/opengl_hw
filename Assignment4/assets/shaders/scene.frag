@@ -68,6 +68,16 @@ vs_tangent_lighting;
 layout(location = 0) out vec4 fs_color;
 
 /*******************************************************************************
+ * Geometry Calculations
+ ******************************************************************************/
+
+// Reference: https://stackoverflow.com/a/26697650
+float CheckInsideBox(vec2 coords, vec2 bottom_left, vec2 top_right) {
+  const vec2 axis_results = step(bottom_left, coords) - step(top_right, coords);
+  return axis_results.x * axis_results.y;
+}
+
+/*******************************************************************************
  * Tangent Space Direction Calculations
  ******************************************************************************/
 
@@ -108,7 +118,14 @@ vec2 CalcParallaxMappingTexCoords(sampler2D tex) {
 }
 
 vec4 GetParallaxMappingColor(sampler2D tex) {
+  // Calculate parallax mapped texture coordinates
   const vec2 parallax_tex_coords = CalcParallaxMappingTexCoords(tex);
+  // Check whether the coordinates are out of range
+  const vec2 bottom_left = vec2(0.0f);
+  const vec2 top_right = vec2(1.0f);
+  if (CheckInsideBox(parallax_tex_coords, bottom_left, top_right) <= 0.0f) {
+    discard;
+  }
   return texture(tex, parallax_tex_coords);
 }
 

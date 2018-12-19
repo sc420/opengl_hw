@@ -1,7 +1,7 @@
 #include "scene_shader.hpp"
 
 shader::SceneShader::SceneShader()
-    : model_rotation(glm::radians(180.0f)),
+    : model_rotation(glm::radians(0.0f)),
       global_trans_(GlobalTrans()),
       model_trans_(ModelTrans()),
       model_material_(ModelMaterial()),
