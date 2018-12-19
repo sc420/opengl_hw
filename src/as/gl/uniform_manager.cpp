@@ -3,7 +3,15 @@
 as::UniformManager::UniformManager()
     : program_manager_(nullptr), buffer_manager_(nullptr) {}
 
+/*******************************************************************************
+ * Initialization
+ ******************************************************************************/
+
 void as::UniformManager::Init() { InitLimits(); }
+
+/*******************************************************************************
+ * Manager Registrations
+ ******************************************************************************/
 
 void as::UniformManager::RegisterProgramManager(
     const ProgramManager &program_manager) {
@@ -14,6 +22,10 @@ void as::UniformManager::RegisterBufferManager(
     const BufferManager &buffer_manager) {
   buffer_manager_ = &buffer_manager;
 }
+
+/*******************************************************************************
+ * Setting Value Methods
+ ******************************************************************************/
 
 void as::UniformManager::SetUniform1Float(const std::string &program_name,
                                           const std::string &var_name,
@@ -28,6 +40,10 @@ void as::UniformManager::SetUniform1Int(const std::string &program_name,
   const GLint var_hdlr = GetUniformVarHdlr(program_name, var_name);
   glUniform1i(var_hdlr, v0);
 }
+
+/*******************************************************************************
+ * Binding Management
+ ******************************************************************************/
 
 void as::UniformManager::AssignUniformBlockToBindingPoint(
     const std::string &program_name, const std::string &block_name,
@@ -84,6 +100,10 @@ void as::UniformManager::UnbindBufferBase(const std::string &buffer_name) {
   BindBufferBaseToBindingPoint(buffer_name, 0);
 }
 
+/*******************************************************************************
+ * Handler Getters
+ ******************************************************************************/
+
 GLint as::UniformManager::GetUniformVarHdlr(const std::string &program_name,
                                             const std::string &block_name) {
   GLint var_hdlr;
@@ -117,6 +137,30 @@ GLuint as::UniformManager::GetUniformBlockHdlr(const std::string &program_name,
   }
   return block_hdlr;
 }
+
+/*******************************************************************************
+ * Debugging
+ ******************************************************************************/
+
+GLint as::UniformManager::GetUniformBlockMemoryOfs(
+    const std::string &program_name,
+    const std::string &block_member_name) const {
+  // Get program handler
+  const GLuint program_hdlr = program_manager_->GetProgramHdlr(program_name);
+  // Get uniform member index
+  GLuint uniform_idx;
+  const char *name = block_member_name.c_str();
+  glGetUniformIndices(program_hdlr, 1, &name, &uniform_idx);
+  // Get uniform member offset
+  GLint uniform_ofs;
+  glGetActiveUniformsiv(program_hdlr, 1, &uniform_idx, GL_UNIFORM_OFFSET,
+                        &uniform_ofs);
+  return uniform_ofs;
+}
+
+/*******************************************************************************
+ * Initialization (Private)
+ ******************************************************************************/
 
 void as::UniformManager::InitLimits() {
   GLint value;

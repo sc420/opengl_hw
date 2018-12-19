@@ -239,20 +239,15 @@ void shader::SceneShader::UpdateModelTrans(const float add_rotation) {
 void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update material
-  model_material_.use_ambient_tex.x =
-      static_cast<int>(material.HasAmbientTexture());
-  model_material_.use_diffuse_tex.x =
-      static_cast<int>(material.HasDiffuseTexture());
-  model_material_.use_specular_tex.x =
-      static_cast<int>(material.HasSpecularTexture());
-  model_material_.use_height_tex.x =
-      static_cast<int>(material.HasHeightTexture());
-  model_material_.use_normals_tex.x =
-      static_cast<int>(material.HasNormalsTexture());
+  model_material_.use_ambient_tex = material.HasAmbientTexture();
+  model_material_.use_diffuse_tex = material.HasDiffuseTexture();
+  model_material_.use_specular_tex = material.HasSpecularTexture();
+  model_material_.use_height_tex = material.HasHeightTexture();
+  model_material_.use_normals_tex = material.HasNormalsTexture();
   model_material_.ambient_color = material.GetAmbientColor();
   model_material_.diffuse_color = material.GetDiffuseColor();
   model_material_.specular_color = material.GetSpecularColor();
-  model_material_.shininess = glm::vec4(material.GetShininess());
+  model_material_.shininess = material.GetShininess();
   // Update the buffer
   const std::string &buffer_name = GetModelMaterialBufferName();
   buffer_manager.UpdateBuffer(buffer_name);

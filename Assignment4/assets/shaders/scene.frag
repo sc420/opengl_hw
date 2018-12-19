@@ -14,20 +14,20 @@ const float kParallaxMapMaxNumLayers = 8.0f;
  * Uniform Blocks
  ******************************************************************************/
 
-uniform ModelMaterial {
-  ivec4 use_ambient_tex;
-  ivec4 use_diffuse_tex;
-  ivec4 use_specular_tex;
-  ivec4 use_height_tex;
-  ivec4 use_normals_tex;
+layout(std140) uniform ModelMaterial {
+  bool use_ambient_tex;
+  bool use_diffuse_tex;
+  bool use_specular_tex;
+  bool use_height_tex;
+  bool use_normals_tex;
   vec4 ambient_color;
   vec4 diffuse_color;
   vec4 specular_color;
-  vec4 shininess;
+  float shininess;
 }
 model_material;
 
-uniform Lighting {
+layout(std140) uniform Lighting {
   mat4 fixed_norm_model;
   vec4 light_color;
   vec4 light_pos;
@@ -84,7 +84,7 @@ float CheckInsideBox(vec2 coords, vec2 bottom_left, vec2 top_right) {
  ******************************************************************************/
 
 vec3 GetTangentNorm() {
-  if (model_material.use_normals_tex.x > 0) {
+  if (model_material.use_normals_tex) {
     const vec3 norm = vec3(texture(normals_tex, vs_tex.coords));
     return normalize(norm * 2.0f - 1.0f);
   } else {
@@ -110,7 +110,7 @@ vec3 GetTangentHalfwayDir() {
 
 vec2 CalcParallaxMappingTexCoords(sampler2D tex) {
   const vec2 tex_coords = vs_tex.coords;
-  if (model_material.use_height_tex.x <= 0) {
+  if (!model_material.use_height_tex) {
     return tex_coords;
   }
   const vec3 view_dir = GetTangentViewDir();
@@ -163,7 +163,7 @@ vec4 GetParallaxMappingColor(sampler2D tex) {
 
 vec4 GetAmbientColor() {
   vec4 tex_color;
-  if (model_material.use_ambient_tex.x > 0) {
+  if (model_material.use_ambient_tex) {
     tex_color = GetParallaxMappingColor(ambient_tex);
   } else {
     tex_color = model_material.ambient_color;
@@ -175,7 +175,7 @@ vec4 GetAmbientColor() {
 
 vec4 GetDiffuseColor() {
   vec4 tex_color;
-  if (model_material.use_diffuse_tex.x > 0) {
+  if (model_material.use_diffuse_tex) {
     tex_color = GetParallaxMappingColor(diffuse_tex);
   } else {
     tex_color = model_material.diffuse_color;
@@ -190,14 +190,14 @@ vec4 GetDiffuseColor() {
 
 vec4 GetSpecularColor() {
   vec4 tex_color;
-  if (model_material.use_specular_tex.x > 0) {
+  if (model_material.use_specular_tex) {
     tex_color = GetParallaxMappingColor(specular_tex);
   } else {
     tex_color = model_material.specular_color;
   }
   const vec3 norm = GetTangentNorm();
   const vec3 halfway_dir = GetTangentHalfwayDir();
-  const float shininess = model_material.shininess.x;
+  const float shininess = model_material.shininess;
   const float energy_conservation = (8.0f + shininess) / (8.0f * kPi);
   const float specular_strength =
       pow(max(dot(norm, halfway_dir), 0.0f), shininess);

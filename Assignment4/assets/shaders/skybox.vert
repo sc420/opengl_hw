@@ -1,6 +1,6 @@
 #version 440
 
-uniform GlobalTrans {
+layout(std140) uniform GlobalTrans {
   mat4 model;
   mat4 view;
   mat4 proj;

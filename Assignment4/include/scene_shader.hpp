@@ -9,33 +9,43 @@ class SkyboxShader;
 class SceneShader : public Shader {
  public:
   struct GlobalTrans {
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 proj;
+    glm::mat4 model;  // 64*0=0, +64->64
+    glm::mat4 view;   // 64*1=64, +64->128
+    glm::mat4 proj;   // 64*2=128, +64->192
   };
 
   struct ModelTrans {
-    glm::mat4 trans;
+    glm::mat4 trans;  // 64*0=0, +64->64
   };
 
   struct ModelMaterial {
-    glm::ivec4 use_ambient_tex;
-    glm::ivec4 use_diffuse_tex;
-    glm::ivec4 use_specular_tex;
-    glm::ivec4 use_height_tex;
-    glm::ivec4 use_normals_tex;
-    glm::vec4 ambient_color;
-    glm::vec4 diffuse_color;
-    glm::vec4 specular_color;
-    glm::vec4 shininess;
+    bool use_ambient_tex;  // 4*0=0, +1->1
+
+    bool pad_use_diffuse_tex[3];  // +3->4
+    bool use_diffuse_tex;         // 4*1=4
+
+    bool pad_use_specular_tex[3];  // +3->8
+    bool use_specular_tex;         // 4*2=8, +1->9
+
+    bool pad_use_height_tex[3];  // +3->12
+    bool use_height_tex;         // 4*3=12, +1->13
+
+    bool pad_use_normals_tex[3];  // +3->16
+    bool use_normals_tex;         // 4*4=16, +1->17
+
+    bool pad_ambient_color[15];  // +15->32
+    glm::vec4 ambient_color;     // 16*1=32, +16->48
+    glm::vec4 diffuse_color;     // 16*2=48, +16->64
+    glm::vec4 specular_color;    // 16*3=64, +16->80
+    float shininess;             // 4*20=80, +4->84
   };
 
   struct Lighting {
-    glm::mat4 fixed_norm_model;
-    glm::vec4 light_color;
-    glm::vec4 light_pos;
-    glm::vec4 light_intensity;
-    glm::vec4 view_pos;
+    glm::mat4 fixed_norm_model;  // 64*0=0, +64->64
+    glm::vec4 light_color;       // 4*16=64, +16->80
+    glm::vec4 light_pos;         // 4*20=80, +16->96
+    glm::vec4 light_intensity;   // 4*24=96, +16->112
+    glm::vec4 view_pos;          // 4*28=112, +16->128
   };
 
   SceneShader();

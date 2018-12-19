@@ -16,17 +16,25 @@ class UniformManager {
  public:
   UniformManager();
 
+  /* Initialization */
+
   void Init();
+
+  /* Manager registrations */
 
   void RegisterProgramManager(const ProgramManager &program_manager);
 
   void RegisterBufferManager(const BufferManager &buffer_manager);
+
+  /* Setting value methods */
 
   void SetUniform1Float(const std::string &program_name,
                         const std::string &var_name, const GLfloat v0);
 
   void SetUniform1Int(const std::string &program_name,
                       const std::string &var_name, const GLint v0);
+
+  /* Binding management */
 
   void AssignUniformBlockToBindingPoint(const std::string &program_name,
                                         const std::string &block_name,
@@ -47,11 +55,23 @@ class UniformManager {
 
   void UnbindBufferBase(const std::string &buffer_name);
 
+  /* Handler getters */
+
   GLint GetUniformVarHdlr(const std::string &program_name,
                           const std::string &block_name);
 
   GLuint GetUniformBlockHdlr(const std::string &program_name,
                              const std::string &block_name);
+
+  /* Debugging */
+
+  /**
+   * Example: GetUniformBlockMemoryOfs("scene", "ExampleBlock.model");
+   * Note that "ExampleBlock" is the uniform declaration name rather than
+   * instance name.
+   */
+  GLint GetUniformBlockMemoryOfs(const std::string &program_name,
+                                 const std::string &block_member_name) const;
 
  private:
   const ProgramManager *program_manager_;
@@ -64,6 +84,8 @@ class UniformManager {
 
   IndexManager<std::tuple<std::string, std::string>, std::string, GLuint>
       index_manager_;
+
+  /* Initialization */
 
   void InitLimits();
 };

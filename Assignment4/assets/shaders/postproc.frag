@@ -32,7 +32,7 @@ const vec4 kErrorColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
  ******************************************************************************/
 
 /* Post-processing inputs */
-uniform PostprocInputs {
+layout(std140) uniform PostprocInputs {
   int enabled[2];
   vec2 mouse_pos;
   int effect_idx[2];

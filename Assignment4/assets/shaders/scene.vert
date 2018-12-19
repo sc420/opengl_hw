@@ -4,17 +4,17 @@
  * Uniform Blocks
  ******************************************************************************/
 
-uniform GlobalTrans {
+layout(std140) uniform GlobalTrans {
   mat4 model;
   mat4 view;
   mat4 proj;
 }
 global_trans;
 
-uniform ModelTrans { mat4 trans; }
+layout(std140) uniform ModelTrans { mat4 trans; }
 model_trans;
 
-uniform Lighting {
+layout(std140) uniform Lighting {
   mat4 fixed_norm_model;
   vec4 light_color;
   vec4 light_pos;
