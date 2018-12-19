@@ -5,7 +5,7 @@
  ******************************************************************************/
 
 const float kPi = 3.1415926535897932384626433832795;
-const float kEnvMapBlendRatio = 0.0f;  // TODO: 0.35f
+const float kEnvMapBlendRatio = 0.35f;  // TODO: 0.35f
 const float kParallaxHeightScale = 0.05f;
 const float kParallaxMapMinNumLayers = 4.0f;
 const float kParallaxMapMaxNumLayers = 8.0f;
@@ -149,11 +149,11 @@ vec4 GetParallaxMappingColor(sampler2D tex) {
   // Calculate parallax mapped texture coordinates
   const vec2 parallax_tex_coords = CalcParallaxMappingTexCoords(tex);
   // Check whether the coordinates are out of range
-  const vec2 bottom_left = vec2(0.0f);
-  const vec2 top_right = vec2(1.0f);
-  if (CheckInsideBox(parallax_tex_coords, bottom_left, top_right) <= 0.0f) {
-    discard;
-  }
+  //  const vec2 bottom_left = vec2(0.0f);
+  //  const vec2 top_right = vec2(1.0f);
+  //  if (CheckInsideBox(parallax_tex_coords, bottom_left, top_right) <= 0.0f) {
+  //    discard;
+  //  }
   return texture(tex, parallax_tex_coords);
 }
 
