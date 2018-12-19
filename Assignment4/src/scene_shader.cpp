@@ -1,7 +1,8 @@
 #include "scene_shader.hpp"
 
 shader::SceneShader::SceneShader()
-    : global_trans_(GlobalTrans()),
+    : model_rotation(0.0f),
+      global_trans_(GlobalTrans()),
       model_trans_(ModelTrans()),
       model_material_(ModelMaterial()),
       lighting_(Lighting()) {}
@@ -21,7 +22,7 @@ void shader::SceneShader::RegisterSkyboxShader(
 
 void shader::SceneShader::LoadModel() {
   as::Model &model = GetModel();
-  model.LoadFile("assets/models/nanosuit/nanosuit.obj",
+  model.LoadFile("assets/models/wall/wall.obj",
                  aiProcess_CalcTangentSpace | aiProcess_Triangulate |
                      aiProcess_GenNormals | aiProcess_FlipUVs);
 }
@@ -214,10 +215,19 @@ void shader::SceneShader::UpdateGlobalTrans(const GlobalTrans &global_trans) {
   UpdateFixedNormModel();
 }
 
-void shader::SceneShader::UpdateModelTrans(const ModelTrans &model_trans) {
+void shader::SceneShader::UpdateModelTrans(const float add_rotation) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Update model state
+  model_rotation += add_rotation;
   // Update model transformation
-  model_trans_ = model_trans;
+  // const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
+  // const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
+  const glm::vec3 scale_factors = glm::vec3(10.0f);
+  const glm::vec3 translate_factors = glm::vec3(-1.0f);
+  glm::mat4 trans = glm::scale(glm::mat4(1.0f), scale_factors);
+  trans = glm::translate(trans, translate_factors);
+  trans = glm::rotate(trans, model_rotation, glm::vec3(0.0, 1.0, 0.0));
+  model_trans_.trans = trans;
   // Update the buffer
   const std::string &buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);

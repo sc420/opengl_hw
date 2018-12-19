@@ -69,7 +69,7 @@ class SceneShader : public Shader {
 
   void UpdateGlobalTrans(const GlobalTrans &global_trans);
 
-  void UpdateModelTrans(const ModelTrans &model_trans);
+  void UpdateModelTrans(const float add_rotation = 0.0f);
 
   void UpdateModelMaterial(const as::Material &material);
 
@@ -111,8 +111,16 @@ class SceneShader : public Shader {
   std::string GetSkyboxTextureUnitName() const;
 
  private:
+  /* Shaders */
   std::shared_ptr<SkyboxShader> skybox_shader_;
+
+  /* Models */
   as::Model scene_model_;
+
+  /* Model states */
+  float model_rotation;
+
+  /* GL states */
   GlobalTrans global_trans_;
   ModelTrans model_trans_;
   ModelMaterial model_material_;

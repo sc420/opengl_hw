@@ -148,19 +148,7 @@ void UpdateGlobalTrans() {
   scene_shader.UpdateGlobalTrans(global_trans);
 }
 
-void UpdateModelTrans() {
-  shader::SceneShader::ModelTrans model_trans;
-  const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
-  // const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
-  const glm::vec3 translate_factors = glm::vec3(0.0f);
-  model_trans.trans =
-      glm::translate(glm::rotate(glm::scale(glm::mat4(1.0f), scale_factors),
-                                 (float)ui_manager.CalcElapsedSeconds(),
-                                 glm::vec3(0.0, 1.0, 0.0)),
-                     translate_factors);
-
-  scene_shader.UpdateModelTrans(model_trans);
-}
+void UpdateModelTrans() { scene_shader.UpdateModelTrans(); }
 
 void UpdateLighting() {
   const glm::vec3 &eye = camera_trans.GetEye();
@@ -336,7 +324,13 @@ void GLUTTimerCallback(const int val) {
     UpdateLighting();
   }
 
-  UpdateModelTrans();
+  // Update model transformation
+  if (ui_manager.IsKeyDown('q')) {
+    scene_shader.UpdateModelTrans(glm::radians(1.0f));
+  }
+  if (ui_manager.IsKeyDown('e')) {
+    scene_shader.UpdateModelTrans(glm::radians(-1.0f));
+  }
 
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();
