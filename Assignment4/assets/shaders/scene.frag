@@ -6,7 +6,7 @@
 
 const float kPi = 3.1415926535897932384626433832795;
 const float kEnvMapBlendRatio = 0.0f;  // TODO: 0.35f
-const float kParallaxHeightScale = 0.1f;
+const float kParallaxHeightScale = 0.05f;
 
 /*******************************************************************************
  * Uniform Blocks
@@ -112,9 +112,45 @@ vec2 CalcParallaxMappingTexCoords(sampler2D tex) {
     return tex_coords;
   }
   const vec3 view_dir = GetTangentViewDir();
-  const float height = texture(height_tex, tex_coords).x;
-  const vec2 ofs = (-view_dir.xy) * height * kParallaxHeightScale / view_dir.z;
-  return tex_coords + ofs;
+
+  // number of depth layers
+  const float minLayers = 8.0;
+  const float maxLayers = 32.0;
+  float numLayers =
+      mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), view_dir)));
+  // calculate the size of each layer
+  float layerDepth = 1.0f / numLayers;
+  // depth of current layer
+  float currentLayerDepth = 0.0f;
+  // the amount to shift the texture coordinates per layer (from vector P)
+  vec2 P = view_dir.xy * kParallaxHeightScale;
+  vec2 deltaTexCoords = P / numLayers;
+
+  vec2 currentTexCoords = tex_coords;
+  float currentDepthMapValue = texture(height_tex, currentTexCoords).x;
+
+  while (currentLayerDepth < currentDepthMapValue) {
+    // shift texture coordinates along direction of P
+    currentTexCoords -= deltaTexCoords;
+    // get depthmap value at current texture coordinates
+    currentDepthMapValue = texture(height_tex, currentTexCoords).x;
+    // get depth of next layer
+    currentLayerDepth += layerDepth;
+  }
+
+  vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+  // get depth after and before collision for linear interpolation
+  float afterDepth = currentDepthMapValue - currentLayerDepth;
+  float beforeDepth =
+      texture(height_tex, prevTexCoords).x - currentLayerDepth + layerDepth;
+
+  // interpolation of texture coordinates
+  float weight = afterDepth / (afterDepth - beforeDepth);
+  vec2 finalTexCoords =
+      prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+
+  return finalTexCoords;
 }
 
 vec4 GetParallaxMappingColor(sampler2D tex) {
@@ -173,7 +209,7 @@ vec4 GetSpecularColor() {
   const float energy_conservation = (8.0f + shininess) / (8.0f * kPi);
   const float specular_strength =
       pow(max(dot(norm, halfway_dir), 0.0f), shininess);
-  const vec4 affecting_color = lighting.light_intensity.z *
+  const vec4 affecting_color = 0.0f * lighting.light_intensity.z *
                                energy_conservation * specular_strength *
                                lighting.light_color;
   return affecting_color * tex_color;
