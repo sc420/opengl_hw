@@ -177,12 +177,15 @@ void shader::SceneShader::Draw() {
           uniform_manager.SetUniform1Int(program_name, "specular_tex",
                                          unit_idx);
         } break;
+        case aiTextureType_HEIGHT: {
+          uniform_manager.SetUniform1Int(program_name, "height_tex", unit_idx);
+        } break;
         case aiTextureType_NORMALS: {
           uniform_manager.SetUniform1Int(program_name, "normals_tex", unit_idx);
         } break;
         default: {
-          throw std::runtime_error("Unknown type '" + std ::to_string(type) +
-                                   "'");
+          throw std::runtime_error("Unknown texture type '" +
+                                   std ::to_string(type) + "'");
         }
       }
       /* Draw vertex arrays */

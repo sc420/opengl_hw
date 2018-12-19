@@ -39,6 +39,7 @@ lighting;
 uniform sampler2D ambient_tex;
 uniform sampler2D diffuse_tex;
 uniform sampler2D specular_tex;
+uniform sampler2D height_tex;
 uniform sampler2D normals_tex;
 uniform samplerCube skybox_tex;
 

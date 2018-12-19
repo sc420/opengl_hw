@@ -14,24 +14,7 @@ class Material {
 
   Material(const fs::path &dir, const aiScene *ai_scene, const aiMesh *ai_mesh);
 
-  const std::set<Texture> ProcessMaterialTextures(
-      const fs::path &dir, const aiMaterial *ai_material) const;
-
-  std::set<Texture> ProcessMaterialTexturesOfType(
-      const fs::path &dir, const aiMaterial *ai_material,
-      const aiTextureType ai_texture_type) const;
-
-  template <class TReturn, class TAiValue>
-  const TReturn GetMaterialProperty(const aiMaterial *ai_material,
-                                    const std::string &key) const;
-
-  template <>
-  const glm::vec4 GetMaterialProperty<glm::vec4, aiColor4D>(
-      const aiMaterial *ai_material, const std::string &key) const;
-
-  template <>
-  const float GetMaterialProperty<float, float>(const aiMaterial *ai_material,
-                                                const std::string &key) const;
+  bool HasTextureType(const aiTextureType type) const;
 
   bool HasAmbientTexture() const;
 
@@ -58,7 +41,24 @@ class Material {
   float shininess_;
   std::set<Texture> textures_;
 
-  bool HasTextureType(const aiTextureType type) const;
+  const std::set<Texture> ProcessMaterialTextures(
+      const fs::path &dir, const aiMaterial *ai_material) const;
+
+  std::set<Texture> ProcessMaterialTexturesOfType(
+      const fs::path &dir, const aiMaterial *ai_material,
+      const aiTextureType ai_texture_type) const;
+
+  template <class TReturn, class TAiValue>
+  const TReturn GetMaterialProperty(const aiMaterial *ai_material,
+                                    const std::string &key) const;
+
+  template <>
+  const glm::vec4 GetMaterialProperty<glm::vec4, aiColor4D>(
+      const aiMaterial *ai_material, const std::string &key) const;
+
+  template <>
+  const float GetMaterialProperty<float, float>(const aiMaterial *ai_material,
+                                                const std::string &key) const;
 };
 
 template <>
