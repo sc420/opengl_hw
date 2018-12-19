@@ -8,6 +8,7 @@ as::Material::Material()
 
 as::Material::Material(const fs::path &dir, const aiScene *ai_scene,
                        const aiMesh *ai_mesh) {
+  Material();
   if (ai_mesh->mMaterialIndex < 0) {
     return;
   }
