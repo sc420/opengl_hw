@@ -2,7 +2,7 @@
 
 std::vector<GLubyte> as::ConvertDataChannels(const int old_num_channels,
                                              const int new_num_channels,
-                                             const std::vector<GLubyte>& data) {
+                                             const std::vector<GLubyte> &data) {
   if (old_num_channels == new_num_channels) {
     return data;
   }
@@ -18,4 +18,12 @@ std::vector<GLubyte> as::ConvertDataChannels(const int old_num_channels,
     }
   }
   return output;
+}
+
+glm::vec3 as::ConvertAiVectorToVec(const aiVector3D &ai_color) {
+  return glm::vec3(ai_color.x, ai_color.y, ai_color.z);
+}
+
+glm::vec4 as::ConvertAiColorToVec(const aiColor4D &ai_color) {
+  return glm::vec4(ai_color.r, ai_color.g, ai_color.b, ai_color.a);
 }

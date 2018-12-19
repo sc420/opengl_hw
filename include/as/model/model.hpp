@@ -13,6 +13,7 @@
 
 /* Project libraries */
 #include "as/common.hpp"
+#include "as/model/converter.hpp"
 #include "as/model/loader.hpp"
 #include "as/model/material.hpp"
 #include "as/model/mesh.hpp"
@@ -46,55 +47,6 @@ class Model {
   const std::vector<Vertex> ProcessMeshVertices(const aiMesh *ai_mesh) const;
 
   const std::vector<size_t> ProcessMeshIdxs(const aiMesh *ai_mesh) const;
-
-  const Material ProcessMeshMaterial(const fs::path &dir,
-                                     const aiScene *ai_scene,
-                                     const aiMesh *ai_mesh) const;
-
-  const std::set<Texture> ProcessMaterialTextures(
-      const fs::path &dir, const aiMaterial *ai_material) const;
-
-  std::set<Texture> ProcessMaterialTexturesOfType(
-      const fs::path &dir, const aiMaterial *ai_material,
-      const aiTextureType ai_texture_type) const;
-
-  template <class TReturn, class TAiValue>
-  const TReturn GetMaterialProperty(const aiMaterial *ai_material,
-                                    const std::string &key) const;
-
-  template <>
-  const glm::vec4 GetMaterialProperty<glm::vec4, aiColor4D>(
-      const aiMaterial *ai_material, const std::string &key) const;
-
-  template <>
-  const float GetMaterialProperty<float, float>(const aiMaterial *ai_material,
-                                                const std::string &key) const;
-
-  static glm::vec3 ConvertAiVectorToVec(const aiVector3D &ai_color);
-
-  static glm::vec4 ConvertAiColorToVec(const aiColor4D &ai_color);
 };
-
-template <>
-inline const glm::vec4 Model::GetMaterialProperty<glm::vec4, aiColor4D>(
-    const aiMaterial *ai_material, const std::string &key) const {
-  aiColor4D value;
-  if (ai_material->Get(key.c_str(), 0, 0, value) == AI_SUCCESS) {
-    return ConvertAiColorToVec(value);
-  } else {
-    return glm::vec4(0.0f);
-  }
-}
-
-template <>
-inline const float Model::GetMaterialProperty<float, float>(
-    const aiMaterial *ai_material, const std::string &key) const {
-  float value;
-  if (ai_material->Get(key.c_str(), 0, 0, value) == AI_SUCCESS) {
-    return value;
-  } else {
-    return 0.0f;
-  }
-}
 
 }  // namespace as

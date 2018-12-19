@@ -69,7 +69,7 @@ const as::Mesh as::Model::ProcessMesh(const fs::path &dir,
                                       const aiMesh *ai_mesh) {
   const std::vector<Vertex> vertices = ProcessMeshVertices(ai_mesh);
   const std::vector<size_t> idxs = ProcessMeshIdxs(ai_mesh);
-  const Material material = ProcessMeshMaterial(dir, ai_scene, ai_mesh);
+  const Material material(dir, ai_scene, ai_mesh);
   return Mesh(ai_mesh->mName.C_Str(), vertices, idxs, material);
 }
 
@@ -112,71 +112,4 @@ const std::vector<size_t> as::Model::ProcessMeshIdxs(
     }
   }
   return idxs;
-}
-
-const as::Material as::Model::ProcessMeshMaterial(const fs::path &dir,
-                                                  const aiScene *ai_scene,
-                                                  const aiMesh *ai_mesh) const {
-  if (ai_mesh->mMaterialIndex < 0) {
-    return Material();
-  }
-  // Get the material
-  const aiMaterial *ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
-  // Get the material colors
-  const glm::vec4 ambient_color =
-      GetMaterialProperty<glm::vec4, aiColor4D>(ai_material, "$clr.ambient");
-  const glm::vec4 diffuse_color =
-      GetMaterialProperty<glm::vec4, aiColor4D>(ai_material, "$clr.diffuse");
-  const glm::vec4 specular_color =
-      GetMaterialProperty<glm::vec4, aiColor4D>(ai_material, "$clr.specular");
-  // Get the material shininess
-  const float shininess =
-      GetMaterialProperty<float, float>(ai_material, "$mat.shininess");
-  // Get the material textures
-  const std::set<Texture> textures = ProcessMaterialTextures(dir, ai_material);
-  return Material(ambient_color, diffuse_color, specular_color, shininess,
-                  textures);
-}
-
-const std::set<as::Texture> as::Model::ProcessMaterialTextures(
-    const fs::path &dir, const aiMaterial *ai_material) const {
-  std::set<Texture> diffuse_textures =
-      ProcessMaterialTexturesOfType(dir, ai_material, aiTextureType_DIFFUSE);
-  std::set<Texture> specular_textures =
-      ProcessMaterialTexturesOfType(dir, ai_material, aiTextureType_SPECULAR);
-  std::set<Texture> ambient_textures =
-      ProcessMaterialTexturesOfType(dir, ai_material, aiTextureType_AMBIENT);
-  std::set<Texture> normals_textures =
-      ProcessMaterialTexturesOfType(dir, ai_material, aiTextureType_NORMALS);
-  // Merge all textures
-  std::set<Texture> all_textures(diffuse_textures);
-  all_textures.insert(specular_textures.begin(), specular_textures.end());
-  all_textures.insert(ambient_textures.begin(), ambient_textures.end());
-  all_textures.insert(normals_textures.begin(), normals_textures.end());
-  return all_textures;
-}
-
-std::set<as::Texture> as::Model::ProcessMaterialTexturesOfType(
-    const fs::path &dir, const aiMaterial *ai_material,
-    const aiTextureType ai_texture_type) const {
-  std::set<Texture> textures;
-  for (size_t i = 0; i < ai_material->GetTextureCount(ai_texture_type); i++) {
-    // Get the relative path
-    aiString path;
-    ai_material->GetTexture(ai_texture_type, i, &path);
-    // Build the full path
-    const fs::path full_path = dir / fs::path(path.C_Str());
-    // Get type name
-    const Texture texture = Texture(full_path.string(), ai_texture_type);
-    textures.insert(texture);
-  }
-  return textures;
-}
-
-glm::vec3 as::Model::ConvertAiVectorToVec(const aiVector3D &ai_color) {
-  return glm::vec3(ai_color.x, ai_color.y, ai_color.z);
-}
-
-glm::vec4 as::Model::ConvertAiColorToVec(const aiColor4D &ai_color) {
-  return glm::vec4(ai_color.r, ai_color.g, ai_color.b, ai_color.a);
 }
