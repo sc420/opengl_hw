@@ -47,6 +47,10 @@ bool as::Material::HasSpecularTexture() const {
   return HasTextureType(aiTextureType_SPECULAR);
 }
 
+bool as::Material::HasHeightTexture() const {
+  return HasTextureType(aiTextureType_HEIGHT);
+}
+
 bool as::Material::HasNormalsTexture() const {
   return HasTextureType(aiTextureType_NORMALS);
 }

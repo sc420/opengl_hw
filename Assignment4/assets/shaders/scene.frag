@@ -5,7 +5,8 @@
  ******************************************************************************/
 
 const float kPi = 3.1415926535897932384626433832795;
-const float kEnvMapBlendRatio = 0.35f;
+const float kEnvMapBlendRatio = 0.0f;  // TODO: 0.35f
+const float kParallaxHeightScale = 0.1f;
 
 /*******************************************************************************
  * Uniform Blocks
@@ -15,6 +16,7 @@ uniform ModelMaterial {
   ivec4 use_ambient_tex;
   ivec4 use_diffuse_tex;
   ivec4 use_specular_tex;
+  ivec4 use_height_tex;
   ivec4 use_normals_tex;
   vec4 ambient_color;
   vec4 diffuse_color;
@@ -66,7 +68,7 @@ vs_tangent_lighting;
 layout(location = 0) out vec4 fs_color;
 
 /*******************************************************************************
- * Blinn-Phong Model Methods
+ * Tangent Space Direction Calculations
  ******************************************************************************/
 
 vec3 GetTangentNorm() {
@@ -90,10 +92,34 @@ vec3 GetTangentHalfwayDir() {
   return normalize(GetTangentLightDir() + GetTangentViewDir());
 }
 
+/*******************************************************************************
+ * Parallax Mapping
+ ******************************************************************************/
+
+vec2 CalcParallaxMappingTexCoords(sampler2D tex) {
+  const vec2 tex_coords = vs_tex.coords;
+  if (model_material.use_height_tex.x <= 0) {
+    return tex_coords;
+  }
+  const vec3 view_dir = GetTangentViewDir();
+  const float height = texture(height_tex, tex_coords).x;
+  const vec2 ofs = (-view_dir.xy) * height * kParallaxHeightScale / view_dir.z;
+  return tex_coords + ofs;
+}
+
+vec4 GetParallaxMappingColor(sampler2D tex) {
+  const vec2 parallax_tex_coords = CalcParallaxMappingTexCoords(tex);
+  return texture(tex, parallax_tex_coords);
+}
+
+/*******************************************************************************
+ * Blinn-Phong Model Methods
+ ******************************************************************************/
+
 vec4 GetAmbientColor() {
   vec4 tex_color;
   if (model_material.use_ambient_tex.x > 0) {
-    tex_color = texture(ambient_tex, vs_tex.coords);
+    tex_color = GetParallaxMappingColor(ambient_tex);
   } else {
     tex_color = model_material.ambient_color;
   }
@@ -105,7 +131,7 @@ vec4 GetAmbientColor() {
 vec4 GetDiffuseColor() {
   vec4 tex_color;
   if (model_material.use_diffuse_tex.x > 0) {
-    tex_color = texture(diffuse_tex, vs_tex.coords);
+    tex_color = GetParallaxMappingColor(diffuse_tex);
   } else {
     tex_color = model_material.diffuse_color;
   }
@@ -120,7 +146,7 @@ vec4 GetDiffuseColor() {
 vec4 GetSpecularColor() {
   vec4 tex_color;
   if (model_material.use_specular_tex.x > 0) {
-    tex_color = texture(specular_tex, vs_tex.coords);
+    tex_color = GetParallaxMappingColor(specular_tex);
   } else {
     tex_color = model_material.specular_color;
   }

@@ -1,7 +1,7 @@
 #include "scene_shader.hpp"
 
 shader::SceneShader::SceneShader()
-    : model_rotation(0.0f),
+    : model_rotation(glm::radians(180.0f)),
       global_trans_(GlobalTrans()),
       model_trans_(ModelTrans()),
       model_material_(ModelMaterial()),
@@ -106,7 +106,7 @@ void shader::SceneShader::InitLighting() {
   Lighting lighting;
   lighting.light_color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
   lighting.light_pos = glm::vec4(-31.75f, 26.05f, -97.72f, 1.0f);
-  lighting.light_intensity = glm::vec4(1.0f, 1.0f, 0.5f, 1.0f);
+  lighting.light_intensity = glm::vec4(0.0f, 1.0f, 0.5f, 1.0f);
   lighting_ = lighting;
 }
 
@@ -247,6 +247,8 @@ void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
       static_cast<int>(material.HasDiffuseTexture());
   model_material_.use_specular_tex.x =
       static_cast<int>(material.HasSpecularTexture());
+  model_material_.use_height_tex.x =
+      static_cast<int>(material.HasHeightTexture());
   model_material_.use_normals_tex.x =
       static_cast<int>(material.HasNormalsTexture());
   model_material_.ambient_color = material.GetAmbientColor();
