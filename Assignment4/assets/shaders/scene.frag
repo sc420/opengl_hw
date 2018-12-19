@@ -7,6 +7,8 @@
 const float kPi = 3.1415926535897932384626433832795;
 const float kEnvMapBlendRatio = 0.0f;  // TODO: 0.35f
 const float kParallaxHeightScale = 0.05f;
+const float kParallaxMapMinNumLayers = 4.0f;
+const float kParallaxMapMaxNumLayers = 8.0f;
 
 /*******************************************************************************
  * Uniform Blocks
@@ -112,45 +114,35 @@ vec2 CalcParallaxMappingTexCoords(sampler2D tex) {
     return tex_coords;
   }
   const vec3 view_dir = GetTangentViewDir();
-
-  // number of depth layers
-  const float minLayers = 8.0;
-  const float maxLayers = 32.0;
-  float numLayers =
-      mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), view_dir)));
-  // calculate the size of each layer
-  float layerDepth = 1.0f / numLayers;
-  // depth of current layer
-  float currentLayerDepth = 0.0f;
-  // the amount to shift the texture coordinates per layer (from vector P)
-  vec2 P = view_dir.xy * kParallaxHeightScale;
-  vec2 deltaTexCoords = P / numLayers;
-
-  vec2 currentTexCoords = tex_coords;
-  float currentDepthMapValue = texture(height_tex, currentTexCoords).x;
-
-  while (currentLayerDepth < currentDepthMapValue) {
-    // shift texture coordinates along direction of P
-    currentTexCoords -= deltaTexCoords;
-    // get depthmap value at current texture coordinates
-    currentDepthMapValue = texture(height_tex, currentTexCoords).x;
-    // get depth of next layer
-    currentLayerDepth += layerDepth;
+  // The more perpendicular of a view direction, the more number of layers
+  const float num_layers =
+      mix(kParallaxMapMaxNumLayers, kParallaxMapMinNumLayers, abs(view_dir.z));
+  // Calculate the height of each layer
+  const float layer_height = 1.0f / num_layers;
+  // Calculate the amount to shift the texture coordinates per layer
+  const vec2 ofs = (-view_dir.xy) / num_layers * kParallaxHeightScale;
+  // Find the layer which is deeper than the depth from texture
+  float cur_layer_depth = 0.0f;
+  vec2 cur_tex_coords = tex_coords;
+  float cur_depth = texture(height_tex, cur_tex_coords).x;
+  while (cur_layer_depth < cur_depth) {
+    // Shift texture coordinates along the opposite of viewing direction
+    cur_tex_coords += ofs;
+    // Get depth at current texture coordinates
+    cur_depth = texture(height_tex, cur_tex_coords).x;
+    // Get depth of the next layer
+    cur_layer_depth += layer_height;
   }
-
-  vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
-
-  // get depth after and before collision for linear interpolation
-  float afterDepth = currentDepthMapValue - currentLayerDepth;
-  float beforeDepth =
-      texture(height_tex, prevTexCoords).x - currentLayerDepth + layerDepth;
-
-  // interpolation of texture coordinates
-  float weight = afterDepth / (afterDepth - beforeDepth);
-  vec2 finalTexCoords =
-      prevTexCoords * weight + currentTexCoords * (1.0 - weight);
-
-  return finalTexCoords;
+  // Calculate the previous texture coordinates
+  const vec2 prev_tex_coords = cur_tex_coords - ofs;
+  // Get errors after and before collision for linear interpolation
+  const float prev_layer_depth = cur_layer_depth - layer_height;
+  const float cur_error = cur_depth - cur_layer_depth;
+  const float prev_error =
+      prev_layer_depth - texture(height_tex, prev_tex_coords).x;
+  // Calculate interpolation of texture coordinates
+  const float weight = cur_error / (cur_error + prev_error);
+  return prev_tex_coords * weight + cur_tex_coords * (1.0f - weight);
 }
 
 vec4 GetParallaxMappingColor(sampler2D tex) {
@@ -209,7 +201,7 @@ vec4 GetSpecularColor() {
   const float energy_conservation = (8.0f + shininess) / (8.0f * kPi);
   const float specular_strength =
       pow(max(dot(norm, halfway_dir), 0.0f), shininess);
-  const vec4 affecting_color = 0.0f * lighting.light_intensity.z *
+  const vec4 affecting_color = lighting.light_intensity.z *
                                energy_conservation * specular_strength *
                                lighting.light_color;
   return affecting_color * tex_color;
