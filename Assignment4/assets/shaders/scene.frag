@@ -29,10 +29,10 @@ model_material;
 
 layout(std140) uniform Lighting {
   mat4 fixed_norm_model;
-  vec4 light_color;
-  vec4 light_pos;
-  vec4 light_intensity;
-  vec4 view_pos;
+  vec3 light_color;
+  vec3 light_pos;
+  vec3 light_intensity;
+  vec3 view_pos;
 }
 lighting;
 
@@ -169,7 +169,7 @@ vec4 GetAmbientColor() {
     tex_color = model_material.ambient_color;
   }
   const vec4 affecting_color =
-      lighting.light_intensity.x * lighting.light_color;
+      lighting.light_intensity.x * vec4(lighting.light_color, 1.0f);
   return affecting_color * tex_color;
 }
 
@@ -183,8 +183,8 @@ vec4 GetDiffuseColor() {
   const vec3 norm = GetTangentNorm();
   const vec3 light_dir = GetTangentLightDir();
   const float diffuse_strength = max(dot(norm, light_dir), 0.0f);
-  const vec4 affecting_color =
-      lighting.light_intensity.y * diffuse_strength * lighting.light_color;
+  const vec4 affecting_color = lighting.light_intensity.y * diffuse_strength *
+                               vec4(lighting.light_color, 1.0f);
   return affecting_color * tex_color;
 }
 
@@ -203,7 +203,7 @@ vec4 GetSpecularColor() {
       pow(max(dot(norm, halfway_dir), 0.0f), shininess);
   const vec4 affecting_color = lighting.light_intensity.z *
                                energy_conservation * specular_strength *
-                               lighting.light_color;
+                               vec4(lighting.light_color, 1.0f);
   return affecting_color * tex_color;
 }
 

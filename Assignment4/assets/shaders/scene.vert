@@ -16,10 +16,10 @@ model_trans;
 
 layout(std140) uniform Lighting {
   mat4 fixed_norm_model;
-  vec4 light_color;
-  vec4 light_pos;
-  vec4 light_intensity;
-  vec4 view_pos;
+  vec3 light_color;
+  vec3 light_pos;
+  vec3 light_intensity;
+  vec3 view_pos;
 }
 lighting;
 
@@ -84,8 +84,8 @@ void OutputTangentLighting() {
   // space
   vs_tangent_lighting.pos = world_to_tang * vec3(model * vec4(in_pos, 1.0f));
   vs_tangent_lighting.norm = world_to_tang * mat3(model) * in_norm;
-  vs_tangent_lighting.light_pos = world_to_tang * vec3(lighting.light_pos);
-  vs_tangent_lighting.view_pos = world_to_tang * vec3(lighting.view_pos);
+  vs_tangent_lighting.light_pos = world_to_tang * lighting.light_pos;
+  vs_tangent_lighting.view_pos = world_to_tang * lighting.view_pos;
 }
 
 /*******************************************************************************
