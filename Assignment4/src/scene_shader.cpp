@@ -22,7 +22,7 @@ void shader::SceneShader::RegisterSkyboxShader(
 
 void shader::SceneShader::LoadModel() {
   as::Model &model = GetModel();
-  model.LoadFile("assets/models/nanosuit/nanosuit.obj",
+  model.LoadFile("assets/models/wall/wall.obj",
                  aiProcess_CalcTangentSpace | aiProcess_Triangulate |
                      aiProcess_GenNormals | aiProcess_FlipUVs);
 }
