@@ -250,9 +250,14 @@ void ConfigSceneTextures() {
   for (size_t scene_idx = 0; scene_idx < SCENE_SIZE; scene_idx++) {
     const std::vector<as::Mesh> &meshes = scene_model[scene_idx].GetMeshes();
     for (const as::Mesh &mesh : meshes) {
-      const std::set<as::Texture> &textures = mesh.GetTextures();
+      const as::Material &material = mesh.GetMaterial();
+      const std::set<as::Texture> &textures = material.GetTextures();
       for (const as::Texture &texture : textures) {
         const std::string &path = texture.GetPath();
+        const aiTextureType type = texture.GetType();
+        if (type != aiTextureType_DIFFUSE) {
+          continue;
+        }
         // Check if the texture has been loaded
         if (texture_unit_idxs.count(path) > 0) {
           continue;
@@ -265,7 +270,7 @@ void ConfigSceneTextures() {
         std::vector<GLubyte> texels;
         as::LoadTextureByStb(path, 0, width, height, comp, texels);
         // Convert the texels from 3 channels to 4 channels to avoid GL errors
-        texels = as::ConvertDataChannels3To4(texels);
+        texels = as::ConvertDataChannels(comp, 4, texels);
         // Generate the texture
         texture_manager.GenTexture(path);
         // Bind the texture
@@ -304,7 +309,8 @@ void ConfigSkyboxTextures() {
   for (size_t scene_idx = 0; scene_idx < SKYBOX_SIZE; scene_idx++) {
     const std::vector<as::Mesh> &meshes = skybox_model[scene_idx].GetMeshes();
     for (const as::Mesh &mesh : meshes) {
-      const std::set<as::Texture> &textures = mesh.GetTextures();
+      const as::Material &material = mesh.GetMaterial();
+      const std::set<as::Texture> &textures = material.GetTextures();
       for (const as::Texture &texture : textures) {
         const std::string &path = texture.GetPath();
         // Check if the texture has been loaded
@@ -325,7 +331,7 @@ void ConfigSkyboxTextures() {
         std::vector<GLubyte> texels;
         as::LoadTextureByStb(path, 0, width, height, comp, texels);
         // Convert the texels from 3 channels to 4 channels to avoid GL errors
-        texels = as::ConvertDataChannels3To4(texels);
+        texels = as::ConvertDataChannels(comp, 4, texels);
         // Generate the texture
         texture_manager.GenTexture(path);
         // Bind the texture
@@ -475,13 +481,18 @@ void DrawMeshes(const std::string &program_name, const std::string &group_name,
         GetMeshVAIdxsBufferName(group_name, mesh_idx);
     // Get the array indexes
     const std::vector<size_t> &idxs = mesh.GetIdxs();
+    // Get the material
+    const as::Material &material = mesh.GetMaterial();
     // Get the textures
-    const std::set<as::Texture> &textures = mesh.GetTextures();
+    const std::set<as::Texture> &textures = material.GetTextures();
 
     /* Update textures */
-    // TODO: There is only diffuse texture
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();
+      const aiTextureType type = texture.GetType();
+      if (type != aiTextureType_DIFFUSE) {
+        continue;
+      }
       // Bind the texture
       texture_manager.BindTexture(path);
       // Get the unit index
