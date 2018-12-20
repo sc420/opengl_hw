@@ -233,6 +233,4 @@ vec4 GetEnvironmentMapColor() {
 void main() {
   fs_color = (1.0f - kEnvMapBlendRatio) * GetBlinnPhongColor() +
              kEnvMapBlendRatio * GetEnvironmentMapColor();
-
-  fs_color = GetEnvironmentMapColor();  // TODO: debug
 }

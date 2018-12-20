@@ -22,7 +22,7 @@ void shader::SceneShader::RegisterSkyboxShader(
 
 void shader::SceneShader::LoadModel() {
   as::Model &model = GetModel();
-  model.LoadFile("assets/models/wall/wall.obj",
+  model.LoadFile("assets/models/nanosuit/nanosuit.obj",
                  aiProcess_CalcTangentSpace | aiProcess_Triangulate |
                      aiProcess_GenNormals | aiProcess_FlipUVs);
 }
@@ -223,11 +223,8 @@ void shader::SceneShader::UpdateModelTrans(const float add_rotation) {
   // Update model state
   model_rotation += add_rotation;
   // Update model transformation
-  // const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
-  // const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
-  // TODO: debug
-  const glm::vec3 scale_factors = glm::vec3(1.0f);
-  const glm::vec3 translate_factors = glm::vec3(-1.0f);
+  const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
+  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
   glm::mat4 trans = glm::scale(glm::mat4(1.0f), scale_factors);
   trans = glm::translate(trans, translate_factors);
   trans = glm::rotate(trans, model_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -246,8 +243,7 @@ void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
   model_material_.use_diffuse_tex = material.HasDiffuseTexture();
   model_material_.use_specular_tex = material.HasSpecularTexture();
   model_material_.use_height_tex = material.HasHeightTexture();
-  model_material_.use_normals_tex = true;
-  material.HasNormalsTexture();  // TODO: debug
+  model_material_.use_normals_tex = material.HasNormalsTexture();
   model_material_.ambient_color = material.GetAmbientColor();
   model_material_.diffuse_color = material.GetDiffuseColor();
   model_material_.specular_color = material.GetSpecularColor();
