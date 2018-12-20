@@ -68,9 +68,14 @@ void shader::SceneShader::InitTextures() {
   // Initialize textures in each mesh
   const std::vector<as::Mesh> &meshes = model.GetMeshes();
   for (const as::Mesh &mesh : meshes) {
-    const std::set<as::Texture> &textures = mesh.GetTextures();
+    const as::Material &material = mesh.GetMaterial();
+    const std::set<as::Texture> &textures = material.GetTextures();
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();
+      const aiTextureType type = texture.GetType();
+      if (type != aiTextureType_DIFFUSE) {
+        continue;
+      }
       // Check if the texture has been loaded
       if (texture_manager.HasTexture(path)) {
         continue;
@@ -80,8 +85,8 @@ void shader::SceneShader::InitTextures() {
       int comp;
       std::vector<GLubyte> texels;
       as::LoadTextureByStb(path, 0, width, height, comp, texels);
-      // Convert the texels from 3 channels to 4 channels to avoid GL errors
-      texels = as::ConvertDataChannels3To4(texels);
+      // Convert the texels to 4 channels to avoid GL errors
+      texels = as::ConvertDataChannels(comp, 4, texels);
       // Generate the texture
       texture_manager.GenTexture(path);
       // Bind the texture
@@ -131,11 +136,17 @@ void shader::SceneShader::Draw() {
         GetMeshVertexArrayIdxsBufferName(mesh_idx);
     // Get the array indexes
     const std::vector<size_t> &idxs = mesh.GetIdxs();
+    // Get the material
+    const as::Material &material = mesh.GetMaterial();
     // Get the textures
-    const std::set<as::Texture> &textures = mesh.GetTextures();
+    const std::set<as::Texture> &textures = material.GetTextures();
     /* Update textures */
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();
+      const aiTextureType type = texture.GetType();
+      if (type != aiTextureType_DIFFUSE) {
+        continue;
+      }
       // Bind the texture
       texture_manager.BindTexture(path);
       // Get the unit index
