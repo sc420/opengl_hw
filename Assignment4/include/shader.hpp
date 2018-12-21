@@ -79,7 +79,7 @@ inline void Shader::LinkDataToUniformBlock(
   // Get managers
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
-  const std::string &program_name = GetProgramName();
+  const std::string program_name = GetProgramName();
   // Initialize uniform buffer
   InitUniformBuffer(buffer_name, buffer_data);
   // Bind the uniform block to the binding point

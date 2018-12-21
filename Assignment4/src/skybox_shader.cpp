@@ -40,12 +40,12 @@ void shader::SkyboxShader::InitUniformBlocks() {
   // Get managers
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
-  const std::string &program_name = GetProgramName();
-  const std::string &global_trans_buffer_name =
+  const std::string program_name = GetProgramName();
+  const std::string global_trans_buffer_name =
       scene_shader_->GetGlobalTransBufferName();
-  const std::string &global_trans_uniform_block_name =
+  const std::string global_trans_uniform_block_name =
       scene_shader_->GetGlobalTransUniformBlockName();
-  const std::string &global_trans_binding_name = global_trans_buffer_name;
+  const std::string global_trans_binding_name = global_trans_buffer_name;
   // Bind the uniform block to the the buffer
   uniform_manager.AssignUniformBlockToBindingPoint(
       program_name, global_trans_uniform_block_name, global_trans_binding_name);
@@ -55,8 +55,8 @@ void shader::SkyboxShader::InitTextures() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   // Get names=
-  const std::string &tex_name = GetTextureName();
-  const std::string &unit_name = GetTextureName();
+  const std::string tex_name = GetTextureName();
+  const std::string unit_name = GetTextureName();
   // Get models
   const as::Model &model = GetModel();
   // Set the path-to-target index map
@@ -130,8 +130,8 @@ void shader::SkyboxShader::Draw() {
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
-  const std::string &program_name = GetProgramName();
-  const std::string &tex_name = GetTextureName();
+  const std::string program_name = GetProgramName();
+  const std::string tex_name = GetTextureName();
   // Get models
   as::Model &model = GetModel();
   // Get meshes

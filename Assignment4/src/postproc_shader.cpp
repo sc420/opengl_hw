@@ -57,7 +57,7 @@ void shader::PostprocShader::UpdateScreenTextures(const GLsizei width,
     // Get names
     const std::string framebuffer_name = GetScreenFramebufferName(screen_idx);
     const std::string tex_name = GetScreenTextureName(screen_idx);
-    const std::string &unit_name = GetScreenTextureUnitName(screen_idx);
+    const std::string unit_name = GetScreenTextureUnitName(screen_idx);
     // Check whether to delete old texture
     if (texture_manager.HasTexture(tex_name)) {
       texture_manager.DeleteTexture(tex_name);
@@ -114,7 +114,7 @@ void shader::PostprocShader::Draw() {
   // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Get names
-  const std::string &buffer_name = GetPostprocInputsBufferName();
+  const std::string buffer_name = GetPostprocInputsBufferName();
 
   // Use the program
   UseProgram();
@@ -165,7 +165,7 @@ void shader::PostprocShader::UseDefaultFramebuffer() {
 void shader::PostprocShader::UseScreenFramebuffer(const int screen_idx) {
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
-  const std::string &framebuffer_name = GetScreenFramebufferName(screen_idx);
+  const std::string framebuffer_name = GetScreenFramebufferName(screen_idx);
   framebuffer_manager.BindFramebuffer(framebuffer_name);
 }
 
@@ -253,10 +253,10 @@ void shader::PostprocShader::SetTextureUnitIdxs() {
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
-  const std::string &program_name = GetProgramName();
-  const std::string &screen_tex1_name = GetScreenTextureName(0);
-  const std::string &screen_tex2_name = GetScreenTextureName(1);
-  const std::string &screen_tex3_name = GetScreenTextureName(2);
+  const std::string program_name = GetProgramName();
+  const std::string screen_tex1_name = GetScreenTextureName(0);
+  const std::string screen_tex2_name = GetScreenTextureName(1);
+  const std::string screen_tex3_name = GetScreenTextureName(2);
   // Get the unit indexes
   const GLuint unit_idx1 = texture_manager.GetUnitIdx(screen_tex1_name);
   const GLuint unit_idx2 = texture_manager.GetUnitIdx(screen_tex2_name);
@@ -271,7 +271,7 @@ void shader::PostprocShader::DrawScreenWithTexture(const int tex_idx) {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   // Get names
-  const std::string &tex_name = GetScreenTextureName(tex_idx);
+  const std::string tex_name = GetScreenTextureName(tex_idx);
   // Get models
   const as::Model &model = GetModel();
   // Get the mesh

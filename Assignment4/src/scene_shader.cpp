@@ -73,7 +73,7 @@ void shader::SceneShader::InitTextures() {
         continue;
       }
       // Get names
-      const std::string &unit_name = GetTextureUnitName(texture);
+      const std::string unit_name = GetTextureUnitName(texture);
       // Load the texture
       GLsizei width, height;
       int comp;
@@ -114,8 +114,8 @@ void shader::SceneShader::SetSkyboxTexture() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   // Get names
-  const std::string &skybox_tex_name = skybox_shader_->GetTextureName();
-  const std::string &skybox_unit_name = GetSkyboxTextureUnitName();
+  const std::string skybox_tex_name = skybox_shader_->GetTextureName();
+  const std::string skybox_unit_name = GetSkyboxTextureUnitName();
   // Reuse the skybox texture
   texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP,
                               skybox_unit_name);
@@ -130,9 +130,9 @@ void shader::SceneShader::Draw() {
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
-  const std::string &program_name = GetProgramName();
-  const std::string &skybox_tex_name = skybox_shader_->GetTextureName();
-  const std::string &skybox_unit_name = GetSkyboxTextureUnitName();
+  const std::string program_name = GetProgramName();
+  const std::string skybox_tex_name = skybox_shader_->GetTextureName();
+  const std::string skybox_unit_name = GetSkyboxTextureUnitName();
   // Get models
   as::Model &model = GetModel();
   // Get meshes
@@ -209,7 +209,7 @@ void shader::SceneShader::Draw() {
 void shader::SceneShader::UpdateGlobalTrans(const GlobalTrans &global_trans) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Get names
-  const std::string &buffer_name = GetGlobalTransBufferName();
+  const std::string buffer_name = GetGlobalTransBufferName();
   // Update global transformation
   global_trans_ = global_trans;
   // Update the buffer
@@ -230,7 +230,7 @@ void shader::SceneShader::UpdateModelTrans(const float add_rotation) {
   trans = glm::rotate(trans, model_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
   model_trans_.trans = trans;
   // Update the buffer
-  const std::string &buffer_name = GetModelTransBufferName();
+  const std::string buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
   // Update also the fixed normal model
   UpdateFixedNormModel();
@@ -249,7 +249,7 @@ void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
   model_material_.specular_color = material.GetSpecularColor();
   model_material_.shininess = material.GetShininess();
   // Update the buffer
-  const std::string &buffer_name = GetModelMaterialBufferName();
+  const std::string buffer_name = GetModelMaterialBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
@@ -258,7 +258,7 @@ void shader::SceneShader::UpdateViewPos(const glm::vec3 &view_pos) {
   // Update lighting
   lighting_.view_pos = view_pos;
   // Update the buffer
-  const std::string &buffer_name = GetLightingBufferName();
+  const std::string buffer_name = GetLightingBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
@@ -336,6 +336,6 @@ void shader::SceneShader::UpdateFixedNormModel() {
   lighting_.fixed_norm_model =
       glm::mat4(glm::transpose(glm::inverse(glm::mat3(model))));
   // Update the buffer
-  const std::string &buffer_name = GetLightingBufferName();
+  const std::string buffer_name = GetLightingBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }
