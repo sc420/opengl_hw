@@ -15,7 +15,7 @@ class VertexSpecManager {
 
   ~VertexSpecManager();
 
-  /* Manager registrations */
+  /* Manager Registrations */
 
   void RegisterBufferManager(const BufferManager &buffer_manager);
 
@@ -31,14 +31,14 @@ class VertexSpecManager {
 
   void DeselectVertexArray() const;
 
-  /* Memory specifications */
+  /* Memory Specifications */
 
   void SpecifyVertexArrayOrg(const std::string &va_name,
                              const GLuint attrib_idx, const GLint size,
                              const GLenum type, const GLboolean normalized,
                              const GLuint relative_ofs) const;
 
-  /* Binding connections */
+  /* Binding Connections */
 
   void AssocVertexAttribToBindingPoint(const std::string &va_name,
                                        const GLuint attrib_idx,
@@ -57,11 +57,11 @@ class VertexSpecManager {
 
   void DeleteVertexArray(const std::string &va_name);
 
-  /* Handler getters */
+  /* Handler Getters */
 
   GLuint GetVertexArrayHdlr(const std::string &va_name) const;
 
-  /* Binding point getters */
+  /* Binding Point Getters */
 
   GLuint GetVertexAttribBindingPoint(const std::string &va_name,
                                      const GLuint attrib_idx) const;
@@ -76,7 +76,7 @@ class VertexSpecManager {
   std::map<std::string, std::map<GLuint, BindBufferToBindingPointPrevParams>>
       bind_buffer_to_binding_point_prev_params_;
 
-  /* Previous parameter getters */
+  /* Previous Parameter Getters */
 
   const BindBufferToBindingPointPrevParams &
   GetBindBufferToBindingPointPrevParams(const std::string &va_name,

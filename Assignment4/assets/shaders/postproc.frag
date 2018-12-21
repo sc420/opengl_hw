@@ -4,12 +4,12 @@
  * Constants
  ******************************************************************************/
 
-/* Display modes */
+/* Display Modes */
 const int kDisplayModeOriginal = 0;
 const int kDisplayModeBar = 1;
 const int kDisplayModePostproc = 2;
 const int kDisplayModeMagnified = 3;
-/* Post-processing effects */
+/* Post-processing Effects */
 const int kPostprocEffectImgAbs = 0;
 const int kPostprocEffectLaplacian = 1;
 const int kPostprocEffectSharpness = 2;

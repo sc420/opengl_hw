@@ -60,15 +60,15 @@ class SceneShader : public Shader {
 
   SceneShader();
 
-  /* Shader registrations */
+  /* Shader Registrations */
 
   void RegisterSkyboxShader(const SkyboxShader &skybox_shader);
 
-  /* Model handlers */
+  /* Model Handlers */
 
   void LoadModel();
 
-  /* GL initialization methods */
+  /* GL Initializations */
 
   void Init() override;
 
@@ -82,11 +82,11 @@ class SceneShader : public Shader {
 
   void SetSkyboxTexture();
 
-  /* GL drawing methods */
+  /* GL Drawing Methods */
 
   void Draw() override;
 
-  /* State updating methods */
+  /* State Updaters */
 
   void UpdateGlobalTrans(const GlobalTrans &global_trans);
 
@@ -96,7 +96,7 @@ class SceneShader : public Shader {
 
   void UpdateViewPos(const glm::vec3 &view_pos);
 
-  /* Name management */
+  /* Name Management */
 
   std::string GetId() const override;
 
@@ -105,15 +105,15 @@ class SceneShader : public Shader {
   std::string GetGlobalTransUniformBlockName() const;
 
  protected:
-  /* Model handlers */
+  /* Model Handlers */
 
   virtual as::Model &GetModel() override;
 
-  /* GL initialization methods */
+  /* GL Initializations */
 
   GLsizei GetNumMipmapLevels() const;
 
-  /* Name management */
+  /* Name Management */
 
   std::string GetModelTransBufferName() const;
 
@@ -138,16 +138,16 @@ class SceneShader : public Shader {
   /* Models */
   as::Model scene_model_;
 
-  /* Model states */
+  /* Model States */
   float model_rotation;
 
-  /* GL states */
+  /* GL States */
   GlobalTrans global_trans_;
   ModelTrans model_trans_;
   ModelMaterial model_material_;
   Lighting lighting_;
 
-  /* State updating methods */
+  /* State Updaters */
 
   void UpdateFixedNormModel();
 };

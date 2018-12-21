@@ -24,7 +24,7 @@ void as::UniformManager::RegisterBufferManager(
 }
 
 /*******************************************************************************
- * Setting Value Methods
+ * Uniform Value Setters
  ******************************************************************************/
 
 void as::UniformManager::SetUniform1Float(const std::string &program_name,

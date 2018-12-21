@@ -3,7 +3,7 @@
 namespace fs = std::experimental::filesystem;
 
 /*******************************************************************************
- * GL Initialization Methods
+ * GL Initializations
  ******************************************************************************/
 
 shader::Shader::Shader() : gl_managers_(nullptr) {}
@@ -37,7 +37,7 @@ void shader::Shader::UseProgram() const {
 std::string shader::Shader::GetProgramName() const { return GetId(); }
 
 /*******************************************************************************
- * GL Initialization Methods (Protected)
+ * GL Initializations (Protected)
  ******************************************************************************/
 
 void shader::Shader::InitVertexArray(const as::Model& model) {
@@ -149,7 +149,7 @@ std::string shader::Shader::GetMeshVertexArrayIdxsBufferName(
 }
 
 /*******************************************************************************
- * GL Initialization Methods (Private)
+ * GL Initializations (Private)
  ******************************************************************************/
 
 void shader::Shader::CreateShaders() {

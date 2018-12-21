@@ -49,13 +49,13 @@ class TextureManager {
 
   void BindDefaultTexture(const GLenum target, const GLuint unit_idx);
 
-  /* Memory initializations */
+  /* Memory Initializations */
 
   void InitTexture2D(const std::string &tex_name, const GLenum target,
                      const GLsizei num_mipmap_level, const GLenum internal_fmt,
                      const GLsizei width, const GLsizei height);
 
-  /* Memory updaters */
+  /* Memory Updaters */
 
   void UpdateTexture2D(const std::string &tex_name, const GLenum target,
                        const GLint mipmap_level, const GLint x_ofs,
@@ -73,11 +73,11 @@ class TextureManager {
 
   void UpdateCubeMapTexture2D(const std::string &tex_name, const GLenum target);
 
-  /* Mipmap generations */
+  /* Mipmap Generations */
 
   void GenMipmap(const std::string &tex_name, const GLenum target);
 
-  /* Texture parameters setters */
+  /* Texture Parameters Setters */
 
   void SetTextureParamFloat(const std::string &tex_name, const GLenum target,
                             const GLenum pname, const GLfloat param);
@@ -103,15 +103,15 @@ class TextureManager {
 
   void DeleteTexture(const std::string &tex_name);
 
-  /* Handler getters */
+  /* Handler Getters */
 
   GLuint GetTextureHdlr(const std::string &tex_name) const;
 
-  /* Status checkings */
+  /* Status Checkings */
 
   bool HasTexture(const std::string &tex_name) const;
 
-  /* Unit index getters */
+  /* Unit Index Getters */
 
   GLuint GetUnitIdx(const std::string &tex_name, const GLenum target) const;
 
@@ -128,7 +128,7 @@ class TextureManager {
   std::map<std::string, UpdateTexture2DPrevParams>
       update_texture_2d_prev_params_;
 
-  /* Previous paramter getters */
+  /* Previous Paramter Getters */
 
   const BindTexturePrevParams &GetBindTexturePrevParams(
       const std::string &tex_name) const;
@@ -136,7 +136,7 @@ class TextureManager {
   const UpdateTexture2DPrevParams &GetUpdateTexture2DPrevParams(
       const std::string &tex_name) const;
 
-  /* Initialization */
+  /* Initializations */
 
   void InitLimits();
 };

@@ -27,7 +27,7 @@ class PostprocShader : public Shader {
 
   PostprocShader();
 
-  /* GL initialization methods */
+  /* GL Initializations */
 
   void Init() override;
 
@@ -39,7 +39,7 @@ class PostprocShader : public Shader {
 
   void InitUniformBlocks();
 
-  /* GL drawing methods */
+  /* GL Drawing Methods */
 
   void UpdateScreenTextures(const GLsizei width, const GLsizei height);
 
@@ -51,7 +51,7 @@ class PostprocShader : public Shader {
 
   void UseScreenFramebuffer(const int screen_idx);
 
-  /* State updating methods */
+  /* State Updaters */
 
   void UpdateEnabled(const bool enabled);
 
@@ -63,16 +63,16 @@ class PostprocShader : public Shader {
 
   void UpdateTime(const float time);
 
-  /* Name management */
+  /* Name Management */
 
   std::string GetId() const override;
 
  protected:
-  /* Model handlers */
+  /* Model Handlers */
 
   virtual as::Model &GetModel() override;
 
-  /* Name management */
+  /* Name Management */
 
   std::string GetPostprocInputsBufferName() const;
 
@@ -94,7 +94,7 @@ class PostprocShader : public Shader {
 
   PostprocInputs postproc_inputs_;
 
-  /* GL drawing methods */
+  /* GL Drawing Methods */
 
   void SetTextureUnitIdxs();
 

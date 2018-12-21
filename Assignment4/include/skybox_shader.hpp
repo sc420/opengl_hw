@@ -8,15 +8,15 @@ class SceneShader;
 
 class SkyboxShader : public Shader {
  public:
-  /* Shader registrations */
+  /* Shader Registrations */
 
   void RegisterSceneShader(const SceneShader &scene_shader);
 
-  /* Model handlers */
+  /* Model Handlers */
 
   void LoadModel();
 
-  /* GL initialization methods */
+  /* GL Initializations */
 
   void Init() override;
 
@@ -26,22 +26,22 @@ class SkyboxShader : public Shader {
 
   void InitTextures();
 
-  /* GL drawing methods */
+  /* GL Drawing Methods */
 
   void Draw() override;
 
-  /* Name management */
+  /* Name Management */
 
   std::string GetId() const override;
 
   std::string GetTextureName() const;
 
  protected:
-  /* Model handlers */
+  /* Model Handlers */
 
   virtual as::Model &GetModel() override;
 
-  /* GL initialization methods */
+  /* GL Initializations */
 
   GLsizei GetNumMipmapLevels() const;
 

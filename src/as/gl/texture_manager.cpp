@@ -88,7 +88,7 @@ void as::TextureManager::InitTexture2D(const std::string &tex_name,
 }
 
 /*******************************************************************************
- * Texture Updating Methods
+ * Texture Updaters
  ******************************************************************************/
 
 void as::TextureManager::UpdateTexture2D(

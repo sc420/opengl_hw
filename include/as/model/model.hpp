@@ -1,9 +1,9 @@
 #pragma once
 
-/* MSVC libraries */
+/* MSVC Libraries */
 #include <codeanalysis\warnings.h>
 
-/* Third-party libraries */
+/* Third-party Libraries */
 #pragma warning(push)
 #pragma warning(disable : ALL_CODE_ANALYSIS_WARNINGS)
 #include <assimp/postprocess.h>
@@ -11,7 +11,7 @@
 #include <assimp/Importer.hpp>
 #pragma warning(pop)
 
-/* Project libraries */
+/* Project Libraries */
 #include "as/common.hpp"
 #include "as/model/converter.hpp"
 #include "as/model/loader.hpp"

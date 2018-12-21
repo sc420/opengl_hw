@@ -20,7 +20,7 @@ void shader::SkyboxShader::LoadModel() {
 }
 
 /*******************************************************************************
- * GL Initialization Methods
+ * GL Initializations
  ******************************************************************************/
 
 void shader::SkyboxShader::Init() {
@@ -173,7 +173,7 @@ std::string shader::SkyboxShader::GetTextureName() const {
 as::Model &shader::SkyboxShader::GetModel() { return skybox_model_; }
 
 /*******************************************************************************
- * GL Initialization Methods (Protected)
+ * GL Initializations (Protected)
  ******************************************************************************/
 
 GLsizei shader::SkyboxShader::GetNumMipmapLevels() const { return 3; }

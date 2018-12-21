@@ -20,13 +20,13 @@ class UniformManager {
 
   void Init();
 
-  /* Manager registrations */
+  /* Manager Registrations */
 
   void RegisterProgramManager(const ProgramManager &program_manager);
 
   void RegisterBufferManager(const BufferManager &buffer_manager);
 
-  /* Setting value methods */
+  /* Uniform Value Setters */
 
   void SetUniform1Float(const std::string &program_name,
                         const std::string &var_name, const GLfloat v0);
@@ -34,7 +34,7 @@ class UniformManager {
   void SetUniform1Int(const std::string &program_name,
                       const std::string &var_name, const GLint v0);
 
-  /* Binding connections */
+  /* Binding Connections */
 
   void AssignUniformBlockToBindingPoint(const std::string &program_name,
                                         const std::string &block_name,
@@ -55,7 +55,7 @@ class UniformManager {
 
   void UnbindBufferBase(const std::string &buffer_name);
 
-  /* Handler getters */
+  /* Handler Getters */
 
   GLint GetUniformVarHdlr(const std::string &program_name,
                           const std::string &block_name);

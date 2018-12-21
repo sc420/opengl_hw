@@ -28,7 +28,7 @@ void shader::SceneShader::LoadModel() {
 }
 
 /*******************************************************************************
- * GL Initialization Methods
+ * GL Initializations
  ******************************************************************************/
 
 void shader::SceneShader::Init() {
@@ -155,9 +155,9 @@ void shader::SceneShader::Draw() {
     const as::Material &material = mesh.GetMaterial();
     // Get the textures
     const std::set<as::Texture> &textures = material.GetTextures();
-    /* Update material colors */
+    /* Update Material Colors */
     UpdateModelMaterial(material);
-    /* Update textures */
+    /* Update Textures */
     for (const as::Texture &texture : textures) {
       const std::string &path = texture.GetPath();
       const aiTextureType type = texture.GetType();
@@ -188,7 +188,7 @@ void shader::SceneShader::Draw() {
                                    std ::to_string(type) + "'");
         }
       }
-      /* Draw vertex arrays */
+      /* Draw Vertex Arrays */
       UseMesh(mesh_idx);
       glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
     }
@@ -203,7 +203,7 @@ void shader::SceneShader::Draw() {
 }
 
 /*******************************************************************************
- * State Updating Methods
+ * State Updaters
  ******************************************************************************/
 
 void shader::SceneShader::UpdateGlobalTrans(const GlobalTrans &global_trans) {
@@ -283,7 +283,7 @@ std::string shader::SceneShader::GetGlobalTransUniformBlockName() const {
 as::Model &shader::SceneShader::GetModel() { return scene_model_; }
 
 /*******************************************************************************
- * GL Initialization Methods (Protected)
+ * GL Initializations (Protected)
  ******************************************************************************/
 
 GLsizei shader::SceneShader::GetNumMipmapLevels() const { return 5; }
@@ -326,7 +326,7 @@ std::string shader::SceneShader::GetSkyboxTextureUnitName() const {
 }
 
 /*******************************************************************************
- * State Updating Methods (Private)
+ * State Updaters (Private)
  ******************************************************************************/
 
 void shader::SceneShader::UpdateFixedNormModel() {

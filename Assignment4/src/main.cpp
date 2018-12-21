@@ -12,7 +12,7 @@ namespace fs = std::experimental::filesystem;
  * Constants
  ******************************************************************************/
 
-/* User interfaces */
+/* User Interfaces */
 static const auto kInitWindowRelativeCenterPos = glm::vec2(0.5f, 0.5f);
 static const auto kInitWindowSize = glm::ivec2(720, 450);
 static const auto kMinWindowSize = glm::ivec2(720, 450);
@@ -78,7 +78,7 @@ enum ModeMenuItems { kModeComparison, kModeNavigation };
 enum TimerMenuItems { kTimerStart, kTimerStop };
 
 /*******************************************************************************
- * GL Initialization Methods
+ * GL Initializations
  ******************************************************************************/
 
 void InitGLUT(int argc, char *argv[]) {
@@ -133,7 +133,7 @@ void ConfigGL() {
 }
 
 /*******************************************************************************
- * GL States Updating Methods
+ * GL States Updaters
  ******************************************************************************/
 
 void UpdateGlobalTrans() {
@@ -427,7 +427,7 @@ void RegisterGLUTCallbacks() {
   /* Display */
   glutDisplayFunc(GLUTDisplayCallback);
   glutReshapeFunc(GLUTReshapeCallback);
-  /* User interface */
+  /* User Interface */
   glutKeyboardFunc(GLUTKeyboardCallback);
   glutKeyboardUpFunc(GLUTKeyboardUpCallback);
   glutSpecialFunc(GLUTSpecialCallback);
@@ -444,7 +444,7 @@ void CreateGLUTMenus() {
   const int mode_submenu_hdlr = glutCreateMenu(GLUTModeMenuCallback);
   const int timer_submenu_hdlr = glutCreateMenu(GLUTTimerMenuCallback);
 
-  /* Main menu */
+  /* Main Menu */
   glutSetMenu(main_menu_hdlr);
   glutAddSubMenu("Mode", mode_submenu_hdlr);
   glutAddSubMenu("Timer", timer_submenu_hdlr);
@@ -460,12 +460,12 @@ void CreateGLUTMenus() {
   glutAddMenuEntry("1. Special Effect", MainMenuItems::kMainSpecial);
   glutAddMenuEntry("Exit", MainMenuItems::kMainExit);
 
-  /* Mode submenu */
+  /* Mode Submenu */
   glutSetMenu(mode_submenu_hdlr);
   glutAddMenuEntry("Comparison", ModeMenuItems::kModeComparison);
   glutAddMenuEntry("Navigation", ModeMenuItems::kModeNavigation);
 
-  /* Timer submenu */
+  /* Timer Submenu */
   glutSetMenu(timer_submenu_hdlr);
   glutAddMenuEntry("Start", TimerMenuItems::kTimerStart);
   glutAddMenuEntry("Stop", TimerMenuItems::kTimerStop);

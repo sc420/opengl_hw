@@ -11,19 +11,19 @@ class Shader {
  public:
   Shader();
 
-  /* GL initialization methods */
+  /* GL Initializations */
 
   void RegisterGLManagers(as::GLManagers &gl_managers);
 
   virtual void Init();
 
-  /* GL drawing methods */
+  /* GL Drawing Methods */
 
   virtual void UseProgram() const;
 
   virtual void Draw() = 0;
 
-  /* Name management */
+  /* Name Management */
 
   virtual std::string GetId() const = 0;
 
@@ -32,11 +32,11 @@ class Shader {
  protected:
   as::GLManagers *gl_managers_;
 
-  /* Model handlers */
+  /* Model Handlers */
 
   virtual as::Model &GetModel() = 0;
 
-  /* GL initialization methods */
+  /* GL Initializations */
 
   template <class T>
   void LinkDataToUniformBlock(const std::string &buffer_name,
@@ -48,11 +48,11 @@ class Shader {
 
   void InitVertexArray(const as::Model &model);
 
-  /* GL drawing methods */
+  /* GL Drawing Methods */
 
   virtual void UseMesh(const size_t mesh_idx) const;
 
-  /* Name management */
+  /* Name Management */
 
   std::string GetMeshVertexArrayName(const size_t mesh_idx) const;
 
@@ -61,13 +61,13 @@ class Shader {
   std::string GetMeshVertexArrayIdxsBufferName(const size_t mesh_idx) const;
 
  private:
-  /* GL initialization methods */
+  /* GL Initializations */
 
   void CreateShaders();
 
   void CreatePrograms();
 
-  /* Path management */
+  /* Path Management */
 
   std::string GetShaderPath(const ShaderTypes &shader_type) const;
 };

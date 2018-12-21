@@ -32,13 +32,13 @@ class BufferManager {
 
   void DeselectBuffer(const GLenum target);
 
-  /* Memory initializations */
+  /* Memory Initializations */
 
   void InitBuffer(const std::string &buffer_name, const GLenum target,
                   const GLsizeiptr size, const GLvoid *data,
                   const GLenum usage);
 
-  /* Memory updaters */
+  /* Memory Updaters */
 
   void UpdateBuffer(const std::string &buffer_name, const GLenum target,
                     const GLintptr ofs, const GLsizeiptr size,
@@ -50,7 +50,7 @@ class BufferManager {
 
   void DeleteBuffer(const std::string &buffer_name);
 
-  /* Handler getters */
+  /* Handler Getters */
 
   GLuint GetBufferHdlr(const std::string &buffer_name) const;
 
@@ -61,7 +61,7 @@ class BufferManager {
 
   std::map<std::string, UpdateBufferPrevParams> update_buffer_prev_params_;
 
-  /* Previous parameter getters */
+  /* Previous Parameter Getters */
 
   const BindBufferPrevParams &GetBindBufferPrevParams(
       const std::string &buffer_name) const;

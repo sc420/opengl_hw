@@ -1,7 +1,7 @@
 #include "postproc_shader.hpp"
 
 /*******************************************************************************
- * GL Initialization Methods
+ * GL Initializations
  ******************************************************************************/
 
 shader::PostprocShader::PostprocShader() : postproc_inputs_(PostprocInputs()) {}
@@ -170,7 +170,7 @@ void shader::PostprocShader::UseScreenFramebuffer(const int screen_idx) {
 }
 
 /*******************************************************************************
- * State Updating Methods
+ * State Updaters
  ******************************************************************************/
 
 void shader::PostprocShader::UpdateEnabled(const bool enabled) {
