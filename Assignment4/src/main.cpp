@@ -176,7 +176,6 @@ void GLUTDisplayCallback() {
   UpdateStates();
   // Draw the scenes on framebuffer 0
   postproc_shader.UseScreenFramebuffer(0);
-  as::ClearColorBuffer();
   as::ClearDepthBuffer();
   scene_shader.Draw();
   skybox_shader.Draw();
