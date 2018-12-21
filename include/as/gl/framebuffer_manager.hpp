@@ -18,11 +18,17 @@ class FramebufferManager {
 
   ~FramebufferManager();
 
+  /* Manager registrations */
+
   void RegisterTextureManager(const TextureManager &texture_manager);
+
+  /* Generations */
 
   void GenFramebuffer(const std::string &framebuffer_name);
 
   void GenRenderbuffer(const std::string &renderbuffer_name);
+
+  /* Bindings */
 
   void BindFramebuffer(const std::string &framebuffer_name,
                        const GLenum framebuffer_target);
@@ -36,10 +42,14 @@ class FramebufferManager {
 
   void BindRenderbuffer(const std::string &renderbuffer_name);
 
+  /* Memory initializations */
+
   void InitRenderbuffer(const std::string &renderbuffer_name,
                         const GLenum renderbuffer_target,
                         const GLenum internal_fmt, const GLsizei width,
                         const GLsizei height);
+
+  /* Binding connections */
 
   void AttachTextureToFramebuffer(const std::string &framebuffer_name,
                                   const std::string &tex_name,
@@ -60,13 +70,19 @@ class FramebufferManager {
                                        const GLenum attachment,
                                        const GLenum renderbuffer_target);
 
+  /* Deletions */
+
   void DeleteFramebuffer(const std::string &framebuffer_name);
 
   void DeleteRenderbuffer(const std::string &renderbuffer_name);
 
+  /* Handler getters */
+
   GLuint GetFramebufferHdlr(const std::string &framebuffer_name) const;
 
   GLuint GetRenderbufferHdlr(const std::string &renderbuffer_name) const;
+
+  /* Status checkings */
 
   bool HasFramebuffer(const std::string &framebuffer_name) const;
 
@@ -84,6 +100,8 @@ class FramebufferManager {
 
   std::map<std::string, BindRenderbufferPrevParams>
       bind_renderbuffer_prev_params_;
+
+  /* Previous parameter getters */
 
   const BindFramebufferPrevParams &GetFramebufferPrevParams(
       const std::string &framebuffer_name) const;

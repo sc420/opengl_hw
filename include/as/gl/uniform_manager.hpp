@@ -16,7 +16,7 @@ class UniformManager {
  public:
   UniformManager();
 
-  /* Initialization */
+  /* Initializations */
 
   void Init();
 
@@ -34,7 +34,7 @@ class UniformManager {
   void SetUniform1Int(const std::string &program_name,
                       const std::string &var_name, const GLint v0);
 
-  /* Binding management */
+  /* Binding connections */
 
   void AssignUniformBlockToBindingPoint(const std::string &program_name,
                                         const std::string &block_name,
@@ -85,7 +85,7 @@ class UniformManager {
   IndexManager<std::tuple<std::string, std::string>, std::string, GLuint>
       index_manager_;
 
-  /* Initialization */
+  /* Initializations */
 
   void InitLimits();
 };

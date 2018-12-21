@@ -9,13 +9,25 @@ as::TextureManager::~TextureManager() {
   }
 }
 
+/*******************************************************************************
+ * Initializations
+ ******************************************************************************/
+
 void as::TextureManager::Init() { InitLimits(); }
+
+/*******************************************************************************
+ * Generations
+ ******************************************************************************/
 
 void as::TextureManager::GenTexture(const std::string &tex_name) {
   GLuint tex_hdlr;
   glGenTextures(1, &tex_hdlr);
   hdlrs_[tex_name] = tex_hdlr;
 }
+
+/*******************************************************************************
+ * Bindings
+ ******************************************************************************/
 
 void as::TextureManager::BindTexture(const std::string &tex_name,
                                      const GLenum target,
@@ -61,6 +73,10 @@ void as::TextureManager::BindDefaultTexture(const GLenum target,
   glBindTexture(target, 0);
 }
 
+/*******************************************************************************
+ * Memory Initializations
+ ******************************************************************************/
+
 void as::TextureManager::InitTexture2D(const std::string &tex_name,
                                        const GLenum target,
                                        const GLsizei num_mipmap_level,
@@ -70,6 +86,10 @@ void as::TextureManager::InitTexture2D(const std::string &tex_name,
   BindTexture(tex_name, target);
   glTexStorage2D(target, num_mipmap_level, internal_fmt, width, height);
 }
+
+/*******************************************************************************
+ * Texture Updating Methods
+ ******************************************************************************/
 
 void as::TextureManager::UpdateTexture2D(
     const std::string &tex_name, const GLenum target, const GLint mipmap_level,
@@ -119,11 +139,19 @@ void as::TextureManager::UpdateCubeMapTexture2D(const std::string &tex_name,
                          prev_params.type, prev_params.data);
 }
 
+/*******************************************************************************
+ * Mipmap Generations
+ ******************************************************************************/
+
 void as::TextureManager::GenMipmap(const std::string &tex_name,
                                    const GLenum target) {
   BindTexture(tex_name);
   glGenerateMipmap(target);
 }
+
+/*******************************************************************************
+ * Texture Parameter Setters
+ ******************************************************************************/
 
 void as::TextureManager::SetTextureParamFloat(const std::string &tex_name,
                                               const GLenum target,
@@ -157,6 +185,10 @@ void as::TextureManager::SetTextureParamIntVector(const std::string &tex_name,
   glTexParameteriv(target, pname, params);
 }
 
+/*******************************************************************************
+ * Unbindings
+ ******************************************************************************/
+
 void as::TextureManager::UnbindTexture(const std::string &tex_name,
                                        const GLenum target) {
   const auto index_manager_target = std::make_tuple(tex_name, target);
@@ -170,6 +202,10 @@ void as::TextureManager::UnbindTexture(const std::string &tex_name) {
   UnbindTexture(tex_name, prev_params.target);
 }
 
+/*******************************************************************************
+ * Deletions
+ ******************************************************************************/
+
 void as::TextureManager::DeleteTexture(const std::string &tex_name) {
   const GLuint tex_hdlr = GetTextureHdlr(tex_name);
   glDeleteTextures(1, &tex_hdlr);
@@ -177,6 +213,10 @@ void as::TextureManager::DeleteTexture(const std::string &tex_name) {
   bind_texture_prev_params_.erase(tex_name);
   update_texture_2d_prev_params_.erase(tex_name);
 }
+
+/*******************************************************************************
+ * Handler Getters
+ ******************************************************************************/
 
 GLuint as::TextureManager::GetTextureHdlr(const std::string &tex_name) const {
   if (!HasTexture(tex_name)) {
@@ -186,9 +226,17 @@ GLuint as::TextureManager::GetTextureHdlr(const std::string &tex_name) const {
   return hdlrs_.at(tex_name);
 }
 
+/*******************************************************************************
+ * Status Checkings
+ ******************************************************************************/
+
 bool as::TextureManager::HasTexture(const std::string &tex_name) const {
   return hdlrs_.count(tex_name) > 0;
 }
+
+/*******************************************************************************
+ * Unit Index Getters
+ ******************************************************************************/
 
 GLuint as::TextureManager::GetUnitIdx(const std::string &tex_name,
                                       const GLenum target) const {
@@ -200,6 +248,10 @@ GLuint as::TextureManager::GetUnitIdx(const std::string &tex_name) const {
   const BindTexturePrevParams &prev_params = GetBindTexturePrevParams(tex_name);
   return GetUnitIdx(tex_name, prev_params.target);
 }
+
+/*******************************************************************************
+ * Previous Parameter Getters (Private)
+ ******************************************************************************/
 
 const as::TextureManager::BindTexturePrevParams &
 as::TextureManager::GetBindTexturePrevParams(
@@ -222,6 +274,10 @@ as::TextureManager::GetUpdateTexture2DPrevParams(
   }
   return update_texture_2d_prev_params_.at(tex_name);
 }
+
+/*******************************************************************************
+ * Initializations (Private)
+ ******************************************************************************/
 
 void as::TextureManager::InitLimits() {
   GLint value;

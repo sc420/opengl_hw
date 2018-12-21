@@ -7,6 +7,10 @@ as::BufferManager::~BufferManager() {
   }
 }
 
+/*******************************************************************************
+ * Generations
+ ******************************************************************************/
+
 void as::BufferManager::GenBuffer(const std::string &buffer_name) {
   // Generate a buffer object
   GLuint hdlr;
@@ -14,6 +18,10 @@ void as::BufferManager::GenBuffer(const std::string &buffer_name) {
   // Save the handler
   hdlrs_[buffer_name] = hdlr;
 }
+
+/*******************************************************************************
+ * Bindings
+ ******************************************************************************/
 
 void as::BufferManager::BindBuffer(const std::string &buffer_name,
                                    const GLenum target) {
@@ -30,9 +38,17 @@ void as::BufferManager::BindBuffer(const std::string &buffer_name) {
   BindBuffer(buffer_name, prev_params.target);
 }
 
+/*******************************************************************************
+ * Deselections
+ ******************************************************************************/
+
 void as::BufferManager::DeselectBuffer(const GLenum target) {
   glBindBuffer(target, 0);
 }
+
+/*******************************************************************************
+ * Memory Initializations
+ ******************************************************************************/
 
 void as::BufferManager::InitBuffer(const std::string &buffer_name,
                                    const GLenum target, const GLsizeiptr size,
@@ -40,6 +56,10 @@ void as::BufferManager::InitBuffer(const std::string &buffer_name,
   BindBuffer(buffer_name, target);
   glBufferData(target, size, data, usage);
 }
+
+/*******************************************************************************
+ * Memory Updaters
+ ******************************************************************************/
 
 void as::BufferManager::UpdateBuffer(const std::string &buffer_name,
                                      const GLenum target, const GLintptr ofs,
@@ -59,6 +79,10 @@ void as::BufferManager::UpdateBuffer(const std::string &buffer_name) {
                prev_params.size, prev_params.data);
 }
 
+/*******************************************************************************
+ * Deletions
+ ******************************************************************************/
+
 void as::BufferManager::DeleteBuffer(const std::string &buffer_name) {
   const GLuint hdlr = GetBufferHdlr(buffer_name);
   glDeleteBuffers(1, &hdlr);
@@ -67,6 +91,10 @@ void as::BufferManager::DeleteBuffer(const std::string &buffer_name) {
   update_buffer_prev_params_.erase(buffer_name);
 }
 
+/*******************************************************************************
+ * Handler Getters
+ ******************************************************************************/
+
 GLuint as::BufferManager::GetBufferHdlr(const std::string &buffer_name) const {
   if (hdlrs_.count(buffer_name) == 0) {
     throw std::runtime_error("Could not find the buffer name '" + buffer_name +
@@ -74,6 +102,10 @@ GLuint as::BufferManager::GetBufferHdlr(const std::string &buffer_name) const {
   }
   return hdlrs_.at(buffer_name);
 }
+
+/*******************************************************************************
+ * Previous Parameter Getters (Private)
+ ******************************************************************************/
 
 const as::BufferManager::BindBufferPrevParams &
 as::BufferManager::GetBindBufferPrevParams(

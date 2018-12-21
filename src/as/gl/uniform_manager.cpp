@@ -42,7 +42,7 @@ void as::UniformManager::SetUniform1Int(const std::string &program_name,
 }
 
 /*******************************************************************************
- * Binding Management
+ * Binding Connections
  ******************************************************************************/
 
 void as::UniformManager::AssignUniformBlockToBindingPoint(

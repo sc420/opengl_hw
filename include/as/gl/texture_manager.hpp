@@ -27,9 +27,15 @@ class TextureManager {
 
   ~TextureManager();
 
+  /* Initializations */
+
   void Init();
 
+  /* Generations */
+
   void GenTexture(const std::string &tex_name);
+
+  /* Bindings */
 
   void BindTexture(const std::string &tex_name, const GLenum target,
                    const GLuint unit_idx);
@@ -43,9 +49,13 @@ class TextureManager {
 
   void BindDefaultTexture(const GLenum target, const GLuint unit_idx);
 
+  /* Memory initializations */
+
   void InitTexture2D(const std::string &tex_name, const GLenum target,
                      const GLsizei num_mipmap_level, const GLenum internal_fmt,
                      const GLsizei width, const GLsizei height);
+
+  /* Memory updaters */
 
   void UpdateTexture2D(const std::string &tex_name, const GLenum target,
                        const GLint mipmap_level, const GLint x_ofs,
@@ -63,7 +73,11 @@ class TextureManager {
 
   void UpdateCubeMapTexture2D(const std::string &tex_name, const GLenum target);
 
+  /* Mipmap generations */
+
   void GenMipmap(const std::string &tex_name, const GLenum target);
+
+  /* Texture parameters setters */
 
   void SetTextureParamFloat(const std::string &tex_name, const GLenum target,
                             const GLenum pname, const GLfloat param);
@@ -79,17 +93,25 @@ class TextureManager {
                                 const GLenum target, const GLenum pname,
                                 const GLint *params);
 
+  /* Unbindings */
+
   void UnbindTexture(const std::string &tex_name, const GLenum target);
 
   void UnbindTexture(const std::string &tex_name);
 
+  /* Deletions */
+
   void DeleteTexture(const std::string &tex_name);
 
-  /* Tools */
+  /* Handler getters */
 
   GLuint GetTextureHdlr(const std::string &tex_name) const;
 
+  /* Status checkings */
+
   bool HasTexture(const std::string &tex_name) const;
+
+  /* Unit index getters */
 
   GLuint GetUnitIdx(const std::string &tex_name, const GLenum target) const;
 
@@ -106,11 +128,15 @@ class TextureManager {
   std::map<std::string, UpdateTexture2DPrevParams>
       update_texture_2d_prev_params_;
 
+  /* Previous paramter getters */
+
   const BindTexturePrevParams &GetBindTexturePrevParams(
       const std::string &tex_name) const;
 
   const UpdateTexture2DPrevParams &GetUpdateTexture2DPrevParams(
       const std::string &tex_name) const;
+
+  /* Initialization */
 
   void InitLimits();
 };

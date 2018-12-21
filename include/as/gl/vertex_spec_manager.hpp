@@ -15,18 +15,30 @@ class VertexSpecManager {
 
   ~VertexSpecManager();
 
+  /* Manager registrations */
+
   void RegisterBufferManager(const BufferManager &buffer_manager);
+
+  /* Generations */
 
   void GenVertexArray(const std::string &va_name);
 
+  /* Bindings */
+
   void BindVertexArray(const std::string &va_name) const;
 
+  /* Deselections */
+
   void DeselectVertexArray() const;
+
+  /* Memory specifications */
 
   void SpecifyVertexArrayOrg(const std::string &va_name,
                              const GLuint attrib_idx, const GLint size,
                              const GLenum type, const GLboolean normalized,
                              const GLuint relative_ofs) const;
+
+  /* Binding connections */
 
   void AssocVertexAttribToBindingPoint(const std::string &va_name,
                                        const GLuint attrib_idx,
@@ -41,9 +53,15 @@ class VertexSpecManager {
                                 const std::string &buffer_name,
                                 const GLuint binding_idx);
 
+  /* Deletions */
+
   void DeleteVertexArray(const std::string &va_name);
 
+  /* Handler getters */
+
   GLuint GetVertexArrayHdlr(const std::string &va_name) const;
+
+  /* Binding point getters */
 
   GLuint GetVertexAttribBindingPoint(const std::string &va_name,
                                      const GLuint attrib_idx) const;
@@ -57,6 +75,8 @@ class VertexSpecManager {
 
   std::map<std::string, std::map<GLuint, BindBufferToBindingPointPrevParams>>
       bind_buffer_to_binding_point_prev_params_;
+
+  /* Previous parameter getters */
 
   const BindBufferToBindingPointPrevParams &
   GetBindBufferToBindingPointPrevParams(const std::string &va_name,

@@ -13,10 +13,18 @@ as::FramebufferManager::~FramebufferManager() {
   }
 }
 
+/*******************************************************************************
+ * Manager Registrations
+ ******************************************************************************/
+
 void as::FramebufferManager::RegisterTextureManager(
     const TextureManager& texture_manager) {
   texture_manager_ = &texture_manager;
 }
+
+/*******************************************************************************
+ * Generations
+ ******************************************************************************/
 
 void as::FramebufferManager::GenFramebuffer(
     const std::string& framebuffer_name) {
@@ -31,6 +39,10 @@ void as::FramebufferManager::GenRenderbuffer(
   glGenRenderbuffers(1, &hdlr);
   renderbuffer_hdlrs_[renderbuffer_name] = hdlr;
 }
+
+/*******************************************************************************
+ * Bindings
+ ******************************************************************************/
 
 void as::FramebufferManager::BindFramebuffer(
     const std::string& framebuffer_name, const GLenum framebuffer_target) {
@@ -69,12 +81,20 @@ void as::FramebufferManager::BindRenderbuffer(
   BindRenderbuffer(renderbuffer_name, prev_params.target);
 }
 
+/*******************************************************************************
+ * Memory Initialization
+ ******************************************************************************/
+
 void as::FramebufferManager::InitRenderbuffer(
     const std::string& renderbuffer_name, const GLenum renderbuffer_target,
     const GLenum internal_fmt, const GLsizei width, const GLsizei height) {
   BindRenderbuffer(renderbuffer_name, renderbuffer_target);
   glRenderbufferStorage(renderbuffer_target, internal_fmt, width, height);
 }
+
+/*******************************************************************************
+ * Binding Connections
+ ******************************************************************************/
 
 void as::FramebufferManager::AttachTextureToFramebuffer(
     const std::string& framebuffer_name, const std::string& tex_name,
@@ -105,6 +125,10 @@ void as::FramebufferManager::AttachRenderbufferToFramebuffer(
                             renderbuffer_hdlr);
 }
 
+/*******************************************************************************
+ * Deletions
+ ******************************************************************************/
+
 void as::FramebufferManager::DeleteFramebuffer(
     const std::string& framebuffer_name) {
   const GLuint hdlr = GetFramebufferHdlr(framebuffer_name);
@@ -120,6 +144,10 @@ void as::FramebufferManager::DeleteRenderbuffer(
   // Delete previous parameters
   bind_renderbuffer_prev_params_.erase(renderbuffer_name);
 }
+
+/*******************************************************************************
+ * Handler Getters
+ ******************************************************************************/
 
 GLuint as::FramebufferManager::GetFramebufferHdlr(
     const std::string& framebuffer_name) const {
@@ -139,6 +167,10 @@ GLuint as::FramebufferManager::GetRenderbufferHdlr(
   return renderbuffer_hdlrs_.at(renderbuffer_name);
 }
 
+/*******************************************************************************
+ * Status Checkings
+ ******************************************************************************/
+
 bool as::FramebufferManager::HasFramebuffer(
     const std::string& framebuffer_name) const {
   return framebuffer_hdlrs_.count(framebuffer_name) > 0;
@@ -148,6 +180,10 @@ bool as::FramebufferManager::HasRenderbuffer(
     const std::string& renderbuffer_name) const {
   return renderbuffer_hdlrs_.count(renderbuffer_name) > 0;
 }
+
+/*******************************************************************************
+ * Previous Parameter Getters (Private)
+ ******************************************************************************/
 
 const as::FramebufferManager::BindFramebufferPrevParams&
 as::FramebufferManager::GetFramebufferPrevParams(
