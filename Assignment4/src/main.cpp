@@ -194,6 +194,7 @@ void GLUTDisplayCallback() {
   scene_shader.Draw();
   skybox_shader.Draw();
   // Draw post-processing effects on default framebuffer
+  framebuffer_ctrl.UseDefaultFramebuffer();
   as::ClearDepthBuffer();
   postproc_shader.Draw();
   // Swap double buffers
