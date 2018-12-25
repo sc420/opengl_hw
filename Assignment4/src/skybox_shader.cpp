@@ -133,7 +133,7 @@ void shader::SkyboxShader::Draw() {
   const std::string program_name = GetProgramName();
   const std::string tex_name = GetTextureName();
   // Get models
-  as::Model &model = GetModel();
+  const as::Model &model = GetModel();
   // Get meshes
   const std::vector<as::Mesh> &meshes = model.GetMeshes();
 

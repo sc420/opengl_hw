@@ -23,6 +23,8 @@ class Shader {
 
   virtual void Draw() = 0;
 
+  void UseDefaultFramebuffer() const;
+
   /* Name Management */
 
   virtual std::string GetId() const = 0;

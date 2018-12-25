@@ -134,7 +134,7 @@ void shader::SceneShader::Draw() {
   const std::string skybox_tex_name = skybox_shader_->GetTextureName();
   const std::string skybox_unit_name = GetSkyboxTextureUnitName();
   // Get models
-  as::Model &model = GetModel();
+  const as::Model &model = GetModel();
   // Get meshes
   const std::vector<as::Mesh> &meshes = model.GetMeshes();
 

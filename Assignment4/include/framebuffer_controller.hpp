@@ -15,6 +15,8 @@ class FramebufferController {
   std::string GetScreenFramebufferName(const int screen_idx) const;
 
  private:
+  static const int kNumFramebuffers;
+
   as::GLManagers* gl_managers_;
 };
 

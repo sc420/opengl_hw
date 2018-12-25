@@ -22,3 +22,5 @@ std::string ctrl::FramebufferController::GetScreenFramebufferName(
     const int screen_idx) const {
   return "screen[" + std::to_string(screen_idx) + "]";
 }
+
+const int ctrl::FramebufferController::kNumFramebuffers = 3;

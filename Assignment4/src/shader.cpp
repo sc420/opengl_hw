@@ -30,6 +30,14 @@ void shader::Shader::UseProgram() const {
   program_manager.UseProgram(program_name);
 }
 
+void shader::Shader::UseDefaultFramebuffer() const {
+  // Get managers
+  as::FramebufferManager& framebuffer_manager =
+      gl_managers_->GetFramebufferManager();
+  // Use default framebuffer
+  framebuffer_manager.BindDefaultFramebuffer(GL_FRAMEBUFFER);
+}
+
 /*******************************************************************************
  * Name Management
  ******************************************************************************/

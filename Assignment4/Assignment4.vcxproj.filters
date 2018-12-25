@@ -111,7 +111,7 @@
     <ClInclude Include="..\include\as\trans\camera.hpp">
       <Filter>include\as\trans</Filter>
     </ClInclude>
-    <ClInclude Include="include\framebuffer_controller.hpp">
+    <ClInclude Include="include\depth_shader.hpp">
       <Filter>Assignment4\include</Filter>
     </ClInclude>
     <ClInclude Include="include\postproc_shader.hpp">
@@ -185,7 +185,7 @@
     <ClCompile Include="..\src\as\trans\camera.cpp">
       <Filter>src\as\trans</Filter>
     </ClCompile>
-    <ClInclude Include="src\framebuffer_controller.cpp">
+    <ClInclude Include="src\depth_shader.cpp">
       <Filter>Assignment4\src</Filter>
     </ClInclude>
     <ClCompile Include="src\main.cpp">
@@ -205,6 +205,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <CopyFileToFolders Include="assets\shaders\depth.frag">
+      <Filter>assets\shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\depth.vert">
+      <Filter>assets\shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\postproc.frag">
+      <Filter>assets\shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\postproc.vert">
+      <Filter>assets\shaders</Filter>
+    </CopyFileToFolders>
     <CopyFileToFolders Include="assets\shaders\scene.frag">
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
@@ -215,12 +227,6 @@
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
     <CopyFileToFolders Include="assets\shaders\skybox.vert">
-      <Filter>assets\shaders</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="assets\shaders\postproc.frag">
-      <Filter>assets\shaders</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="assets\shaders\postproc.vert">
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
   </ItemGroup>

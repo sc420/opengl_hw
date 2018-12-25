@@ -178,7 +178,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\model\texture.hpp" />
     <ClInclude Include="..\include\as\model\vertex.hpp" />
     <ClInclude Include="..\include\as\trans\camera.hpp" />
-    <ClInclude Include="include\framebuffer_controller.hpp" />
+    <ClInclude Include="include\depth_shader.hpp" />
     <ClInclude Include="include\postproc_shader.hpp" />
     <ClInclude Include="include\scene_shader.hpp" />
     <ClInclude Include="include\shader.hpp" />
@@ -204,7 +204,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\as\model\texture.cpp" />
     <ClCompile Include="..\src\as\model\vertex.cpp" />
     <ClCompile Include="..\src\as\trans\camera.cpp" />
-    <ClCompile Include="src\framebuffer_controller.cpp" />
+    <ClCompile Include="src\depth_shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\postproc_shader.cpp" />
     <ClCompile Include="src\scene_shader.cpp" />
@@ -212,6 +212,20 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="src\skybox_shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <CopyFileToFolders Include="assets\shaders\depth.frag">
+      <FileType>CppCode</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/assets/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/assets/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)/shaders</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\depth.vert">
+      <FileType>CppCode</FileType>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/assets/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/assets/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)/shaders</DestinationFolders>
+    </CopyFileToFolders>
     <CopyFileToFolders Include="assets\shaders\postproc.frag">
       <FileType>CppCode</FileType>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/assets/shaders</DestinationFolders>
