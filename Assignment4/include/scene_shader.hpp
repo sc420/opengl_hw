@@ -54,8 +54,6 @@ class SceneShader : public Shader {
 
     bool pad_view_pos[4];  // +4->96
     glm::vec3 view_pos;    // 16*6=96, +12->108
-
-    bool pad[100];
   };
 
   SceneShader();
