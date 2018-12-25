@@ -3,11 +3,13 @@
 ## Tutorials
 
 * [Learn OpenGL](https://learnopengl.com/)
+* [opengl-tutorial](http://www.opengl-tutorial.org/)
 * [OpenGL tutorials and notes by Song Ho Ahn](http://www.songho.ca/opengl/index.html)
 * [progschj/OpenGL-Examples](https://github.com/progschj/OpenGL-Examples)
 * [Menu Management](http://openglut.sourceforge.net/group__menus.html)
 * [OPENGL FPS CAMERA QUATERNION](http://in2gpu.com/2016/03/14/opengl-fps-camera-quaternion/)
 * [OpenGL Angles to Axes](http://www.songho.ca/opengl/gl_anglestoaxes.html)
+* [Improvements for shadow mapping in OpenGL and GLSL](http://www.sunandblackcat.com/tipFullView.php?l=eng&topicid=35)
 
 ## Libraries
 
