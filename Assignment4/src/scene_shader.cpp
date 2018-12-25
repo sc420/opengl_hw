@@ -13,7 +13,7 @@ shader::SceneShader::SceneShader()
 
 void shader::SceneShader::RegisterSkyboxShader(
     const SkyboxShader &skybox_shader) {
-  skybox_shader_ = std::make_shared<SkyboxShader>(skybox_shader);
+  skybox_shader_ = &skybox_shader;
 }
 
 /*******************************************************************************
@@ -110,7 +110,7 @@ void shader::SceneShader::InitLighting() {
   lighting_ = lighting;
 }
 
-void shader::SceneShader::SetSkyboxTexture() {
+void shader::SceneShader::ReuseSkyboxTexture() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   // Get names

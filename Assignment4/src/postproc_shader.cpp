@@ -1,10 +1,19 @@
 #include "postproc_shader.hpp"
 
+shader::PostprocShader::PostprocShader() : postproc_inputs_(PostprocInputs()) {}
+
+/*******************************************************************************
+ * Controller Registrations
+ ******************************************************************************/
+
+void shader::PostprocShader::RegisterFramebufferController(
+    ctrl::FramebufferController &framebuffer_ctrl) {
+  framebuffer_ctrl_ = &framebuffer_ctrl;
+}
+
 /*******************************************************************************
  * GL Initializations
  ******************************************************************************/
-
-shader::PostprocShader::PostprocShader() : postproc_inputs_(PostprocInputs()) {}
 
 void shader::PostprocShader::Init() {
   Shader::Init();
@@ -27,7 +36,8 @@ void shader::PostprocShader::InitFramebuffers() {
   // 1st framebuffer is the original screen
   // 2nd and 3rd framebuffers are ping pong screen for multi-pass filtering
   for (int screen_idx = 0; screen_idx < kNumFramebuffers; screen_idx++) {
-    const std::string &name = GetScreenFramebufferName(screen_idx);
+    const std::string &name =
+        framebuffer_ctrl_->GetScreenFramebufferName(screen_idx);
     framebuffer_manager.GenFramebuffer(name);
   }
 }
@@ -55,7 +65,8 @@ void shader::PostprocShader::UpdateScreenTextures(const GLsizei width,
   // Configure textures
   for (int screen_idx = 0; screen_idx < kNumFramebuffers; screen_idx++) {
     // Get names
-    const std::string framebuffer_name = GetScreenFramebufferName(screen_idx);
+    const std::string framebuffer_name =
+        framebuffer_ctrl_->GetScreenFramebufferName(screen_idx);
     const std::string tex_name = GetScreenTextureName(screen_idx);
     const std::string unit_name = GetScreenTextureUnitName(screen_idx);
     // Check whether to delete old texture
@@ -91,7 +102,8 @@ void shader::PostprocShader::UpdateScreenRenderbuffers(const GLsizei width,
   // Configure textures
   for (int screen_idx = 0; screen_idx < kNumFramebuffers; screen_idx++) {
     // Get names
-    const std::string framebuffer_name = GetScreenFramebufferName(screen_idx);
+    const std::string framebuffer_name =
+        framebuffer_ctrl_->GetScreenFramebufferName(screen_idx);
     const std::string renderbuffer_name =
         GetScreenDepthRenderbufferName(screen_idx);
     // Check whether to delete old renderbuffer
@@ -129,7 +141,7 @@ void shader::PostprocShader::Draw() {
     UpdatePassIdx(0);
     buffer_manager.UpdateBuffer(buffer_name);
     // Draw to screen framebuffer
-    UseScreenFramebuffer(1);
+    framebuffer_ctrl_->UseScreenFramebuffer(1);
     DrawScreenWithTexture(0);
 
     /* Draw to framebuffer 2(1) with texture 1(2) */
@@ -140,7 +152,7 @@ void shader::PostprocShader::Draw() {
       // Draw to screen framebuffer
       const int source_idx = 1 + (i % 2);
       const int target_idx = 1 + ((i + 1) % 2);
-      UseScreenFramebuffer(target_idx);
+      framebuffer_ctrl_->UseScreenFramebuffer(target_idx);
       DrawScreenWithTexture(source_idx);
     }
 
@@ -149,24 +161,12 @@ void shader::PostprocShader::Draw() {
     UpdatePassIdx(1 + 2 * kNumMultipass);
     buffer_manager.UpdateBuffer(buffer_name);
     // Draw to default framebuffer
-    UseDefaultFramebuffer();
+    framebuffer_ctrl_->UseDefaultFramebuffer();
     DrawScreenWithTexture(1);
   } else {
+    framebuffer_ctrl_->UseDefaultFramebuffer();
     DrawScreenWithTexture(0);
   }
-}
-
-void shader::PostprocShader::UseDefaultFramebuffer() {
-  as::FramebufferManager &framebuffer_manager =
-      gl_managers_->GetFramebufferManager();
-  framebuffer_manager.BindDefaultFramebuffer(GL_FRAMEBUFFER);
-}
-
-void shader::PostprocShader::UseScreenFramebuffer(const int screen_idx) {
-  as::FramebufferManager &framebuffer_manager =
-      gl_managers_->GetFramebufferManager();
-  const std::string framebuffer_name = GetScreenFramebufferName(screen_idx);
-  framebuffer_manager.BindFramebuffer(framebuffer_name);
 }
 
 /*******************************************************************************
@@ -215,11 +215,6 @@ std::string shader::PostprocShader::GetPostprocInputsBufferName() const {
 
 std::string shader::PostprocShader::GetPostprocInputsUniformBlockName() const {
   return "PostprocInputs";
-}
-
-std::string shader::PostprocShader::GetScreenFramebufferName(
-    const int screen_idx) const {
-  return "screen[" + std::to_string(screen_idx) + "]";
 }
 
 std::string shader::PostprocShader::GetScreenTextureName(

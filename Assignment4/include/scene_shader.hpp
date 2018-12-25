@@ -80,7 +80,7 @@ class SceneShader : public Shader {
 
   void InitLighting();
 
-  void SetSkyboxTexture();
+  void ReuseSkyboxTexture();
 
   /* GL Drawing Methods */
 
@@ -133,7 +133,7 @@ class SceneShader : public Shader {
 
  private:
   /* Shaders */
-  std::shared_ptr<SkyboxShader> skybox_shader_;
+  const SkyboxShader *skybox_shader_;
 
   /* Models */
   as::Model scene_model_;

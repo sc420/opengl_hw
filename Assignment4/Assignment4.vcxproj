@@ -178,6 +178,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\model\texture.hpp" />
     <ClInclude Include="..\include\as\model\vertex.hpp" />
     <ClInclude Include="..\include\as\trans\camera.hpp" />
+    <ClInclude Include="include\framebuffer_controller.hpp" />
     <ClInclude Include="include\postproc_shader.hpp" />
     <ClInclude Include="include\scene_shader.hpp" />
     <ClInclude Include="include\shader.hpp" />
@@ -203,6 +204,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\as\model\texture.cpp" />
     <ClCompile Include="..\src\as\model\vertex.cpp" />
     <ClCompile Include="..\src\as\trans\camera.cpp" />
+    <ClCompile Include="src\framebuffer_controller.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\postproc_shader.cpp" />
     <ClCompile Include="src\scene_shader.cpp" />

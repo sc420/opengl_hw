@@ -6,7 +6,7 @@
 
 void shader::SkyboxShader::RegisterSceneShader(
     const SceneShader &scene_shader) {
-  scene_shader_ = std::make_shared<SceneShader>(scene_shader);
+  scene_shader_ = &scene_shader;
 }
 
 /*******************************************************************************

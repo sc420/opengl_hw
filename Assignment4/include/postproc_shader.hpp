@@ -1,5 +1,6 @@
 #pragma once
 
+#include "framebuffer_controller.hpp"
 #include "shader.hpp"
 
 namespace shader {
@@ -26,6 +27,11 @@ class PostprocShader : public Shader {
   };
 
   PostprocShader();
+
+  /* Controller Registrations */
+
+  void RegisterFramebufferController(
+      ctrl::FramebufferController &framebuffer_ctrl);
 
   /* GL Initializations */
 
@@ -78,8 +84,6 @@ class PostprocShader : public Shader {
 
   std::string GetPostprocInputsUniformBlockName() const;
 
-  std::string GetScreenFramebufferName(const int screen_idx) const;
-
   std::string GetScreenTextureName(const int screen_idx) const;
 
   std::string GetScreenTextureUnitName(const int screen_idx) const;
@@ -89,6 +93,8 @@ class PostprocShader : public Shader {
  private:
   static const int kNumFramebuffers;
   static const int kNumMultipass;
+
+  ctrl::FramebufferController *framebuffer_ctrl_;
 
   as::Model screen_quad_model_;
 

@@ -2,6 +2,7 @@
 #include "as/gl/gl_tools.hpp"
 #include "as/trans/camera.hpp"
 
+#include "framebuffer_controller.hpp"
 #include "postproc_shader.hpp"
 #include "scene_shader.hpp"
 #include "skybox_shader.hpp"
@@ -38,6 +39,12 @@ as::CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 0.0f),
 
 as::GLManagers gl_managers;
 as::UiManager ui_manager;
+
+/*******************************************************************************
+ * GL Controllers
+ ******************************************************************************/
+
+ctrl::FramebufferController framebuffer_ctrl;
 
 /*******************************************************************************
  * Shaders
@@ -109,26 +116,33 @@ void InitUiManager() {
   ui_manager.StartClock();
 }
 
+void InitFramebufferController() {
+  framebuffer_ctrl.RegisterGLManagers(gl_managers);
+}
+
 void InitShaders() {
-  // Register shaders
-  scene_shader.RegisterSkyboxShader(skybox_shader);
-  skybox_shader.RegisterSceneShader(scene_shader);
   // Register managers
   postproc_shader.RegisterGLManagers(gl_managers);
   scene_shader.RegisterGLManagers(gl_managers);
   skybox_shader.RegisterGLManagers(gl_managers);
+  // Register controllers
+  postproc_shader.RegisterFramebufferController(framebuffer_ctrl);
+  // Register shaders
+  scene_shader.RegisterSkyboxShader(skybox_shader);
+  skybox_shader.RegisterSceneShader(scene_shader);
   // Initialize shaders
   postproc_shader.Init();
   scene_shader.Init();
   skybox_shader.Init();
-  // Set skybox texture
-  scene_shader.SetSkyboxTexture();
+  // Reuse skybox texture
+  scene_shader.ReuseSkyboxTexture();
 }
 
 void ConfigGL() {
   as::EnableCatchingGLError();
   ConfigGLSettings();
   InitUiManager();
+  InitFramebufferController();
   InitShaders();
 }
 
@@ -175,12 +189,11 @@ void GLUTDisplayCallback() {
   // Update states
   UpdateStates();
   // Draw the scenes on framebuffer 0
-  postproc_shader.UseScreenFramebuffer(0);
+  framebuffer_ctrl.UseScreenFramebuffer(0);
   as::ClearDepthBuffer();
   scene_shader.Draw();
   skybox_shader.Draw();
   // Draw post-processing effects on default framebuffer
-  postproc_shader.UseDefaultFramebuffer();
   as::ClearDepthBuffer();
   postproc_shader.Draw();
   // Swap double buffers

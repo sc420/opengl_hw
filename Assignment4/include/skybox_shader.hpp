@@ -46,7 +46,8 @@ class SkyboxShader : public Shader {
   GLsizei GetNumMipmapLevels() const;
 
  private:
-  std::shared_ptr<SceneShader> scene_shader_;
+  const SceneShader *scene_shader_;
+
   as::Model skybox_model_;
 };
 }  // namespace shader
