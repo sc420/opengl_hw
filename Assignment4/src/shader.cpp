@@ -30,6 +30,8 @@ void shader::Shader::UseProgram() const {
   program_manager.UseProgram(program_name);
 }
 
+void shader::Shader::Draw() {}
+
 void shader::Shader::UseDefaultFramebuffer() const {
   // Get managers
   as::FramebufferManager& framebuffer_manager =

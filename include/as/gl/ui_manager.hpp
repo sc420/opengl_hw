@@ -11,6 +11,8 @@ class UiManager {
 
   void SaveWindowSize(const glm::ivec2 &window_size);
 
+  glm::ivec2 GetWindowSize() const;
+
   float GetWindowAspectRatio() const;
 
   void MarkWindowClosed();

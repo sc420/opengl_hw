@@ -1,5 +1,7 @@
 #pragma once
 
+#include "as/trans/camera.hpp"
+
 #include "scene_shader.hpp"
 #include "shader.hpp"
 
@@ -20,7 +22,9 @@ class DepthShader : public Shader {
 
   /* GL Drawing Methods */
 
-  void Draw() override;
+  void Draw(const glm::ivec2 &window_size);
+
+  void UseDepthFramebuffer();
 
   /* Name Management */
 

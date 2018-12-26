@@ -86,6 +86,8 @@ class SceneShader : public Shader {
 
   /* State Getters */
 
+  GlobalTrans GetGlobalTrans() const;
+
   glm::vec3 GetLightPos() const;
 
   /* State Updaters */

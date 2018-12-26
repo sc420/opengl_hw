@@ -146,7 +146,7 @@ void UpdateGlobalTrans() {
   const glm::mat4 identity(1.0f);
   const float aspect_ratio = ui_manager.GetWindowAspectRatio();
   global_trans.proj =
-      glm::perspective(glm::radians(80.0f), aspect_ratio, 1e-3f, 1000.0f);
+      glm::perspective(glm::radians(80.0f), aspect_ratio, 1e-3f, 1e3f);
   global_trans.view = camera_trans.GetTrans();
   global_trans.model = identity;
 
@@ -177,9 +177,15 @@ void UpdateStates() {
  ******************************************************************************/
 
 void GLUTDisplayCallback() {
+  const glm::ivec2 window_size = ui_manager.GetWindowSize();
+
   // Update states
   UpdateStates();
-  // Draw the scenes on framebuffer 0
+  // Draw the scene depth on depth framebuffer
+  depth_shader.UseDepthFramebuffer();
+  as::ClearDepthBuffer();
+  depth_shader.Draw(window_size);
+  // Draw the scenes on screen framebuffer
   postproc_shader.UseScreenFramebuffer();
   as::ClearDepthBuffer();
   scene_shader.Draw();

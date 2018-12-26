@@ -206,6 +206,10 @@ void shader::SceneShader::Draw() {
  * State Getters
  ******************************************************************************/
 
+shader::SceneShader::GlobalTrans shader::SceneShader::GetGlobalTrans() const {
+  return global_trans_;
+}
+
 glm::vec3 shader::SceneShader::GetLightPos() const {
   return lighting_.light_pos;
 }

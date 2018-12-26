@@ -21,7 +21,7 @@ class Shader {
 
   virtual void UseProgram() const;
 
-  virtual void Draw() = 0;
+  virtual void Draw();
 
   void UseDefaultFramebuffer() const;
 
