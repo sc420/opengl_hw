@@ -84,6 +84,10 @@ class SceneShader : public Shader {
 
   void Draw() override;
 
+  /* State Getters */
+
+  glm::vec3 GetLightPos() const;
+
   /* State Updaters */
 
   void UpdateGlobalTrans(const GlobalTrans &global_trans);

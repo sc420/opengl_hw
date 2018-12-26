@@ -2,6 +2,7 @@
 #include "as/gl/gl_tools.hpp"
 #include "as/trans/camera.hpp"
 
+#include "depth_shader.hpp"
 #include "postproc_shader.hpp"
 #include "scene_shader.hpp"
 #include "skybox_shader.hpp"
@@ -43,6 +44,7 @@ as::UiManager ui_manager;
  * Shaders
  ******************************************************************************/
 
+shader::DepthShader depth_shader;
 shader::PostprocShader postproc_shader;
 shader::SceneShader scene_shader;
 shader::SkyboxShader skybox_shader;
@@ -111,16 +113,19 @@ void InitUiManager() {
 
 void InitShaders() {
   // Register managers
+  depth_shader.RegisterGLManagers(gl_managers);
   postproc_shader.RegisterGLManagers(gl_managers);
   scene_shader.RegisterGLManagers(gl_managers);
   skybox_shader.RegisterGLManagers(gl_managers);
   // Register shaders
+  depth_shader.RegisterSceneShader(scene_shader);
   scene_shader.RegisterSkyboxShader(skybox_shader);
   skybox_shader.RegisterSceneShader(scene_shader);
   // Initialize shaders
   postproc_shader.Init();
   scene_shader.Init();
   skybox_shader.Init();
+  depth_shader.Init();
   // Reuse skybox texture
   scene_shader.ReuseSkyboxTexture();
 }

@@ -85,10 +85,16 @@ class PostprocShader : public Shader {
   std::string GetScreenDepthRenderbufferName(const int screen_idx) const;
 
  private:
+  /* Constants */
+
   static const int kNumFramebuffers;
   static const int kNumMultipass;
 
+  /* Models */
+
   as::Model screen_quad_model_;
+
+  /* States */
 
   PostprocInputs postproc_inputs_;
 

@@ -27,7 +27,7 @@ void shader::PostprocShader::InitFramebuffers() {
   // 1st framebuffer is the original screen
   // 2nd and 3rd framebuffers are ping pong screen for multi-pass filtering
   for (int screen_idx = 0; screen_idx < kNumFramebuffers; screen_idx++) {
-    const std::string &name = GetScreenFramebufferName(screen_idx);
+    const std::string name = GetScreenFramebufferName(screen_idx);
     framebuffer_manager.GenFramebuffer(name);
   }
 }

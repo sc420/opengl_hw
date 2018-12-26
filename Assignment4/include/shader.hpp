@@ -36,7 +36,7 @@ class Shader {
 
   /* Model Handlers */
 
-  virtual as::Model &GetModel() = 0;
+  virtual as::Model &GetModel();
 
   /* GL Initializations */
 

@@ -45,6 +45,15 @@ void shader::Shader::UseDefaultFramebuffer() const {
 std::string shader::Shader::GetProgramName() const { return GetId(); }
 
 /*******************************************************************************
+ * Model Handlers
+ ******************************************************************************/
+
+as::Model& shader::Shader::GetModel() {
+  as::Model model;
+  return model;
+}
+
+/*******************************************************************************
  * GL Initializations (Protected)
  ******************************************************************************/
 
