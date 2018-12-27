@@ -26,11 +26,12 @@ void shader::SceneShader::RegisterSkyboxShader(
 
 void shader::SceneShader::LoadModel() {
   as::Model &scene_model = GetSceneModel();
-  // as::Model &quad_model = GetQuadModel();
+  as::Model &quad_model = GetQuadModel();
   scene_model.LoadFile("assets/models/wall/wall.obj",
                        aiProcess_CalcTangentSpace | aiProcess_Triangulate |
                            aiProcess_GenNormals | aiProcess_FlipUVs);
-  // quad_model.LoadFile("assets/models/quad/quad.obj", 0);
+  quad_model.LoadFile("assets/models/quad/quad.obj",
+                      aiProcess_CalcTangentSpace | aiProcess_GenNormals);
 }
 
 /*******************************************************************************
@@ -40,16 +41,18 @@ void shader::SceneShader::LoadModel() {
 void shader::SceneShader::Init() {
   Shader::Init();
   LoadModel();
-  InitLighting();
   InitVertexArrays();
   InitUniformBlocks();
   InitTextures();
 }
 
 void shader::SceneShader::InitVertexArrays() {
-  const std::string group_name = GetProgramName();
+  const std::string scene_group_name = GetSceneGroupName();
+  const std::string quad_group_name = GetQuadGroupName();
   const as::Model &scene_model = GetSceneModel();
-  InitVertexArray(group_name, scene_model);
+  const as::Model &quad_model = GetQuadModel();
+  InitVertexArray(scene_group_name, scene_model);
+  InitVertexArray(quad_group_name, quad_model);
 }
 
 void shader::SceneShader::InitUniformBlocks() {
@@ -109,14 +112,6 @@ void shader::SceneShader::InitTextures() {
   }
 }
 
-void shader::SceneShader::InitLighting() {
-  Lighting lighting;
-  lighting.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  lighting.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
-  lighting.light_intensity = glm::vec3(0.0f, 1.0f, 0.5f);
-  lighting_ = lighting;
-}
-
 void shader::SceneShader::ReuseSkyboxTexture() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
@@ -138,12 +133,13 @@ void shader::SceneShader::Draw() {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string program_name = GetProgramName();
+  const std::string quad_group_name = GetQuadGroupName();
+  const std::string scene_group_name = GetSceneGroupName();
   const std::string skybox_tex_name = skybox_shader_->GetTextureName();
   const std::string skybox_unit_name = GetSkyboxTextureUnitName();
   // Get models
+  const as::Model &quad_model = GetQuadModel();
   const as::Model &scene_model = GetSceneModel();
-  // Get meshes
-  const std::vector<as::Mesh> &meshes = scene_model.GetMeshes();
 
   // Use the program
   UseProgram();
@@ -159,59 +155,19 @@ void shader::SceneShader::Draw() {
   const GLuint depth_unit_idx = texture_manager.GetUnitIdx(depth_tex_name);
   texture_manager.BindTexture(depth_tex_name, GL_TEXTURE_2D, depth_unit_name);
   uniform_manager.SetUniform1Int(program_name, "depth_map_tex", depth_unit_idx);
-
-  // Draw each mesh with its own texture
-  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
-    const as::Mesh &mesh = meshes.at(mesh_idx);
-    // Get the array indexes
-    const std::vector<size_t> &idxs = mesh.GetIdxs();
-    // Get the material
-    const as::Material &material = mesh.GetMaterial();
-    // Get the textures
-    const std::set<as::Texture> &textures = material.GetTextures();
-    /* Update Material Colors */
-    UpdateModelMaterial(material);
-    /* Update Textures */
-    for (const as::Texture &texture : textures) {
-      const std::string &path = texture.GetPath();
-      const aiTextureType type = texture.GetType();
-      // Bind the texture
-      texture_manager.BindTexture(path);
-      // Get the unit index
-      const GLuint unit_idx = texture_manager.GetUnitIdx(path);
-      // Set the texture handler to the unit index
-      switch (type) {
-        case aiTextureType_AMBIENT: {
-          uniform_manager.SetUniform1Int(program_name, "ambient_tex", unit_idx);
-        } break;
-        case aiTextureType_DIFFUSE: {
-          uniform_manager.SetUniform1Int(program_name, "diffuse_tex", unit_idx);
-        } break;
-        case aiTextureType_SPECULAR: {
-          uniform_manager.SetUniform1Int(program_name, "specular_tex",
-                                         unit_idx);
-        } break;
-        case aiTextureType_HEIGHT: {
-          uniform_manager.SetUniform1Int(program_name, "height_tex", unit_idx);
-        } break;
-        case aiTextureType_NORMALS: {
-          uniform_manager.SetUniform1Int(program_name, "normals_tex", unit_idx);
-        } break;
-        default: {
-          throw std::runtime_error("Unknown texture type '" +
-                                   std ::to_string(type) + "'");
-        }
-      }
-    }
-    /* Draw Vertex Arrays */
-    UseMesh(program_name, mesh_idx);
-    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
-  }
+  // Draw the quad
+  UpdateQuadModelTrans();
+  UpdateQuadLighting();
+  DrawModel(quad_model, quad_group_name);
+  // Draw the scene
+  UpdateSceneModelTrans();
+  UpdateSceneLighting();
+  DrawModel(scene_model, scene_group_name);
 }
 
 void shader::SceneShader::DrawDepth() {
   // Get names
-  const std::string group_name = GetProgramName();
+  const std::string scene_group_name = GetSceneGroupName();
   // Get models
   const as::Model &scene_model = GetSceneModel();
   // Get meshes
@@ -224,9 +180,35 @@ void shader::SceneShader::DrawDepth() {
     const std::vector<size_t> &idxs = mesh.GetIdxs();
 
     /* Draw Vertex Arrays */
-    UseMesh(group_name, mesh_idx);
+    UseMesh(scene_group_name, mesh_idx);
     glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
   }
+}
+
+void shader::SceneShader::UpdateQuadLighting() {
+  lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
+  lighting_.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
+  lighting_.light_intensity = glm::vec3(1.0f, 0.0f, 0.0f);
+
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string buffer_name = GetLightingBufferName();
+  // Update the buffer
+  buffer_manager.UpdateBuffer(buffer_name);
+}
+
+void shader::SceneShader::UpdateSceneLighting() {
+  lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
+  lighting_.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
+  lighting_.light_intensity = glm::vec3(0.0f, 1.0f, 0.5f);
+
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string buffer_name = GetLightingBufferName();
+  // Update the buffer
+  buffer_manager.UpdateBuffer(buffer_name);
 }
 
 /*******************************************************************************
@@ -257,15 +239,31 @@ void shader::SceneShader::UpdateGlobalTrans(const GlobalTrans &global_trans) {
   UpdateFixedNormModel();
 }
 
-void shader::SceneShader::UpdateModelTrans(const float add_rotation) {
+void shader::SceneShader::UpdateQuadModelTrans() {
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Update model transformation
+  const glm::vec3 scale_factors = 5.0f * glm::vec3(0.5f, 0.35f, 0.5f);
+  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.5f, -8.0f);
+  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
+  trans = glm::scale(trans, scale_factors);
+  trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+  model_trans_.trans = trans;
+  // Update the buffer
+  const std::string buffer_name = GetModelTransBufferName();
+  buffer_manager.UpdateBuffer(buffer_name);
+  // Update also the fixed normal model
+  UpdateFixedNormModel();
+}
+
+void shader::SceneShader::UpdateSceneModelTrans(const float add_rotation) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model state
   model_rotation += add_rotation;
   // Update model transformation
   const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
   const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
-  glm::mat4 trans = glm::scale(glm::mat4(1.0f), scale_factors);
-  trans = glm::translate(trans, translate_factors);
+  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
+  trans = glm::scale(trans, scale_factors);
   trans = glm::rotate(trans, model_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
   model_trans_.trans = trans;
   // Update the buffer
@@ -357,6 +355,14 @@ std::string shader::SceneShader::GetLightingUniformBlockName() const {
   return "Lighting";
 }
 
+std::string shader::SceneShader::GetSceneGroupName() const {
+  return GetProgramName() + "/scene";
+}
+
+std::string shader::SceneShader::GetQuadGroupName() const {
+  return GetProgramName() + "/quad";
+}
+
 std::string shader::SceneShader::GetTextureUnitName(
     const as::Texture &texture) const {
   return GetProgramName() + "/type[" + std::to_string(texture.GetType()) + "]";
@@ -379,4 +385,67 @@ void shader::SceneShader::UpdateFixedNormModel() {
   // Update the buffer
   const std::string buffer_name = GetLightingBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
+}
+
+/*******************************************************************************
+ * GL Drawing Methods (Private)
+ ******************************************************************************/
+
+void shader::SceneShader::DrawModel(const as::Model &model,
+                                    const std::string &group_name) {
+  // Get managers
+  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
+  // Get names
+  const std::string program_name = GetProgramName();
+  // Get meshes
+  const std::vector<as::Mesh> &meshes = model.GetMeshes();
+
+  // Draw each mesh with its own texture
+  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+    const as::Mesh &mesh = meshes.at(mesh_idx);
+    // Get the array indexes
+    const std::vector<size_t> &idxs = mesh.GetIdxs();
+    // Get the material
+    const as::Material &material = mesh.GetMaterial();
+    // Get the textures
+    const std::set<as::Texture> &textures = material.GetTextures();
+    /* Update Material Colors */
+    UpdateModelMaterial(material);
+    /* Update Textures */
+    for (const as::Texture &texture : textures) {
+      const std::string &path = texture.GetPath();
+      const aiTextureType type = texture.GetType();
+      // Bind the texture
+      texture_manager.BindTexture(path);
+      // Get the unit index
+      const GLuint unit_idx = texture_manager.GetUnitIdx(path);
+      // Set the texture handler to the unit index
+      switch (type) {
+        case aiTextureType_AMBIENT: {
+          uniform_manager.SetUniform1Int(program_name, "ambient_tex", unit_idx);
+        } break;
+        case aiTextureType_DIFFUSE: {
+          uniform_manager.SetUniform1Int(program_name, "diffuse_tex", unit_idx);
+        } break;
+        case aiTextureType_SPECULAR: {
+          uniform_manager.SetUniform1Int(program_name, "specular_tex",
+                                         unit_idx);
+        } break;
+        case aiTextureType_HEIGHT: {
+          uniform_manager.SetUniform1Int(program_name, "height_tex", unit_idx);
+        } break;
+        case aiTextureType_NORMALS: {
+          uniform_manager.SetUniform1Int(program_name, "normals_tex", unit_idx);
+        } break;
+        default: {
+          throw std::runtime_error("Unknown texture type '" +
+                                   std ::to_string(type) + "'");
+        }
+      }
+    }
+    /* Draw Vertex Arrays */
+    UseMesh(group_name, mesh_idx);
+    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
+  }
 }

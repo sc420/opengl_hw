@@ -154,8 +154,6 @@ void UpdateGlobalTrans() {
   scene_shader.UpdateGlobalTrans(global_trans);
 }
 
-void UpdateModelTrans() { scene_shader.UpdateModelTrans(); }
-
 void UpdateLighting() {
   const glm::vec3 &eye = camera_trans.GetEye();
   scene_shader.UpdateViewPos(eye);
@@ -168,7 +166,6 @@ void UpdatePostprocInputs() {
 
 void UpdateStates() {
   UpdateGlobalTrans();
-  UpdateModelTrans();
   UpdateLighting();
   UpdatePostprocInputs();
 }
@@ -337,10 +334,10 @@ void GLUTTimerCallback(const int val) {
 
   // Update model transformation
   if (ui_manager.IsKeyDown('q')) {
-    scene_shader.UpdateModelTrans(glm::radians(1.0f));
+    scene_shader.UpdateSceneModelTrans(glm::radians(1.0f));
   }
   if (ui_manager.IsKeyDown('e')) {
-    scene_shader.UpdateModelTrans(glm::radians(-1.0f));
+    scene_shader.UpdateSceneModelTrans(glm::radians(-1.0f));
   }
 
   // Mark the current window as needing to be redisplayed

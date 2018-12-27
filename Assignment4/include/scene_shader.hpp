@@ -81,8 +81,6 @@ class SceneShader : public Shader {
 
   void InitTextures();
 
-  void InitLighting();
-
   void ReuseSkyboxTexture();
 
   /* GL Drawing Methods */
@@ -90,6 +88,10 @@ class SceneShader : public Shader {
   void Draw() override;
 
   void DrawDepth();
+
+  void UpdateQuadLighting();
+
+  void UpdateSceneLighting();
 
   /* State Getters */
 
@@ -101,7 +103,9 @@ class SceneShader : public Shader {
 
   void UpdateGlobalTrans(const GlobalTrans &global_trans);
 
-  void UpdateModelTrans(const float add_rotation = 0.0f);
+  void UpdateQuadModelTrans();
+
+  void UpdateSceneModelTrans(const float add_rotation = 0.0f);
 
   void UpdateModelMaterial(const as::Material &material);
 
@@ -140,6 +144,10 @@ class SceneShader : public Shader {
 
   std::string GetLightingUniformBlockName() const;
 
+  std::string GetSceneGroupName() const;
+
+  std::string GetQuadGroupName() const;
+
   std::string GetTextureUnitName(const as::Texture &texture) const;
 
   std::string GetSkyboxTextureUnitName() const;
@@ -165,5 +173,9 @@ class SceneShader : public Shader {
   /* State Updaters */
 
   void UpdateFixedNormModel();
+
+  /* GL Drawing Methods */
+
+  void DrawModel(const as::Model &model, const std::string &group_name);
 };
 }  // namespace shader
