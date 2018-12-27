@@ -119,6 +119,7 @@ void InitShaders() {
   skybox_shader.RegisterGLManagers(gl_managers);
   // Register shaders
   depth_shader.RegisterSceneShader(scene_shader);
+  scene_shader.RegisterDepthShader(depth_shader);
   scene_shader.RegisterSkyboxShader(skybox_shader);
   skybox_shader.RegisterSceneShader(scene_shader);
   // Initialize shaders
@@ -500,7 +501,7 @@ int main(int argc, char *argv[]) {
     EnterGLUTLoop();
   } catch (const std::exception &ex) {
     std::cerr << "Exception: " << ex.what() << std::endl;
-    return 1;
+    throw;
   }
   return 0;
 }

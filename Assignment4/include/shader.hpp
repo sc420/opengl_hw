@@ -34,10 +34,6 @@ class Shader {
  protected:
   as::GLManagers *gl_managers_;
 
-  /* Model Handlers */
-
-  virtual as::Model &GetModel();
-
   /* GL Initializations */
 
   template <class T>
@@ -48,19 +44,23 @@ class Shader {
   template <class T>
   void InitUniformBuffer(const std::string &buffer_name, const T &buffer_data);
 
-  void InitVertexArray(const as::Model &model);
+  void InitVertexArray(const std::string &group_name, const as::Model &model);
 
   /* GL Drawing Methods */
 
-  virtual void UseMesh(const size_t mesh_idx) const;
+  virtual void UseMesh(const std::string &group_name,
+                       const size_t mesh_idx) const;
 
   /* Name Management */
 
-  std::string GetMeshVertexArrayName(const size_t mesh_idx) const;
+  std::string GetMeshVertexArrayName(const std::string &group_name,
+                                     const size_t mesh_idx) const;
 
-  std::string GetMeshVertexArrayBufferName(const size_t mesh_idx) const;
+  std::string GetMeshVertexArrayBufferName(const std::string &group_name,
+                                           const size_t mesh_idx) const;
 
-  std::string GetMeshVertexArrayIdxsBufferName(const size_t mesh_idx) const;
+  std::string GetMeshVertexArrayIdxsBufferName(const std::string &group_name,
+                                               const size_t mesh_idx) const;
 
  private:
   /* GL Initializations */

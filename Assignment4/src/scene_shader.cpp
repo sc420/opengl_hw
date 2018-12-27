@@ -11,6 +11,10 @@ shader::SceneShader::SceneShader()
  * Shader Registrations
  ******************************************************************************/
 
+void shader::SceneShader::RegisterDepthShader(const DepthShader &depth_shader) {
+  depth_shader_ = &depth_shader;
+}
+
 void shader::SceneShader::RegisterSkyboxShader(
     const SkyboxShader &skybox_shader) {
   skybox_shader_ = &skybox_shader;
@@ -21,10 +25,12 @@ void shader::SceneShader::RegisterSkyboxShader(
  ******************************************************************************/
 
 void shader::SceneShader::LoadModel() {
-  as::Model &model = GetModel();
-  model.LoadFile("assets/models/wall/wall.obj",
-                 aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                     aiProcess_GenNormals | aiProcess_FlipUVs);
+  as::Model &scene_model = GetSceneModel();
+  // as::Model &quad_model = GetQuadModel();
+  scene_model.LoadFile("assets/models/wall/wall.obj",
+                       aiProcess_CalcTangentSpace | aiProcess_Triangulate |
+                           aiProcess_GenNormals | aiProcess_FlipUVs);
+  // quad_model.LoadFile("assets/models/quad/quad.obj", 0);
 }
 
 /*******************************************************************************
@@ -41,8 +47,9 @@ void shader::SceneShader::Init() {
 }
 
 void shader::SceneShader::InitVertexArrays() {
-  const as::Model &model = GetModel();
-  InitVertexArray(model);
+  const std::string group_name = GetProgramName();
+  const as::Model &scene_model = GetSceneModel();
+  InitVertexArray(group_name, scene_model);
 }
 
 void shader::SceneShader::InitUniformBlocks() {
@@ -60,9 +67,9 @@ void shader::SceneShader::InitTextures() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   // Get models
-  const as::Model &model = GetModel();
+  const as::Model &scene_model = GetSceneModel();
   // Initialize textures in each mesh
-  const std::vector<as::Mesh> &meshes = model.GetMeshes();
+  const std::vector<as::Mesh> &meshes = scene_model.GetMeshes();
   for (const as::Mesh &mesh : meshes) {
     const as::Material &material = mesh.GetMaterial();
     const std::set<as::Texture> &textures = material.GetTextures();
@@ -134,21 +141,28 @@ void shader::SceneShader::Draw() {
   const std::string skybox_tex_name = skybox_shader_->GetTextureName();
   const std::string skybox_unit_name = GetSkyboxTextureUnitName();
   // Get models
-  const as::Model &model = GetModel();
+  const as::Model &scene_model = GetSceneModel();
   // Get meshes
-  const std::vector<as::Mesh> &meshes = model.GetMeshes();
+  const std::vector<as::Mesh> &meshes = scene_model.GetMeshes();
 
   // Use the program
   UseProgram();
+
+  // Bind the skybox texture
+  const GLuint skybox_unit_idx = texture_manager.GetUnitIdx(skybox_tex_name);
+  texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP,
+                              skybox_unit_name);
+  uniform_manager.SetUniform1Int(program_name, "skybox_tex", skybox_unit_idx);
+  // Bind the depth map texture
+  const std::string depth_tex_name = depth_shader_->GetDepthTextureName();
+  const std::string depth_unit_name = depth_shader_->GetDepthTextureUnitName();
+  const GLuint depth_unit_idx = texture_manager.GetUnitIdx(depth_tex_name);
+  texture_manager.BindTexture(depth_tex_name, GL_TEXTURE_2D, depth_unit_name);
+  uniform_manager.SetUniform1Int(program_name, "depth_map_tex", depth_unit_idx);
+
   // Draw each mesh with its own texture
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
     const as::Mesh &mesh = meshes.at(mesh_idx);
-    // Get names
-    const std::string scene_va_name = GetMeshVertexArrayName(mesh_idx);
-    const std::string scene_buffer_name =
-        GetMeshVertexArrayBufferName(mesh_idx);
-    const std::string scene_idxs_buffer_name =
-        GetMeshVertexArrayIdxsBufferName(mesh_idx);
     // Get the array indexes
     const std::vector<size_t> &idxs = mesh.GetIdxs();
     // Get the material
@@ -188,18 +202,31 @@ void shader::SceneShader::Draw() {
                                    std ::to_string(type) + "'");
         }
       }
-      /* Draw Vertex Arrays */
-      UseMesh(mesh_idx);
-      glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
     }
+    /* Draw Vertex Arrays */
+    UseMesh(program_name, mesh_idx);
+    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
   }
+}
 
-  // Bind the skybox texture
-  const GLuint skybox_unit_idx = texture_manager.GetUnitIdx(skybox_tex_name);
-  texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP,
-                              skybox_unit_name);
-  uniform_manager.SetUniform1Int(GetProgramName(), "skybox_tex",
-                                 skybox_unit_idx);
+void shader::SceneShader::DrawDepth() {
+  // Get names
+  const std::string group_name = GetProgramName();
+  // Get models
+  const as::Model &scene_model = GetSceneModel();
+  // Get meshes
+  const std::vector<as::Mesh> &meshes = scene_model.GetMeshes();
+
+  // Draw each mesh with its own texture
+  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+    const as::Mesh &mesh = meshes.at(mesh_idx);
+    // Get the array indexes
+    const std::vector<size_t> &idxs = mesh.GetIdxs();
+
+    /* Draw Vertex Arrays */
+    UseMesh(group_name, mesh_idx);
+    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
+  }
 }
 
 /*******************************************************************************
@@ -292,7 +319,9 @@ std::string shader::SceneShader::GetGlobalTransUniformBlockName() const {
  * Model Handlers (Protected)
  ******************************************************************************/
 
-as::Model &shader::SceneShader::GetModel() { return scene_model_; }
+as::Model &shader::SceneShader::GetSceneModel() { return scene_model_; }
+
+as::Model &shader::SceneShader::GetQuadModel() { return quad_model_; }
 
 /*******************************************************************************
  * GL Initializations (Protected)

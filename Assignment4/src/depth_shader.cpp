@@ -49,7 +49,8 @@ void shader::DepthShader::InitDepthTexture() {
 
   // texture_manager.InitTexture2D(
   //    tex_name, GL_TEXTURE_2D, 1, GL_R8, kDepthMapSize.x,
-  //    kDepthMapSize.y);  // TODO: May need to use glTexImage2D
+  //    kDepthMapSize.y);
+  // TODO: May need to use glTexImage2D
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, kDepthMapSize.x,
                kDepthMapSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
@@ -93,6 +94,11 @@ void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
   // Set the new viewport
   glViewport(0, 0, kDepthMapSize.x, kDepthMapSize.y);
 
+  // Use depth program
+  UseProgram();
+  // Draw the scene
+  scene_shader_->DrawDepth();
+
   // Reset the original global transformations
   scene_shader_->UpdateGlobalTrans(orig_global_trans);
   // Reset the viewport
@@ -115,20 +121,20 @@ void shader::DepthShader::UseDepthFramebuffer() {
 
 std::string shader::DepthShader::GetId() const { return "depth"; }
 
-/*******************************************************************************
- * Name Management (Protected)
- ******************************************************************************/
-
-std::string shader::DepthShader::GetDepthFramebufferName() const {
-  return GetProgramName() + "/depth";
-}
-
 std::string shader::DepthShader::GetDepthTextureName() const {
   return GetProgramName() + "/depth";
 }
 
 std::string shader::DepthShader::GetDepthTextureUnitName() const {
   return GetProgramName();
+}
+
+/*******************************************************************************
+ * Name Management (Protected)
+ ******************************************************************************/
+
+std::string shader::DepthShader::GetDepthFramebufferName() const {
+  return GetProgramName() + "/depth";
 }
 
 /*******************************************************************************

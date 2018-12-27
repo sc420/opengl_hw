@@ -32,8 +32,9 @@ void shader::SkyboxShader::Init() {
 }
 
 void shader::SkyboxShader::InitVertexArrays() {
+  const std::string group_name = GetProgramName();
   const as::Model &model = GetModel();
-  InitVertexArray(model);
+  InitVertexArray(group_name, model);
 }
 
 void shader::SkyboxShader::InitUniformBlocks() {
@@ -151,7 +152,7 @@ void shader::SkyboxShader::Draw() {
     // Get the array indexes
     const std::vector<size_t> &idxs = mesh.GetIdxs();
     /* Draw vertex arrays */
-    UseMesh(mesh_idx);
+    UseMesh(program_name, mesh_idx);
     glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
   }
 }

@@ -33,8 +33,9 @@ void shader::PostprocShader::InitFramebuffers() {
 }
 
 void shader::PostprocShader::InitVertexArrays() {
+  const std::string group_name = GetProgramName();
   const as::Model &model = GetModel();
-  InitVertexArray(model);
+  InitVertexArray(group_name, model);
 }
 
 void shader::PostprocShader::InitUniformBlocks() {
@@ -266,6 +267,7 @@ void shader::PostprocShader::DrawScreenWithTexture(const int tex_idx) {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   // Get names
+  const std::string group_name = GetProgramName();
   const std::string tex_name = GetScreenTextureName(tex_idx);
   // Get models
   const as::Model &model = GetModel();
@@ -275,7 +277,7 @@ void shader::PostprocShader::DrawScreenWithTexture(const int tex_idx) {
   // Get the array indexes
   const std::vector<size_t> &idxs = mesh.GetIdxs();
   // Use the first mesh
-  UseMesh(0);
+  UseMesh(group_name, 0);
   // Bind the texture
   texture_manager.BindTexture(tex_name);
   // Draw the mesh

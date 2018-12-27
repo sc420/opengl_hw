@@ -6,6 +6,8 @@
 #include "shader.hpp"
 
 namespace shader {
+class SceneShader;
+
 class DepthShader : public Shader {
  public:
   /* Shader Registrations */
@@ -30,14 +32,14 @@ class DepthShader : public Shader {
 
   std::string GetId() const override;
 
+  std::string GetDepthTextureName() const;
+
+  std::string GetDepthTextureUnitName() const;
+
  protected:
   /* Name Management */
 
   std::string GetDepthFramebufferName() const;
-
-  std::string GetDepthTextureName() const;
-
-  std::string GetDepthTextureUnitName() const;
 
  private:
   /* Constants */

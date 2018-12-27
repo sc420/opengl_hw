@@ -1,9 +1,12 @@
 #pragma once
 
+#include "depth_shader.hpp"
 #include "shader.hpp"
 #include "skybox_shader.hpp"
 
 namespace shader {
+class DepthShader;
+
 class SkyboxShader;
 
 class SceneShader : public Shader {
@@ -60,6 +63,8 @@ class SceneShader : public Shader {
 
   /* Shader Registrations */
 
+  void RegisterDepthShader(const DepthShader &depth_shader);
+
   void RegisterSkyboxShader(const SkyboxShader &skybox_shader);
 
   /* Model Handlers */
@@ -83,6 +88,8 @@ class SceneShader : public Shader {
   /* GL Drawing Methods */
 
   void Draw() override;
+
+  void DrawDepth();
 
   /* State Getters */
 
@@ -111,7 +118,9 @@ class SceneShader : public Shader {
  protected:
   /* Model Handlers */
 
-  virtual as::Model &GetModel() override;
+  as::Model &GetSceneModel();
+
+  as::Model &GetQuadModel();
 
   /* GL Initializations */
 
@@ -137,10 +146,12 @@ class SceneShader : public Shader {
 
  private:
   /* Shaders */
+  const DepthShader *depth_shader_;
   const SkyboxShader *skybox_shader_;
 
   /* Models */
   as::Model scene_model_;
+  as::Model quad_model_;
 
   /* Model States */
   float model_rotation;

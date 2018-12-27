@@ -47,19 +47,11 @@ void shader::Shader::UseDefaultFramebuffer() const {
 std::string shader::Shader::GetProgramName() const { return GetId(); }
 
 /*******************************************************************************
- * Model Handlers
- ******************************************************************************/
-
-as::Model& shader::Shader::GetModel() {
-  as::Model model;
-  return model;
-}
-
-/*******************************************************************************
  * GL Initializations (Protected)
  ******************************************************************************/
 
-void shader::Shader::InitVertexArray(const as::Model& model) {
+void shader::Shader::InitVertexArray(const std::string& group_name,
+                                     const as::Model& model) {
   as::BufferManager& buffer_manager = gl_managers_->GetBufferManager();
   as::VertexSpecManager& vertex_spec_manager =
       gl_managers_->GetVertexSpecManager();
@@ -67,10 +59,11 @@ void shader::Shader::InitVertexArray(const as::Model& model) {
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
     const as::Mesh& mesh = meshes.at(mesh_idx);
     // Get names
-    const std::string& va_name = GetMeshVertexArrayName(mesh_idx);
-    const std::string& buffer_name = GetMeshVertexArrayBufferName(mesh_idx);
+    const std::string& va_name = GetMeshVertexArrayName(group_name, mesh_idx);
+    const std::string& buffer_name =
+        GetMeshVertexArrayBufferName(group_name, mesh_idx);
     const std::string& idxs_buffer_name =
-        GetMeshVertexArrayIdxsBufferName(mesh_idx);
+        GetMeshVertexArrayIdxsBufferName(group_name, mesh_idx);
     // Get mesh data
     const std::vector<as::Vertex>& vertices = mesh.GetVertices();
     const std::vector<size_t>& idxs = mesh.GetIdxs();
@@ -131,16 +124,18 @@ void shader::Shader::InitVertexArray(const as::Model& model) {
  * GL Drawing Methods (Protected)
  ******************************************************************************/
 
-void shader::Shader::UseMesh(const size_t mesh_idx) const {
+void shader::Shader::UseMesh(const std::string& group_name,
+                             size_t mesh_idx) const {
   // Get managers
   as::BufferManager& buffer_manager = gl_managers_->GetBufferManager();
   const as::VertexSpecManager& vertex_spec_manager =
       gl_managers_->GetVertexSpecManager();
   // Get names
-  const std::string& va_name = GetMeshVertexArrayName(mesh_idx);
-  const std::string& buffer_name = GetMeshVertexArrayBufferName(mesh_idx);
+  const std::string& va_name = GetMeshVertexArrayName(group_name, mesh_idx);
+  const std::string& buffer_name =
+      GetMeshVertexArrayBufferName(group_name, mesh_idx);
   const std::string& idxs_buffer_name =
-      GetMeshVertexArrayIdxsBufferName(mesh_idx);
+      GetMeshVertexArrayIdxsBufferName(group_name, mesh_idx);
   // Use the vertex array
   vertex_spec_manager.BindVertexArray(va_name);
   // Use the buffers
@@ -153,18 +148,18 @@ void shader::Shader::UseMesh(const size_t mesh_idx) const {
  ******************************************************************************/
 
 std::string shader::Shader::GetMeshVertexArrayName(
-    const size_t mesh_idx) const {
-  return GetProgramName() + "/mesh[" + std::to_string(mesh_idx) + "]";
+    const std::string& group_name, const size_t mesh_idx) const {
+  return group_name + "/mesh[" + std::to_string(mesh_idx) + "]";
 }
 
 std::string shader::Shader::GetMeshVertexArrayBufferName(
-    const size_t mesh_idx) const {
-  return GetProgramName() + "/va[" + std::to_string(mesh_idx) + "]";
+    const std::string& group_name, const size_t mesh_idx) const {
+  return group_name + "/va[" + std::to_string(mesh_idx) + "]";
 }
 
 std::string shader::Shader::GetMeshVertexArrayIdxsBufferName(
-    const size_t mesh_idx) const {
-  return GetProgramName() + "/va_idxs[" + std::to_string(mesh_idx) + "]";
+    const std::string& group_name, const size_t mesh_idx) const {
+  return group_name + "/va_idxs[" + std::to_string(mesh_idx) + "]";
 }
 
 /*******************************************************************************

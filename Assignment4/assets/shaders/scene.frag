@@ -46,6 +46,7 @@ uniform sampler2D specular_tex;
 uniform sampler2D height_tex;
 uniform sampler2D normals_tex;
 uniform samplerCube skybox_tex;
+uniform sampler2D depth_map_tex;
 
 /*******************************************************************************
  * Inputs

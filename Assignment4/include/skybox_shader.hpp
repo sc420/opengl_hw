@@ -39,7 +39,7 @@ class SkyboxShader : public Shader {
  protected:
   /* Model Handlers */
 
-  virtual as::Model &GetModel() override;
+  as::Model &GetModel();
 
   /* GL Initializations */
 
