@@ -4,6 +4,7 @@
 
 #include "scene_shader.hpp"
 #include "shader.hpp"
+#include "trans_dto.hpp"
 
 namespace shader {
 class SceneShader;
@@ -25,6 +26,8 @@ class DepthShader : public Shader {
   /* GL Drawing Methods */
 
   void Draw(const glm::ivec2 &window_size);
+
+  dto::GlobalTrans GetLightTrans() const;
 
   void UseDepthFramebuffer();
 

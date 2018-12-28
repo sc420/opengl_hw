@@ -3,6 +3,7 @@
 #include "depth_shader.hpp"
 #include "shader.hpp"
 #include "skybox_shader.hpp"
+#include "trans_dto.hpp"
 
 namespace shader {
 class DepthShader;
@@ -11,12 +12,6 @@ class SkyboxShader;
 
 class SceneShader : public Shader {
  public:
-  struct GlobalTrans {
-    glm::mat4 model;  // 64*0=0, +64->64
-    glm::mat4 view;   // 64*1=64, +64->128
-    glm::mat4 proj;   // 64*2=128, +64->192
-  };
-
   struct ModelTrans {
     glm::mat4 trans;  // 64*0=0, +64->64
   };
@@ -47,16 +42,17 @@ class SceneShader : public Shader {
     // NOTE: Don't use mat2 or mat3 because each column is padded like vec4
     // Reference: https://www.khronos.org/opengl/wiki/Talk:Uniform_Buffer_Object
     glm::mat4 fixed_norm_model;  // 64*0=0, +64->64
-    glm::vec3 light_color;       // 16*3=48, +12->60
+    glm::mat4 light_trans;       // 64*1=64, +64->128
+    glm::vec3 light_color;       // 16*8=128, +12->140
 
-    bool pad_light_pos[4];  // +4->64
-    glm::vec3 light_pos;    // 16*4=64, +12->76
+    bool pad_light_pos[4];  // +4->144
+    glm::vec3 light_pos;    // 16*9=144, +12->156
 
-    bool pad_light_intensity[4];  // +4->80
-    glm::vec3 light_intensity;    // 16*5=80, +12->92
+    bool pad_light_intensity[4];  // +4->160
+    glm::vec3 light_intensity;    // 16*10=160, +12->172
 
-    bool pad_view_pos[4];  // +4->96
-    glm::vec3 view_pos;    // 16*6=96, +12->108
+    bool pad_view_pos[4];  // +4->176
+    glm::vec3 view_pos;    // 16*11=176, +12->188
   };
 
   SceneShader();
@@ -79,6 +75,8 @@ class SceneShader : public Shader {
 
   void InitUniformBlocks();
 
+  void InitLightTrans();
+
   void InitTextures();
 
   void ReuseSkyboxTexture();
@@ -95,13 +93,13 @@ class SceneShader : public Shader {
 
   /* State Getters */
 
-  GlobalTrans GetGlobalTrans() const;
+  dto::GlobalTrans GetGlobalTrans() const;
 
   glm::vec3 GetLightPos() const;
 
   /* State Updaters */
 
-  void UpdateGlobalTrans(const GlobalTrans &global_trans);
+  void UpdateGlobalTrans(const dto::GlobalTrans &global_trans);
 
   void UpdateQuadModelTrans();
 
@@ -165,7 +163,7 @@ class SceneShader : public Shader {
   float model_rotation;
 
   /* GL States */
-  GlobalTrans global_trans_;
+  dto::GlobalTrans global_trans_;
   ModelTrans model_trans_;
   ModelMaterial model_material_;
   Lighting lighting_;
@@ -177,5 +175,8 @@ class SceneShader : public Shader {
   /* GL Drawing Methods */
 
   void DrawModel(const as::Model &model, const std::string &group_name);
+
+  void DrawModelWithoutTextures(const as::Model &model,
+                                const std::string &group_name);
 };
 }  // namespace shader

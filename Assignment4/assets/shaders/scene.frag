@@ -29,6 +29,7 @@ model_material;
 
 layout(std140) uniform Lighting {
   mat4 fixed_norm_model;
+  mat4 light_trans;
   vec3 light_color;
   vec3 light_pos;
   vec3 light_intensity;
@@ -63,6 +64,9 @@ layout(location = 1) in VSTangentLighting {
   vec3 view_pos;
 }
 vs_tangent_lighting;
+
+layout(location = 8) in VSDepth { vec4 light_space_pos; }
+vs_depth;
 
 /*******************************************************************************
  * Outputs
@@ -159,6 +163,26 @@ vec4 GetParallaxMappingColor(sampler2D tex) {
 }
 
 /*******************************************************************************
+ * Shadow Calculations
+ ******************************************************************************/
+
+float ShadowCalculation() {
+  // perform perspective divide
+  vec3 projCoords = vs_depth.light_space_pos.xyz / vs_depth.light_space_pos.w;
+  // transform to [0,1] range
+  projCoords = projCoords * 0.5 + 0.5;
+  // get closest depth value from light's perspective (using [0,1] range
+  // fragPosLight as coords)
+  float closestDepth = texture(depth_map_tex, projCoords.xy).x;
+  // get depth of current fragment from light's perspective
+  float currentDepth = projCoords.z;
+  // check whether current frag pos is in shadow
+  float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
+
+  return shadow;
+}
+
+/*******************************************************************************
  * Blinn-Phong Model Methods
  ******************************************************************************/
 
@@ -212,7 +236,8 @@ vec4 GetBlinnPhongColor() {
   const vec4 ambient_color = GetAmbientColor();
   const vec4 diffuse_color = GetDiffuseColor();
   const vec4 specular_color = GetSpecularColor();
-  return ambient_color + diffuse_color + specular_color;
+  const float shadow = ShadowCalculation();
+  return ambient_color + shadow * (diffuse_color + specular_color);
 }
 
 /*******************************************************************************
@@ -234,4 +259,6 @@ vec4 GetEnvironmentMapColor() {
 void main() {
   fs_color = (1.0f - kEnvMapBlendRatio) * GetBlinnPhongColor() +
              kEnvMapBlendRatio * GetEnvironmentMapColor();
+
+  fs_color = GetBlinnPhongColor();
 }

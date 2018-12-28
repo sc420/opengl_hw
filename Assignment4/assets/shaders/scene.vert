@@ -16,6 +16,7 @@ model_trans;
 
 layout(std140) uniform Lighting {
   mat4 fixed_norm_model;
+  mat4 light_trans;
   vec3 light_color;
   vec3 light_pos;
   vec3 light_intensity;
@@ -47,6 +48,9 @@ layout(location = 1) out VSTangentLighting {
   vec3 view_pos;
 }
 vs_tangent_lighting;
+
+layout(location = 8) out VSDepth { vec4 light_space_pos; }
+vs_depth;
 
 /*******************************************************************************
  * Transformations
@@ -99,4 +103,6 @@ void main() {
   vs_tex.coords = in_tex_coords;
   // Calculate tangent lighting
   OutputTangentLighting();
+  // Calculate light space vertex position
+  vs_depth.light_space_pos = lighting.light_trans * vec4(in_pos, 1.0f);
 }

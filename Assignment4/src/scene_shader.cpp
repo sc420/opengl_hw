@@ -2,7 +2,7 @@
 
 shader::SceneShader::SceneShader()
     : model_rotation(glm::radians(0.0f)),
-      global_trans_(GlobalTrans()),
+      global_trans_(dto::GlobalTrans()),
       model_trans_(ModelTrans()),
       model_material_(ModelMaterial()),
       lighting_(Lighting()) {}
@@ -43,6 +43,7 @@ void shader::SceneShader::Init() {
   LoadModel();
   InitVertexArrays();
   InitUniformBlocks();
+  InitLightTrans();
   InitTextures();
 }
 
@@ -64,6 +65,19 @@ void shader::SceneShader::InitUniformBlocks() {
                          lighting_);
   LinkDataToUniformBlock(GetModelMaterialBufferName(),
                          GetModelMaterialUniformBlockName(), model_material_);
+}
+
+void shader::SceneShader::InitLightTrans() {
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string buffer_name = GetLightingBufferName();
+  // Get light space transformation
+  const dto::GlobalTrans global_trans = depth_shader_->GetLightTrans();
+  lighting_.light_trans =
+      global_trans.proj * global_trans.view * global_trans.model;
+  // Update the buffer
+  buffer_manager.UpdateBuffer(buffer_name);
 }
 
 void shader::SceneShader::InitTextures() {
@@ -167,28 +181,24 @@ void shader::SceneShader::Draw() {
 
 void shader::SceneShader::DrawDepth() {
   // Get names
+  const std::string quad_group_name = GetQuadGroupName();
   const std::string scene_group_name = GetSceneGroupName();
   // Get models
+  const as::Model &quad_model = GetQuadModel();
   const as::Model &scene_model = GetSceneModel();
-  // Get meshes
-  const std::vector<as::Mesh> &meshes = scene_model.GetMeshes();
 
-  // Draw each mesh with its own texture
-  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
-    const as::Mesh &mesh = meshes.at(mesh_idx);
-    // Get the array indexes
-    const std::vector<size_t> &idxs = mesh.GetIdxs();
-
-    /* Draw Vertex Arrays */
-    UseMesh(scene_group_name, mesh_idx);
-    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
-  }
+  // Draw the quad
+  UpdateQuadModelTrans();
+  DrawModelWithoutTextures(quad_model, quad_group_name);
+  // Draw the scene
+  UpdateSceneModelTrans();
+  DrawModelWithoutTextures(scene_model, scene_group_name);
 }
 
 void shader::SceneShader::UpdateQuadLighting() {
   lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
   lighting_.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
-  lighting_.light_intensity = glm::vec3(1.0f, 0.0f, 0.0f);
+  lighting_.light_intensity = glm::vec3(1.0f, 1.0f, 1.0f);
 
   // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
@@ -201,7 +211,7 @@ void shader::SceneShader::UpdateQuadLighting() {
 void shader::SceneShader::UpdateSceneLighting() {
   lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
   lighting_.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
-  lighting_.light_intensity = glm::vec3(0.0f, 1.0f, 0.5f);
+  lighting_.light_intensity = glm::vec3(0.1f, 1.0f, 0.5f);
 
   // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
@@ -215,7 +225,7 @@ void shader::SceneShader::UpdateSceneLighting() {
  * State Getters
  ******************************************************************************/
 
-shader::SceneShader::GlobalTrans shader::SceneShader::GetGlobalTrans() const {
+dto::GlobalTrans shader::SceneShader::GetGlobalTrans() const {
   return global_trans_;
 }
 
@@ -227,7 +237,8 @@ glm::vec3 shader::SceneShader::GetLightPos() const {
  * State Updaters
  ******************************************************************************/
 
-void shader::SceneShader::UpdateGlobalTrans(const GlobalTrans &global_trans) {
+void shader::SceneShader::UpdateGlobalTrans(
+    const dto::GlobalTrans &global_trans) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Get names
   const std::string buffer_name = GetGlobalTransBufferName();
@@ -444,6 +455,29 @@ void shader::SceneShader::DrawModel(const as::Model &model,
         }
       }
     }
+    /* Draw Vertex Arrays */
+    UseMesh(group_name, mesh_idx);
+    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
+  }
+}
+
+void shader::SceneShader::DrawModelWithoutTextures(
+    const as::Model &model, const std::string &group_name) {
+  // Get managers
+  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
+  // Get meshes
+  const std::vector<as::Mesh> &meshes = model.GetMeshes();
+
+  // Draw each mesh with its own texture
+  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+    const as::Mesh &mesh = meshes.at(mesh_idx);
+    // Get the array indexes
+    const std::vector<size_t> &idxs = mesh.GetIdxs();
+    // Get the material
+    const as::Material &material = mesh.GetMaterial();
+    /* Update Material Colors */
+    UpdateModelMaterial(material);
     /* Draw Vertex Arrays */
     UseMesh(group_name, mesh_idx);
     glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);

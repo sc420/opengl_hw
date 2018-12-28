@@ -183,6 +183,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="include\scene_shader.hpp" />
     <ClInclude Include="include\shader.hpp" />
     <ClInclude Include="include\skybox_shader.hpp" />
+    <ClInclude Include="include\trans_dto.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\as\common.cpp" />

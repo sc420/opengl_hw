@@ -143,7 +143,7 @@ void ConfigGL() {
  ******************************************************************************/
 
 void UpdateGlobalTrans() {
-  shader::SceneShader::GlobalTrans global_trans;
+  dto::GlobalTrans global_trans;
   const glm::mat4 identity(1.0f);
   const float aspect_ratio = ui_manager.GetWindowAspectRatio();
   global_trans.proj =
