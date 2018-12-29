@@ -167,18 +167,26 @@ vec4 GetParallaxMappingColor(sampler2D tex) {
  ******************************************************************************/
 
 float ShadowCalculation() {
-  // perform perspective divide
-  vec3 projCoords = vs_depth.light_space_pos.xyz / vs_depth.light_space_pos.w;
-  // transform to [0,1] range
-  projCoords = projCoords * 0.5 + 0.5;
-  // get closest depth value from light's perspective (using [0,1] range
-  // fragPosLight as coords)
-  float closestDepth = texture(depth_map_tex, projCoords.xy).x;
-  // get depth of current fragment from light's perspective
-  float currentDepth = projCoords.z;
-  // check whether current frag pos is in shadow
-  float shadow = currentDepth > closestDepth ? 1.0 : 0.0;
-
+  // Set the bias
+  const float bias = 1e-3f;
+  // Perform perspective divide
+  vec3 proj_coords =
+      vec3(vs_depth.light_space_pos) / vs_depth.light_space_pos.w;
+  // Transform to [0,1] range
+  proj_coords = proj_coords * 0.5f + 0.5f;
+  // Get depth of current fragment from light's perspective
+  const float view_depth = proj_coords.z;
+  // Perform PCF
+  float shadow = 0.0f;
+  const vec2 scale = 1.0f / textureSize(depth_map_tex, 0);
+  for (float x = -1.0f; x <= 1.0f; x++) {
+    for (float y = -1.0f; y <= 1.0f; y++) {
+      float light_depth =
+          texture(depth_map_tex, proj_coords.xy + vec2(x, y) * scale).x;
+      shadow += view_depth - bias > light_depth ? 1.0f : 0.0f;
+    }
+  }
+  shadow /= 9.0f;
   return shadow;
 }
 

@@ -62,9 +62,9 @@ void shader::DepthShader::InitDepthTexture() {
                kDepthMapSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                     GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                                     GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                     GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                                     GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
                                      GL_REPEAT);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
