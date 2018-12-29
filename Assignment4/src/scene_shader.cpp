@@ -176,10 +176,12 @@ void shader::SceneShader::Draw() {
   // Draw the quad
   UpdateQuadModelTrans();
   UpdateQuadLighting();
+  model_material_.use_env_map = false;
   DrawModel(quad_model, quad_group_name);
   // Draw the scene
   UpdateSceneModelTrans();
   UpdateSceneLighting();
+  model_material_.use_env_map = true;
   DrawModel(scene_model, scene_group_name);
 }
 
@@ -202,7 +204,9 @@ void shader::SceneShader::DrawDepth() {
 void shader::SceneShader::UpdateQuadLighting() {
   lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
   lighting_.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
-  lighting_.light_intensity = glm::vec3(1.0f, 1.0f, 1.0f);
+  // HACK: We have to use a value higher than 1.0 to counteract the diffuse
+  // strength calculation with normal and light direction
+  lighting_.light_intensity = glm::vec3(0.0f, 3.0f, 0.0f);
 
   // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();

@@ -32,6 +32,8 @@ class SceneShader : public Shader {
     glm::vec4 diffuse_color;     // 16*2=48, +16->64
     glm::vec4 specular_color;    // 16*3=64, +16->80
     float shininess;             // 4*20=80, +4->84
+
+    bool use_env_map;  // 4*21=84, +1->85
   };
 
   struct Lighting {

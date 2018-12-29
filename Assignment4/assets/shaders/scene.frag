@@ -24,6 +24,7 @@ layout(std140) uniform ModelMaterial {
   vec4 diffuse_color;
   vec4 specular_color;
   float shininess;
+  bool use_env_map;
 }
 model_material;
 
@@ -248,8 +249,7 @@ vec4 GetBlinnPhongColor() {
   const vec4 ambient_color = GetAmbientColor();
   const vec4 diffuse_color = GetDiffuseColor();
   const vec4 specular_color = GetSpecularColor();
-  const float shadow = CalcShadow();
-  return ambient_color + (1.0f - shadow) * (diffuse_color + specular_color);
+  return ambient_color + diffuse_color + specular_color;
 }
 
 /*******************************************************************************
@@ -265,10 +265,34 @@ vec4 GetEnvironmentMapColor() {
 }
 
 /*******************************************************************************
+ * Color Blending
+ ******************************************************************************/
+
+vec4 CalcNonShadowColor() {
+  // Calculate environment mapping blend ratio
+  float env_map_blend_ratio = kEnvMapBlendRatio;
+  if (!model_material.use_env_map) {
+    env_map_blend_ratio = 0.0f;
+  }
+  // Blend Blinn-Phong color with environment mapped color
+  return (1.0f - env_map_blend_ratio) * GetBlinnPhongColor() +
+         env_map_blend_ratio * GetEnvironmentMapColor();
+}
+
+vec4 CalcFinalColor(vec4 non_shadow_color) {
+  const vec4 kShadowColor = vec4(0.64f, 0.57f, 0.49f, 1.0f);
+
+  // Calculate shadow coefficient
+  const float shadow_coef = CalcShadow();
+  // Blend non-shadow color with shadow color
+  return (1.0f - shadow_coef) * non_shadow_color + shadow_coef * kShadowColor;
+}
+
+/*******************************************************************************
  * Entry Point
  ******************************************************************************/
 
 void main() {
-  fs_color = (1.0f - kEnvMapBlendRatio) * GetBlinnPhongColor() +
-             kEnvMapBlendRatio * GetEnvironmentMapColor();
+  const vec4 non_shadow_color = CalcNonShadowColor();
+  fs_color = CalcFinalColor(non_shadow_color);
 }
