@@ -81,6 +81,7 @@ enum MainMenuItems {
   kMainExit
 };
 enum ModeMenuItems { kModeComparison, kModeNavigation };
+enum NormalHeightMenuItems { kNormalHeightOn, kNormalHeightOff };
 enum TimerMenuItems { kTimerStart, kTimerStop };
 
 /*******************************************************************************
@@ -419,6 +420,21 @@ void GLUTModeMenuCallback(const int id) {
   }
 }
 
+void GLUTNormalHeightMenuCallback(const int id) {
+  switch (id) {
+    case NormalHeightMenuItems::kNormalHeightOn: {
+      scene_shader.ToggleNormalHeight(true);
+    } break;
+    case NormalHeightMenuItems::kNormalHeightOff: {
+      scene_shader.ToggleNormalHeight(false);
+    } break;
+    default: {
+      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
+                               "'");
+    }
+  }
+}
+
 void GLUTTimerMenuCallback(const int id) {
   switch (id) {
     case TimerMenuItems::kTimerStart: {
@@ -457,11 +473,14 @@ void RegisterGLUTCallbacks() {
 void CreateGLUTMenus() {
   const int main_menu_hdlr = glutCreateMenu(GLUTMainMenuCallback);
   const int mode_submenu_hdlr = glutCreateMenu(GLUTModeMenuCallback);
+  const int normal_height_submenu_hdlr =
+      glutCreateMenu(GLUTNormalHeightMenuCallback);
   const int timer_submenu_hdlr = glutCreateMenu(GLUTTimerMenuCallback);
 
   /* Main Menu */
   glutSetMenu(main_menu_hdlr);
   glutAddSubMenu("Mode", mode_submenu_hdlr);
+  glutAddSubMenu("Normal&Height Mapping", normal_height_submenu_hdlr);
   glutAddSubMenu("Timer", timer_submenu_hdlr);
   glutAddMenuEntry("(Mid-level)", MainMenuItems::kMainMidLevelSep);
   glutAddMenuEntry("1. Image Abstraction", MainMenuItems::kMainImgAbs);
@@ -479,6 +498,11 @@ void CreateGLUTMenus() {
   glutSetMenu(mode_submenu_hdlr);
   glutAddMenuEntry("Comparison", ModeMenuItems::kModeComparison);
   glutAddMenuEntry("Navigation", ModeMenuItems::kModeNavigation);
+
+  /* Normal&Height Submenu */
+  glutSetMenu(normal_height_submenu_hdlr);
+  glutAddMenuEntry("On", NormalHeightMenuItems::kNormalHeightOn);
+  glutAddMenuEntry("Off", NormalHeightMenuItems::kNormalHeightOff);
 
   /* Timer Submenu */
   glutSetMenu(timer_submenu_hdlr);

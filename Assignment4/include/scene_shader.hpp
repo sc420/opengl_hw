@@ -114,6 +114,8 @@ class SceneShader : public Shader {
 
   void UpdateViewPos(const glm::vec3 &view_pos);
 
+  void ToggleNormalHeight(const bool toggle);
+
   /* Name Management */
 
   std::string GetId() const override;
@@ -163,6 +165,7 @@ class SceneShader : public Shader {
   dto::ModelTrans model_trans_;
   ModelMaterial model_material_;
   Lighting lighting_;
+  bool use_normal_height;
 
   /* State Updaters */
 

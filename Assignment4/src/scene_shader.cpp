@@ -2,6 +2,7 @@
 
 shader::SceneShader::SceneShader()
     : model_rotation(glm::radians(0.0f)),
+      use_normal_height(true),
       global_trans_(dto::GlobalTrans()),
       model_trans_(dto::ModelTrans()),
       model_material_(ModelMaterial()),
@@ -282,8 +283,13 @@ void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
   model_material_.use_ambient_tex = material.HasAmbientTexture();
   model_material_.use_diffuse_tex = material.HasDiffuseTexture();
   model_material_.use_specular_tex = material.HasSpecularTexture();
-  model_material_.use_height_tex = material.HasHeightTexture();
-  model_material_.use_normals_tex = material.HasNormalsTexture();
+  if (use_normal_height) {
+    model_material_.use_height_tex = material.HasHeightTexture();
+    model_material_.use_normals_tex = material.HasNormalsTexture();
+  } else {
+    model_material_.use_height_tex = false;
+    model_material_.use_normals_tex = false;
+  }
   model_material_.ambient_color = material.GetAmbientColor();
   model_material_.diffuse_color = material.GetDiffuseColor();
   model_material_.specular_color = material.GetSpecularColor();
@@ -300,6 +306,10 @@ void shader::SceneShader::UpdateViewPos(const glm::vec3 &view_pos) {
   // Update the buffer
   const std::string buffer_name = GetLightingBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
+}
+
+void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
+  use_normal_height = toggle;
 }
 
 /*******************************************************************************
