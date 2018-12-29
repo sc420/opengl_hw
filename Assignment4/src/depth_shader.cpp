@@ -69,6 +69,8 @@ void shader::DepthShader::InitDepthTexture() {
                                      GL_REPEAT);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
                                      GL_REPEAT);
+  float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
   // Attach textures to framebuffers
   framebuffer_manager.AttachTexture2DToFramebuffer(
       framebuffer_name, tex_name, GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,

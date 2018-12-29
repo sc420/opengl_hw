@@ -166,7 +166,7 @@ vec4 GetParallaxMappingColor(sampler2D tex) {
  * Shadow Calculations
  ******************************************************************************/
 
-float ShadowCalculation() {
+float CalcShadow() {
   // Set the bias
   const float bias = 1e-3f;
   // Perform perspective divide
@@ -176,6 +176,10 @@ float ShadowCalculation() {
   proj_coords = proj_coords * 0.5f + 0.5f;
   // Get depth of current fragment from light's perspective
   const float view_depth = proj_coords.z;
+  // Check whether the coordinates is further than the far plane
+  if (view_depth > 1.0f) {
+    return 0.0f;
+  }
   // Perform PCF
   float shadow = 0.0f;
   const vec2 scale = 1.0f / textureSize(depth_map_tex, 0);
@@ -244,7 +248,7 @@ vec4 GetBlinnPhongColor() {
   const vec4 ambient_color = GetAmbientColor();
   const vec4 diffuse_color = GetDiffuseColor();
   const vec4 specular_color = GetSpecularColor();
-  const float shadow = ShadowCalculation();
+  const float shadow = CalcShadow();
   return ambient_color + (1.0f - shadow) * (diffuse_color + specular_color);
 }
 
@@ -267,10 +271,4 @@ vec4 GetEnvironmentMapColor() {
 void main() {
   fs_color = (1.0f - kEnvMapBlendRatio) * GetBlinnPhongColor() +
              kEnvMapBlendRatio * GetEnvironmentMapColor();
-
-  fs_color = GetBlinnPhongColor();
-
-  //  fs_color = vec4(
-  //      vec3(texture(depth_map_tex, gl_FragCoord.xy / vec2(720,
-  //      450)).r), 1.0f);
 }
