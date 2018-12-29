@@ -1,5 +1,7 @@
 #include "diff_shader.hpp"
 
+shader::DiffShader::DiffShader() { diff_.display_mode = 0; }
+
 /*******************************************************************************
  * GL Initializations
  ******************************************************************************/
@@ -9,6 +11,7 @@ void shader::DiffShader::Init() {
   Shader::Init();
   LoadModel();
   InitFramebuffers();
+  InitUniformBlocks();
   InitVertexArrays();
 }
 
@@ -27,6 +30,10 @@ void shader::DiffShader::InitFramebuffers() {
     const std::string framebuffer_name = GetDiffFramebufferName(diff_type);
     framebuffer_manager.GenFramebuffer(framebuffer_name);
   }
+}
+
+void shader::DiffShader::InitUniformBlocks() {
+  LinkDataToUniformBlock(GetDiffBufferName(), GetDiffUniformBlockName(), diff_);
 }
 
 void shader::DiffShader::InitVertexArrays() {
@@ -139,6 +146,21 @@ void shader::DiffShader::UpdateDiffFramebufferTextures(const GLsizei width,
 }
 
 /*******************************************************************************
+ * State Updaters
+ ******************************************************************************/
+
+void shader::DiffShader::ToggleDisplayMode() {
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string buffer_name = GetDiffBufferName();
+  // Switch display mode
+  diff_.display_mode = (diff_.display_mode + 1) % 4;
+  // Update the buffer
+  buffer_manager.UpdateBuffer(buffer_name);
+}
+
+/*******************************************************************************
  * Name Management
  ******************************************************************************/
 
@@ -169,6 +191,14 @@ std::string shader::DiffShader::GetDiffFramebufferTextureUnitName(
 
 std::string shader::DiffShader::GetQuadVertexArrayGroupName() const {
   return GetProgramName() + "/vertex_array";
+}
+
+std::string shader::DiffShader::GetDiffBufferName() const {
+  return GetProgramName() + "/buffer/diff";
+}
+
+std::string shader::DiffShader::GetDiffUniformBlockName() const {
+  return "Diff";
 }
 
 /*******************************************************************************

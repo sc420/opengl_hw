@@ -214,6 +214,10 @@ void shader::SceneShader::DrawScene() {
   const GLuint depth_unit_idx = texture_manager.GetUnitIdx(depth_tex_name);
   texture_manager.BindTexture(depth_tex_name, GL_TEXTURE_2D, depth_unit_name);
   uniform_manager.SetUniform1Int(program_name, "depth_map_tex", depth_unit_idx);
+
+  // Update shadow
+  UpdateShadow(true);
+
   // Draw the scene
   UpdateSceneModelTrans();
   UpdateSceneLighting();

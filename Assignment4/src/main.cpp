@@ -225,7 +225,6 @@ void GLUTDisplayCallback() {
   diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kObj);
   // Clear color and depth buffers
   as::ClearColorBuffer();
-  as::ClearDepthBuffer();
   // Draw fragments if their stencil values are not 1
   glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
   // Disable writing to stencil buffer
@@ -243,7 +242,6 @@ void GLUTDisplayCallback() {
   glStencilMask(0x00);
   // Clear color and depth buffers
   as::ClearColorBuffer();
-  as::ClearDepthBuffer();
   // Draw the quad without shadow
   scene_shader.DrawQuad(false);
 
@@ -312,6 +310,10 @@ void GLUTReshapeCallback(const int width, const int height) {
 
 void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
   switch (key) {
+    case 'i': {
+      // Switch between framebuffers
+      diff_shader.ToggleDisplayMode();
+    } break;
     case 'r': {
       // Reset camera transformation
       camera_trans.ResetTrans();

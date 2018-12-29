@@ -7,6 +7,12 @@ class DiffShader : public Shader {
  public:
   enum class DiffTypes { kObj, kNoObj, kBg };
 
+  struct Diff {
+    int display_mode;  // 4*0=0, +4->4
+  };
+
+  DiffShader();
+
   /* GL Initializations */
 
   void Init() override;
@@ -14,6 +20,8 @@ class DiffShader : public Shader {
   void LoadModel();
 
   void InitFramebuffers();
+
+  void InitUniformBlocks();
 
   void InitVertexArrays();
 
@@ -26,6 +34,10 @@ class DiffShader : public Shader {
   void UpdateObjDiffRenderbuffer(const GLsizei width, const GLsizei height);
 
   void UpdateDiffFramebufferTextures(const GLsizei width, const GLsizei height);
+
+  /* State Updaters */
+
+  void ToggleDisplayMode();
 
   /* Name Management */
 
@@ -45,9 +57,16 @@ class DiffShader : public Shader {
 
   std::string GetQuadVertexArrayGroupName() const;
 
+  std::string GetDiffBufferName() const;
+
+  std::string GetDiffUniformBlockName() const;
+
  private:
   /* Models */
   as::Model quad_model_;
+
+  /* GL States */
+  Diff diff_;
 
   /* GL Drawing Methods */
 
