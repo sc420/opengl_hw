@@ -38,7 +38,10 @@ layout(std140) uniform Lighting {
 }
 lighting;
 
-layout(std140) uniform Shadow { bool draw_shadow; }
+layout(std140) uniform Shadow {
+  bool dim_orig_color;
+  bool draw_shadow;
+}
 shadow;
 
 /*******************************************************************************
@@ -283,15 +286,21 @@ vec4 CalcNonShadowColor() {
 }
 
 vec4 CalcFinalColor(vec4 non_shadow_color) {
-  const vec4 kShadowColor = vec4(0.64f, 0.57f, 0.49f, 1.0f);
+  const vec4 kShadowColor = 0.3f * vec4(0.64f, 0.57f, 0.49f, 1.0f);
+  const float kShadowFactor = 0.2f;
 
   // Calculate shadow coefficient
   float shadow_coef = CalcShadow();
   if (!shadow.draw_shadow) {
     shadow_coef = 0.0f;
   }
-  // Blend non-shadow color with shadow color
-  return (1.0f - shadow_coef) * non_shadow_color + shadow_coef * kShadowColor;
+  // Check whether to dim the original color
+  if (shadow.dim_orig_color) {
+    return (1.0f - shadow_coef) * non_shadow_color +
+           shadow_coef * kShadowFactor * non_shadow_color;
+  } else {
+    return (1.0f - shadow_coef) * non_shadow_color + shadow_coef * kShadowColor;
+  }
 }
 
 /*******************************************************************************

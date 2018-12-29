@@ -54,7 +54,10 @@ class SceneShader : public Shader {
   };
 
   struct Shadow {
-    bool draw_shadow;  // 4*0=0, +1->1
+    bool dim_orig_color;  // 4*0=0, +1->1
+
+    bool pad_draw_shadow[3];  // +3->4
+    bool draw_shadow;         // 4*1=4, +1->5
   };
 
   /* Model States */
@@ -122,7 +125,7 @@ class SceneShader : public Shader {
 
   void UpdateViewPos(const glm::vec3 &view_pos);
 
-  void UpdateShadow(const bool draw_shadow);
+  void UpdateShadow(const bool dim_orig_color, const bool draw_shadow);
 
   void ToggleNormalHeight(const bool toggle);
 

@@ -216,7 +216,7 @@ void shader::SceneShader::DrawScene() {
   uniform_manager.SetUniform1Int(program_name, "depth_map_tex", depth_unit_idx);
 
   // Update shadow
-  UpdateShadow(true);
+  UpdateShadow(true, true);
 
   // Draw the scene
   UpdateSceneModelTrans();
@@ -253,7 +253,7 @@ void shader::SceneShader::DrawQuad(const bool draw_shadow) {
   uniform_manager.SetUniform1Int(program_name, "depth_map_tex", depth_unit_idx);
 
   // Update shadow
-  UpdateShadow(draw_shadow);
+  UpdateShadow(false, draw_shadow);
 
   // Draw the quad
   UpdateQuadModelTrans();
@@ -384,9 +384,11 @@ void shader::SceneShader::UpdateViewPos(const glm::vec3 &view_pos) {
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
-void shader::SceneShader::UpdateShadow(const bool draw_shadow) {
+void shader::SceneShader::UpdateShadow(const bool dim_orig_color,
+                                       const bool draw_shadow) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update shadow
+  shadow_.dim_orig_color = dim_orig_color;
   shadow_.draw_shadow = draw_shadow;
   // Update the buffer
   const std::string buffer_name = GetShadowBufferName();
