@@ -262,6 +262,7 @@ void main() {
 
   fs_color = GetBlinnPhongColor();
 
-  fs_color = vec4(
-      vec3(texture(depth_map_tex, gl_FragCoord.xy / vec2(720, 450)).r), 1.0f);
+  //  fs_color = vec4(
+  //      vec3(texture(depth_map_tex, gl_FragCoord.xy / vec2(720,
+  //      450)).r), 1.0f);
 }

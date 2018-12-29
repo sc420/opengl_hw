@@ -134,7 +134,7 @@ dto::GlobalTrans shader::DepthShader::GetLightTrans() const {
   const glm::vec3 light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
   // Use a camera at the light position
   const as::CameraTrans camera_trans(
-      light_pos, glm::vec3(glm::radians(20.0f), glm::radians(-190.0f),
+      light_pos, glm::vec3(glm::radians(23.0f), glm::radians(-194.0f),
                            glm::radians(0.0f)));
   // Set the new global transformation of the light
   const glm::mat4 light_proj =

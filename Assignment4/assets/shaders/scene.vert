@@ -104,5 +104,6 @@ void main() {
   // Calculate tangent lighting
   OutputTangentLighting();
   // Calculate light space vertex position
-  vs_depth.light_space_pos = lighting.light_trans * vec4(in_pos, 1.0f);
+  vs_depth.light_space_pos =
+      lighting.light_trans * model_trans.trans * vec4(in_pos, 1.0f);
 }
