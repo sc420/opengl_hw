@@ -202,7 +202,7 @@ void shader::SceneShader::DrawDepth() {
 void shader::SceneShader::UpdateQuadLighting() {
   lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
   lighting_.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
-  lighting_.light_intensity = glm::vec3(1.0f, 1.0f, 1.0f);
+  lighting_.light_intensity = glm::vec3(0.5f, 0.5f, 0.5f);
 
   // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
@@ -257,7 +257,7 @@ void shader::SceneShader::UpdateGlobalTrans(
 void shader::SceneShader::UpdateQuadModelTrans() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model transformation
-  const glm::vec3 scale_factors = 5.0f * glm::vec3(0.5f, 0.35f, 0.5f);
+  const glm::vec3 scale_factors = 10.0f * glm::vec3(0.5f, 0.35f, 0.5f);
   const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.5f, -8.0f);
   glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
   trans = glm::scale(trans, scale_factors);
@@ -294,8 +294,10 @@ void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
   model_material_.use_ambient_tex = material.HasAmbientTexture();
   model_material_.use_diffuse_tex = material.HasDiffuseTexture();
   model_material_.use_specular_tex = material.HasSpecularTexture();
-  model_material_.use_height_tex = material.HasHeightTexture();
-  model_material_.use_normals_tex = material.HasNormalsTexture();
+  model_material_.use_height_tex = false;
+  // material.HasHeightTexture();
+  model_material_.use_normals_tex = false;
+  // material.HasNormalsTexture();
   model_material_.ambient_color = material.GetAmbientColor();
   model_material_.diffuse_color = material.GetDiffuseColor();
   model_material_.specular_color = material.GetSpecularColor();

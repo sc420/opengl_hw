@@ -237,7 +237,7 @@ vec4 GetBlinnPhongColor() {
   const vec4 diffuse_color = GetDiffuseColor();
   const vec4 specular_color = GetSpecularColor();
   const float shadow = ShadowCalculation();
-  return ambient_color + shadow * (diffuse_color + specular_color);
+  return ambient_color + (1.0f - shadow) * (diffuse_color + specular_color);
 }
 
 /*******************************************************************************

@@ -80,9 +80,6 @@ void shader::DepthShader::InitDepthTexture() {
  ******************************************************************************/
 
 void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
-  // Get the original global transformation
-  const dto::GlobalTrans orig_global_trans = scene_shader_->GetGlobalTrans();
-
   // Use depth program
   UseProgram();
   // Set the new viewport
@@ -107,8 +104,6 @@ void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
   UpdateSceneModelTrans();
   DrawModelWithoutTextures(scene_model, scene_group_name);
 
-  // Reset the original global transformations
-  scene_shader_->UpdateGlobalTrans(orig_global_trans);
   // Reset the viewport
   glViewport(0, 0, window_size.x, window_size.y);
 }
@@ -131,17 +126,20 @@ void shader::DepthShader::DrawModelWithoutTextures(
 
 dto::GlobalTrans shader::DepthShader::GetLightTrans() const {
   // Get light position in the scene
-  const glm::vec3 light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
+  const glm::vec3 light_pos = glm::vec3(-31.75f, 26.05f, -97.72) / 10.0f;
   // Use a camera at the light position
   const as::CameraTrans camera_trans(
       light_pos, glm::vec3(glm::radians(23.0f), glm::radians(-194.0f),
                            glm::radians(0.0f)));
   // Set the new global transformation of the light
   const glm::mat4 light_proj =
-      glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1e-3f, 1e3f);
+      glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 1e-3f, 1e2f);
   const glm::mat4 light_view = camera_trans.GetTrans();
   const glm::mat4 light_model = glm::mat4(1.0f);
-  const dto::GlobalTrans global_trans = {light_model, light_view, light_proj};
+  dto::GlobalTrans global_trans;
+  global_trans.proj = light_proj;
+  global_trans.view = light_view;
+  global_trans.model = light_model;
   return global_trans;
 }
 
