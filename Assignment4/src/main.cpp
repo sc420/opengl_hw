@@ -111,6 +111,13 @@ void ConfigGLSettings() {
   glClearStencil(0);
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
+
+  // Enable stencil test
+  glEnable(GL_STENCIL_TEST);
+  // Set default stencil action
+  glStencilFunc(GL_EQUAL, 0, 0xFF);
+  // Set stencil test actions
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
 void InitUiManager() {
@@ -197,13 +204,10 @@ void GLUTDisplayCallback() {
   as::ClearDepthBuffer();
   depth_shader.Draw(window_size);
 
-  // Set stencil test actions
-  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
-  // Enable stencil test
-  glEnable(GL_STENCIL_TEST);
   // Use obj framebuffer
   diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kObj);
+  // Enable writing to stencil buffer to ensure clearing
+  glStencilMask(0xFF);
   // Clear all buffers
   as::ClearColorBuffer();
   as::ClearStencilBuffer();
@@ -215,6 +219,24 @@ void GLUTDisplayCallback() {
   // Draw the scene
   scene_shader.DrawScene();
 
+  glDisable(GL_DEPTH_TEST);
+
+  // Use obj framebuffer
+  diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kObj);
+  // Clear color and depth buffers
+  as::ClearColorBuffer();
+  as::ClearDepthBuffer();
+  // Draw fragments if their stencil values are not 1
+  glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+  // Disable writing to stencil buffer
+  glStencilMask(0x00);
+  // Draw the quad
+  scene_shader.DrawQuad(true);
+
+  // Use no_obj framebuffer
+  diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kNoObj);
+  // Enable stencil test
+  glEnable(GL_STENCIL_TEST);
   // Draw fragments if their stencil values are not 1
   glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
   // Disable writing to stencil buffer
@@ -222,11 +244,25 @@ void GLUTDisplayCallback() {
   // Clear color and depth buffers
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
-  // Draw the quad
-  scene_shader.DrawQuad();
+  // Draw the quad without shadow
+  scene_shader.DrawQuad(false);
 
-  // Enable writing to stencil buffer
+  glEnable(GL_DEPTH_TEST);
+
+  // Use bg framebuffer
+  diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kBg);
+  // Enable writing to stencil buffer to ensure clearing
   glStencilMask(0xFF);
+  // Set default stencil action
+  glStencilFunc(GL_EQUAL, 0, 0xFF);
+  // Clear all buffers
+  as::ClearColorBuffer();
+  as::ClearStencilBuffer();
+  as::ClearDepthBuffer();
+  // Draw the scene
+  scene_shader.DrawScene();
+  // Draw the skybox
+  skybox_shader.Draw();
 
   // Draw the differential rendering result
   scene_shader.UseDefaultFramebuffer();

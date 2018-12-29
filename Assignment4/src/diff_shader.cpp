@@ -88,13 +88,13 @@ void shader::DiffShader::UpdateObjDiffRenderbuffer(const GLsizei width,
   framebuffer_manager.GenRenderbuffer(obj_renderbuffer_name);
   // Initialize renderbuffers
   framebuffer_manager.InitRenderbuffer(obj_renderbuffer_name, GL_RENDERBUFFER,
-                                       GL_STENCIL_INDEX, width, height);
+                                       GL_DEPTH24_STENCIL8, width, height);
   // Attach the renderbuffer to all framebuffers
   for (const DiffTypes diff_type : diff_types) {
     const std::string framebuffer_name = GetDiffFramebufferName(diff_type);
     framebuffer_manager.AttachRenderbufferToFramebuffer(
         framebuffer_name, obj_renderbuffer_name, GL_FRAMEBUFFER,
-        GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER);
+        GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER);
   }
 }
 

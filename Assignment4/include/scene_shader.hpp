@@ -53,6 +53,10 @@ class SceneShader : public Shader {
     glm::vec3 view_pos;    // 16*11=176, +12->188
   };
 
+  struct Shadow {
+    bool draw_shadow;  // 4*0=0, +1->1
+  };
+
   /* Model States */
 
   // HACK: Should put it back to private
@@ -94,7 +98,7 @@ class SceneShader : public Shader {
 
   void DrawScene();
 
-  void DrawQuad();
+  void DrawQuad(const bool draw_shadow = true);
 
   void UpdateQuadLighting();
 
@@ -117,6 +121,8 @@ class SceneShader : public Shader {
   void UpdateModelMaterial(const as::Material &material);
 
   void UpdateViewPos(const glm::vec3 &view_pos);
+
+  void UpdateShadow(const bool draw_shadow);
 
   void ToggleNormalHeight(const bool toggle);
 
@@ -141,11 +147,15 @@ class SceneShader : public Shader {
 
   std::string GetLightingBufferName() const;
 
+  std::string GetShadowBufferName() const;
+
   std::string GetModelTransUniformBlockName() const;
 
   std::string GetModelMaterialUniformBlockName() const;
 
   std::string GetLightingUniformBlockName() const;
+
+  std::string GetShadowUniformBlockName() const;
 
   std::string GetSceneGroupName() const;
 
@@ -169,6 +179,7 @@ class SceneShader : public Shader {
   dto::ModelTrans model_trans_;
   ModelMaterial model_material_;
   Lighting lighting_;
+  Shadow shadow_;
   bool use_normal_height;
 
   /* State Updaters */

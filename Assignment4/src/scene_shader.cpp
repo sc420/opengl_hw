@@ -66,10 +66,12 @@ void shader::SceneShader::InitUniformBlocks() {
                          GetGlobalTransUniformBlockName(), global_trans_);
   LinkDataToUniformBlock(GetModelTransBufferName(),
                          GetModelTransUniformBlockName(), model_trans_);
-  LinkDataToUniformBlock(GetLightingBufferName(), GetLightingUniformBlockName(),
-                         lighting_);
   LinkDataToUniformBlock(GetModelMaterialBufferName(),
                          GetModelMaterialUniformBlockName(), model_material_);
+  LinkDataToUniformBlock(GetLightingBufferName(), GetLightingUniformBlockName(),
+                         lighting_);
+  LinkDataToUniformBlock(GetShadowBufferName(), GetShadowUniformBlockName(),
+                         shadow_);
 }
 
 void shader::SceneShader::InitLightTrans() {
@@ -219,7 +221,7 @@ void shader::SceneShader::DrawScene() {
   DrawModel(scene_model, scene_group_name);
 }
 
-void shader::SceneShader::DrawQuad() {
+void shader::SceneShader::DrawQuad(const bool draw_shadow) {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
@@ -245,6 +247,10 @@ void shader::SceneShader::DrawQuad() {
   const GLuint depth_unit_idx = texture_manager.GetUnitIdx(depth_tex_name);
   texture_manager.BindTexture(depth_tex_name, GL_TEXTURE_2D, depth_unit_name);
   uniform_manager.SetUniform1Int(program_name, "depth_map_tex", depth_unit_idx);
+
+  // Update shadow
+  UpdateShadow(draw_shadow);
+
   // Draw the quad
   UpdateQuadModelTrans();
   UpdateQuadLighting();
@@ -374,6 +380,15 @@ void shader::SceneShader::UpdateViewPos(const glm::vec3 &view_pos) {
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
+void shader::SceneShader::UpdateShadow(const bool draw_shadow) {
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Update shadow
+  shadow_.draw_shadow = draw_shadow;
+  // Update the buffer
+  const std::string buffer_name = GetShadowBufferName();
+  buffer_manager.UpdateBuffer(buffer_name);
+}
+
 void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
   use_normal_height = toggle;
 }
@@ -414,6 +429,10 @@ std::string shader::SceneShader::GetLightingBufferName() const {
   return "lighting";
 }
 
+std::string shader::SceneShader::GetShadowBufferName() const {
+  return "shadow";
+}
+
 std::string shader::SceneShader::GetModelTransUniformBlockName() const {
   return "ModelTrans";
 }
@@ -424,6 +443,10 @@ std::string shader::SceneShader::GetModelMaterialUniformBlockName() const {
 
 std::string shader::SceneShader::GetLightingUniformBlockName() const {
   return "Lighting";
+}
+
+std::string shader::SceneShader::GetShadowUniformBlockName() const {
+  return "Shadow";
 }
 
 std::string shader::SceneShader::GetSceneGroupName() const {

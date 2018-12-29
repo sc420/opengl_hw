@@ -38,6 +38,9 @@ layout(std140) uniform Lighting {
 }
 lighting;
 
+layout(std140) uniform Shadow { bool draw_shadow; }
+shadow;
+
 /*******************************************************************************
  * Textures
  ******************************************************************************/
@@ -283,7 +286,10 @@ vec4 CalcFinalColor(vec4 non_shadow_color) {
   const vec4 kShadowColor = vec4(0.64f, 0.57f, 0.49f, 1.0f);
 
   // Calculate shadow coefficient
-  const float shadow_coef = CalcShadow();
+  float shadow_coef = CalcShadow();
+  if (!shadow.draw_shadow) {
+    shadow_coef = 0.0f;
+  }
   // Blend non-shadow color with shadow color
   return (1.0f - shadow_coef) * non_shadow_color + shadow_coef * kShadowColor;
 }
