@@ -21,11 +21,16 @@ class DepthShader : public Shader {
 
   void InitFramebuffers();
 
+  void InitUniformBlocks();
+
   void InitDepthTexture();
 
   /* GL Drawing Methods */
 
   void Draw(const glm::ivec2 &window_size);
+
+  void DrawModelWithoutTextures(const as::Model &model,
+                                const std::string &group_name);
 
   dto::GlobalTrans GetLightTrans() const;
 
@@ -52,5 +57,18 @@ class DepthShader : public Shader {
   /* Shaders */
 
   SceneShader *scene_shader_;
+
+  /* GL States */
+
+  dto::GlobalTrans global_trans_;
+  dto::ModelTrans model_trans_;
+
+  /* State Updaters */
+
+  void UpdateGlobalTrans(const dto::GlobalTrans &global_trans);
+
+  void UpdateQuadModelTrans();
+
+  void UpdateSceneModelTrans();
 };
 }  // namespace shader

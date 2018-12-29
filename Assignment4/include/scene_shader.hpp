@@ -12,10 +12,6 @@ class SkyboxShader;
 
 class SceneShader : public Shader {
  public:
-  struct ModelTrans {
-    glm::mat4 trans;  // 64*0=0, +64->64
-  };
-
   struct ModelMaterial {
     bool use_ambient_tex;  // 4*0=0, +1->1
 
@@ -55,6 +51,10 @@ class SceneShader : public Shader {
     glm::vec3 view_pos;    // 16*11=176, +12->188
   };
 
+  /* Model States */
+
+  float model_rotation;
+
   SceneShader();
 
   /* Shader Registrations */
@@ -66,6 +66,10 @@ class SceneShader : public Shader {
   /* Model Handlers */
 
   void LoadModel();
+
+  as::Model &GetSceneModel();
+
+  as::Model &GetQuadModel();
 
   /* GL Initializations */
 
@@ -118,12 +122,6 @@ class SceneShader : public Shader {
   std::string GetGlobalTransUniformBlockName() const;
 
  protected:
-  /* Model Handlers */
-
-  as::Model &GetSceneModel();
-
-  as::Model &GetQuadModel();
-
   /* GL Initializations */
 
   GLsizei GetNumMipmapLevels() const;
@@ -159,12 +157,9 @@ class SceneShader : public Shader {
   as::Model scene_model_;
   as::Model quad_model_;
 
-  /* Model States */
-  float model_rotation;
-
   /* GL States */
   dto::GlobalTrans global_trans_;
-  ModelTrans model_trans_;
+  dto::ModelTrans model_trans_;
   ModelMaterial model_material_;
   Lighting lighting_;
 

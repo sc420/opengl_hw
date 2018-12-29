@@ -181,17 +181,22 @@ void GLUTDisplayCallback() {
   UpdateStates();
   // Draw the scene depth on depth framebuffer
   depth_shader.UseDepthFramebuffer();
+  as::ClearColorBuffer();
   as::ClearDepthBuffer();
   depth_shader.Draw(window_size);
+
+  UpdateStates();
+
   // Draw the scenes on screen framebuffer
-  postproc_shader.UseScreenFramebuffer();
+  postproc_shader.UseDefaultFramebuffer();
+  as::ClearColorBuffer();
   as::ClearDepthBuffer();
   scene_shader.Draw();
   skybox_shader.Draw();
-  // Draw post-processing effects on default framebuffer
-  scene_shader.UseDefaultFramebuffer();
-  as::ClearDepthBuffer();
-  postproc_shader.Draw();
+  //// Draw post-processing effects on default framebuffer
+  // scene_shader.UseDefaultFramebuffer();
+  // as::ClearDepthBuffer();
+  // postproc_shader.Draw();
   // Swap double buffers
   glutSwapBuffers();
 }

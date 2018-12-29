@@ -15,6 +15,7 @@ void shader::DepthShader::RegisterSceneShader(SceneShader &scene_shader) {
 void shader::DepthShader::Init() {
   Shader::Init();
   InitFramebuffers();
+  InitUniformBlocks();
   InitDepthTexture();
 }
 
@@ -31,6 +32,11 @@ void shader::DepthShader::InitFramebuffers() {
   // Disable color rendering
   glDrawBuffer(GL_NONE);
   glReadBuffer(GL_NONE);
+}
+
+void shader::DepthShader::InitUniformBlocks() {
+  LinkDataToUniformBlock("depth/global_trans", "GlobalTrans", global_trans_);
+  LinkDataToUniformBlock("depth/model_trans", "ModelTrans", model_trans_);
 }
 
 void shader::DepthShader::InitDepthTexture() {
@@ -84,9 +90,22 @@ void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
   // Get light space transformation
   const dto::GlobalTrans global_trans = GetLightTrans();
   // Update global transformation
-  scene_shader_->UpdateGlobalTrans(global_trans);
+  UpdateGlobalTrans(global_trans);
+
   // Draw the scene
-  scene_shader_->DrawDepth();
+  // Get names
+  const std::string quad_group_name = "scene/quad";
+  const std::string scene_group_name = "scene/scene";
+  // Get models
+  const as::Model &quad_model = scene_shader_->GetQuadModel();
+  const as::Model &scene_model = scene_shader_->GetSceneModel();
+
+  // Draw the quad
+  UpdateQuadModelTrans();
+  DrawModelWithoutTextures(quad_model, quad_group_name);
+  // Draw the scene
+  UpdateSceneModelTrans();
+  DrawModelWithoutTextures(scene_model, scene_group_name);
 
   // Reset the original global transformations
   scene_shader_->UpdateGlobalTrans(orig_global_trans);
@@ -94,19 +113,33 @@ void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
   glViewport(0, 0, window_size.x, window_size.y);
 }
 
+void shader::DepthShader::DrawModelWithoutTextures(
+    const as::Model &model, const std::string &group_name) {
+  // Get meshes
+  const std::vector<as::Mesh> &meshes = model.GetMeshes();
+
+  // Draw each mesh with its own texture
+  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+    const as::Mesh &mesh = meshes.at(mesh_idx);
+    // Get the array indexes
+    const std::vector<size_t> &idxs = mesh.GetIdxs();
+    /* Draw Vertex Arrays */
+    UseMesh(group_name, mesh_idx);
+    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
+  }
+}
+
 dto::GlobalTrans shader::DepthShader::GetLightTrans() const {
   // Get light position in the scene
-  const glm::vec3 light_pos = scene_shader_->GetLightPos();
+  const glm::vec3 light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
   // Use a camera at the light position
   const as::CameraTrans camera_trans(
-      light_pos,
-      glm::vec3(glm::radians(20.0f), glm::radians(-90.0f), glm::radians(0.0f)));
+      light_pos, glm::vec3(glm::radians(20.0f), glm::radians(-190.0f),
+                           glm::radians(0.0f)));
   // Set the new global transformation of the light
   const glm::mat4 light_proj =
       glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1e-3f, 1e3f);
-  /*const glm::mat4 light_view = camera_trans.GetTrans();*/
-  const glm::mat4 light_view = glm::lookAt(
-      light_pos, glm::vec3(-10.0f, -13.5f, -8.0f), glm::vec3(0.0, 1.0, 0.0));
+  const glm::mat4 light_view = camera_trans.GetTrans();
   const glm::mat4 light_model = glm::mat4(1.0f);
   const dto::GlobalTrans global_trans = {light_model, light_view, light_proj};
   return global_trans;
@@ -149,3 +182,47 @@ std::string shader::DepthShader::GetDepthFramebufferName() const {
  ******************************************************************************/
 
 const glm::ivec2 shader::DepthShader::kDepthMapSize = glm::ivec2(1024, 1024);
+
+/*******************************************************************************
+ * State Updaters (Private)
+ ******************************************************************************/
+
+void shader::DepthShader::UpdateGlobalTrans(
+    const dto::GlobalTrans &global_trans) {
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string buffer_name = "depth/global_trans";
+  // Update global transformation
+  global_trans_ = global_trans;
+  // Update the buffer
+  buffer_manager.UpdateBuffer(buffer_name);
+}
+
+void shader::DepthShader::UpdateQuadModelTrans() {
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Update model transformation
+  const glm::vec3 scale_factors = 5.0f * glm::vec3(0.5f, 0.35f, 0.5f);
+  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.5f, -8.0f);
+  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
+  trans = glm::scale(trans, scale_factors);
+  trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+  model_trans_.trans = trans;
+  // Update the buffer
+  const std::string buffer_name = "depth/model_trans";
+  buffer_manager.UpdateBuffer(buffer_name);
+}
+
+void shader::DepthShader::UpdateSceneModelTrans() {
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Update model transformation
+  const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
+  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
+  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
+  trans = glm::scale(trans, scale_factors);
+  trans = glm::rotate(trans, scene_shader_->model_rotation,
+                      glm::vec3(0.0f, 1.0f, 0.0f));
+  model_trans_.trans = trans;
+  // Update the buffer
+  const std::string buffer_name = "depth/model_trans";
+  buffer_manager.UpdateBuffer(buffer_name);
+}

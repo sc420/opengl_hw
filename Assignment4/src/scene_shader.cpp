@@ -3,7 +3,7 @@
 shader::SceneShader::SceneShader()
     : model_rotation(glm::radians(0.0f)),
       global_trans_(dto::GlobalTrans()),
-      model_trans_(ModelTrans()),
+      model_trans_(dto::ModelTrans()),
       model_material_(ModelMaterial()),
       lighting_(Lighting()) {}
 
@@ -33,6 +33,10 @@ void shader::SceneShader::LoadModel() {
   quad_model.LoadFile("assets/models/quad/quad.obj",
                       aiProcess_CalcTangentSpace | aiProcess_GenNormals);
 }
+
+as::Model &shader::SceneShader::GetSceneModel() { return scene_model_; }
+
+as::Model &shader::SceneShader::GetQuadModel() { return quad_model_; }
 
 /*******************************************************************************
  * GL Initializations
@@ -325,14 +329,6 @@ std::string shader::SceneShader::GetGlobalTransUniformBlockName() const {
 }
 
 /*******************************************************************************
- * Model Handlers (Protected)
- ******************************************************************************/
-
-as::Model &shader::SceneShader::GetSceneModel() { return scene_model_; }
-
-as::Model &shader::SceneShader::GetQuadModel() { return quad_model_; }
-
-/*******************************************************************************
  * GL Initializations (Protected)
  ******************************************************************************/
 
@@ -463,9 +459,6 @@ void shader::SceneShader::DrawModel(const as::Model &model,
 
 void shader::SceneShader::DrawModelWithoutTextures(
     const as::Model &model, const std::string &group_name) {
-  // Get managers
-  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
-  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get meshes
   const std::vector<as::Mesh> &meshes = model.GetMeshes();
 
