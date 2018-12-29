@@ -32,8 +32,8 @@ as::CameraTrans camera_trans(glm::vec3(0.0f, 0.0f, 0.0f),
                              glm::vec3(glm::radians(20.0f),
                                        glm::radians(-45.0f),
                                        glm::radians(0.0f)));
-// as::CameraTrans camera_trans(glm::vec3(-31.75f, 26.05f, -97.72) / 10.0f,
-//                             glm::vec3(glm::radians(23.0f),
+// as::CameraTrans camera_trans(glm::vec3(-31.75f, 26.05f, -97.72),
+//                             glm::vec3(glm::radians(22.0f),
 //                                       glm::radians(-194.0f),
 //                                       glm::radians(0.0f)));
 
@@ -152,7 +152,7 @@ void UpdateGlobalTrans() {
   const float aspect_ratio = ui_manager.GetWindowAspectRatio();
   global_trans.proj =
       glm::perspective(glm::radians(80.0f), aspect_ratio, 1e-3f, 1e3f);
-  // global_trans.proj = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 1e-3f, 1e2f);
+  // global_trans.proj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1e-3f, 1e3f);
   global_trans.view = camera_trans.GetTrans();
   global_trans.model = identity;
 
@@ -190,15 +190,15 @@ void GLUTDisplayCallback() {
   as::ClearDepthBuffer();
   depth_shader.Draw(window_size);
   // Draw the scenes on screen framebuffer
-  postproc_shader.UseDefaultFramebuffer();
+  postproc_shader.UseScreenFramebuffer();
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
   scene_shader.Draw();
   skybox_shader.Draw();
-  //// Draw post-processing effects on default framebuffer
-  // scene_shader.UseDefaultFramebuffer();
-  // as::ClearDepthBuffer();
-  // postproc_shader.Draw();
+  // Draw post-processing effects on default framebuffer
+  scene_shader.UseDefaultFramebuffer();
+  as::ClearDepthBuffer();
+  postproc_shader.Draw();
   // Swap double buffers
   glutSwapBuffers();
 }

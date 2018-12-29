@@ -5,8 +5,8 @@
  ******************************************************************************/
 
 const float kPi = 3.1415926535897932384626433832795;
-const float kEnvMapBlendRatio = 0.2f;  // TODO: 0.35f
-const float kParallaxHeightScale = 0.05f;
+const float kEnvMapBlendRatio = 0.35f;
+const float kParallaxHeightScale = 0.01f;
 const float kParallaxMapMinNumLayers = 4.0f;
 const float kParallaxMapMaxNumLayers = 8.0f;
 
@@ -168,7 +168,7 @@ vec4 GetParallaxMappingColor(sampler2D tex) {
 
 float CalcShadow() {
   // Set the bias
-  const float bias = 1e-3f;
+  const float bias = 1e-4f;
   // Perform perspective divide
   vec3 proj_coords =
       vec3(vs_depth.light_space_pos) / vs_depth.light_space_pos.w;
@@ -185,7 +185,7 @@ float CalcShadow() {
   const vec2 scale = 1.0f / textureSize(depth_map_tex, 0);
   for (float x = -1.0f; x <= 1.0f; x++) {
     for (float y = -1.0f; y <= 1.0f; y++) {
-      float light_depth =
+      const float light_depth =
           texture(depth_map_tex, proj_coords.xy + vec2(x, y) * scale).x;
       shadow += view_depth - bias > light_depth ? 1.0f : 0.0f;
     }

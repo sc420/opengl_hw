@@ -62,13 +62,13 @@ void shader::DepthShader::InitDepthTexture() {
                kDepthMapSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                     GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                                     GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                     GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                                     GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-                                     GL_REPEAT);
+                                     GL_CLAMP_TO_BORDER);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-                                     GL_REPEAT);
+                                     GL_CLAMP_TO_BORDER);
   float borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
   glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
   // Attach textures to framebuffers
@@ -128,14 +128,14 @@ void shader::DepthShader::DrawModelWithoutTextures(
 
 dto::GlobalTrans shader::DepthShader::GetLightTrans() const {
   // Get light position in the scene
-  const glm::vec3 light_pos = glm::vec3(-31.75f, 26.05f, -97.72) / 10.0f;
+  const glm::vec3 light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
   // Use a camera at the light position
   const as::CameraTrans camera_trans(
-      light_pos, glm::vec3(glm::radians(23.0f), glm::radians(-194.0f),
+      light_pos, glm::vec3(glm::radians(22.0f), glm::radians(-194.0f),
                            glm::radians(0.0f)));
   // Set the new global transformation of the light
   const glm::mat4 light_proj =
-      glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, 1e-3f, 1e2f);
+      glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1e-3f, 1e3f);
   const glm::mat4 light_view = camera_trans.GetTrans();
   const glm::mat4 light_model = glm::mat4(1.0f);
   dto::GlobalTrans global_trans;
@@ -201,8 +201,8 @@ void shader::DepthShader::UpdateGlobalTrans(
 void shader::DepthShader::UpdateQuadModelTrans() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model transformation
-  const glm::vec3 scale_factors = 5.0f * glm::vec3(0.5f, 0.35f, 0.5f);
-  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.5f, -8.0f);
+  const glm::vec3 scale_factors = 100.0f * glm::vec3(0.5f, 0.35f, 0.5f);
+  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
   glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
   trans = glm::scale(trans, scale_factors);
   trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
