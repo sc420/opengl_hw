@@ -45,6 +45,8 @@ bool LimitGLWindowSize(const glm::ivec2 &window_size,
 
 void ClearColorBuffer();
 
+void ClearStencilBuffer();
+
 void ClearDepthBuffer();
 
 /* GL Manager Container */

@@ -186,6 +186,72 @@ void shader::SceneShader::Draw() {
   DrawModel(scene_model, scene_group_name);
 }
 
+void shader::SceneShader::DrawScene() {
+  // Get managers
+  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
+  // Get names
+  const std::string program_name = GetProgramName();
+  const std::string scene_group_name = GetSceneGroupName();
+  const std::string skybox_tex_name = skybox_shader_->GetTextureName();
+  const std::string skybox_unit_name = GetSkyboxTextureUnitName();
+  // Get models
+  const as::Model &scene_model = GetSceneModel();
+
+  // Use the program
+  UseProgram();
+
+  // Bind the skybox texture
+  const GLuint skybox_unit_idx = texture_manager.GetUnitIdx(skybox_tex_name);
+  texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP,
+                              skybox_unit_name);
+  uniform_manager.SetUniform1Int(program_name, "skybox_tex", skybox_unit_idx);
+  // Bind the depth map texture
+  const std::string depth_tex_name = depth_shader_->GetDepthTextureName();
+  const std::string depth_unit_name = depth_shader_->GetDepthTextureUnitName();
+  const GLuint depth_unit_idx = texture_manager.GetUnitIdx(depth_tex_name);
+  texture_manager.BindTexture(depth_tex_name, GL_TEXTURE_2D, depth_unit_name);
+  uniform_manager.SetUniform1Int(program_name, "depth_map_tex", depth_unit_idx);
+  // Draw the scene
+  UpdateSceneModelTrans();
+  UpdateSceneLighting();
+  model_material_.use_env_map = true;
+  DrawModel(scene_model, scene_group_name);
+}
+
+void shader::SceneShader::DrawQuad() {
+  // Get managers
+  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
+  // Get names
+  const std::string program_name = GetProgramName();
+  const std::string quad_group_name = GetQuadGroupName();
+  const std::string skybox_tex_name = skybox_shader_->GetTextureName();
+  const std::string skybox_unit_name = GetSkyboxTextureUnitName();
+  // Get models
+  const as::Model &quad_model = GetQuadModel();
+
+  // Use the program
+  UseProgram();
+
+  // Bind the skybox texture
+  const GLuint skybox_unit_idx = texture_manager.GetUnitIdx(skybox_tex_name);
+  texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP,
+                              skybox_unit_name);
+  uniform_manager.SetUniform1Int(program_name, "skybox_tex", skybox_unit_idx);
+  // Bind the depth map texture
+  const std::string depth_tex_name = depth_shader_->GetDepthTextureName();
+  const std::string depth_unit_name = depth_shader_->GetDepthTextureUnitName();
+  const GLuint depth_unit_idx = texture_manager.GetUnitIdx(depth_tex_name);
+  texture_manager.BindTexture(depth_tex_name, GL_TEXTURE_2D, depth_unit_name);
+  uniform_manager.SetUniform1Int(program_name, "depth_map_tex", depth_unit_idx);
+  // Draw the quad
+  UpdateQuadModelTrans();
+  UpdateQuadLighting();
+  model_material_.use_env_map = false;
+  DrawModel(quad_model, quad_group_name);
+}
+
 void shader::SceneShader::UpdateQuadLighting() {
   lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
   lighting_.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);

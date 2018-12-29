@@ -107,6 +107,8 @@ void InitGLUT(int argc, char *argv[]) {
 
 void ConfigGLSettings() {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClearDepth(1.0f);
+  glClearStencil(0);
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
 }
@@ -194,16 +196,55 @@ void GLUTDisplayCallback() {
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
   depth_shader.Draw(window_size);
-  // Draw the scenes on screen framebuffer
-  postproc_shader.UseScreenFramebuffer();
+
+  // Set stencil test actions
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+  // Enable stencil test
+  glEnable(GL_STENCIL_TEST);
+  // Use obj framebuffer
+  diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kObj);
+  // Clear all buffers
+  as::ClearColorBuffer();
+  as::ClearStencilBuffer();
+  as::ClearDepthBuffer();
+  // Draw stencil with 1
+  glStencilFunc(GL_ALWAYS, 1, 0xFF);
+  // Enable writing to stencil buffer
+  glStencilMask(0xFF);
+  // Draw the scene
+  scene_shader.DrawScene();
+
+  // Draw fragments if their stencil values are not 1
+  glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+  // Disable writing to stencil buffer
+  glStencilMask(0x00);
+  // Clear color and depth buffers
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
-  scene_shader.Draw();
-  skybox_shader.Draw();
-  // Draw post-processing effects on default framebuffer
+  // Draw the quad
+  scene_shader.DrawQuad();
+
+  // Enable writing to stencil buffer
+  glStencilMask(0xFF);
+
+  // Draw the differential rendering result
   scene_shader.UseDefaultFramebuffer();
+  as::ClearColorBuffer();
+  as::ClearStencilBuffer();
   as::ClearDepthBuffer();
-  postproc_shader.Draw();
+  diff_shader.Draw();
+
+  //// Draw the scenes on screen framebuffer
+  // postproc_shader.UseScreenFramebuffer();
+  // as::ClearColorBuffer();
+  // as::ClearDepthBuffer();
+  // scene_shader.Draw();
+  // skybox_shader.Draw();
+  //// Draw post-processing effects on default framebuffer
+  // scene_shader.UseDefaultFramebuffer();
+  // as::ClearDepthBuffer();
+  // postproc_shader.Draw();
   // Swap double buffers
   glutSwapBuffers();
 }
@@ -224,7 +265,9 @@ void GLUTReshapeCallback(const int width, const int height) {
   // Update screen depth renderbuffers
   postproc_shader.UpdateScreenRenderbuffers(width, height);
   // Update differential rendering stencil renderbuffers
-  diff_shader.UpdateObjDiffRenderbuffers(width, height);
+  diff_shader.UpdateObjDiffRenderbuffer(width, height);
+  // Update differential rendering framebuffer textures
+  diff_shader.UpdateDiffFramebufferTextures(width, height);
 }
 
 /*******************************************************************************

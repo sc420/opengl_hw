@@ -92,6 +92,10 @@ class SceneShader : public Shader {
 
   void Draw() override;
 
+  void DrawScene();
+
+  void DrawQuad();
+
   void UpdateQuadLighting();
 
   void UpdateSceneLighting();

@@ -116,6 +116,8 @@ bool as::LimitGLWindowSize(const glm::ivec2& window_size,
 
 void as::ClearColorBuffer() { glClear(GL_COLOR_BUFFER_BIT); }
 
+void as::ClearStencilBuffer() { glClear(GL_STENCIL_BUFFER_BIT); }
+
 void as::ClearDepthBuffer() { glClear(GL_DEPTH_BUFFER_BIT); }
 
 /*******************************************************************************

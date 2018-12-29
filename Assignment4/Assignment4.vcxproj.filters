@@ -220,6 +220,12 @@
     <CopyFileToFolders Include="assets\shaders\depth.vert">
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\diff.frag">
+      <Filter>assets\shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="assets\shaders\diff.vert">
+      <Filter>assets\shaders</Filter>
+    </CopyFileToFolders>
     <CopyFileToFolders Include="assets\shaders\postproc.frag">
       <Filter>assets\shaders</Filter>
     </CopyFileToFolders>
