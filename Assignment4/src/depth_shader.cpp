@@ -127,6 +127,7 @@ void shader::DepthShader::DrawModelWithoutTextures(
 }
 
 dto::GlobalTrans shader::DepthShader::GetLightTrans() const {
+  // TODO: Should get from scene shader
   // Get light position in the scene
   const glm::vec3 light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
   // Use a camera at the light position
@@ -198,6 +199,7 @@ void shader::DepthShader::UpdateGlobalTrans(
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
+// HACK: Should combine
 void shader::DepthShader::UpdateQuadModelTrans() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model transformation
@@ -212,6 +214,7 @@ void shader::DepthShader::UpdateQuadModelTrans() {
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
+// HACK: Should combine
 void shader::DepthShader::UpdateSceneModelTrans() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model transformation

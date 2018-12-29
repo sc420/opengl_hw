@@ -185,22 +185,6 @@ void shader::SceneShader::Draw() {
   DrawModel(scene_model, scene_group_name);
 }
 
-void shader::SceneShader::DrawDepth() {
-  // Get names
-  const std::string quad_group_name = GetQuadGroupName();
-  const std::string scene_group_name = GetSceneGroupName();
-  // Get models
-  const as::Model &quad_model = GetQuadModel();
-  const as::Model &scene_model = GetSceneModel();
-
-  // Draw the quad
-  UpdateQuadModelTrans();
-  DrawModelWithoutTextures(quad_model, quad_group_name);
-  // Draw the scene
-  UpdateSceneModelTrans();
-  DrawModelWithoutTextures(scene_model, scene_group_name);
-}
-
 void shader::SceneShader::UpdateQuadLighting() {
   lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
   lighting_.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
@@ -455,26 +439,6 @@ void shader::SceneShader::DrawModel(const as::Model &model,
         }
       }
     }
-    /* Draw Vertex Arrays */
-    UseMesh(group_name, mesh_idx);
-    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
-  }
-}
-
-void shader::SceneShader::DrawModelWithoutTextures(
-    const as::Model &model, const std::string &group_name) {
-  // Get meshes
-  const std::vector<as::Mesh> &meshes = model.GetMeshes();
-
-  // Draw each mesh with its own texture
-  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
-    const as::Mesh &mesh = meshes.at(mesh_idx);
-    // Get the array indexes
-    const std::vector<size_t> &idxs = mesh.GetIdxs();
-    // Get the material
-    const as::Material &material = mesh.GetMaterial();
-    /* Update Material Colors */
-    UpdateModelMaterial(material);
     /* Draw Vertex Arrays */
     UseMesh(group_name, mesh_idx);
     glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);

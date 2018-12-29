@@ -55,6 +55,7 @@ class SceneShader : public Shader {
 
   /* Model States */
 
+  // HACK: Should put it back to private
   float model_rotation;
 
   SceneShader();
@@ -90,8 +91,6 @@ class SceneShader : public Shader {
   /* GL Drawing Methods */
 
   void Draw() override;
-
-  void DrawDepth();
 
   void UpdateQuadLighting();
 
@@ -172,8 +171,5 @@ class SceneShader : public Shader {
   /* GL Drawing Methods */
 
   void DrawModel(const as::Model &model, const std::string &group_name);
-
-  void DrawModelWithoutTextures(const as::Model &model,
-                                const std::string &group_name);
 };
 }  // namespace shader
