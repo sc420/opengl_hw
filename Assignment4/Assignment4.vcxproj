@@ -179,6 +179,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\model\vertex.hpp" />
     <ClInclude Include="..\include\as\trans\camera.hpp" />
     <ClInclude Include="include\depth_shader.hpp" />
+    <ClInclude Include="include\diff_shader.hpp" />
     <ClInclude Include="include\postproc_shader.hpp" />
     <ClInclude Include="include\scene_shader.hpp" />
     <ClInclude Include="include\shader.hpp" />
@@ -206,6 +207,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\as\model\vertex.cpp" />
     <ClCompile Include="..\src\as\trans\camera.cpp" />
     <ClCompile Include="src\depth_shader.cpp" />
+    <ClCompile Include="src\diff_shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\postproc_shader.cpp" />
     <ClCompile Include="src\scene_shader.cpp" />

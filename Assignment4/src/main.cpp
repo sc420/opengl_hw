@@ -3,6 +3,7 @@
 #include "as/trans/camera.hpp"
 
 #include "depth_shader.hpp"
+#include "diff_shader.hpp"
 #include "postproc_shader.hpp"
 #include "scene_shader.hpp"
 #include "skybox_shader.hpp"
@@ -49,6 +50,7 @@ as::UiManager ui_manager;
  ******************************************************************************/
 
 shader::DepthShader depth_shader;
+shader::DiffShader diff_shader;
 shader::PostprocShader postproc_shader;
 shader::SceneShader scene_shader;
 shader::SkyboxShader skybox_shader;
@@ -104,7 +106,7 @@ void InitGLUT(int argc, char *argv[]) {
  ******************************************************************************/
 
 void ConfigGLSettings() {
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
 }
@@ -119,6 +121,7 @@ void InitUiManager() {
 void InitShaders() {
   // Register managers
   depth_shader.RegisterGLManagers(gl_managers);
+  diff_shader.RegisterGLManagers(gl_managers);
   postproc_shader.RegisterGLManagers(gl_managers);
   scene_shader.RegisterGLManagers(gl_managers);
   skybox_shader.RegisterGLManagers(gl_managers);
@@ -128,10 +131,11 @@ void InitShaders() {
   scene_shader.RegisterSkyboxShader(skybox_shader);
   skybox_shader.RegisterSceneShader(scene_shader);
   // Initialize shaders
+  depth_shader.Init();
+  diff_shader.Init();
   postproc_shader.Init();
   scene_shader.Init();
   skybox_shader.Init();
-  depth_shader.Init();
   // Reuse skybox texture
   scene_shader.ReuseSkyboxTexture();
 }
@@ -219,6 +223,8 @@ void GLUTReshapeCallback(const int width, const int height) {
   postproc_shader.UpdateScreenTextures(width, height);
   // Update screen depth renderbuffers
   postproc_shader.UpdateScreenRenderbuffers(width, height);
+  // Update differential rendering stencil renderbuffers
+  diff_shader.UpdateObjDiffRenderbuffers(width, height);
 }
 
 /*******************************************************************************

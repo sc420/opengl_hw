@@ -114,6 +114,9 @@
     <ClInclude Include="include\depth_shader.hpp">
       <Filter>Assignment4\include</Filter>
     </ClInclude>
+    <ClInclude Include="include\diff_shader.hpp">
+      <Filter>Assignment4\include</Filter>
+    </ClInclude>
     <ClInclude Include="include\postproc_shader.hpp">
       <Filter>Assignment4\include</Filter>
     </ClInclude>
@@ -188,9 +191,12 @@
     <ClCompile Include="..\src\as\trans\camera.cpp">
       <Filter>src\as\trans</Filter>
     </ClCompile>
-    <ClInclude Include="src\depth_shader.cpp">
+    <ClCompile Include="src\depth_shader.cpp">
       <Filter>Assignment4\src</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="src\diff_shader.cpp">
+      <Filter>Assignment4\src</Filter>
+    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Assignment4\src</Filter>
     </ClCompile>

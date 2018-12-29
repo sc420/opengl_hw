@@ -89,7 +89,7 @@ void shader::PostprocShader::UpdateScreenRenderbuffers(const GLsizei width,
   // Get managers
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
-  // Configure textures
+  // Configure renderbuffers
   for (int screen_idx = 0; screen_idx < kNumFramebuffers; screen_idx++) {
     // Get names
     const std::string framebuffer_name = GetScreenFramebufferName(screen_idx);
@@ -205,6 +205,7 @@ as::Model &shader::PostprocShader::GetModel() { return screen_quad_model_; }
  * Name Management (Protected)
  ******************************************************************************/
 
+// TODO: Every name should have program name as prefix
 std::string shader::PostprocShader::GetPostprocInputsBufferName() const {
   return "postproc_inputs";
 }
