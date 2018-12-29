@@ -129,11 +129,11 @@ void shader::DepthShader::DrawModelWithoutTextures(
 dto::GlobalTrans shader::DepthShader::GetLightTrans() const {
   // TODO: Should get from scene shader
   // Get light position in the scene
-  const glm::vec3 light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
+  const glm::vec3 light_pos = glm::vec3(-20.0f, 0.0f, 15.0f);
   // Use a camera at the light position
   const as::CameraTrans camera_trans(
-      light_pos, glm::vec3(glm::radians(22.0f), glm::radians(-194.0f),
-                           glm::radians(0.0f)));
+      light_pos,
+      glm::vec3(glm::radians(30.0f), glm::radians(30.0f), glm::radians(0.0f)));
   // Set the new global transformation of the light
   const glm::mat4 light_proj =
       glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1e-3f, 1e3f);
