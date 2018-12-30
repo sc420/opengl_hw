@@ -2,11 +2,11 @@
 
 shader::SceneShader::SceneShader()
     : model_rotation(glm::radians(0.0f)),
-      use_normal_height(true),
       global_trans_(dto::GlobalTrans()),
       model_trans_(dto::ModelTrans()),
       model_material_(ModelMaterial()),
-      lighting_(Lighting()) {}
+      lighting_(Lighting()),
+      use_normal_height(true) {}
 
 /*******************************************************************************
  * Shader Registrations
