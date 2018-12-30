@@ -269,22 +269,17 @@ void GLUTDisplayCallback() {
   // Draw the skybox
   skybox_shader.Draw();
 
-  // Draw the differential rendering result
-  scene_shader.UseDefaultFramebuffer();
+  // Draw the differential rendering result on postproc framebuffer
+  postproc_shader.UseScreenFramebuffer();
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
   diff_shader.Draw();
 
-  //// Draw the scenes on screen framebuffer
-  // postproc_shader.UseScreenFramebuffer();
-  // as::ClearColorBuffer();
-  // as::ClearDepthBuffer();
-  // scene_shader.Draw();
-  // skybox_shader.Draw();
-  //// Draw post-processing effects on default framebuffer
-  // scene_shader.UseDefaultFramebuffer();
-  // as::ClearDepthBuffer();
-  // postproc_shader.Draw();
+  // Draw post-processing effects on default framebuffer
+  scene_shader.UseDefaultFramebuffer();
+  as::ClearDepthBuffer();
+  postproc_shader.Draw();
+
   // Swap double buffers
   glutSwapBuffers();
 }

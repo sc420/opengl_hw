@@ -52,15 +52,9 @@ void shader::DepthShader::InitDepthTexture() {
   texture_manager.GenTexture(tex_name);
   // Update texture
   texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, unit_name);
-
-  // texture_manager.InitTexture2D(
-  //    tex_name, GL_TEXTURE_2D, 1, GL_R8, kDepthMapSize.x,
-  //    kDepthMapSize.y);
-  // TODO: May need to use glTexImage2D
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, kDepthMapSize.x,
-               kDepthMapSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-
+  texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 1,
+                                GL_DEPTH_COMPONENT16, kDepthMapSize.x,
+                                kDepthMapSize.y);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
                                      GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
