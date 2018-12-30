@@ -209,9 +209,9 @@ void shader::SceneShader::DrawScene() {
   UpdateShadow(true, true);
 
   // Draw the scene
+  model_material_.use_env_map = true;
   UpdateSceneModelTrans();
   UpdateSceneLighting();
-  model_material_.use_env_map = true;
   DrawModel(scene_model, scene_group_name);
 }
 
