@@ -34,6 +34,8 @@ class SceneShader : public Shader {
     float shininess;             // 4*20=80, +4->84
 
     bool use_env_map;  // 4*21=84, +1->85
+
+    bool pad[3];  // +3->88=4*22
   };
 
   struct Lighting {
@@ -51,6 +53,8 @@ class SceneShader : public Shader {
 
     bool pad_view_pos[4];  // +4->176
     glm::vec3 view_pos;    // 16*11=176, +12->188
+
+    bool pad[4];  // +4->192=16*12
   };
 
   struct Shadow {
@@ -58,6 +62,8 @@ class SceneShader : public Shader {
 
     bool pad_draw_shadow[3];  // +3->4
     bool draw_shadow;         // 4*1=4, +1->5
+
+    bool pad[3];  // +3->8=4*2
   };
 
   /* Model States */

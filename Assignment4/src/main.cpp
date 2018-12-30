@@ -226,8 +226,9 @@ void GLUTDisplayCallback() {
   glStencilMask(0xFF);
   // Always pass stencil to ensure clearing
   glStencilFunc(GL_ALWAYS, 1, 0xFF);
-  // Clear color buffer
+  // Clear color and depth buffers
   as::ClearColorBuffer();
+  as::ClearDepthBuffer();
   // Draw fragments if their stencil values are not 1
   glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
   // Disable writing to stencil buffer
@@ -243,17 +244,13 @@ void GLUTDisplayCallback() {
   glStencilFunc(GL_ALWAYS, 1, 0xFF);
   // Clear color and depth buffers
   as::ClearColorBuffer();
+  as::ClearDepthBuffer();
   // Enable stencil test
   glEnable(GL_STENCIL_TEST);
   // Draw fragments if their stencil values are not 1
   glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
   // Disable writing to stencil buffer
   glStencilMask(0x00);
-
-  for (int i = 0; i < 1e6; i++) {
-    glEnable(GL_STENCIL_TEST);
-  }
-
   // Draw the quad without shadow
   scene_shader.DrawQuad(false);
 
@@ -275,7 +272,6 @@ void GLUTDisplayCallback() {
   // Draw the differential rendering result
   scene_shader.UseDefaultFramebuffer();
   as::ClearColorBuffer();
-  as::ClearStencilBuffer();
   as::ClearDepthBuffer();
   diff_shader.Draw();
 
