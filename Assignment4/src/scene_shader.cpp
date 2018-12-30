@@ -236,7 +236,7 @@ void shader::SceneShader::DrawQuad(const bool draw_shadow) {
 
 void shader::SceneShader::UpdateQuadLighting() {
   lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  lighting_.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
+  lighting_.light_pos = glm::vec3(-20.0f, 0.0f, 15.0f);
   // HACK: We have to use a value higher than 1.0 to counteract the diffuse
   // strength calculation with normal and light direction
   lighting_.light_intensity = glm::vec3(0.0f, 3.0f, 0.0f);
@@ -251,7 +251,7 @@ void shader::SceneShader::UpdateQuadLighting() {
 
 void shader::SceneShader::UpdateSceneLighting() {
   lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  lighting_.light_pos = glm::vec3(-31.75f, 26.05f, -97.72);
+  lighting_.light_pos = glm::vec3(-20.0f, 0.0f, 15.0f);
   lighting_.light_intensity = glm::vec3(0.1f, 1.0f, 1.0f);
 
   // Get managers
