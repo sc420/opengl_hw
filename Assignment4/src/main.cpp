@@ -194,6 +194,7 @@ void GLUTDisplayCallback() {
 
   // Update states
   UpdateStates();
+
   // Draw the scene depth on depth framebuffer
   depth_shader.UseDepthFramebuffer();
   as::ClearColorBuffer();
@@ -204,6 +205,8 @@ void GLUTDisplayCallback() {
   diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kObj);
   // Enable writing to stencil buffer to ensure clearing
   glStencilMask(0xFF);
+  // Always pass stencil to ensure clearing
+  glStencilFunc(GL_ALWAYS, 1, 0xFF);
   // Clear all buffers
   as::ClearColorBuffer();
   as::ClearStencilBuffer();
@@ -219,7 +222,11 @@ void GLUTDisplayCallback() {
 
   // Use obj framebuffer
   diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kObj);
-  // Clear color and depth buffers
+  // Enable writing to stencil buffer to ensure clearing
+  glStencilMask(0xFF);
+  // Always pass stencil to ensure clearing
+  glStencilFunc(GL_ALWAYS, 1, 0xFF);
+  // Clear color buffer
   as::ClearColorBuffer();
   // Draw fragments if their stencil values are not 1
   glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
@@ -230,14 +237,23 @@ void GLUTDisplayCallback() {
 
   // Use no_obj framebuffer
   diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kNoObj);
+  // Enable writing to stencil buffer to ensure clearing
+  glStencilMask(0xFF);
+  // Always pass stencil to ensure clearing
+  glStencilFunc(GL_ALWAYS, 1, 0xFF);
+  // Clear color and depth buffers
+  as::ClearColorBuffer();
   // Enable stencil test
   glEnable(GL_STENCIL_TEST);
   // Draw fragments if their stencil values are not 1
   glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
   // Disable writing to stencil buffer
   glStencilMask(0x00);
-  // Clear color and depth buffers
-  as::ClearColorBuffer();
+
+  for (int i = 0; i < 1e6; i++) {
+    glEnable(GL_STENCIL_TEST);
+  }
+
   // Draw the quad without shadow
   scene_shader.DrawQuad(false);
 
@@ -247,8 +263,8 @@ void GLUTDisplayCallback() {
   diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kBg);
   // Enable writing to stencil buffer to ensure clearing
   glStencilMask(0xFF);
-  // Set default stencil action
-  glStencilFunc(GL_EQUAL, 0, 0xFF);
+  // Always pass stencil to ensure clearing
+  glStencilFunc(GL_ALWAYS, 1, 0xFF);
   // Clear all buffers
   as::ClearColorBuffer();
   as::ClearStencilBuffer();

@@ -177,14 +177,14 @@ void shader::SceneShader::Draw() {
   texture_manager.BindTexture(depth_tex_name, GL_TEXTURE_2D, depth_unit_name);
   uniform_manager.SetUniform1Int(program_name, "depth_map_tex", depth_unit_idx);
   // Draw the quad
+  model_material_.use_env_map = false;
   UpdateQuadModelTrans();
   UpdateQuadLighting();
-  model_material_.use_env_map = false;
   DrawModel(quad_model, quad_group_name);
   // Draw the scene
+  model_material_.use_env_map = true;
   UpdateSceneModelTrans();
   UpdateSceneLighting();
-  model_material_.use_env_map = true;
   DrawModel(scene_model, scene_group_name);
 }
 
@@ -256,9 +256,9 @@ void shader::SceneShader::DrawQuad(const bool draw_shadow) {
   UpdateShadow(false, draw_shadow);
 
   // Draw the quad
+  model_material_.use_env_map = false;
   UpdateQuadModelTrans();
   UpdateQuadLighting();
-  model_material_.use_env_map = false;
   DrawModel(quad_model, quad_group_name);
 }
 
