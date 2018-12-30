@@ -95,6 +95,8 @@ class SceneShader : public Shader {
 
   void ReuseSkyboxTexture();
 
+  void BindTextures();
+
   /* GL Drawing Methods */
 
   void Draw() override;

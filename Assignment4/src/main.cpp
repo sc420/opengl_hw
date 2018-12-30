@@ -143,6 +143,8 @@ void InitShaders() {
   skybox_shader.Init();
   // Reuse skybox texture
   scene_shader.ReuseSkyboxTexture();
+  // Bind textures
+  scene_shader.BindTextures();
 }
 
 void ConfigGL() {
@@ -218,8 +220,6 @@ void GLUTDisplayCallback() {
   // Draw the scene
   scene_shader.DrawScene();
 
-  glDisable(GL_DEPTH_TEST);
-
   // Use obj framebuffer
   diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kObj);
   // Enable writing to stencil buffer to ensure clearing
@@ -256,8 +256,6 @@ void GLUTDisplayCallback() {
 
   // Draw the quad without shadow
   scene_shader.DrawQuad(false);
-
-  glEnable(GL_DEPTH_TEST);
 
   // Use bg framebuffer
   diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kBg);

@@ -52,8 +52,6 @@ void shader::DiffShader::Draw() {
 
   // Use the program
   UseProgram();
-  // Set texture unit indexes
-  SetTextureUnitIdxs();
 
   // Get the mesh
   const std::vector<as::Mesh> &meshes = quad_model_.GetMeshes();
@@ -143,6 +141,9 @@ void shader::DiffShader::UpdateDiffFramebufferTextures(const GLsizei width,
         framebuffer_name, tex_name, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D, 0);
   }
+
+  // Set texture unit indexes
+  SetTextureUnitIdxs();
 }
 
 /*******************************************************************************
@@ -211,6 +212,9 @@ void shader::DiffShader::SetTextureUnitIdxs() {
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string program_name = GetProgramName();
+
+  // Use the program
+  UseProgram();
   // Set all texture unit indexes
   const DiffTypes diff_types[] = {DiffTypes::kObj, DiffTypes::kNoObj,
                                   DiffTypes::kBg};
