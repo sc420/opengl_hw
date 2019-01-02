@@ -1,0 +1,22 @@
+// Reference: https://github.com/triplepointfive/ogldev/blob/master/Content/quad.obj
+
+mtllib quad.mtl
+
+o quad
+
+// Fill the screen in NDC
+v -1.0 1.0 0.0
+v 1.0 1.0 0.0
+v -1.0 -1.0 0.0
+v 1.0 -1.0 0.0
+
+vt 1.0 1.0
+vt 0.0 1.0
+vt 0.0 0.0
+vt 1.0 0.0
+
+usemtl quad
+
+s 1
+f 4/4 3/3 1/2
+f 2/1 4/4 1/2
