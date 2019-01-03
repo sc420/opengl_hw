@@ -8,8 +8,6 @@
 #include "scene_shader.hpp"
 #include "skybox_shader.hpp"
 
-namespace fs = std::experimental::filesystem;
-
 /*******************************************************************************
  * Constants
  ******************************************************************************/
