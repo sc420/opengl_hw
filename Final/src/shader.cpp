@@ -149,17 +149,17 @@ void shader::Shader::UseMesh(const std::string& group_name,
 
 std::string shader::Shader::GetMeshVertexArrayName(
     const std::string& group_name, const size_t mesh_idx) const {
-  return group_name + "/mesh[" + std::to_string(mesh_idx) + "]";
+  return group_name + "/vertex_array/mesh-" + std::to_string(mesh_idx);
 }
 
 std::string shader::Shader::GetMeshVertexArrayBufferName(
     const std::string& group_name, const size_t mesh_idx) const {
-  return group_name + "/va[" + std::to_string(mesh_idx) + "]";
+  return group_name + "/buffer/vertex_array-" + std::to_string(mesh_idx);
 }
 
 std::string shader::Shader::GetMeshVertexArrayIdxsBufferName(
     const std::string& group_name, const size_t mesh_idx) const {
-  return group_name + "/va_idxs[" + std::to_string(mesh_idx) + "]";
+  return group_name + "/buffer/vertex_array_idxs-" + std::to_string(mesh_idx);
 }
 
 /*******************************************************************************

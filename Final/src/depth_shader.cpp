@@ -157,11 +157,11 @@ void shader::DepthShader::UseDepthFramebuffer() {
 std::string shader::DepthShader::GetId() const { return "depth"; }
 
 std::string shader::DepthShader::GetDepthTextureName() const {
-  return GetProgramName() + "/depth";
+  return GetProgramName() + "/texture/depth";
 }
 
 std::string shader::DepthShader::GetDepthTextureUnitName() const {
-  return GetProgramName();
+  return GetProgramName() + "/texture_unit_name/depth";
 }
 
 /*******************************************************************************
@@ -169,7 +169,7 @@ std::string shader::DepthShader::GetDepthTextureUnitName() const {
  ******************************************************************************/
 
 std::string shader::DepthShader::GetDepthFramebufferName() const {
-  return GetProgramName() + "/depth";
+  return GetProgramName() + "/framebuffer/depth";
 }
 
 /*******************************************************************************

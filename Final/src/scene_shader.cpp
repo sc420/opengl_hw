@@ -378,7 +378,7 @@ void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
 std::string shader::SceneShader::GetId() const { return "scene"; }
 
 std::string shader::SceneShader::GetGlobalTransBufferName() const {
-  return "global_trans";
+  return GetProgramName() + "buffer/global_trans";
 }
 
 std::string shader::SceneShader::GetGlobalTransUniformBlockName() const {

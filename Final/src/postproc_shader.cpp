@@ -160,7 +160,6 @@ void shader::PostprocShader::Draw() {
     UseDefaultFramebuffer();
     DrawScreenWithTexture(1);
   } else {
-    UseDefaultFramebuffer();
     DrawScreenWithTexture(0);
   }
 }
@@ -205,33 +204,34 @@ as::Model &shader::PostprocShader::GetModel() { return screen_quad_model_; }
  * Name Management (Protected)
  ******************************************************************************/
 
-// TODO: Every name should have program name as prefix
 std::string shader::PostprocShader::GetPostprocInputsBufferName() const {
-  return "postproc_inputs";
-}
-
-std::string shader::PostprocShader::GetPostprocInputsUniformBlockName() const {
-  return "PostprocInputs";
+  return GetProgramName() + "/buffer/postproc_inputs";
 }
 
 std::string shader::PostprocShader::GetScreenFramebufferName(
     const int screen_idx) const {
-  return "screen[" + std::to_string(screen_idx) + "]";
+  return GetProgramName() + "framebuffer/screen-" + std::to_string(screen_idx);
 }
 
 std::string shader::PostprocShader::GetScreenTextureName(
     const int screen_idx) const {
-  return "screen[" + std::to_string(screen_idx) + "]";
+  return GetProgramName() + "/texture/screen-" + std::to_string(screen_idx);
 }
 
 std::string shader::PostprocShader::GetScreenTextureUnitName(
     const int screen_idx) const {
-  return GetProgramName() + "/screen[" + std::to_string(screen_idx) + "]";
+  return GetProgramName() + "/texture_unit_name/screen-" +
+         std::to_string(screen_idx);
 }
 
 std::string shader::PostprocShader::GetScreenDepthRenderbufferName(
     const int screen_idx) const {
-  return "screen[" + std::to_string(screen_idx) + "]";
+  return GetProgramName() + "/renderbuffer/screen-" +
+         std::to_string(screen_idx);
+}
+
+std::string shader::PostprocShader::GetPostprocInputsUniformBlockName() const {
+  return "PostprocInputs";
 }
 
 /*******************************************************************************

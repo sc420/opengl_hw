@@ -191,7 +191,7 @@ std::string shader::DiffShader::GetDiffFramebufferTextureUnitName(
 }
 
 std::string shader::DiffShader::GetQuadVertexArrayGroupName() const {
-  return GetProgramName() + "/vertex_array";
+  return GetProgramName() + "/vertex_array/group";
 }
 
 std::string shader::DiffShader::GetDiffBufferName() const {

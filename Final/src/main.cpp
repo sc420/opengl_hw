@@ -205,6 +205,8 @@ void GLUTDisplayCallback() {
   diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kObj);
   // Enable writing to stencil buffer to ensure clearing
   glStencilMask(0xFF);
+  // Always pass stencil to ensure clearing
+  glStencilFunc(GL_ALWAYS, 1, 0xFF);
   // Clear all buffers
   as::ClearColorBuffer();
   as::ClearStencilBuffer();

@@ -164,7 +164,7 @@ void shader::SkyboxShader::Draw() {
 std::string shader::SkyboxShader::GetId() const { return "skybox"; }
 
 std::string shader::SkyboxShader::GetTextureName() const {
-  return GetProgramName() + "/skybox";
+  return GetProgramName() + "/texture/skybox";
 }
 
 /*******************************************************************************

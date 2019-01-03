@@ -74,8 +74,6 @@ class PostprocShader : public Shader {
 
   std::string GetPostprocInputsBufferName() const;
 
-  std::string GetPostprocInputsUniformBlockName() const;
-
   std::string GetScreenFramebufferName(const int screen_idx) const;
 
   std::string GetScreenTextureName(const int screen_idx) const;
@@ -83,6 +81,8 @@ class PostprocShader : public Shader {
   std::string GetScreenTextureUnitName(const int screen_idx) const;
 
   std::string GetScreenDepthRenderbufferName(const int screen_idx) const;
+
+  std::string GetPostprocInputsUniformBlockName() const;
 
  private:
   /* Constants */
