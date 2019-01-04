@@ -37,9 +37,7 @@ void shader::DiffShader::InitUniformBlocks() {
 }
 
 void shader::DiffShader::InitVertexArrays() {
-  // TODO: Also get name like this for other shaders
-  const std::string group_name = GetQuadVertexArrayGroupName();
-  InitVertexArray(group_name, quad_model_);
+  InitVertexArray(GetQuadVertexArrayGroupName(), quad_model_);
 }
 
 /*******************************************************************************

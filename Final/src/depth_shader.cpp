@@ -123,18 +123,18 @@ void shader::DepthShader::DrawModelWithoutTextures(
 }
 
 dto::GlobalTrans shader::DepthShader::GetLightTrans() const {
-  // TODO: Should get from scene shader
   // Get light position in the scene
-  const glm::vec3 light_pos = glm::vec3(-20.0f, 0.0f, 15.0f);
+  const glm::vec3 light_pos = scene_shader_->GetLightPos();
   // Use a camera at the light position
   const as::CameraTrans camera_trans(
       light_pos,
       glm::vec3(glm::radians(30.0f), glm::radians(30.0f), glm::radians(0.0f)));
-  // Set the new global transformation of the light
+  // Set the light space
   const glm::mat4 light_proj =
       glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1e-3f, 1e3f);
   const glm::mat4 light_view = camera_trans.GetTrans();
   const glm::mat4 light_model = glm::mat4(1.0f);
+  // Set the new global transformation to the light space
   dto::GlobalTrans global_trans;
   global_trans.proj = light_proj;
   global_trans.view = light_view;
@@ -211,32 +211,19 @@ void shader::DepthShader::UpdateGlobalTrans(
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
-// HACK: Should combine
 void shader::DepthShader::UpdateQuadModelTrans() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model transformation
-  const glm::vec3 scale_factors = 100.0f * glm::vec3(0.5f, 0.35f, 0.5f);
-  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
-  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
-  trans = glm::scale(trans, scale_factors);
-  trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-  model_trans_.trans = trans;
+  model_trans_.trans = scene_shader_->GetQuadModelTrans();
   // Update the buffer
   const std::string buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
-// HACK: Should combine
 void shader::DepthShader::UpdateSceneModelTrans() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model transformation
-  const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
-  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
-  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
-  trans = glm::scale(trans, scale_factors);
-  trans = glm::rotate(trans, scene_shader_->model_rotation,
-                      glm::vec3(0.0f, 1.0f, 0.0f));
-  model_trans_.trans = trans;
+  model_trans_.trans = scene_shader_->GetSceneModelTrans();
   // Update the buffer
   const std::string buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);

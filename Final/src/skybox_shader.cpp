@@ -14,9 +14,8 @@ void shader::SkyboxShader::RegisterSceneShader(
  ******************************************************************************/
 
 void shader::SkyboxShader::LoadModel() {
-  as::Model &model = GetModel();
-  model.LoadFile("assets/models/san-giuseppe-bridge/skybox.obj",
-                 aiProcess_FlipUVs);
+  skybox_model_.LoadFile("assets/models/san-giuseppe-bridge/skybox.obj",
+                         aiProcess_FlipUVs);
 }
 
 /*******************************************************************************
@@ -33,9 +32,7 @@ void shader::SkyboxShader::Init() {
 }
 
 void shader::SkyboxShader::InitVertexArrays() {
-  const std::string group_name = GetProgramName();
-  const as::Model &model = GetModel();
-  InitVertexArray(group_name, model);
+  InitVertexArray(GetProgramName(), skybox_model_);
 }
 
 void shader::SkyboxShader::InitUniformBlocks() {
@@ -59,8 +56,6 @@ void shader::SkyboxShader::InitTextures() {
   // Get names=
   const std::string tex_name = GetTextureName();
   const std::string unit_name = GetTextureName();
-  // Get models
-  const as::Model &model = GetModel();
   // Set the path-to-target index map
   static const std::map<std::string, size_t> path_to_target_idx = {
       {"right.jpg", 0},  {"left.jpg", 1},  {"top.jpg", 2},
@@ -72,7 +67,7 @@ void shader::SkyboxShader::InitTextures() {
   texture_manager.BindTexture(tex_name, GL_TEXTURE_CUBE_MAP, unit_name);
   // Update the textures
   bool tex_initialized = false;
-  const std::vector<as::Mesh> &meshes = model.GetMeshes();
+  const std::vector<as::Mesh> &meshes = skybox_model_.GetMeshes();
   for (const as::Mesh &mesh : meshes) {
     const as::Material &material = mesh.GetMaterial();
     const std::set<as::Texture> &textures = material.GetTextures();
@@ -134,10 +129,8 @@ void shader::SkyboxShader::Draw() {
   // Get names
   const std::string program_name = GetProgramName();
   const std::string tex_name = GetTextureName();
-  // Get models
-  const as::Model &model = GetModel();
   // Get meshes
-  const std::vector<as::Mesh> &meshes = model.GetMeshes();
+  const std::vector<as::Mesh> &meshes = skybox_model_.GetMeshes();
 
   // Use the program
   UseProgram();
@@ -167,12 +160,6 @@ std::string shader::SkyboxShader::GetId() const { return "skybox"; }
 std::string shader::SkyboxShader::GetTextureName() const {
   return GetProgramName() + "/texture/skybox";
 }
-
-/*******************************************************************************
- * Model Handlers (Protected)
- ******************************************************************************/
-
-as::Model &shader::SkyboxShader::GetModel() { return skybox_model_; }
 
 /*******************************************************************************
  * GL Initializations (Protected)

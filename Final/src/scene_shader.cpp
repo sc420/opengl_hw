@@ -54,12 +54,8 @@ void shader::SceneShader::Init() {
 }
 
 void shader::SceneShader::InitVertexArrays() {
-  const std::string scene_group_name = GetSceneGroupName();
-  const std::string quad_group_name = GetQuadGroupName();
-  const as::Model &scene_model = GetSceneModel();
-  const as::Model &quad_model = GetQuadModel();
-  InitVertexArray(scene_group_name, scene_model);
-  InitVertexArray(quad_group_name, quad_model);
+  InitVertexArray(GetSceneGroupName(), GetSceneModel());
+  InitVertexArray(GetQuadGroupName(), GetQuadModel());
 }
 
 void shader::SceneShader::InitUniformBlocks() {
@@ -237,9 +233,9 @@ void shader::SceneShader::DrawQuad(const bool draw_shadow) {
 
 void shader::SceneShader::UpdateQuadLighting() {
   lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  lighting_.light_pos = glm::vec3(-20.0f, 0.0f, 15.0f);
-  // HACK: We have to use a value higher than 1.0 to counteract the diffuse
-  // strength calculation with normal and light direction
+  lighting_.light_pos = GetLightPos();
+  // We have to use a value higher than 1.0 to counteract the diffuse strength
+  // calculation with normal and light direction
   lighting_.light_intensity = glm::vec3(0.0f, 3.0f, 0.0f);
 
   // Get managers
@@ -252,7 +248,7 @@ void shader::SceneShader::UpdateQuadLighting() {
 
 void shader::SceneShader::UpdateSceneLighting() {
   lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  lighting_.light_pos = glm::vec3(-20.0f, 0.0f, 15.0f);
+  lighting_.light_pos = GetLightPos();
   lighting_.light_intensity = glm::vec3(0.1f, 1.0f, 1.0f);
 
   // Get managers
@@ -271,8 +267,26 @@ dto::GlobalTrans shader::SceneShader::GetGlobalTrans() const {
   return global_trans_;
 }
 
+glm::mat4 shader::SceneShader::GetQuadModelTrans() {
+  const glm::vec3 scale_factors = 100.0f * glm::vec3(0.5f, 0.35f, 0.5f);
+  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
+  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
+  trans = glm::scale(trans, scale_factors);
+  trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+  return trans;
+}
+
+glm::mat4 shader::SceneShader::GetSceneModelTrans() {
+  const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
+  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
+  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
+  trans = glm::scale(trans, scale_factors);
+  trans = glm::rotate(trans, model_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+  return trans;
+}
+
 glm::vec3 shader::SceneShader::GetLightPos() const {
-  return lighting_.light_pos;
+  return glm::vec3(-20.0f, 0.0f, 15.0f);
 }
 
 /*******************************************************************************
@@ -295,12 +309,7 @@ void shader::SceneShader::UpdateGlobalTrans(
 void shader::SceneShader::UpdateQuadModelTrans() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model transformation
-  const glm::vec3 scale_factors = 100.0f * glm::vec3(0.5f, 0.35f, 0.5f);
-  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
-  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
-  trans = glm::scale(trans, scale_factors);
-  trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-  model_trans_.trans = trans;
+  model_trans_.trans = GetQuadModelTrans();
   // Update the buffer
   const std::string buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
@@ -313,12 +322,7 @@ void shader::SceneShader::UpdateSceneModelTrans(const float add_rotation) {
   // Update model state
   model_rotation += add_rotation;
   // Update model transformation
-  const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
-  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
-  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
-  trans = glm::scale(trans, scale_factors);
-  trans = glm::rotate(trans, model_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
-  model_trans_.trans = trans;
+  model_trans_.trans = GetSceneModelTrans();
   // Update the buffer
   const std::string buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);

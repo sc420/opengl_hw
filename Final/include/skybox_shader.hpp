@@ -37,10 +37,6 @@ class SkyboxShader : public Shader {
   std::string GetTextureName() const;
 
  protected:
-  /* Model Handlers */
-
-  as::Model &GetModel();
-
   /* GL Initializations */
 
   GLsizei GetNumMipmapLevels() const;

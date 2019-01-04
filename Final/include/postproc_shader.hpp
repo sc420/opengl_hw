@@ -66,15 +66,13 @@ class PostprocShader : public Shader {
   std::string GetId() const override;
 
  protected:
-  /* Model Handlers */
-
-  as::Model &GetModel();
-
   /* Name Management */
 
   std::string GetPostprocInputsBufferName() const;
 
   std::string GetScreenFramebufferName(const int screen_idx) const;
+
+  std::string GetQuadVertexArrayGroupName() const;
 
   std::string GetScreenTextureName(const int screen_idx) const;
 
@@ -92,7 +90,7 @@ class PostprocShader : public Shader {
 
   /* Models */
 
-  as::Model screen_quad_model_;
+  as::Model quad_model_;
 
   /* States */
 

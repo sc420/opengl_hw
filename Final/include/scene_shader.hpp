@@ -66,11 +66,6 @@ class SceneShader : public Shader {
     bool pad[3];  // +3->8=4*2
   };
 
-  /* Model States */
-
-  // HACK: Should put it back to private
-  float model_rotation;
-
   SceneShader();
 
   /* Shader Registrations */
@@ -118,6 +113,10 @@ class SceneShader : public Shader {
   /* State Getters */
 
   dto::GlobalTrans GetGlobalTrans() const;
+
+  glm::mat4 GetQuadModelTrans();
+
+  glm::mat4 GetSceneModelTrans();
 
   glm::vec3 GetLightPos() const;
 
@@ -177,6 +176,9 @@ class SceneShader : public Shader {
   std::string GetShadowUniformBlockName() const;
 
  private:
+  /* Model States */
+  float model_rotation;
+
   /* Shaders */
   const DepthShader *depth_shader_;
   const SkyboxShader *skybox_shader_;
