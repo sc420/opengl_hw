@@ -197,77 +197,14 @@ void GLUTDisplayCallback() {
 
   // Draw the scene depth on depth framebuffer
   depth_shader.UseDepthFramebuffer();
-  as::ClearColorBuffer();
   as::ClearDepthBuffer();
   depth_shader.Draw(window_size);
 
-  // Use obj framebuffer
-  diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kObj);
-  // Enable writing to stencil buffer to ensure clearing
-  glStencilMask(0xFF);
-  // Always pass stencil to ensure clearing
-  glStencilFunc(GL_ALWAYS, 1, 0xFF);
-  // Clear all buffers
-  as::ClearColorBuffer();
-  as::ClearStencilBuffer();
-  as::ClearDepthBuffer();
-  // Draw stencil with 1
-  glStencilFunc(GL_ALWAYS, 1, 0xFF);
-  // Enable writing to stencil buffer
-  glStencilMask(0xFF);
-  // Draw the scene
-  scene_shader.DrawScene();
-
-  // Use obj framebuffer
-  diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kObj);
-  // Enable writing to stencil buffer to ensure clearing
-  glStencilMask(0xFF);
-  // Clear color and depth buffers
-  as::ClearColorBuffer();
-  as::ClearDepthBuffer();
-  // Draw fragments if their stencil values are not 1
-  glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-  // Disable writing to stencil buffer
-  glStencilMask(0x00);
-  // Draw the quad
-  scene_shader.DrawQuad(true);
-
-  // Use no_obj framebuffer
-  diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kNoObj);
-  // Enable writing to stencil buffer to ensure clearing
-  glStencilMask(0xFF);
-  // Clear color and depth buffers
-  as::ClearColorBuffer();
-  as::ClearDepthBuffer();
-  // Enable stencil test
-  glEnable(GL_STENCIL_TEST);
-  // Draw fragments if their stencil values are not 1
-  glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-  // Disable writing to stencil buffer
-  glStencilMask(0x00);
-  // Draw the quad without shadow
-  scene_shader.DrawQuad(false);
-
-  // Use bg framebuffer
-  diff_shader.UseDiffFramebuffer(shader::DiffShader::DiffTypes::kBg);
-  // Enable writing to stencil buffer to ensure clearing
-  glStencilMask(0xFF);
-  // Always pass stencil to ensure clearing
-  glStencilFunc(GL_ALWAYS, 1, 0xFF);
-  // Clear all buffers
-  as::ClearColorBuffer();
-  as::ClearStencilBuffer();
-  as::ClearDepthBuffer();
-  // Draw the scene
-  scene_shader.DrawScene();
-  // Draw the skybox
-  skybox_shader.Draw();
-
-  // Draw the differential rendering result on postproc framebuffer
+  // Draw the scene on postproc framebuffer
   postproc_shader.UseScreenFramebuffer();
-  as::ClearColorBuffer();
   as::ClearDepthBuffer();
-  diff_shader.Draw();
+  scene_shader.Draw();
+  skybox_shader.Draw();
 
   // Draw post-processing effects on default framebuffer
   scene_shader.UseDefaultFramebuffer();

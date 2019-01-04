@@ -32,9 +32,10 @@ void shader::SceneShader::LoadModel() {
                           aiProcess_GenNormals | aiProcess_FlipUVs,
                       "nanosuit", 5, gl_managers_);
   scene_models_["quad"] =
-      dto::SceneModel("assets/models/quad/quad.obj",
-                      aiProcess_CalcTangentSpace | aiProcess_GenNormals, "quad",
-                      1, gl_managers_);
+      dto::SceneModel("assets/models/volcano-02/volcano 02_subdiv_01.obj",
+                      aiProcess_CalcTangentSpace | aiProcess_Triangulate |
+                          aiProcess_GenNormals | aiProcess_FlipUVs,
+                      "quad", 3, gl_managers_);
 }
 
 const as::Model &shader::SceneShader::GetSceneModel() {
@@ -227,11 +228,12 @@ dto::GlobalTrans shader::SceneShader::GetGlobalTrans() const {
 }
 
 glm::mat4 shader::SceneShader::GetQuadModelTrans() {
-  const glm::vec3 scale_factors = 100.0f * glm::vec3(0.5f, 0.35f, 0.5f);
-  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
+  const glm::vec3 scale_factors = glm::vec3(1e-4f);
+  const glm::vec3 translate_factors = glm::vec3(-10.0f, -14.0f, -8.0f);
   glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
   trans = glm::scale(trans, scale_factors);
-  trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+  // trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(1.0f, 0.0f,
+  // 0.0f));
   return trans;
 }
 
