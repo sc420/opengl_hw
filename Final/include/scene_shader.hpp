@@ -89,7 +89,7 @@ class SceneShader : public Shader {
 
   /* GL Initializations */
 
-  void Init() override;
+  void Init();
 
   void InitVertexArrays();
 
@@ -105,7 +105,7 @@ class SceneShader : public Shader {
 
   /* GL Drawing Methods */
 
-  void Draw() override;
+  void Draw();
 
   void DrawScene();
 

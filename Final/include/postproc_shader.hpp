@@ -29,7 +29,7 @@ class PostprocShader : public Shader {
 
   /* GL Initializations */
 
-  void Init() override;
+  void Init();
 
   void LoadModel();
 
@@ -47,7 +47,7 @@ class PostprocShader : public Shader {
 
   void UseScreenFramebuffer(const int screen_idx = 0);
 
-  void Draw() override;
+  void Draw();
 
   /* State Updaters */
 

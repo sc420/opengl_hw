@@ -7,7 +7,8 @@ shader::PostprocShader::PostprocShader() : postproc_inputs_(PostprocInputs()) {}
  ******************************************************************************/
 
 void shader::PostprocShader::Init() {
-  Shader::Init();
+  CreateShaders();
+  CreatePrograms();
   LoadModel();
   InitFramebuffers();
   InitVertexArrays();

@@ -7,8 +7,8 @@ shader::DiffShader::DiffShader() { diff_.display_mode = 0; }
  ******************************************************************************/
 
 void shader::DiffShader::Init() {
-  // TODO: Other shaders should explicitly initialize programs and shaders
-  Shader::Init();
+  CreateShaders();
+  CreatePrograms();
   LoadModel();
   InitFramebuffers();
   InitUniformBlocks();

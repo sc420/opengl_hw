@@ -13,7 +13,8 @@ void shader::DepthShader::RegisterSceneShader(SceneShader &scene_shader) {
  ******************************************************************************/
 
 void shader::DepthShader::Init() {
-  Shader::Init();
+  CreateShaders();
+  CreatePrograms();
   InitFramebuffers();
   InitUniformBlocks();
   InitDepthTexture();

@@ -44,7 +44,8 @@ as::Model &shader::SceneShader::GetQuadModel() { return quad_model_; }
  ******************************************************************************/
 
 void shader::SceneShader::Init() {
-  Shader::Init();
+  CreateShaders();
+  CreatePrograms();
   LoadModel();
   InitVertexArrays();
   InitUniformBlocks();

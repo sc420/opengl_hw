@@ -18,7 +18,7 @@ class SkyboxShader : public Shader {
 
   /* GL Initializations */
 
-  void Init() override;
+  void Init();
 
   void InitVertexArrays();
 
@@ -28,7 +28,7 @@ class SkyboxShader : public Shader {
 
   /* GL Drawing Methods */
 
-  void Draw() override;
+  void Draw();
 
   /* Name Management */
 

@@ -12,11 +12,6 @@ void shader::Shader::RegisterGLManagers(as::GLManagers& gl_managers) {
   gl_managers_ = &gl_managers;
 }
 
-void shader::Shader::Init() {
-  CreateShaders();
-  CreatePrograms();
-}
-
 /*******************************************************************************
  * GL Drawing Methods
  ******************************************************************************/
@@ -29,8 +24,6 @@ void shader::Shader::UseProgram() const {
   // Use the program
   program_manager.UseProgram(program_name);
 }
-
-void shader::Shader::Draw() {}
 
 void shader::Shader::UseDefaultFramebuffer() const {
   // Get managers
@@ -49,6 +42,25 @@ std::string shader::Shader::GetProgramName() const { return GetId(); }
 /*******************************************************************************
  * GL Initializations (Protected)
  ******************************************************************************/
+
+void shader::Shader::CreateShaders() {
+  as::ShaderManager& shader_manager = gl_managers_->GetShaderManager();
+  const std::string& vertex_path = GetShaderPath(ShaderTypes::kVertex);
+  const std::string& fragment_path = GetShaderPath(ShaderTypes::kFragment);
+  shader_manager.CreateShader(vertex_path, GL_VERTEX_SHADER, vertex_path);
+  shader_manager.CreateShader(fragment_path, GL_FRAGMENT_SHADER, fragment_path);
+}
+
+void shader::Shader::CreatePrograms() {
+  as::ProgramManager& program_manager = gl_managers_->GetProgramManager();
+  const std::string& program_name = GetProgramName();
+  const std::string& vertex_path = GetShaderPath(ShaderTypes::kVertex);
+  const std::string& fragment_path = GetShaderPath(ShaderTypes::kFragment);
+  program_manager.CreateProgram(program_name);
+  program_manager.AttachShader(program_name, vertex_path);
+  program_manager.AttachShader(program_name, fragment_path);
+  program_manager.LinkProgram(program_name);
+}
 
 void shader::Shader::InitVertexArray(const std::string& group_name,
                                      const as::Model& model) {
@@ -160,29 +172,6 @@ std::string shader::Shader::GetMeshVertexArrayBufferName(
 std::string shader::Shader::GetMeshVertexArrayIdxsBufferName(
     const std::string& group_name, const size_t mesh_idx) const {
   return group_name + "/buffer/vertex_array_idxs-" + std::to_string(mesh_idx);
-}
-
-/*******************************************************************************
- * GL Initializations (Private)
- ******************************************************************************/
-
-void shader::Shader::CreateShaders() {
-  as::ShaderManager& shader_manager = gl_managers_->GetShaderManager();
-  const std::string& vertex_path = GetShaderPath(ShaderTypes::kVertex);
-  const std::string& fragment_path = GetShaderPath(ShaderTypes::kFragment);
-  shader_manager.CreateShader(vertex_path, GL_VERTEX_SHADER, vertex_path);
-  shader_manager.CreateShader(fragment_path, GL_FRAGMENT_SHADER, fragment_path);
-}
-
-void shader::Shader::CreatePrograms() {
-  as::ProgramManager& program_manager = gl_managers_->GetProgramManager();
-  const std::string& program_name = GetProgramName();
-  const std::string& vertex_path = GetShaderPath(ShaderTypes::kVertex);
-  const std::string& fragment_path = GetShaderPath(ShaderTypes::kFragment);
-  program_manager.CreateProgram(program_name);
-  program_manager.AttachShader(program_name, vertex_path);
-  program_manager.AttachShader(program_name, fragment_path);
-  program_manager.LinkProgram(program_name);
 }
 
 /*******************************************************************************

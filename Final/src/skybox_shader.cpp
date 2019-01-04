@@ -24,7 +24,8 @@ void shader::SkyboxShader::LoadModel() {
  ******************************************************************************/
 
 void shader::SkyboxShader::Init() {
-  Shader::Init();
+  CreateShaders();
+  CreatePrograms();
   LoadModel();
   InitVertexArrays();
   InitUniformBlocks();

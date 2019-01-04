@@ -15,13 +15,9 @@ class Shader {
 
   void RegisterGLManagers(as::GLManagers &gl_managers);
 
-  virtual void Init();
-
   /* GL Drawing Methods */
 
   virtual void UseProgram() const;
-
-  virtual void Draw();
 
   void UseDefaultFramebuffer() const;
 
@@ -35,6 +31,10 @@ class Shader {
   as::GLManagers *gl_managers_;
 
   /* GL Initializations */
+
+  void CreateShaders();
+
+  void CreatePrograms();
 
   template <class T>
   void LinkDataToUniformBlock(const std::string &buffer_name,
@@ -63,12 +63,6 @@ class Shader {
                                                const size_t mesh_idx) const;
 
  private:
-  /* GL Initializations */
-
-  void CreateShaders();
-
-  void CreatePrograms();
-
   /* Path Management */
 
   std::string GetShaderPath(const ShaderTypes &shader_type) const;

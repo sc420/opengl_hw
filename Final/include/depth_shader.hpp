@@ -17,7 +17,7 @@ class DepthShader : public Shader {
 
   /* GL Initializations */
 
-  void Init() override;
+  void Init();
 
   void InitFramebuffers();
 

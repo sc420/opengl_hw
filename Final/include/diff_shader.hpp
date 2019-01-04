@@ -15,7 +15,7 @@ class DiffShader : public Shader {
 
   /* GL Initializations */
 
-  void Init() override;
+  void Init();
 
   void LoadModel();
 
@@ -27,7 +27,7 @@ class DiffShader : public Shader {
 
   /* GL Drawing Methods */
 
-  void Draw() override;
+  void Draw();
 
   void UseDiffFramebuffer(const DiffTypes diff_type);
 
