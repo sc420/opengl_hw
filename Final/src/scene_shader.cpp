@@ -26,18 +26,24 @@ void shader::SceneShader::RegisterSkyboxShader(
  ******************************************************************************/
 
 void shader::SceneShader::LoadModel() {
-  as::Model &scene_model = GetSceneModel();
-  as::Model &quad_model = GetQuadModel();
-  scene_model.LoadFile("assets/models/nanosuit/nanosuit.obj",
-                       aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                           aiProcess_GenNormals | aiProcess_FlipUVs);
-  quad_model.LoadFile("assets/models/quad/quad.obj",
-                      aiProcess_CalcTangentSpace | aiProcess_GenNormals);
+  scene_models_["scene"] =
+      dto::SceneModel("assets/models/nanosuit/nanosuit.obj",
+                      aiProcess_CalcTangentSpace | aiProcess_Triangulate |
+                          aiProcess_GenNormals | aiProcess_FlipUVs,
+                      "nanosuit", 5, gl_managers_);
+  scene_models_["quad"] =
+      dto::SceneModel("assets/models/quad/quad.obj",
+                      aiProcess_CalcTangentSpace | aiProcess_GenNormals, "quad",
+                      1, gl_managers_);
 }
 
-as::Model &shader::SceneShader::GetSceneModel() { return scene_model_; }
+const as::Model &shader::SceneShader::GetSceneModel() {
+  return scene_models_.at("scene").GetModel();
+}
 
-as::Model &shader::SceneShader::GetQuadModel() { return quad_model_; }
+const as::Model &shader::SceneShader::GetQuadModel() {
+  return scene_models_.at("quad").GetModel();
+}
 
 /*******************************************************************************
  * GL Initializations
@@ -50,7 +56,6 @@ void shader::SceneShader::Init() {
   InitVertexArrays();
   InitUniformBlocks();
   InitLightTrans();
-  InitTextures();
 }
 
 void shader::SceneShader::InitVertexArrays() {
@@ -82,52 +87,6 @@ void shader::SceneShader::InitLightTrans() {
       global_trans.proj * global_trans.view * global_trans.model;
   // Update the buffer
   buffer_manager.UpdateBuffer(buffer_name);
-}
-
-void shader::SceneShader::InitTextures() {
-  // Get managers
-  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
-  // Get models
-  const as::Model &scene_model = GetSceneModel();
-  // Initialize textures in each mesh
-  const std::vector<as::Mesh> &meshes = scene_model.GetMeshes();
-  for (const as::Mesh &mesh : meshes) {
-    const as::Material &material = mesh.GetMaterial();
-    const std::set<as::Texture> &textures = material.GetTextures();
-    for (const as::Texture &texture : textures) {
-      const std::string &path = texture.GetPath();
-      // Check if the texture has been loaded
-      if (texture_manager.HasTexture(path)) {
-        continue;
-      }
-      // Get names
-      const std::string unit_name = GetTextureUnitName(texture);
-      // Load the texture
-      GLsizei width, height;
-      int comp;
-      std::vector<GLubyte> texels;
-      as::LoadTextureByStb(path, 0, width, height, comp, texels);
-      // Convert the texels to 4 channels to avoid GL errors
-      texels = as::ConvertDataChannels(comp, 4, texels);
-      // Generate the texture
-      texture_manager.GenTexture(path);
-      // Bind the texture
-      texture_manager.BindTexture(path, GL_TEXTURE_2D, unit_name);
-      // Initialize the texture
-      const GLsizei num_mipmap_levels = GetNumMipmapLevels();
-      texture_manager.InitTexture2D(path, GL_TEXTURE_2D, num_mipmap_levels,
-                                    GL_RGBA8, width, height);
-      // Update the texture
-      texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
-                                      height, GL_RGBA, GL_UNSIGNED_BYTE,
-                                      texels.data());
-      texture_manager.GenMipmap(path, GL_TEXTURE_2D);
-      texture_manager.SetTextureParamInt(
-          path, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
-                                         GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
-  }
 }
 
 void shader::SceneShader::ReuseSkyboxTexture() {
@@ -422,11 +381,6 @@ std::string shader::SceneShader::GetLightingBufferName() const {
 
 std::string shader::SceneShader::GetShadowBufferName() const {
   return GetProgramName() + "shadow";
-}
-
-std::string shader::SceneShader::GetTextureUnitName(
-    const as::Texture &texture) const {
-  return GetProgramName() + "/type[" + std::to_string(texture.GetType()) + "]";
 }
 
 std::string shader::SceneShader::GetSkyboxTextureUnitName() const {

@@ -14,7 +14,7 @@ void shader::SkyboxShader::RegisterSceneShader(
  ******************************************************************************/
 
 void shader::SkyboxShader::LoadModel() {
-  skybox_model_.LoadFile("assets/models/san-giuseppe-bridge/skybox.obj",
+  skybox_model_.LoadFile("assets/models/san-giuseppe-bridge-low/skybox.obj",
                          aiProcess_FlipUVs);
 }
 

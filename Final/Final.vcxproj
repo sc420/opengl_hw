@@ -181,6 +181,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="include\depth_shader.hpp" />
     <ClInclude Include="include\diff_shader.hpp" />
     <ClInclude Include="include\postproc_shader.hpp" />
+    <ClInclude Include="include\scene_model_dto.hpp" />
     <ClInclude Include="include\scene_shader.hpp" />
     <ClInclude Include="include\shader.hpp" />
     <ClInclude Include="include\skybox_shader.hpp" />
@@ -211,6 +212,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\postproc_shader.cpp" />
     <ClCompile Include="src\scene_shader.cpp" />
+    <ClCompile Include="src\scene_model_dto.cpp" />
     <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\skybox_shader.cpp" />
   </ItemGroup>

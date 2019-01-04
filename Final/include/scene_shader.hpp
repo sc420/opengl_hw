@@ -1,6 +1,7 @@
 #pragma once
 
 #include "depth_shader.hpp"
+#include "scene_model_dto.hpp"
 #include "shader.hpp"
 #include "skybox_shader.hpp"
 #include "trans_dto.hpp"
@@ -78,9 +79,9 @@ class SceneShader : public Shader {
 
   void LoadModel();
 
-  as::Model &GetSceneModel();
+  const as::Model &GetSceneModel();
 
-  as::Model &GetQuadModel();
+  const as::Model &GetQuadModel();
 
   /* GL Initializations */
 
@@ -91,8 +92,6 @@ class SceneShader : public Shader {
   void InitUniformBlocks();
 
   void InitLightTrans();
-
-  void InitTextures();
 
   void ReuseSkyboxTexture();
 
@@ -163,8 +162,6 @@ class SceneShader : public Shader {
 
   std::string GetShadowBufferName() const;
 
-  std::string GetTextureUnitName(const as::Texture &texture) const;
-
   std::string GetSkyboxTextureUnitName() const;
 
   std::string GetModelTransUniformBlockName() const;
@@ -184,8 +181,7 @@ class SceneShader : public Shader {
   const SkyboxShader *skybox_shader_;
 
   /* Models */
-  as::Model scene_model_;
-  as::Model quad_model_;
+  std::map<std::string, dto::SceneModel> scene_models_;
 
   /* GL States */
   dto::GlobalTrans global_trans_;
