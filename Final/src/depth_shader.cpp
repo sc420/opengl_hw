@@ -36,8 +36,10 @@ void shader::DepthShader::InitFramebuffers() {
 }
 
 void shader::DepthShader::InitUniformBlocks() {
-  LinkDataToUniformBlock("depth/global_trans", "GlobalTrans", global_trans_);
-  LinkDataToUniformBlock("depth/model_trans", "ModelTrans", model_trans_);
+  LinkDataToUniformBlock(GetGlobalTransBufferName(),
+                         GetGlobalTransUniformBlockName(), global_trans_);
+  LinkDataToUniformBlock(GetModelTransBufferName(),
+                         GetModelTransUniformBlockName(), model_trans_);
 }
 
 void shader::DepthShader::InitDepthTexture() {
@@ -86,10 +88,9 @@ void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
   // Update global transformation
   UpdateGlobalTrans(global_trans);
 
-  // Draw the scene
   // Get names
-  const std::string quad_group_name = "scene/quad";
-  const std::string scene_group_name = "scene/scene";
+  const std::string quad_group_name = scene_shader_->GetQuadGroupName();
+  const std::string scene_group_name = scene_shader_->GetSceneGroupName();
   // Get models
   const as::Model &quad_model = scene_shader_->GetQuadModel();
   const as::Model &scene_model = scene_shader_->GetSceneModel();
@@ -173,6 +174,22 @@ std::string shader::DepthShader::GetDepthFramebufferName() const {
   return GetProgramName() + "/framebuffer/depth";
 }
 
+std::string shader::DepthShader::GetGlobalTransBufferName() const {
+  return GetProgramName() + "/buffer/global_trans";
+}
+
+std::string shader::DepthShader::GetModelTransBufferName() const {
+  return GetProgramName() + "/buffer/model_trans";
+}
+
+std::string shader::DepthShader::GetGlobalTransUniformBlockName() const {
+  return "GlobalTrans";
+}
+
+std::string shader::DepthShader::GetModelTransUniformBlockName() const {
+  return "ModelTrans";
+}
+
 /*******************************************************************************
  * Constants (Private)
  ******************************************************************************/
@@ -187,7 +204,7 @@ void shader::DepthShader::UpdateGlobalTrans(
     const dto::GlobalTrans &global_trans) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Get names
-  const std::string buffer_name = "depth/global_trans";
+  const std::string buffer_name = GetGlobalTransBufferName();
   // Update global transformation
   global_trans_ = global_trans;
   // Update the buffer
@@ -205,7 +222,7 @@ void shader::DepthShader::UpdateQuadModelTrans() {
   trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
   model_trans_.trans = trans;
   // Update the buffer
-  const std::string buffer_name = "depth/model_trans";
+  const std::string buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
@@ -221,6 +238,6 @@ void shader::DepthShader::UpdateSceneModelTrans() {
                       glm::vec3(0.0f, 1.0f, 0.0f));
   model_trans_.trans = trans;
   // Update the buffer
-  const std::string buffer_name = "depth/model_trans";
+  const std::string buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }

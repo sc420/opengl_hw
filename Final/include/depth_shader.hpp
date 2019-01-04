@@ -49,6 +49,14 @@ class DepthShader : public Shader {
 
   std::string GetDepthFramebufferName() const;
 
+  std::string GetGlobalTransBufferName() const;
+
+  std::string GetModelTransBufferName() const;
+
+  std::string GetGlobalTransUniformBlockName() const;
+
+  std::string GetModelTransUniformBlockName() const;
+
  private:
   /* Constants */
 

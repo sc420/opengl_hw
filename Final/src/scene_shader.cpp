@@ -378,6 +378,14 @@ void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
 
 std::string shader::SceneShader::GetId() const { return "scene"; }
 
+std::string shader::SceneShader::GetSceneGroupName() const {
+  return GetProgramName() + "/scene";
+}
+
+std::string shader::SceneShader::GetQuadGroupName() const {
+  return GetProgramName() + "/quad";
+}
+
 std::string shader::SceneShader::GetGlobalTransBufferName() const {
   return GetProgramName() + "buffer/global_trans";
 }
@@ -397,19 +405,28 @@ GLsizei shader::SceneShader::GetNumMipmapLevels() const { return 5; }
  ******************************************************************************/
 
 std::string shader::SceneShader::GetModelTransBufferName() const {
-  return "model_trans";
+  return GetProgramName() + "model_trans";
 }
 
 std::string shader::SceneShader::GetModelMaterialBufferName() const {
-  return "model_material";
+  return GetProgramName() + "model_material";
 }
 
 std::string shader::SceneShader::GetLightingBufferName() const {
-  return "lighting";
+  return GetProgramName() + "lighting";
 }
 
 std::string shader::SceneShader::GetShadowBufferName() const {
-  return "shadow";
+  return GetProgramName() + "shadow";
+}
+
+std::string shader::SceneShader::GetTextureUnitName(
+    const as::Texture &texture) const {
+  return GetProgramName() + "/type[" + std::to_string(texture.GetType()) + "]";
+}
+
+std::string shader::SceneShader::GetSkyboxTextureUnitName() const {
+  return GetProgramName() + "/skybox";
 }
 
 std::string shader::SceneShader::GetModelTransUniformBlockName() const {
@@ -426,23 +443,6 @@ std::string shader::SceneShader::GetLightingUniformBlockName() const {
 
 std::string shader::SceneShader::GetShadowUniformBlockName() const {
   return "Shadow";
-}
-
-std::string shader::SceneShader::GetSceneGroupName() const {
-  return GetProgramName() + "/scene";
-}
-
-std::string shader::SceneShader::GetQuadGroupName() const {
-  return GetProgramName() + "/quad";
-}
-
-std::string shader::SceneShader::GetTextureUnitName(
-    const as::Texture &texture) const {
-  return GetProgramName() + "/type[" + std::to_string(texture.GetType()) + "]";
-}
-
-std::string shader::SceneShader::GetSkyboxTextureUnitName() const {
-  return GetProgramName() + "/skybox";
 }
 
 /*******************************************************************************

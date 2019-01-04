@@ -141,6 +141,10 @@ class SceneShader : public Shader {
 
   std::string GetId() const override;
 
+  std::string GetSceneGroupName() const;
+
+  std::string GetQuadGroupName() const;
+
   std::string GetGlobalTransBufferName() const;
 
   std::string GetGlobalTransUniformBlockName() const;
@@ -160,6 +164,10 @@ class SceneShader : public Shader {
 
   std::string GetShadowBufferName() const;
 
+  std::string GetTextureUnitName(const as::Texture &texture) const;
+
+  std::string GetSkyboxTextureUnitName() const;
+
   std::string GetModelTransUniformBlockName() const;
 
   std::string GetModelMaterialUniformBlockName() const;
@@ -167,14 +175,6 @@ class SceneShader : public Shader {
   std::string GetLightingUniformBlockName() const;
 
   std::string GetShadowUniformBlockName() const;
-
-  std::string GetSceneGroupName() const;
-
-  std::string GetQuadGroupName() const;
-
-  std::string GetTextureUnitName(const as::Texture &texture) const;
-
-  std::string GetSkyboxTextureUnitName() const;
 
  private:
   /* Shaders */
