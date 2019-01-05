@@ -179,6 +179,7 @@ void InitImGui() {
 
   // Setup Platform/Renderer bindings
   ImGui_ImplFreeGLUT_Init();
+  // NOTE: GLUT can only have one binding function, we don't bind it again
   // ImGui_ImplFreeGLUT_InstallFuncs();
   ImGui_ImplOpenGL3_Init();
 }
@@ -334,10 +335,6 @@ void GLUTReshapeCallback(const int width, const int height) {
     // If the window size has been limited, ignore the new size
     return;
   }
-
-  ImGuiIO &io = ImGui::GetIO();
-  io.DisplaySize = ImVec2((float)width, (float)height);
-
   // Save window size
   ui_manager.SaveWindowSize(window_size);
   // Set the viewport
@@ -350,6 +347,8 @@ void GLUTReshapeCallback(const int width, const int height) {
   diff_shader.UpdateObjDiffRenderbuffer(width, height);
   // Update differential rendering framebuffer textures
   diff_shader.UpdateDiffFramebufferTextures(width, height);
+  // Update ImGui
+  ImGui_ImplFreeGLUT_ReshapeFunc(width, height);
 }
 
 /*******************************************************************************
@@ -374,14 +373,26 @@ void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
   }
   // Mark key state down
   ui_manager.MarkKeyDown(key);
+  // Update ImGui
+  ImGui_ImplFreeGLUT_KeyboardFunc(key, x, y);
 }
 
 void GLUTKeyboardUpCallback(const unsigned char key, const int x, const int y) {
   // Mark key state up
   ui_manager.MarkKeyUp(key);
+  // Update ImGui
+  ImGui_ImplFreeGLUT_KeyboardUpFunc(key, x, y);
 }
 
-void GLUTSpecialCallback(const int key, const int x, const int y) {}
+void GLUTSpecialCallback(const int key, const int x, const int y) {
+  // Update ImGui
+  ImGui_ImplFreeGLUT_SpecialFunc(key, x, y);
+}
+
+void GLUTSpecialUpCallback(const int key, const int x, const int y) {
+  // Update ImGui
+  ImGui_ImplFreeGLUT_SpecialUpFunc(key, x, y);
+}
 
 void GLUTMouseCallback(const int button, const int state, const int x,
                        const int y) {
@@ -397,6 +408,8 @@ void GLUTMouseCallback(const int button, const int state, const int x,
   }
   // Update mouse position
   postproc_shader.UpdateMousePos(mouse_pos);
+  // Update ImGui
+  ImGui_ImplFreeGLUT_MouseFunc(button, state, x, y);
 }
 
 void GLUTMouseWheelCallback(const int button, const int dir, const int x,
@@ -406,27 +419,41 @@ void GLUTMouseWheelCallback(const int button, const int dir, const int x,
   } else {
     camera_trans.AddEye(kCameraZoomingStep * glm::vec3(0.0f, 0.0f, 1.0f));
   }
+  // Update ImGui
+  ImGui_ImplFreeGLUT_MouseWheelFunc(button, dir, x, y);
 }
 
 void GLUTMotionCallback(const int x, const int y) {
   const glm::ivec2 mouse_pos = glm::vec2(x, y);
-  // Check whether the left mouse button is down
-  if (ui_manager.IsMouseDown(GLUT_LEFT_BUTTON)) {
-    switch (cur_mode) {
-      case Modes::comparison: {
-      } break;
-      case Modes::navigation: {
-        const glm::ivec2 diff = mouse_pos - ui_manager.GetMousePos();
-        camera_trans.AddAngles(kCameraRotationSensitivity *
-                               glm::vec3(diff.y, diff.x, 0.0f));
-      } break;
-      default: { throw new std::runtime_error("Unknown mode"); }
+  // Get ImGui IO
+  ImGuiIO &io = ImGui::GetIO();
+  // Check whether the ImGui widget isn't active
+  if (!io.WantCaptureMouse) {
+    // Check whether the left mouse button is down
+    if (ui_manager.IsMouseDown(GLUT_LEFT_BUTTON)) {
+      switch (cur_mode) {
+        case Modes::comparison: {
+        } break;
+        case Modes::navigation: {
+          const glm::ivec2 diff = mouse_pos - ui_manager.GetMousePos();
+          camera_trans.AddAngles(kCameraRotationSensitivity *
+                                 glm::vec3(diff.y, diff.x, 0.0f));
+        } break;
+        default: { throw new std::runtime_error("Unknown mode"); }
+      }
     }
+    // Update mouse position
+    postproc_shader.UpdateMousePos(mouse_pos);
+    // Save mouse position
+    ui_manager.MarkMouseMotion(mouse_pos);
   }
-  // Update mouse position
-  postproc_shader.UpdateMousePos(mouse_pos);
-  // Save mouse position
-  ui_manager.MarkMouseMotion(mouse_pos);
+  // Update ImGui
+  ImGui_ImplFreeGLUT_MotionFunc(x, y);
+}
+
+void GLUTPassiveMotionCallback(const int x, const int y) {
+  // Update ImGui
+  ImGui_ImplFreeGLUT_MotionFunc(x, y);
 }
 
 void GLUTCloseCallback() { ui_manager.MarkWindowClosed(); }
@@ -597,9 +624,11 @@ void RegisterGLUTCallbacks() {
   glutKeyboardFunc(GLUTKeyboardCallback);
   glutKeyboardUpFunc(GLUTKeyboardUpCallback);
   glutSpecialFunc(GLUTSpecialCallback);
+  glutSpecialUpFunc(GLUTSpecialUpCallback);
   glutMouseFunc(GLUTMouseCallback);
   glutMouseWheelFunc(GLUTMouseWheelCallback);
   glutMotionFunc(GLUTMotionCallback);
+  glutPassiveMotionFunc(GLUTPassiveMotionCallback);
   glutCloseFunc(GLUTCloseCallback);
   /* Timer */
   glutTimerFunc(kTimerInterval, GLUTTimerCallback, 0);
