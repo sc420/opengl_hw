@@ -210,16 +210,20 @@ std::string shader::SceneShader::GetLightingUniformBlockName() const {
 
 void shader::SceneShader::LoadModels() {
   // Scene
-  scene_models_["scene"] =
-      dto::SceneModel("scene", "assets/models/nanosuit/nanosuit.obj",
-                      aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                          aiProcess_GenNormals | aiProcess_FlipUVs,
-                      "scene", 5, gl_managers_);
+  scene_models_["scene"] = dto::SceneModel(
+      "scene", "assets/models/nanosuit/nanosuit.obj",
+      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
+          aiProcess_Triangulate | aiProcess_GenNormals |
+          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
+          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
+      "scene", 5, gl_managers_);
   // Quad
   scene_models_["quad"] = dto::SceneModel(
       "quad", "assets/models/volcano-02/volcano 02_subdiv_01.obj",
-      aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-          aiProcess_GenNormals | aiProcess_FlipUVs,
+      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
+          aiProcess_Triangulate | aiProcess_GenNormals |
+          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
+          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
       "quad", 3, gl_managers_);
 }
 
