@@ -26,11 +26,13 @@ void shader::SceneShader::RegisterSkyboxShader(
  ******************************************************************************/
 
 void shader::SceneShader::LoadModels() {
+  // Scene
   scene_models_["scene"] =
       dto::SceneModel("scene", "assets/models/nanosuit/nanosuit.obj",
                       aiProcess_CalcTangentSpace | aiProcess_Triangulate |
                           aiProcess_GenNormals | aiProcess_FlipUVs,
                       "scene", 5, gl_managers_);
+  // Quad
   scene_models_["quad"] = dto::SceneModel(
       "quad", "assets/models/volcano-02/volcano 02_subdiv_01.obj",
       aiProcess_CalcTangentSpace | aiProcess_Triangulate |
@@ -39,13 +41,14 @@ void shader::SceneShader::LoadModels() {
 }
 
 void shader::SceneShader::InitModels() {
+  // Scene
   scene_models_.at("scene").SetTranslation(glm::vec3(-10.0f, 0.0f, -8.0f));
   scene_models_.at("scene").SetScale(glm::vec3(0.5f, 0.35f, 0.5f));
   scene_models_.at("scene").SetRotation(glm::vec3(0.0f));
   scene_models_.at("scene").SetLightPos(GetLightPos());
   scene_models_.at("scene").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
   scene_models_.at("scene").SetLightIntensity(glm::vec3(0.1f, 1.0f, 1.0f));
-
+  // Quad
   scene_models_.at("quad").SetTranslation(glm::vec3(0.0f));
   scene_models_.at("quad").SetScale(glm::vec3(1e-4f));
   scene_models_.at("quad").SetRotation(glm::vec3(0.0f));
