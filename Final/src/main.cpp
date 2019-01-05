@@ -203,6 +203,7 @@ void UpdateImGui() {
 
   ImGui::Begin("Debug");
 
+  ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::CollapsingHeader("Camera")) {
     ImGui::Text("Position: (%.1f, %.1f, %.1f)", camera_pos.x, camera_pos.y,
                 camera_pos.z);
@@ -210,6 +211,7 @@ void UpdateImGui() {
                 camera_angles.y, camera_angles.z);
   }
 
+  ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::CollapsingHeader("Performance")) {
     ImGui::Text("FPS: %.1f", io.Framerate);
   }
