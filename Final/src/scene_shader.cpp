@@ -219,12 +219,12 @@ void shader::SceneShader::LoadModels() {
       "scene", 5, gl_managers_);
   // Ground
   scene_models_["ground"] = dto::SceneModel(
-      "ground", "assets/models/volcano-02/volcano 02_subdiv_01.obj",
+      "ground", "assets/models/volcano-02-low/volcano 02_subdiv_01.obj",
       aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
           aiProcess_Triangulate | aiProcess_GenNormals |
           aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
           aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
-      "ground", 3, gl_managers_);
+      "ground", 1, gl_managers_);
 }
 
 void shader::SceneShader::InitModels() {

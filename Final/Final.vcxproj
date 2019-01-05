@@ -207,6 +207,12 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\as\model\texture.cpp" />
     <ClCompile Include="..\src\as\model\vertex.cpp" />
     <ClCompile Include="..\src\as\trans\camera.cpp" />
+    <ClCompile Include="..\src\imgui\imgui.cpp" />
+    <ClCompile Include="..\src\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\src\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\src\imgui\imgui_impl_freeglut.cpp" />
+    <ClCompile Include="..\src\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\src\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\depth_shader.cpp" />
     <ClCompile Include="src\diff_shader.cpp" />
     <ClCompile Include="src\main.cpp" />

@@ -20,6 +20,7 @@
 * [stb](https://github.com/nothings/stb)
     - stb_image.h: 2.19
 * [tinyobjloader](https://github.com/syoyo/tinyobjloader): 1.0.6
+* [ImGui](https://github.com/ocornut/imgui): 1.66
 
 ## Assets
 

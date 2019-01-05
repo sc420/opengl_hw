@@ -46,6 +46,9 @@
     <Filter Include="src\as\trans">
       <UniqueIdentifier>{5406f30e-c62b-4d43-b914-56d5cad59dea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\imgui">
+      <UniqueIdentifier>{47fd6c40-16e8-492a-a454-1d230d462741}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\as\common.hpp">
@@ -193,6 +196,24 @@
     </ClCompile>
     <ClCompile Include="..\src\as\trans\camera.cpp">
       <Filter>src\as\trans</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui.cpp">
+      <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_demo.cpp">
+      <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_draw.cpp">
+      <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_impl_freeglut.cpp">
+      <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_impl_opengl3.cpp">
+      <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_widgets.cpp">
+      <Filter>src\imgui</Filter>
     </ClCompile>
     <ClCompile Include="src\depth_shader.cpp">
       <Filter>Final\src</Filter>
