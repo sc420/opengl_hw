@@ -159,17 +159,6 @@ void shader::SceneShader::UpdateViewPos(const glm::vec3 &view_pos) {
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
-void shader::SceneShader::UpdateShadow(const bool dim_orig_color,
-                                       const bool draw_shadow) {
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  // Update shadow
-  shadow_.dim_orig_color = dim_orig_color;
-  shadow_.draw_shadow = draw_shadow;
-  // Update the buffer
-  const std::string buffer_name = GetShadowBufferName();
-  buffer_manager.UpdateBuffer(buffer_name);
-}
-
 void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
   use_normal_height = toggle;
 }
@@ -218,10 +207,6 @@ std::string shader::SceneShader::GetLightingBufferName() const {
   return GetProgramName() + "lighting";
 }
 
-std::string shader::SceneShader::GetShadowBufferName() const {
-  return GetProgramName() + "shadow";
-}
-
 std::string shader::SceneShader::GetSkyboxTextureUnitName() const {
   return GetProgramName() + "/skybox";
 }
@@ -236,10 +221,6 @@ std::string shader::SceneShader::GetModelMaterialUniformBlockName() const {
 
 std::string shader::SceneShader::GetLightingUniformBlockName() const {
   return "Lighting";
-}
-
-std::string shader::SceneShader::GetShadowUniformBlockName() const {
-  return "Shadow";
 }
 
 /*******************************************************************************
@@ -276,7 +257,7 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("quad").SetRotation(glm::vec3(0.0f));
   scene_models_.at("quad").SetLightPos(GetLightPos());
   scene_models_.at("quad").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
-  scene_models_.at("quad").SetLightIntensity(glm::vec3(0.8f, 0.8f, 1.0f));
+  scene_models_.at("quad").SetLightIntensity(glm::vec3(0.5f, 0.5f, 1.0f));
   scene_models_.at("quad").SetUseEnvMap(false);
 }
 
@@ -301,8 +282,6 @@ void shader::SceneShader::InitUniformBlocks() {
                          GetModelMaterialUniformBlockName(), model_material_);
   LinkDataToUniformBlock(GetLightingBufferName(), GetLightingUniformBlockName(),
                          lighting_);
-  LinkDataToUniformBlock(GetShadowBufferName(), GetShadowUniformBlockName(),
-                         shadow_);
 }
 
 void shader::SceneShader::InitLightTrans() {

@@ -4,7 +4,7 @@
  * Constants
  ******************************************************************************/
 
-const float kPi = 3.1415926535897932384626433832795;
+const float kPi = 3.1415926535897932384626433832795f;
 const float kEnvMapBlendRatio = 0.35f;
 const float kParallaxHeightScale = 0.01f;
 const float kParallaxMapMinNumLayers = 4.0f;
@@ -37,12 +37,6 @@ layout(std140) uniform Lighting {
   vec3 view_pos;
 }
 lighting;
-
-layout(std140) uniform Shadow {
-  bool dim_orig_color;
-  bool draw_shadow;
-}
-shadow;
 
 /*******************************************************************************
  * Textures
@@ -251,13 +245,6 @@ vec4 GetSpecularColor() {
   return affecting_color * tex_color;
 }
 
-vec4 GetBlinnPhongColor() {
-  const vec4 ambient_color = GetAmbientColor();
-  const vec4 diffuse_color = GetDiffuseColor();
-  const vec4 specular_color = GetSpecularColor();
-  return ambient_color + diffuse_color + specular_color;
-}
-
 /*******************************************************************************
  * Environment Mapping
  ******************************************************************************/
@@ -274,40 +261,27 @@ vec4 GetEnvironmentMapColor() {
  * Color Blending
  ******************************************************************************/
 
-vec4 CalcNonShadowColor() {
+vec4 GetBlinnPhongShadowColor() {
+  const vec4 ambient_color = GetAmbientColor();
+  const vec4 diffuse_color = GetDiffuseColor();
+  const vec4 specular_color = GetSpecularColor();
+  const float shadow = CalcShadow();
+  return ambient_color + (1.0f - shadow) * (diffuse_color + specular_color);
+}
+
+vec4 CalcFinalColor() {
   // Calculate environment mapping blend ratio
   float env_map_blend_ratio = kEnvMapBlendRatio;
   if (!model_material.use_env_map) {
     env_map_blend_ratio = 0.0f;
   }
   // Blend Blinn-Phong color with environment mapped color
-  return (1.0f - env_map_blend_ratio) * GetBlinnPhongColor() +
+  return (1.0f - env_map_blend_ratio) * GetBlinnPhongShadowColor() +
          env_map_blend_ratio * GetEnvironmentMapColor();
-}
-
-vec4 CalcFinalColor(vec4 non_shadow_color) {
-  const vec4 kShadowColor = 0.3f * vec4(0.64f, 0.57f, 0.49f, 1.0f);
-  const float kShadowFactor = 0.2f;
-
-  // Calculate shadow coefficient
-  float shadow_coef = CalcShadow();
-  if (!shadow.draw_shadow) {
-    shadow_coef = 0.0f;
-  }
-  // Check whether to dim the original color
-  if (shadow.dim_orig_color) {
-    return (1.0f - shadow_coef) * non_shadow_color +
-           shadow_coef * kShadowFactor * non_shadow_color;
-  } else {
-    return (1.0f - shadow_coef) * non_shadow_color + shadow_coef * kShadowColor;
-  }
 }
 
 /*******************************************************************************
  * Entry Point
  ******************************************************************************/
 
-void main() {
-  const vec4 non_shadow_color = CalcNonShadowColor();
-  fs_color = CalcFinalColor(non_shadow_color);
-}
+void main() { fs_color = CalcFinalColor(); }

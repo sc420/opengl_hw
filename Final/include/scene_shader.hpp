@@ -58,15 +58,6 @@ class SceneShader : public Shader {
     bool pad[4];  // +4->192=16*12
   };
 
-  struct Shadow {
-    bool dim_orig_color;  // 4*0=0, +1->1
-
-    bool pad_draw_shadow[3];  // +3->4
-    bool draw_shadow;         // 4*1=4, +1->5
-
-    bool pad[3];  // +3->8=4*2
-  };
-
   SceneShader();
 
   /* Shader Registrations */
@@ -111,8 +102,6 @@ class SceneShader : public Shader {
 
   void UpdateViewPos(const glm::vec3 &view_pos);
 
-  void UpdateShadow(const bool dim_orig_color, const bool draw_shadow);
-
   void ToggleNormalHeight(const bool toggle);
 
   /* Name Management */
@@ -140,8 +129,6 @@ class SceneShader : public Shader {
 
   std::string GetLightingBufferName() const;
 
-  std::string GetShadowBufferName() const;
-
   std::string GetSkyboxTextureUnitName() const;
 
   std::string GetModelTransUniformBlockName() const;
@@ -149,8 +136,6 @@ class SceneShader : public Shader {
   std::string GetModelMaterialUniformBlockName() const;
 
   std::string GetLightingUniformBlockName() const;
-
-  std::string GetShadowUniformBlockName() const;
 
  private:
   /* Model States */
@@ -168,7 +153,6 @@ class SceneShader : public Shader {
   dto::ModelTrans model_trans_;
   ModelMaterial model_material_;
   Lighting lighting_;
-  Shadow shadow_;
   bool use_normal_height;
 
   /* Model Initialization */
