@@ -113,7 +113,7 @@ dto::GlobalTrans shader::SceneShader::GetGlobalTrans() const {
 }
 
 glm::vec3 shader::SceneShader::GetLightPos() const {
-  return glm::vec3(-20.0f, 0.0f, 15.0f);
+  return glm::vec3(-20.0f, 30.0f, 30.0f);
 }
 
 /*******************************************************************************

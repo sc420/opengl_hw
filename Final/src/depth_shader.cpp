@@ -132,7 +132,7 @@ dto::GlobalTrans shader::DepthShader::GetLightTrans() const {
       glm::vec3(glm::radians(30.0f), glm::radians(30.0f), glm::radians(0.0f)));
   // Set the light space
   const glm::mat4 light_proj =
-      glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 1e-3f, 1e3f);
+      glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, 1e-3f, 1e3f);
   const glm::mat4 light_view = camera_trans.GetTrans();
   const glm::mat4 light_model = glm::mat4(1.0f);
   // Set the new global transformation to the light space
