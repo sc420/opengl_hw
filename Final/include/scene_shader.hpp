@@ -77,10 +77,6 @@ class SceneShader : public Shader {
 
   /* Model Handlers */
 
-  void LoadModels();
-
-  void InitModels();
-
   const as::Model &GetSceneModel();
 
   const as::Model &GetQuadModel();
@@ -89,12 +85,6 @@ class SceneShader : public Shader {
 
   void Init();
 
-  void InitVertexArrays();
-
-  void InitUniformBlocks();
-
-  void InitLightTrans();
-
   void ReuseSkyboxTexture();
 
   void BindTextures();
@@ -102,10 +92,6 @@ class SceneShader : public Shader {
   /* GL Drawing Methods */
 
   void Draw();
-
-  void UpdateQuadLighting();
-
-  void UpdateSceneLighting();
 
   /* State Getters */
 
@@ -121,11 +107,7 @@ class SceneShader : public Shader {
 
   void UpdateGlobalTrans(const dto::GlobalTrans &global_trans);
 
-  void UpdateQuadModelTrans();
-
   void UpdateSceneModelTrans(const float add_rotation = 0.0f);
-
-  void UpdateModelMaterial(const as::Material &material);
 
   void UpdateViewPos(const glm::vec3 &view_pos);
 
@@ -189,7 +171,29 @@ class SceneShader : public Shader {
   Shadow shadow_;
   bool use_normal_height;
 
+  /* Model Initialization */
+
+  void LoadModels();
+
+  void InitModels();
+
+  /* GL Initialization */
+
+  void InitVertexArrays();
+
+  void InitUniformBlocks();
+
+  void InitLightTrans();
+
   /* State Updaters */
+
+  void UpdateModelTrans(const dto::SceneModel &scene_model);
+
+  void UpdateLighting(const dto::SceneModel &scene_model);
+
+  void UpdateModelMaterial(const dto::SceneModel &scene_model);
+
+  void UpdateModelMaterial(const as::Material &material);
 
   void UpdateFixedNormModel();
 

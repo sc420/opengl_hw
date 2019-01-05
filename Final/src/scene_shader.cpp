@@ -25,38 +25,6 @@ void shader::SceneShader::RegisterSkyboxShader(
  * Model Handlers
  ******************************************************************************/
 
-void shader::SceneShader::LoadModels() {
-  // Scene
-  scene_models_["scene"] =
-      dto::SceneModel("scene", "assets/models/nanosuit/nanosuit.obj",
-                      aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                          aiProcess_GenNormals | aiProcess_FlipUVs,
-                      "scene", 5, gl_managers_);
-  // Quad
-  scene_models_["quad"] = dto::SceneModel(
-      "quad", "assets/models/volcano-02/volcano 02_subdiv_01.obj",
-      aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-          aiProcess_GenNormals | aiProcess_FlipUVs,
-      "quad", 3, gl_managers_);
-}
-
-void shader::SceneShader::InitModels() {
-  // Scene
-  scene_models_.at("scene").SetTranslation(glm::vec3(-10.0f, 0.0f, -8.0f));
-  scene_models_.at("scene").SetScale(glm::vec3(0.5f, 0.35f, 0.5f));
-  scene_models_.at("scene").SetRotation(glm::vec3(0.0f));
-  scene_models_.at("scene").SetLightPos(GetLightPos());
-  scene_models_.at("scene").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
-  scene_models_.at("scene").SetLightIntensity(glm::vec3(0.1f, 1.0f, 1.0f));
-  // Quad
-  scene_models_.at("quad").SetTranslation(glm::vec3(0.0f));
-  scene_models_.at("quad").SetScale(glm::vec3(1e-4f));
-  scene_models_.at("quad").SetRotation(glm::vec3(0.0f));
-  scene_models_.at("quad").SetLightPos(GetLightPos());
-  scene_models_.at("quad").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
-  scene_models_.at("quad").SetLightIntensity(glm::vec3(0.8f, 0.8f, 1.0f));
-}
-
 const as::Model &shader::SceneShader::GetSceneModel() {
   return scene_models_.at("scene").GetModel();
 }
@@ -77,40 +45,6 @@ void shader::SceneShader::Init() {
   InitVertexArrays();
   InitUniformBlocks();
   InitLightTrans();
-}
-
-void shader::SceneShader::InitVertexArrays() {
-  for (const auto &pair : scene_models_) {
-    const dto::SceneModel &scene_model = pair.second;
-    InitVertexArray(scene_model.GetVertexArrayGroupName(),
-                    scene_model.GetModel());
-  }
-}
-
-void shader::SceneShader::InitUniformBlocks() {
-  LinkDataToUniformBlock(GetGlobalTransBufferName(),
-                         GetGlobalTransUniformBlockName(), global_trans_);
-  LinkDataToUniformBlock(GetModelTransBufferName(),
-                         GetModelTransUniformBlockName(), model_trans_);
-  LinkDataToUniformBlock(GetModelMaterialBufferName(),
-                         GetModelMaterialUniformBlockName(), model_material_);
-  LinkDataToUniformBlock(GetLightingBufferName(), GetLightingUniformBlockName(),
-                         lighting_);
-  LinkDataToUniformBlock(GetShadowBufferName(), GetShadowUniformBlockName(),
-                         shadow_);
-}
-
-void shader::SceneShader::InitLightTrans() {
-  // Get managers
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  // Get names
-  const std::string buffer_name = GetLightingBufferName();
-  // Get light space transformation
-  const dto::GlobalTrans global_trans = depth_shader_->GetLightTrans();
-  lighting_.light_trans =
-      global_trans.proj * global_trans.view * global_trans.model;
-  // Update the buffer
-  buffer_manager.UpdateBuffer(buffer_name);
 }
 
 void shader::SceneShader::ReuseSkyboxTexture() {
@@ -154,56 +88,23 @@ void shader::SceneShader::BindTextures() {
  ******************************************************************************/
 
 void shader::SceneShader::Draw() {
-  // Get names
-  const std::string quad_group_name = GetQuadGroupName();
-  const std::string scene_group_name = GetSceneGroupName();
-  // Get models
-  const as::Model &quad_model = GetQuadModel();
-  const as::Model &scene_model = GetSceneModel();
-
   // Use the program
   UseProgram();
 
-  // Draw the quad
-  model_material_.use_env_map = false;
-  UpdateQuadModelTrans();
-  UpdateQuadLighting();
-  DrawModel(quad_model, quad_group_name);
-  // Draw the scene
-  model_material_.use_env_map = true;
-  UpdateSceneModelTrans();
-  UpdateSceneLighting();
-  DrawModel(scene_model, scene_group_name);
-}
+  for (const auto &pair : scene_models_) {
+    const dto::SceneModel &scene_model = pair.second;
+    // Get names
+    const std::string group_name = scene_model.GetVertexArrayGroupName();
+    // Get model
+    const as::Model &model = scene_model.GetModel();
 
-void shader::SceneShader::UpdateQuadLighting() {
-  const dto::SceneModel &model = scene_models_.at("quad");
-
-  lighting_.light_pos = model.GetLightPos();
-  lighting_.light_color = model.GetLightColor();
-  lighting_.light_intensity = model.GetLightIntensity();
-
-  // Get managers
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  // Get names
-  const std::string buffer_name = GetLightingBufferName();
-  // Update the buffer
-  buffer_manager.UpdateBuffer(buffer_name);
-}
-
-void shader::SceneShader::UpdateSceneLighting() {
-  const dto::SceneModel &model = scene_models_.at("scene");
-
-  lighting_.light_pos = model.GetLightPos();
-  lighting_.light_color = model.GetLightColor();
-  lighting_.light_intensity = model.GetLightIntensity();
-
-  // Get managers
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  // Get names
-  const std::string buffer_name = GetLightingBufferName();
-  // Update the buffer
-  buffer_manager.UpdateBuffer(buffer_name);
+    // Update states
+    UpdateModelTrans(scene_model);
+    UpdateLighting(scene_model);
+    UpdateModelMaterial(scene_model);
+    // Draw the model
+    DrawModel(model, group_name);
+  }
 }
 
 /*******************************************************************************
@@ -243,53 +144,10 @@ void shader::SceneShader::UpdateGlobalTrans(
   UpdateFixedNormModel();
 }
 
-void shader::SceneShader::UpdateQuadModelTrans() {
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  // Update model transformation
-  model_trans_.trans = GetQuadModelTrans();
-  // Update the buffer
-  const std::string buffer_name = GetModelTransBufferName();
-  buffer_manager.UpdateBuffer(buffer_name);
-  // Update also the fixed normal model
-  UpdateFixedNormModel();
-}
-
 void shader::SceneShader::UpdateSceneModelTrans(const float add_rotation) {
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model state
   model_rotation += add_rotation;
-
   scene_models_.at("scene").SetRotation(glm::vec3(0.0f, model_rotation, 0.0f));
-
-  // Update model transformation
-  model_trans_.trans = GetSceneModelTrans();
-  // Update the buffer
-  const std::string buffer_name = GetModelTransBufferName();
-  buffer_manager.UpdateBuffer(buffer_name);
-  // Update also the fixed normal model
-  UpdateFixedNormModel();
-}
-
-void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  // Update material
-  model_material_.use_ambient_tex = material.HasAmbientTexture();
-  model_material_.use_diffuse_tex = material.HasDiffuseTexture();
-  model_material_.use_specular_tex = material.HasSpecularTexture();
-  if (use_normal_height) {
-    model_material_.use_height_tex = material.HasHeightTexture();
-    model_material_.use_normals_tex = material.HasNormalsTexture();
-  } else {
-    model_material_.use_height_tex = false;
-    model_material_.use_normals_tex = false;
-  }
-  model_material_.ambient_color = material.GetAmbientColor();
-  model_material_.diffuse_color = material.GetDiffuseColor();
-  model_material_.specular_color = material.GetSpecularColor();
-  model_material_.shininess = material.GetShininess();
-  // Update the buffer
-  const std::string buffer_name = GetModelMaterialBufferName();
-  buffer_manager.UpdateBuffer(buffer_name);
 }
 
 void shader::SceneShader::UpdateViewPos(const glm::vec3 &view_pos) {
@@ -385,8 +243,142 @@ std::string shader::SceneShader::GetShadowUniformBlockName() const {
 }
 
 /*******************************************************************************
+ * Model Initialization (Private)
+ ******************************************************************************/
+
+void shader::SceneShader::LoadModels() {
+  // Scene
+  scene_models_["scene"] =
+      dto::SceneModel("scene", "assets/models/nanosuit/nanosuit.obj",
+                      aiProcess_CalcTangentSpace | aiProcess_Triangulate |
+                          aiProcess_GenNormals | aiProcess_FlipUVs,
+                      "scene", 5, gl_managers_);
+  // Quad
+  scene_models_["quad"] = dto::SceneModel(
+      "quad", "assets/models/volcano-02/volcano 02_subdiv_01.obj",
+      aiProcess_CalcTangentSpace | aiProcess_Triangulate |
+          aiProcess_GenNormals | aiProcess_FlipUVs,
+      "quad", 3, gl_managers_);
+}
+
+void shader::SceneShader::InitModels() {
+  // Scene
+  scene_models_.at("scene").SetTranslation(glm::vec3(-10.0f, 0.0f, -8.0f));
+  scene_models_.at("scene").SetScale(glm::vec3(0.5f, 0.35f, 0.5f));
+  scene_models_.at("scene").SetRotation(glm::vec3(0.0f));
+  scene_models_.at("scene").SetLightPos(GetLightPos());
+  scene_models_.at("scene").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
+  scene_models_.at("scene").SetLightIntensity(glm::vec3(0.1f, 1.0f, 1.0f));
+  scene_models_.at("scene").SetUseEnvMap(true);
+  // Quad
+  scene_models_.at("quad").SetTranslation(glm::vec3(0.0f));
+  scene_models_.at("quad").SetScale(glm::vec3(1e-4f));
+  scene_models_.at("quad").SetRotation(glm::vec3(0.0f));
+  scene_models_.at("quad").SetLightPos(GetLightPos());
+  scene_models_.at("quad").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
+  scene_models_.at("quad").SetLightIntensity(glm::vec3(0.8f, 0.8f, 1.0f));
+  scene_models_.at("quad").SetUseEnvMap(false);
+}
+
+/*******************************************************************************
+ * GL Initialization (Private)
+ ******************************************************************************/
+
+void shader::SceneShader::InitVertexArrays() {
+  for (const auto &pair : scene_models_) {
+    const dto::SceneModel &scene_model = pair.second;
+    InitVertexArray(scene_model.GetVertexArrayGroupName(),
+                    scene_model.GetModel());
+  }
+}
+
+void shader::SceneShader::InitUniformBlocks() {
+  LinkDataToUniformBlock(GetGlobalTransBufferName(),
+                         GetGlobalTransUniformBlockName(), global_trans_);
+  LinkDataToUniformBlock(GetModelTransBufferName(),
+                         GetModelTransUniformBlockName(), model_trans_);
+  LinkDataToUniformBlock(GetModelMaterialBufferName(),
+                         GetModelMaterialUniformBlockName(), model_material_);
+  LinkDataToUniformBlock(GetLightingBufferName(), GetLightingUniformBlockName(),
+                         lighting_);
+  LinkDataToUniformBlock(GetShadowBufferName(), GetShadowUniformBlockName(),
+                         shadow_);
+}
+
+void shader::SceneShader::InitLightTrans() {
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string buffer_name = GetLightingBufferName();
+  // Get light space transformation
+  const dto::GlobalTrans global_trans = depth_shader_->GetLightTrans();
+  lighting_.light_trans =
+      global_trans.proj * global_trans.view * global_trans.model;
+  // Update the buffer
+  buffer_manager.UpdateBuffer(buffer_name);
+}
+
+/*******************************************************************************
  * State Updaters (Private)
  ******************************************************************************/
+
+void shader::SceneShader::UpdateModelTrans(const dto::SceneModel &scene_model) {
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string buffer_name = GetModelTransBufferName();
+
+  // Update transformation
+  model_trans_.trans = scene_model.GetTrans();
+  // Update the buffer
+  buffer_manager.UpdateBuffer(buffer_name);
+
+  // Update also the fixed normal model
+  UpdateFixedNormModel();
+}
+
+void shader::SceneShader::UpdateLighting(const dto::SceneModel &scene_model) {
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string buffer_name = GetLightingBufferName();
+
+  // Update lighting
+  lighting_.light_pos = scene_model.GetLightPos();
+  lighting_.light_color = scene_model.GetLightColor();
+  lighting_.light_intensity = scene_model.GetLightIntensity();
+
+  // Update the buffer
+  buffer_manager.UpdateBuffer(buffer_name);
+}
+
+void shader::SceneShader::UpdateModelMaterial(
+    const dto::SceneModel &scene_model) {
+  // The buffer will be updated in the draw method
+  model_material_.use_env_map = scene_model.GetUseEnvMap();
+}
+
+void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Update material
+  model_material_.use_ambient_tex = material.HasAmbientTexture();
+  model_material_.use_diffuse_tex = material.HasDiffuseTexture();
+  model_material_.use_specular_tex = material.HasSpecularTexture();
+  if (use_normal_height) {
+    model_material_.use_height_tex = material.HasHeightTexture();
+    model_material_.use_normals_tex = material.HasNormalsTexture();
+  } else {
+    model_material_.use_height_tex = false;
+    model_material_.use_normals_tex = false;
+  }
+  model_material_.ambient_color = material.GetAmbientColor();
+  model_material_.diffuse_color = material.GetDiffuseColor();
+  model_material_.specular_color = material.GetSpecularColor();
+  model_material_.shininess = material.GetShininess();
+  // Update the buffer
+  const std::string buffer_name = GetModelMaterialBufferName();
+  buffer_manager.UpdateBuffer(buffer_name);
+}
 
 void shader::SceneShader::UpdateFixedNormModel() {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();

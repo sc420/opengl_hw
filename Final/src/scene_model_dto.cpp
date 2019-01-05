@@ -28,27 +28,39 @@ std::string dto::SceneModel::GetVertexArrayGroupName() const {
 
 const as::Model &dto::SceneModel::GetModel() const { return model_; }
 
-void dto::SceneModel::SetTranslation(const glm::vec3 translation) {
+/*******************************************************************************
+ * State Setters
+ ******************************************************************************/
+
+void dto::SceneModel::SetTranslation(const glm::vec3 &translation) {
   translation_ = translation;
 }
 
-void dto::SceneModel::SetScale(const glm::vec3 scale) { scale_ = scale; }
+void dto::SceneModel::SetScale(const glm::vec3 &scale) { scale_ = scale; }
 
-void dto::SceneModel::SetRotation(const glm::vec3 rotation) {
+void dto::SceneModel::SetRotation(const glm::vec3 &rotation) {
   rotation_ = rotation;
 }
 
-void dto::SceneModel::SetLightPos(const glm::vec3 light_pos) {
+void dto::SceneModel::SetLightPos(const glm::vec3 &light_pos) {
   light_pos_ = light_pos;
 }
 
-void dto::SceneModel::SetLightColor(const glm::vec3 light_color) {
+void dto::SceneModel::SetLightColor(const glm::vec3 &light_color) {
   light_color_ = light_color;
 }
 
-void dto::SceneModel::SetLightIntensity(const glm::vec3 light_intensity) {
+void dto::SceneModel::SetLightIntensity(const glm::vec3 &light_intensity) {
   light_intensity_ = light_intensity;
 }
+
+void dto::SceneModel::SetUseEnvMap(const bool use_env_map) {
+  use_env_map_ = use_env_map;
+}
+
+/*******************************************************************************
+ * State Getters
+ ******************************************************************************/
 
 glm::mat4 dto::SceneModel::GetTrans() const {
   const glm::mat4 identity = glm::mat4(1.0f);
@@ -78,6 +90,8 @@ glm::vec3 dto::SceneModel::GetLightColor() const { return light_color_; }
 glm::vec3 dto::SceneModel::GetLightIntensity() const {
   return light_intensity_;
 }
+
+bool dto::SceneModel::GetUseEnvMap() const { return use_env_map_; }
 
 /*******************************************************************************
  * Model Initialization (Private)

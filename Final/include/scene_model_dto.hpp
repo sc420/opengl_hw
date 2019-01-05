@@ -26,17 +26,19 @@ class SceneModel {
 
   /* State Setters */
 
-  void SetTranslation(const glm::vec3 translation);
+  void SetTranslation(const glm::vec3 &translation);
 
-  void SetScale(const glm::vec3 scale);
+  void SetScale(const glm::vec3 &scale);
 
-  void SetRotation(const glm::vec3 rotation);
+  void SetRotation(const glm::vec3 &rotation);
 
-  void SetLightPos(const glm::vec3 light_pos);
+  void SetLightPos(const glm::vec3 &light_pos);
 
-  void SetLightColor(const glm::vec3 light_color);
+  void SetLightColor(const glm::vec3 &light_color);
 
-  void SetLightIntensity(const glm::vec3 light_intensity);
+  void SetLightIntensity(const glm::vec3 &light_intensity);
+
+  void SetUseEnvMap(const bool use_env_map);
 
   /* State Getters */
 
@@ -47,6 +49,8 @@ class SceneModel {
   glm::vec3 GetLightColor() const;
 
   glm::vec3 GetLightIntensity() const;
+
+  bool GetUseEnvMap() const;
 
  private:
   /* Name Management */
@@ -64,6 +68,9 @@ class SceneModel {
   glm::vec3 light_pos_;
   glm::vec3 light_color_;
   glm::vec3 light_intensity_;
+
+  /* Material */
+  bool use_env_map_;
 
   /* Model Initialization */
 
