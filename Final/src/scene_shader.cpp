@@ -217,14 +217,14 @@ void shader::SceneShader::LoadModels() {
           aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
           aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
       "scene", 5, gl_managers_);
-  // Quad
-  scene_models_["quad"] = dto::SceneModel(
-      "quad", "assets/models/volcano-02/volcano 02_subdiv_01.obj",
+  // Ground
+  scene_models_["ground"] = dto::SceneModel(
+      "ground", "assets/models/volcano-02/volcano 02_subdiv_01.obj",
       aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
           aiProcess_Triangulate | aiProcess_GenNormals |
           aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
           aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
-      "quad", 3, gl_managers_);
+      "ground", 3, gl_managers_);
 }
 
 void shader::SceneShader::InitModels() {
@@ -236,14 +236,14 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("scene").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
   scene_models_.at("scene").SetLightIntensity(glm::vec3(0.1f, 1.0f, 1.0f));
   scene_models_.at("scene").SetUseEnvMap(true);
-  // Quad
-  scene_models_.at("quad").SetTranslation(glm::vec3(0.0f));
-  scene_models_.at("quad").SetScale(glm::vec3(1e-4f));
-  scene_models_.at("quad").SetRotation(glm::vec3(0.0f));
-  scene_models_.at("quad").SetLightPos(GetLightPos());
-  scene_models_.at("quad").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
-  scene_models_.at("quad").SetLightIntensity(glm::vec3(0.5f, 0.5f, 1.0f));
-  scene_models_.at("quad").SetUseEnvMap(false);
+  // Ground
+  scene_models_.at("ground").SetTranslation(glm::vec3(0.0f));
+  scene_models_.at("ground").SetScale(glm::vec3(1e-4f));
+  scene_models_.at("ground").SetRotation(glm::vec3(0.0f));
+  scene_models_.at("ground").SetLightPos(GetLightPos());
+  scene_models_.at("ground").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
+  scene_models_.at("ground").SetLightIntensity(glm::vec3(0.5f, 0.5f, 1.0f));
+  scene_models_.at("ground").SetUseEnvMap(false);
 }
 
 /*******************************************************************************
