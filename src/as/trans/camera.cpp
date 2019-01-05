@@ -33,6 +33,9 @@ void as::CameraTrans::AddEye(const glm::vec3 &add_dir) {
 
 void as::CameraTrans::AddAngles(const glm::vec3 &add_angles) {
   angles_ += add_angles;
+  // Keep the range in [0, 2*pi)
+  const float two_pi = 2.0f * glm::pi<float>();
+  angles_ = glm::mod(angles_, two_pi);
 }
 
 void as::CameraTrans::SetTrans(const glm::vec3 &pos, const glm::vec3 &angles) {
