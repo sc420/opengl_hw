@@ -22,15 +22,12 @@ void shader::SceneShader::RegisterSkyboxShader(
 }
 
 /*******************************************************************************
- * Model Handlers
+ * Model Getters
  ******************************************************************************/
 
-const as::Model &shader::SceneShader::GetSceneModel() {
-  return scene_models_.at("scene").GetModel();
-}
-
-const as::Model &shader::SceneShader::GetQuadModel() {
-  return scene_models_.at("quad").GetModel();
+const std::map<std::string, dto::SceneModel>
+    &shader::SceneShader::GetSceneModels() const {
+  return scene_models_;
 }
 
 /*******************************************************************************
@@ -115,14 +112,6 @@ dto::GlobalTrans shader::SceneShader::GetGlobalTrans() const {
   return global_trans_;
 }
 
-glm::mat4 shader::SceneShader::GetQuadModelTrans() {
-  return scene_models_.at("quad").GetTrans();
-}
-
-glm::mat4 shader::SceneShader::GetSceneModelTrans() {
-  return scene_models_.at("scene").GetTrans();
-}
-
 glm::vec3 shader::SceneShader::GetLightPos() const {
   return glm::vec3(-20.0f, 0.0f, 15.0f);
 }
@@ -169,16 +158,8 @@ void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
 
 std::string shader::SceneShader::GetId() const { return "scene"; }
 
-std::string shader::SceneShader::GetSceneGroupName() const {
-  return "vertex_array/group/scene";
-}
-
-std::string shader::SceneShader::GetQuadGroupName() const {
-  return "vertex_array/group/quad";
-}
-
 std::string shader::SceneShader::GetGlobalTransBufferName() const {
-  return GetProgramName() + "buffer/global_trans";
+  return GetProgramName() + "/buffer/global_trans";
 }
 
 std::string shader::SceneShader::GetGlobalTransUniformBlockName() const {

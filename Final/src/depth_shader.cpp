@@ -88,19 +88,20 @@ void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
   // Update global transformation
   UpdateGlobalTrans(global_trans);
 
-  // Get names
-  const std::string quad_group_name = scene_shader_->GetQuadGroupName();
-  const std::string scene_group_name = scene_shader_->GetSceneGroupName();
-  // Get models
-  const as::Model &quad_model = scene_shader_->GetQuadModel();
-  const as::Model &scene_model = scene_shader_->GetSceneModel();
+  // Draw the scene models without textures
+  const auto &scene_models = scene_shader_->GetSceneModels();
+  for (const auto &pair : scene_models) {
+    const dto::SceneModel &scene_model = pair.second;
+    // Get names
+    const std::string group_name = scene_model.GetVertexArrayGroupName();
+    // Get model
+    const as::Model &model = scene_model.GetModel();
 
-  // Draw the quad
-  UpdateQuadModelTrans();
-  DrawModelWithoutTextures(quad_model, quad_group_name);
-  // Draw the scene
-  UpdateSceneModelTrans();
-  DrawModelWithoutTextures(scene_model, scene_group_name);
+    // Update states
+    UpdateModelTrans(scene_model);
+    // Draw the model
+    DrawModelWithoutTextures(model, group_name);
+  }
 
   // Reset the viewport
   glViewport(0, 0, window_size.x, window_size.y);
@@ -211,20 +212,15 @@ void shader::DepthShader::UpdateGlobalTrans(
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
-void shader::DepthShader::UpdateQuadModelTrans() {
+void shader::DepthShader::UpdateModelTrans(const dto::SceneModel &scene_model) {
+  // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  // Update model transformation
-  model_trans_.trans = scene_shader_->GetQuadModelTrans();
-  // Update the buffer
+  // Get names
   const std::string buffer_name = GetModelTransBufferName();
-  buffer_manager.UpdateBuffer(buffer_name);
-}
 
-void shader::DepthShader::UpdateSceneModelTrans() {
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model transformation
-  model_trans_.trans = scene_shader_->GetSceneModelTrans();
+  model_trans_.trans = scene_model.GetTrans();
+
   // Update the buffer
-  const std::string buffer_name = GetModelTransBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }

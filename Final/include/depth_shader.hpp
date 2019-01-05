@@ -2,6 +2,7 @@
 
 #include "as/trans/camera.hpp"
 
+#include "scene_model_dto.hpp"
 #include "scene_shader.hpp"
 #include "shader.hpp"
 #include "trans_dto.hpp"
@@ -75,8 +76,6 @@ class DepthShader : public Shader {
 
   void UpdateGlobalTrans(const dto::GlobalTrans &global_trans);
 
-  void UpdateQuadModelTrans();
-
-  void UpdateSceneModelTrans();
+  void UpdateModelTrans(const dto::SceneModel &scene_model);
 };
 }  // namespace shader

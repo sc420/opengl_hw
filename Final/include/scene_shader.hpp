@@ -66,11 +66,9 @@ class SceneShader : public Shader {
 
   void RegisterSkyboxShader(const SkyboxShader &skybox_shader);
 
-  /* Model Handlers */
+  /* Model Getters */
 
-  const as::Model &GetSceneModel();
-
-  const as::Model &GetQuadModel();
+  const std::map<std::string, dto::SceneModel> &GetSceneModels() const;
 
   /* GL Initializations */
 
@@ -88,10 +86,6 @@ class SceneShader : public Shader {
 
   dto::GlobalTrans GetGlobalTrans() const;
 
-  glm::mat4 GetQuadModelTrans();
-
-  glm::mat4 GetSceneModelTrans();
-
   glm::vec3 GetLightPos() const;
 
   /* State Updaters */
@@ -107,10 +101,6 @@ class SceneShader : public Shader {
   /* Name Management */
 
   std::string GetId() const override;
-
-  std::string GetSceneGroupName() const;
-
-  std::string GetQuadGroupName() const;
 
   std::string GetGlobalTransBufferName() const;
 
