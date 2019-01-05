@@ -77,7 +77,9 @@ class SceneShader : public Shader {
 
   /* Model Handlers */
 
-  void LoadModel();
+  void LoadModels();
+
+  void InitModels();
 
   const as::Model &GetSceneModel();
 
@@ -100,10 +102,6 @@ class SceneShader : public Shader {
   /* GL Drawing Methods */
 
   void Draw();
-
-  void DrawScene();
-
-  void DrawQuad(const bool draw_shadow = true);
 
   void UpdateQuadLighting();
 

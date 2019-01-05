@@ -1,21 +1,96 @@
 #include "scene_model_dto.hpp"
 
-dto::SceneModel::SceneModel() : model_(as::Model()) {}
+dto::SceneModel::SceneModel() {}
 
-dto::SceneModel::SceneModel(const std::string &path, const unsigned int flags,
+dto::SceneModel::SceneModel(const std::string &id, const std::string &path,
+                            const unsigned int flags,
                             const std::string &tex_unit_group_name,
                             const GLsizei num_mipmap_levels,
                             as::GLManagers *gl_managers) {
+  id_ = id;
   LoadFile(path, flags);
   InitTextures(tex_unit_group_name, num_mipmap_levels, gl_managers);
 }
 
+/*******************************************************************************
+ * Name Management
+ ******************************************************************************/
+
+std::string dto::SceneModel::GetId() const { return id_; }
+
+std::string dto::SceneModel::GetVertexArrayGroupName() const {
+  return "vertex_array/group/" + id_;
+}
+
+/*******************************************************************************
+ * Model Getters
+ ******************************************************************************/
+
 const as::Model &dto::SceneModel::GetModel() const { return model_; }
+
+void dto::SceneModel::SetTranslation(const glm::vec3 translation) {
+  translation_ = translation;
+}
+
+void dto::SceneModel::SetScale(const glm::vec3 scale) { scale_ = scale; }
+
+void dto::SceneModel::SetRotation(const glm::vec3 rotation) {
+  rotation_ = rotation;
+}
+
+void dto::SceneModel::SetLightPos(const glm::vec3 light_pos) {
+  light_pos_ = light_pos;
+}
+
+void dto::SceneModel::SetLightColor(const glm::vec3 light_color) {
+  light_color_ = light_color;
+}
+
+void dto::SceneModel::SetLightIntensity(const glm::vec3 light_intensity) {
+  light_intensity_ = light_intensity;
+}
+
+glm::mat4 dto::SceneModel::GetTrans() const {
+  const glm::mat4 identity = glm::mat4(1.0f);
+  glm::mat4 trans = glm::mat4(1.0f);
+
+  trans = glm::scale(identity, scale_) * trans;
+
+  // Convert quaternion to rotation matrix
+  const glm::quat pitch =
+      glm::angleAxis(rotation_.x, glm::vec3(1.0f, 0.0f, 0.0f));
+  const glm::quat yaw =
+      glm::angleAxis(rotation_.y, glm::vec3(0.0f, 1.0f, 0.0f));
+  const glm::quat roll =
+      glm::angleAxis(rotation_.z, glm::vec3(0.0f, 0.0f, 1.0f));
+  const glm::quat orientation = glm::normalize(pitch * yaw * roll);
+  trans = glm::mat4_cast(orientation) * trans;
+
+  trans = glm::translate(identity, translation_) * trans;
+
+  return trans;
+}
+
+glm::vec3 dto::SceneModel::GetLightPos() const { return light_pos_; }
+
+glm::vec3 dto::SceneModel::GetLightColor() const { return light_color_; }
+
+glm::vec3 dto::SceneModel::GetLightIntensity() const {
+  return light_intensity_;
+}
+
+/*******************************************************************************
+ * Model Initialization (Private)
+ ******************************************************************************/
 
 void dto::SceneModel::LoadFile(const std::string &path,
                                const unsigned int flags) {
   model_.LoadFile(path, flags);
 }
+
+/*******************************************************************************
+ * GL Initialization (Private)
+ ******************************************************************************/
 
 void dto::SceneModel::InitTextures(const std::string &tex_unit_group_name,
                                    const GLsizei num_mipmap_levels,
@@ -62,6 +137,10 @@ void dto::SceneModel::InitTextures(const std::string &tex_unit_group_name,
     }
   }
 }
+
+/*******************************************************************************
+ * Name Management (Private)
+ ******************************************************************************/
 
 std::string dto::SceneModel::GetTextureUnitName(
     const std::string &tex_unit_group_name, const as::Texture &texture) const {

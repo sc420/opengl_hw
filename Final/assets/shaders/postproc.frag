@@ -26,6 +26,7 @@ const float kPi = 3.1415926535897932384626433832795;
 const vec4 kWhiteColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 const vec4 kBlackColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 const vec4 kErrorColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
+const float kGamma = 1.2f;
 
 /*******************************************************************************
  * Uniform Blocks
@@ -638,6 +639,11 @@ vec4 CalcSpecial() {
  * Post-processing / Center
  ******************************************************************************/
 
+vec4 CalcOriginal() {
+  const vec4 color = GetTexel(vs_tex_coords);
+  return pow(color, vec4(1.0f / kGamma));
+}
+
 vec4 CalcPostproc() {
   switch (postproc_inputs.effect_idx) {
     case kPostprocEffectImgAbs: {
@@ -676,7 +682,7 @@ void main() {
       fs_color = CalcPostproc();
     } break;
     case kDisplayModeOriginal: {
-      fs_color = GetTexel(vs_tex_coords);
+      fs_color = CalcOriginal();
     } break;
     case kDisplayModeBar: {
       fs_color = vec4(vec3(1.0f, 0.0f, 0.0f), 1.0f);

@@ -27,9 +27,8 @@ static const auto kTimerInterval = 10;
  ******************************************************************************/
 
 // Camera transformations
-as::CameraTrans camera_trans(glm::vec3(0.0f, -5.0f, -8.0f),
-                             glm::vec3(glm::radians(30.0f),
-                                       glm::radians(-80.0f),
+as::CameraTrans camera_trans(glm::vec3(10.0f, 5.0f, 0.0f),
+                             glm::vec3(glm::radians(30.0f), glm::radians(0.0f),
                                        glm::radians(0.0f)));
 
 /*******************************************************************************
@@ -301,8 +300,8 @@ void GLUTMotionCallback(const int x, const int y) {
       } break;
       case Modes::navigation: {
         const glm::ivec2 diff = mouse_pos - ui_manager.GetMousePos();
-        camera_trans.AddAngle(kCameraRotationSensitivity *
-                              glm::vec3(diff.y, diff.x, 0.0f));
+        camera_trans.AddAngles(kCameraRotationSensitivity *
+                               glm::vec3(diff.y, diff.x, 0.0f));
       } break;
       default: { throw new std::runtime_error("Unknown mode"); }
     }

@@ -25,17 +25,33 @@ void shader::SceneShader::RegisterSkyboxShader(
  * Model Handlers
  ******************************************************************************/
 
-void shader::SceneShader::LoadModel() {
+void shader::SceneShader::LoadModels() {
   scene_models_["scene"] =
-      dto::SceneModel("assets/models/nanosuit/nanosuit.obj",
+      dto::SceneModel("scene", "assets/models/nanosuit/nanosuit.obj",
                       aiProcess_CalcTangentSpace | aiProcess_Triangulate |
                           aiProcess_GenNormals | aiProcess_FlipUVs,
-                      "nanosuit", 5, gl_managers_);
-  scene_models_["quad"] =
-      dto::SceneModel("assets/models/volcano-02/volcano 02_subdiv_01.obj",
-                      aiProcess_CalcTangentSpace | aiProcess_Triangulate |
-                          aiProcess_GenNormals | aiProcess_FlipUVs,
-                      "quad", 3, gl_managers_);
+                      "scene", 5, gl_managers_);
+  scene_models_["quad"] = dto::SceneModel(
+      "quad", "assets/models/volcano-02/volcano 02_subdiv_01.obj",
+      aiProcess_CalcTangentSpace | aiProcess_Triangulate |
+          aiProcess_GenNormals | aiProcess_FlipUVs,
+      "quad", 3, gl_managers_);
+}
+
+void shader::SceneShader::InitModels() {
+  scene_models_.at("scene").SetTranslation(glm::vec3(-10.0f, 0.0f, -8.0f));
+  scene_models_.at("scene").SetScale(glm::vec3(0.5f, 0.35f, 0.5f));
+  scene_models_.at("scene").SetRotation(glm::vec3(0.0f));
+  scene_models_.at("scene").SetLightPos(GetLightPos());
+  scene_models_.at("scene").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
+  scene_models_.at("scene").SetLightIntensity(glm::vec3(0.1f, 1.0f, 1.0f));
+
+  scene_models_.at("quad").SetTranslation(glm::vec3(0.0f));
+  scene_models_.at("quad").SetScale(glm::vec3(1e-4f));
+  scene_models_.at("quad").SetRotation(glm::vec3(0.0f));
+  scene_models_.at("quad").SetLightPos(GetLightPos());
+  scene_models_.at("quad").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
+  scene_models_.at("quad").SetLightIntensity(glm::vec3(0.8f, 0.8f, 1.0f));
 }
 
 const as::Model &shader::SceneShader::GetSceneModel() {
@@ -53,15 +69,19 @@ const as::Model &shader::SceneShader::GetQuadModel() {
 void shader::SceneShader::Init() {
   CreateShaders();
   CreatePrograms();
-  LoadModel();
+  LoadModels();
+  InitModels();
   InitVertexArrays();
   InitUniformBlocks();
   InitLightTrans();
 }
 
 void shader::SceneShader::InitVertexArrays() {
-  InitVertexArray(GetSceneGroupName(), GetSceneModel());
-  InitVertexArray(GetQuadGroupName(), GetQuadModel());
+  for (const auto &pair : scene_models_) {
+    const dto::SceneModel &scene_model = pair.second;
+    InitVertexArray(scene_model.GetVertexArrayGroupName(),
+                    scene_model.GetModel());
+  }
 }
 
 void shader::SceneShader::InitUniformBlocks() {
@@ -153,50 +173,12 @@ void shader::SceneShader::Draw() {
   DrawModel(scene_model, scene_group_name);
 }
 
-void shader::SceneShader::DrawScene() {
-  // Get names
-  const std::string scene_group_name = GetSceneGroupName();
-  // Get models
-  const as::Model &scene_model = GetSceneModel();
-
-  // Use the program
-  UseProgram();
-
-  // Update shadow
-  UpdateShadow(true, true);
-
-  // Draw the scene
-  model_material_.use_env_map = true;
-  UpdateSceneModelTrans();
-  UpdateSceneLighting();
-  DrawModel(scene_model, scene_group_name);
-}
-
-void shader::SceneShader::DrawQuad(const bool draw_shadow) {
-  // Get names
-  const std::string quad_group_name = GetQuadGroupName();
-  // Get models
-  const as::Model &quad_model = GetQuadModel();
-
-  // Use the program
-  UseProgram();
-
-  // Update shadow
-  UpdateShadow(false, draw_shadow);
-
-  // Draw the quad
-  model_material_.use_env_map = false;
-  UpdateQuadModelTrans();
-  UpdateQuadLighting();
-  DrawModel(quad_model, quad_group_name);
-}
-
 void shader::SceneShader::UpdateQuadLighting() {
-  lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  lighting_.light_pos = GetLightPos();
-  // We have to use a value higher than 1.0 to counteract the diffuse strength
-  // calculation with normal and light direction
-  lighting_.light_intensity = glm::vec3(0.0f, 3.0f, 0.0f);
+  const dto::SceneModel &model = scene_models_.at("quad");
+
+  lighting_.light_pos = model.GetLightPos();
+  lighting_.light_color = model.GetLightColor();
+  lighting_.light_intensity = model.GetLightIntensity();
 
   // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
@@ -207,9 +189,11 @@ void shader::SceneShader::UpdateQuadLighting() {
 }
 
 void shader::SceneShader::UpdateSceneLighting() {
-  lighting_.light_color = glm::vec3(1.0f, 1.0f, 1.0f);
-  lighting_.light_pos = GetLightPos();
-  lighting_.light_intensity = glm::vec3(0.1f, 1.0f, 1.0f);
+  const dto::SceneModel &model = scene_models_.at("scene");
+
+  lighting_.light_pos = model.GetLightPos();
+  lighting_.light_color = model.GetLightColor();
+  lighting_.light_intensity = model.GetLightIntensity();
 
   // Get managers
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
@@ -228,22 +212,11 @@ dto::GlobalTrans shader::SceneShader::GetGlobalTrans() const {
 }
 
 glm::mat4 shader::SceneShader::GetQuadModelTrans() {
-  const glm::vec3 scale_factors = glm::vec3(1e-4f);
-  const glm::vec3 translate_factors = glm::vec3(-10.0f, -14.0f, -8.0f);
-  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
-  trans = glm::scale(trans, scale_factors);
-  // trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(1.0f, 0.0f,
-  // 0.0f));
-  return trans;
+  return scene_models_.at("quad").GetTrans();
 }
 
 glm::mat4 shader::SceneShader::GetSceneModelTrans() {
-  const glm::vec3 scale_factors = glm::vec3(0.5f, 0.35f, 0.5f);
-  const glm::vec3 translate_factors = glm::vec3(-10.0f, -13.0f, -8.0f);
-  glm::mat4 trans = glm::translate(glm::mat4(1.0f), translate_factors);
-  trans = glm::scale(trans, scale_factors);
-  trans = glm::rotate(trans, model_rotation, glm::vec3(0.0f, 1.0f, 0.0f));
-  return trans;
+  return scene_models_.at("scene").GetTrans();
 }
 
 glm::vec3 shader::SceneShader::GetLightPos() const {
@@ -282,6 +255,9 @@ void shader::SceneShader::UpdateSceneModelTrans(const float add_rotation) {
   as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
   // Update model state
   model_rotation += add_rotation;
+
+  scene_models_.at("scene").SetRotation(glm::vec3(0.0f, model_rotation, 0.0f));
+
   // Update model transformation
   model_trans_.trans = GetSceneModelTrans();
   // Update the buffer
@@ -344,11 +320,11 @@ void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
 std::string shader::SceneShader::GetId() const { return "scene"; }
 
 std::string shader::SceneShader::GetSceneGroupName() const {
-  return GetProgramName() + "/scene";
+  return "vertex_array/group/scene";
 }
 
 std::string shader::SceneShader::GetQuadGroupName() const {
-  return GetProgramName() + "/quad";
+  return "vertex_array/group/quad";
 }
 
 std::string shader::SceneShader::GetGlobalTransBufferName() const {

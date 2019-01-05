@@ -14,7 +14,7 @@ void shader::SkyboxShader::RegisterSceneShader(
  ******************************************************************************/
 
 void shader::SkyboxShader::LoadModel() {
-  skybox_model_.LoadFile("assets/models/san-giuseppe-bridge-low/skybox.obj",
+  skybox_model_.LoadFile("assets/models/champagne_castle_1/skybox.obj",
                          aiProcess_FlipUVs);
 }
 
@@ -58,8 +58,8 @@ void shader::SkyboxShader::InitTextures() {
   const std::string unit_name = GetTextureName();
   // Set the path-to-target index map
   static const std::map<std::string, size_t> path_to_target_idx = {
-      {"right.jpg", 0},  {"left.jpg", 1},  {"top.jpg", 2},
-      {"bottom.jpg", 3}, {"front.jpg", 4}, {"back.jpg", 5}};
+      {"right.png", 0},  {"left.png", 1},  {"top.png", 2},
+      {"bottom.png", 3}, {"front.png", 4}, {"back.png", 5}};
 
   // Generate the texture
   texture_manager.GenTexture(tex_name);
