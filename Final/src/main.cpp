@@ -205,7 +205,6 @@ void InitImGui() {
 }
 
 void DestoryImGui() {
-  // Cleanup
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplFreeGLUT_Shutdown();
   ImGui::DestroyContext();
@@ -319,6 +318,7 @@ void GLUTDisplayCallback() {
   postproc_shader.UseScreenFramebuffer();
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
+  fbx_ctrl.Draw();
   scene_shader.Draw();
   skybox_shader.Draw();
 
@@ -326,10 +326,6 @@ void GLUTDisplayCallback() {
   scene_shader.UseDefaultFramebuffer();
   as::ClearDepthBuffer();
   postproc_shader.Draw();
-
-  // Draw FBX on default framebuffer
-  scene_shader.UseDefaultFramebuffer();
-  fbx_ctrl.Draw();
 
   // Draw ImGui on default framebuffer
   scene_shader.UseDefaultFramebuffer();
