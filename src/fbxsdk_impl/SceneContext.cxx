@@ -287,6 +287,7 @@ void LoadCacheRecursive(FbxScene* pScene, FbxAnimLayer* pAnimLayer,
       // Try to load the texture from absolute path
       FbxString lFileName = lFileTexture->GetFileName();
 
+      // ADD: Force to load TGA textures
       lFileName = lFileName.Left(lFileName.GetLen() - 3) + "TGA";
 
       // Only TGA textures are supported now.
@@ -626,11 +627,12 @@ void SceneContext::OnTimerClick() const {
 
 // Redraw the scene
 bool SceneContext::OnDisplay() {
-  // Restore default GL states
+  // ADD: Restore default GL states
   glUseProgram(0);
   glBindVertexArray(0);
   glActiveTexture(GL_TEXTURE0);
 
+  // REMOVE: Don't clear color and depth buffers
   // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Test if the scene has been loaded yet.

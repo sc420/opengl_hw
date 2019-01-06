@@ -6,7 +6,7 @@
    Use of this software is subject to the terms of the Autodesk license
 agreement provided at the time of installation or download, or which otherwise
 accompanies this software in either electronic or hard copy form.
- 
+ 
 ****************************************************************************************/
 
 #include "fbxsdk_impl/DrawScene.h"
@@ -110,23 +110,28 @@ void DrawNode(FbxNode* pNode, FbxTime& pTime, FbxAnimLayer* pAnimLayer,
     // All lights has been processed before the whole scene because they
     // influence every geometry.
     if (lNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMarker) {
-      DrawMarker(pGlobalPosition);
+      // REMOVE: Don't draw marker
+      // DrawMarker(pGlobalPosition);
     } else if (lNodeAttribute->GetAttributeType() ==
                FbxNodeAttribute::eSkeleton) {
-      DrawSkeleton(pNode, pParentGlobalPosition, pGlobalPosition);
+      // REMOVE: Don't draw skeleton
+      // DrawSkeleton(pNode, pParentGlobalPosition, pGlobalPosition);
     }
     // NURBS and patch have been converted into triangluation meshes.
     else if (lNodeAttribute->GetAttributeType() == FbxNodeAttribute::eMesh) {
       DrawMesh(pNode, pTime, pAnimLayer, pGlobalPosition, pPose, pShadingMode);
     } else if (lNodeAttribute->GetAttributeType() ==
                FbxNodeAttribute::eCamera) {
-      DrawCamera(pNode, pTime, pAnimLayer, pGlobalPosition);
+      // REMOVE: Don't draw camera
+      // DrawCamera(pNode, pTime, pAnimLayer, pGlobalPosition);
     } else if (lNodeAttribute->GetAttributeType() == FbxNodeAttribute::eNull) {
-      DrawNull(pGlobalPosition);
+      // REMOVE: Don't draw null
+      // DrawNull(pGlobalPosition);
     }
   } else {
+    // REMOVE: Don't draw null
     // Draw a Null for nodes without attribute.
-    DrawNull(pGlobalPosition);
+    // DrawNull(pGlobalPosition);
   }
 }
 
@@ -291,7 +296,7 @@ to calculate: influence = (targetShape - baseGeometry) * weight * 0.01
         But if there are more than one targetShapes on this channel, this is an
 in-between blendshape, also called progressive morph. The calculation of
 influence is different.
-        
+        
         For example, given two in-between targets, the full weight percentage of
 first target is 50, and the full weight percentage of the second target is 100.
         When the weight percentage reach 50, the base geometry is already be
