@@ -61,9 +61,7 @@ class FbxController {
 
   void Draw();
 
-  void PostDraw();
-
-  void SetTime(const float ratio);
+  void SetTime(const double ratio);
 
   void OnReshape(const int width, const int height);
 

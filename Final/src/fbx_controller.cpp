@@ -10,11 +10,9 @@ void ctrl::FbxController::Initialize(const std::string& fbx_path,
   gSceneContext = new SceneContext(
       "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
       window_size.x, window_size.y, lSupportVBO);
-}
 
-void ctrl::FbxController::Draw() { gSceneContext->OnDisplay(); }
+  Draw();
 
-void ctrl::FbxController::PostDraw() {
   // Import the scene if it's ready to load.
   if (gSceneContext->GetStatus() == SceneContext::MUST_BE_LOADED) {
     // This function is only called in the first display callback
@@ -37,14 +35,15 @@ void ctrl::FbxController::PostDraw() {
   }
 }
 
-void ctrl::FbxController::SetTime(const float ratio) {
+void ctrl::FbxController::Draw() { gSceneContext->OnDisplay(); }
+
+void ctrl::FbxController::SetTime(const double ratio) {
   // Ask to display the current frame only if necessary.
   if (gSceneContext->GetStatus() == SceneContext::MUST_BE_REFRESHED) {
     glutPostRedisplay();
   }
 
-  // gSceneContext->SetTime(ratio);
-  gSceneContext->OnTimerClick();
+  gSceneContext->SetTime(ratio);
 }
 
 void ctrl::FbxController::OnReshape(const int width, const int height) {

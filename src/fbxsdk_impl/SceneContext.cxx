@@ -609,10 +609,6 @@ void SceneContext::OnTimerClick() const {
     // the scene in the next timer callback.
     mStatus = MUST_BE_REFRESHED;
 
-    // Loop in the animation stack if not paused.
-    fprintf(stderr, "%llu-%llu (+%llu) %d\n", mStart.Get(), mStop.Get(),
-            mFrameTime.Get(), mPause);
-
     mCurrentTime += mFrameTime;
 
     if (mCurrentTime > mStop) {
@@ -924,7 +920,7 @@ void SceneContext::SetZoomMode(CameraZoomMode pZoomMode) {
   }
 }
 
-void SceneContext::SetTime(const float ratio) {
+void SceneContext::SetTime(const double ratio) {
   // Loop in the animation stack if not paused.
   if (mStop > mStart && !mPause) {
     // Set the scene status flag to refresh
@@ -932,10 +928,14 @@ void SceneContext::SetTime(const float ratio) {
     mStatus = MUST_BE_REFRESHED;
 
     // Set the time
-    const fbxsdk::FbxLongLong range =
-        static_cast<fbxsdk::FbxLongLong>(fmod(ratio, 1.0f));
-    fbxsdk::FbxTime fb_range(range);
-    mCurrentTime = mStart;
+    const FbxLongLong total_ms = mStop.GetMilliSeconds();
+    const double new_ms = fmod(ratio, 1.0) * static_cast<double>(total_ms);
+
+    mCurrentTime.SetMilliSeconds(static_cast<FbxLongLong>(new_ms));
+
+    if (mCurrentTime > mStop) {
+      mCurrentTime = mStart;
+    }
   }
   // Avoid displaying the same frame on
   // and on if the animation stack has no length.

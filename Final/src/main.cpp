@@ -17,6 +17,8 @@
  * Constants
  ******************************************************************************/
 
+/* FBX */
+static const auto kBlackHawkAnimDuration = 0.1f;
 /* User Interfaces */
 static const auto kInitWindowRelativeCenterPos = glm::vec2(0.5f, 0.5f);
 static const auto kInitWindowSize = glm::ivec2(720, 450);
@@ -178,9 +180,6 @@ void InitFbx() {
   fbx_ctrl.Initialize(
       "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
       kInitWindowSize);
-
-  fbx_ctrl.Draw();
-  fbx_ctrl.PostDraw();
 }
 
 /*******************************************************************************
@@ -313,7 +312,7 @@ void GLUTDisplayCallback() {
   as::ClearDepthBuffer();
   postproc_shader.Draw();
 
-  // Draw fbx on default framebuffer
+  // Draw FBX on default framebuffer
   scene_shader.UseDefaultFramebuffer();
   fbx_ctrl.Draw();
 
@@ -344,7 +343,7 @@ void GLUTReshapeCallback(const int width, const int height) {
   diff_shader.UpdateObjDiffRenderbuffer(width, height);
   // Update differential rendering framebuffer textures
   diff_shader.UpdateDiffFramebufferTextures(width, height);
-  // Update FbxSdk
+  // Update FBX
   fbx_ctrl.OnReshape(width, height);
   // Update ImGui
   ImGui_ImplFreeGLUT_ReshapeFunc(width, height);
@@ -372,7 +371,7 @@ void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
   }
   // Mark key state down
   ui_manager.MarkKeyDown(key);
-  // Update FbxSdk
+  // Update FBX
   fbx_ctrl.OnKeyboard(key);
   // Update ImGui
   ImGui_ImplFreeGLUT_KeyboardFunc(key, x, y);
@@ -409,7 +408,7 @@ void GLUTMouseCallback(const int button, const int state, const int x,
   }
   // Update mouse position
   postproc_shader.UpdateMousePos(mouse_pos);
-  // Update FbxSdk
+  // Update FBX
   fbx_ctrl.OnMouse(button, state, x, y);
   // Update ImGui
   ImGui_ImplFreeGLUT_MouseFunc(button, state, x, y);
@@ -450,7 +449,7 @@ void GLUTMotionCallback(const int x, const int y) {
     // Save mouse position
     ui_manager.MarkMouseMotion(mouse_pos);
   }
-  // Update FbxSdk
+  // Update FBX
   fbx_ctrl.OnMotion(x, y);
   // Update ImGui
   ImGui_ImplFreeGLUT_MotionFunc(x, y);
@@ -523,7 +522,7 @@ void GLUTTimerCallback(const int val) {
   postproc_shader.UpdateTime(elapsed_time);
 
   // Update FBX
-  fbx_ctrl.SetTime(elapsed_time / 5.0f);
+  fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);
 
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();

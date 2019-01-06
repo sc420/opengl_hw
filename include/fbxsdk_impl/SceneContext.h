@@ -85,8 +85,8 @@ class SceneContext {
   CameraZoomMode GetZoomMode() { return mCameraZoomMode; }
   void SetZoomMode(CameraZoomMode pZoomMode);
 
-  // Set the time directly
-  void SetTime(const float ratio);
+  // ADD: Set the time directly
+  void SetTime(const double ratio);
 
  private:
   // Display information about current status in the left-up corner of the
