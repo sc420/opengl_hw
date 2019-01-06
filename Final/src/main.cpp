@@ -84,12 +84,15 @@ void ExitFunction() { delete fbx_ctrl.gSceneContext; }
 
 // Trigger the display of the current frame.
 void TimerCallback(int) {
-  // Ask to display the current frame only if necessary.
-  if (fbx_ctrl.gSceneContext->GetStatus() == SceneContext::MUST_BE_REFRESHED) {
-    glutPostRedisplay();
-  }
+  //// Ask to display the current frame only if necessary.
+  // if (fbx_ctrl.gSceneContext->GetStatus() == SceneContext::MUST_BE_REFRESHED)
+  // {
+  //  glutPostRedisplay();
+  //}
 
-  fbx_ctrl.gSceneContext->OnTimerClick();
+  // fbx_ctrl.gSceneContext->OnTimerClick();
+
+  fbx_ctrl.SetTime(0.0f);
 
   // Call the timer to display the next frame.
   glutTimerFunc(
@@ -258,12 +261,7 @@ void InitFbx() {
       kInitWindowSize);
 
   fbx_ctrl.Draw();
-
   fbx_ctrl.PostDraw();
-
-  glutTimerFunc(
-      (unsigned int)fbx_ctrl.gSceneContext->GetFrameTime().GetMilliSeconds(),
-      TimerCallback, 0);
 }
 
 /*******************************************************************************
@@ -606,7 +604,7 @@ void GLUTTimerCallback(const int val) {
   postproc_shader.UpdateTime(elapsed_time);
 
   // Update FBX
-  // fbx_ctrl.SetTime(elapsed_time / 5.0f);
+  fbx_ctrl.SetTime(elapsed_time / 5.0f);
 
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();
