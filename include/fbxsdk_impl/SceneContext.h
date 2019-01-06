@@ -87,6 +87,9 @@ class SceneContext {
 
   // ADD: Set the time directly
   void SetTime(const double ratio);
+  // ADD: Set camera aspect
+  void SetCameraAspect(FbxCamera::EAspectRatioMode mode, const double width,
+                       const double height);
 
  private:
   // Display information about current status in the left-up corner of the

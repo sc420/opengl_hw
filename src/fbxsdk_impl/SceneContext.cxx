@@ -945,3 +945,9 @@ void SceneContext::SetTime(const double ratio) {
     mStatus = REFRESHED;
   }
 }
+
+void SceneContext::SetCameraAspect(FbxCamera::EAspectRatioMode mode,
+                                   const double width, const double height) {
+  FbxCamera* lCamera = GetCurrentCamera(mScene);
+  lCamera->SetAspect(mode, width, height);
+}

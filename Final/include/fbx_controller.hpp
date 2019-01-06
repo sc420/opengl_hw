@@ -71,7 +71,7 @@ class FbxController {
 
   void OnMotion(const int x, const int y);
 
-  // private:
+ private:
   /* FbxSdk Implementations */
   SceneContext *gSceneContext;
 
@@ -79,5 +79,7 @@ class FbxController {
   static bool init_mem_allocator_;
 
   void InitializeMemoryAllocator();
+
+  void ConfigSceneContext();
 };
 }  // namespace ctrl
