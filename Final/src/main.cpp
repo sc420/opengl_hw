@@ -552,55 +552,68 @@ void GLUTTimerCallback(const int val) {
     return;
   }
 
+  bool redisplay = false;
+
   // Update camera transformation
   if (ui_manager.IsKeyDown('w')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, -1.0f));
     UpdateGlobalTrans();
     UpdateLighting();
+    redisplay = true;
   }
   if (ui_manager.IsKeyDown('s')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, 1.0f));
     UpdateGlobalTrans();
     UpdateLighting();
+    redisplay = true;
   }
   if (ui_manager.IsKeyDown('a')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(-1.0f, 0.0f, 0.0f));
     UpdateGlobalTrans();
     UpdateLighting();
+    redisplay = true;
   }
   if (ui_manager.IsKeyDown('d')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(1.0f, 0.0f, 0.0f));
     UpdateGlobalTrans();
     UpdateLighting();
+    redisplay = true;
   }
   if (ui_manager.IsKeyDown('z')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, 1.0f, 0.0f));
     UpdateGlobalTrans();
     UpdateLighting();
+    redisplay = true;
   }
   if (ui_manager.IsKeyDown('x')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, -1.0f, 0.0f));
     UpdateGlobalTrans();
     UpdateLighting();
+    redisplay = true;
   }
 
   // Update model transformation
   if (ui_manager.IsKeyDown('q')) {
     scene_shader.UpdateSceneModelTrans(glm::radians(1.0f));
+    redisplay = true;
   }
   if (ui_manager.IsKeyDown('e')) {
     scene_shader.UpdateSceneModelTrans(glm::radians(-1.0f));
+    redisplay = true;
   }
-
-  // Mark the current window as needing to be redisplayed
-  glutPostRedisplay();
 
   // Update time
   const float elapsed_time =
       static_cast<float>(ui_manager.CalcElapsedSeconds());
   postproc_shader.UpdateTime(elapsed_time);
+
+  // Redisplay only when necessary
+  if (redisplay) {
+    // Mark the current window as needing to be redisplayed
+    glutPostRedisplay();
+  }
 
   // Register the timer callback again
   glutTimerFunc(kTimerInterval, GLUTTimerCallback, val);
