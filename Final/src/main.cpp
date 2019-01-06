@@ -1,5 +1,3 @@
-#include "fbxsdk_impl/SceneContext.h"
-
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_freeglut.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -14,91 +12,6 @@
 #include "postproc_shader.hpp"
 #include "scene_shader.hpp"
 #include "skybox_shader.hpp"
-
-void ExitFunction();
-void TimerCallback(int);
-
-// SceneContext *gSceneContext;
-
-// const int DEFAULT_WINDOW_WIDTH = 720;
-// const int DEFAULT_WINDOW_HEIGHT = 450;
-
-class MyMemoryAllocator {
- public:
-  static void *MyMalloc(size_t pSize) {
-    char *p = (char *)malloc(pSize + FBXSDK_MEMORY_ALIGNMENT);
-    memset(p, '#', FBXSDK_MEMORY_ALIGNMENT);
-    return p + FBXSDK_MEMORY_ALIGNMENT;
-  }
-
-  static void *MyCalloc(size_t pCount, size_t pSize) {
-    char *p = (char *)calloc(pCount, pSize + FBXSDK_MEMORY_ALIGNMENT);
-    memset(p, '#', FBXSDK_MEMORY_ALIGNMENT);
-    return p + FBXSDK_MEMORY_ALIGNMENT;
-  }
-
-  static void *MyRealloc(void *pData, size_t pSize) {
-    if (pData) {
-      FBX_ASSERT(*((char *)pData - 1) == '#');
-      if (*((char *)pData - 1) == '#') {
-        char *p = (char *)realloc((char *)pData - FBXSDK_MEMORY_ALIGNMENT,
-                                  pSize + FBXSDK_MEMORY_ALIGNMENT);
-        memset(p, '#', FBXSDK_MEMORY_ALIGNMENT);
-        return p + FBXSDK_MEMORY_ALIGNMENT;
-      } else {  // Mismatch
-        char *p =
-            (char *)realloc((char *)pData, pSize + FBXSDK_MEMORY_ALIGNMENT);
-        memset(p, '#', FBXSDK_MEMORY_ALIGNMENT);
-        return p + FBXSDK_MEMORY_ALIGNMENT;
-      }
-    } else {
-      char *p = (char *)realloc(NULL, pSize + FBXSDK_MEMORY_ALIGNMENT);
-      memset(p, '#', FBXSDK_MEMORY_ALIGNMENT);
-      return p + FBXSDK_MEMORY_ALIGNMENT;
-    }
-  }
-
-  static void MyFree(void *pData) {
-    if (pData == NULL) return;
-    FBX_ASSERT(*((char *)pData - 1) == '#');
-    if (*((char *)pData - 1) == '#') {
-      free((char *)pData - FBXSDK_MEMORY_ALIGNMENT);
-    } else {  // Mismatch
-      free(pData);
-    }
-  }
-};
-
-/*******************************************************************************
- * Controllers
- ******************************************************************************/
-
-ctrl::FbxController fbx_ctrl;
-
-/*******************************************************************************
- * FbxSdk
- ******************************************************************************/
-
-// Function to destroy objects created by the FBX SDK.
-void ExitFunction() { delete fbx_ctrl.gSceneContext; }
-
-// Trigger the display of the current frame.
-void TimerCallback(int) {
-  //// Ask to display the current frame only if necessary.
-  // if (fbx_ctrl.gSceneContext->GetStatus() == SceneContext::MUST_BE_REFRESHED)
-  // {
-  //  glutPostRedisplay();
-  //}
-
-  // fbx_ctrl.gSceneContext->OnTimerClick();
-
-  fbx_ctrl.SetTime(0.0f);
-
-  // Call the timer to display the next frame.
-  glutTimerFunc(
-      (unsigned int)fbx_ctrl.gSceneContext->GetFrameTime().GetMilliSeconds(),
-      TimerCallback, 0);
-}
 
 /*******************************************************************************
  * Constants
@@ -144,6 +57,12 @@ shader::DiffShader diff_shader;
 shader::PostprocShader postproc_shader;
 shader::SceneShader scene_shader;
 shader::SkyboxShader skybox_shader;
+
+/*******************************************************************************
+ * Controllers
+ ******************************************************************************/
+
+ctrl::FbxController fbx_ctrl;
 
 /*******************************************************************************
  * User Interface States
