@@ -537,15 +537,19 @@ void GLUTTimerCallback(const int val) {
   // Update black hawk transformation
   if (ui_manager.IsKeyDown('t')) {
     aircraft_ctrl.AddPos(glm::vec3(0.0f, 0.0f, -1.0f));
+    aircraft_ctrl.AddRot(glm::vec3(1.0f, 0.0f, 0.0f));
   }
   if (ui_manager.IsKeyDown('g')) {
     aircraft_ctrl.AddPos(glm::vec3(0.0f, 0.0f, 1.0f));
+    aircraft_ctrl.AddRot(glm::vec3(-1.0f, 0.0f, 0.0f));
   }
   if (ui_manager.IsKeyDown('f')) {
     aircraft_ctrl.AddPos(glm::vec3(-1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddRot(glm::vec3(0.0f, 0.0f, 1.0f));
   }
   if (ui_manager.IsKeyDown('h')) {
     aircraft_ctrl.AddPos(glm::vec3(1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddRot(glm::vec3(0.0f, 0.0f, -1.0f));
   }
 
   // Update time
@@ -556,9 +560,10 @@ void GLUTTimerCallback(const int val) {
 
   // Update FBX
   fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);
+  const glm::vec3 aircraft_rot = aircraft_ctrl.GetRot();
   fbx_ctrl.SetModelTransform(aircraft_ctrl.GetPos(),
                              glm::vec3(0.0f, 0.0f, -1.0f),
-                             glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+                             glm::vec3(0.0f, 1.0f, 0.0f), aircraft_rot.z);
 
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();
