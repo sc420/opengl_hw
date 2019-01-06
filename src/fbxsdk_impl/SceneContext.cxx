@@ -391,7 +391,7 @@ SceneContext::SceneContext(const char* pFileName, int pWindowWidth,
       mCameraZoomMode(ZOOM_FOCAL_LENGTH),
       mWindowWidth(pWindowWidth),
       mWindowHeight(pWindowHeight),
-      mDrawText(new DrawText) {
+      mDrawText(new FbxDrawText) {
   if (mFileName == NULL) mFileName = SAMPLE_FILENAME;
 
   // initialize cache start and stop time
@@ -604,11 +604,14 @@ bool SceneContext::SetCurrentPoseIndex(int pPoseIndex) {
 }
 
 void SceneContext::OnTimerClick() const {
-  // Loop in the animation stack if not paused.
   if (mStop > mStart && !mPause) {
     // Set the scene status flag to refresh
     // the scene in the next timer callback.
     mStatus = MUST_BE_REFRESHED;
+
+    // Loop in the animation stack if not paused.
+    fprintf(stderr, "%llu-%llu (+%llu) %d\n", mStart.Get(), mStop.Get(),
+            mFrameTime.Get(), mPause);
 
     mCurrentTime += mFrameTime;
 
@@ -918,5 +921,27 @@ void SceneContext::SetZoomMode(CameraZoomMode pZoomMode) {
     mCameraZoomMode = ZOOM_POSITION;
   } else {
     mCameraZoomMode = ZOOM_FOCAL_LENGTH;
+  }
+}
+
+void SceneContext::SetTime(const float ratio) {
+  // Loop in the animation stack if not paused.
+  if (mStop > mStart && !mPause) {
+    // Set the scene status flag to refresh
+    // the scene in the next timer callback.
+    mStatus = MUST_BE_REFRESHED;
+
+    // Set the time
+    const fbxsdk::FbxLongLong range =
+        static_cast<fbxsdk::FbxLongLong>(fmod(ratio, 1.0f));
+    fbxsdk::FbxTime fb_range(range);
+    mCurrentTime = mStart;
+  }
+  // Avoid displaying the same frame on
+  // and on if the animation stack has no length.
+  else {
+    // Set the scene status flag to avoid refreshing
+    // the scene in the next timer callback.
+    mStatus = REFRESHED;
   }
 }

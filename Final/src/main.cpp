@@ -10,6 +10,7 @@
 
 #include "depth_shader.hpp"
 #include "diff_shader.hpp"
+#include "fbx_controller.hpp"
 #include "postproc_shader.hpp"
 #include "scene_shader.hpp"
 #include "skybox_shader.hpp"
@@ -17,10 +18,10 @@
 void ExitFunction();
 void TimerCallback(int);
 
-SceneContext *gSceneContext;
+// SceneContext *gSceneContext;
 
-const int DEFAULT_WINDOW_WIDTH = 720;
-const int DEFAULT_WINDOW_HEIGHT = 450;
+// const int DEFAULT_WINDOW_WIDTH = 720;
+// const int DEFAULT_WINDOW_HEIGHT = 450;
 
 class MyMemoryAllocator {
  public:
@@ -69,24 +70,31 @@ class MyMemoryAllocator {
 };
 
 /*******************************************************************************
+ * Controllers
+ ******************************************************************************/
+
+ctrl::FbxController fbx_ctrl;
+
+/*******************************************************************************
  * FbxSdk
  ******************************************************************************/
 
 // Function to destroy objects created by the FBX SDK.
-void ExitFunction() { delete gSceneContext; }
+void ExitFunction() { delete fbx_ctrl.gSceneContext; }
 
 // Trigger the display of the current frame.
 void TimerCallback(int) {
   // Ask to display the current frame only if necessary.
-  if (gSceneContext->GetStatus() == SceneContext::MUST_BE_REFRESHED) {
+  if (fbx_ctrl.gSceneContext->GetStatus() == SceneContext::MUST_BE_REFRESHED) {
     glutPostRedisplay();
   }
 
-  gSceneContext->OnTimerClick();
+  fbx_ctrl.gSceneContext->OnTimerClick();
 
   // Call the timer to display the next frame.
-  glutTimerFunc((unsigned int)gSceneContext->GetFrameTime().GetMilliSeconds(),
-                TimerCallback, 0);
+  glutTimerFunc(
+      (unsigned int)fbx_ctrl.gSceneContext->GetFrameTime().GetMilliSeconds(),
+      TimerCallback, 0);
 }
 
 /*******************************************************************************
@@ -241,6 +249,16 @@ void ConfigGL() {
 }
 
 /*******************************************************************************
+ * FBX Handlers
+ ******************************************************************************/
+
+void InitFbx() {
+  fbx_ctrl.Initialize(
+      "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
+      kInitWindowSize);
+}
+
+/*******************************************************************************
  * GUI Handlers
  ******************************************************************************/
 
@@ -372,7 +390,7 @@ void GLUTDisplayCallback() {
 
   // Draw fbx on default framebuffer
   scene_shader.UseDefaultFramebuffer();
-  gSceneContext->OnDisplay();
+  fbx_ctrl.gSceneContext->OnDisplay();
 
   // Draw ImGui on default framebuffer
   scene_shader.UseDefaultFramebuffer();
@@ -382,25 +400,26 @@ void GLUTDisplayCallback() {
   glutSwapBuffers();
 
   // Import the scene if it's ready to load.
-  if (gSceneContext->GetStatus() == SceneContext::MUST_BE_LOADED) {
+  if (fbx_ctrl.gSceneContext->GetStatus() == SceneContext::MUST_BE_LOADED) {
     // This function is only called in the first display callback
     // to make sure that the application window is opened and a
     // status message is displayed before.
-    gSceneContext->LoadFile();
+    fbx_ctrl.gSceneContext->LoadFile();
 
     // Set the current animation stack and set the start, stop and current
     // time.
-    gSceneContext->SetCurrentAnimStack(0);
+    fbx_ctrl.gSceneContext->SetCurrentAnimStack(0);
     // Set the current pose
-    gSceneContext->SetCurrentPoseIndex(0);
+    fbx_ctrl.gSceneContext->SetCurrentPoseIndex(0);
     // Set the pesepective camera
-    gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_PERSPECTIVE);
+    fbx_ctrl.gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_PERSPECTIVE);
     // Set the zoom mode
-    gSceneContext->SetZoomMode(SceneContext::ZOOM_POSITION);
+    fbx_ctrl.gSceneContext->SetZoomMode(SceneContext::ZOOM_POSITION);
 
     // Call the timer to display the first frame.
-    glutTimerFunc((unsigned int)gSceneContext->GetFrameTime().GetMilliSeconds(),
-                  TimerCallback, 0);
+    glutTimerFunc(
+        (unsigned int)fbx_ctrl.gSceneContext->GetFrameTime().GetMilliSeconds(),
+        TimerCallback, 0);
   }
 }
 
@@ -424,7 +443,7 @@ void GLUTReshapeCallback(const int width, const int height) {
   // Update differential rendering framebuffer textures
   diff_shader.UpdateDiffFramebufferTextures(width, height);
   // Update FbxSdk
-  gSceneContext->OnReshape(width, height);
+  fbx_ctrl.OnReshape(width, height);
   // Update ImGui
   ImGui_ImplFreeGLUT_ReshapeFunc(width, height);
 }
@@ -452,7 +471,7 @@ void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
   // Mark key state down
   ui_manager.MarkKeyDown(key);
   // Update FbxSdk
-  gSceneContext->OnKeyboard(key);
+  fbx_ctrl.OnKeyboard(key);
   // Update ImGui
   ImGui_ImplFreeGLUT_KeyboardFunc(key, x, y);
 }
@@ -489,7 +508,7 @@ void GLUTMouseCallback(const int button, const int state, const int x,
   // Update mouse position
   postproc_shader.UpdateMousePos(mouse_pos);
   // Update FbxSdk
-  gSceneContext->OnMouse(button, state, x, y);
+  fbx_ctrl.OnMouse(button, state, x, y);
   // Update ImGui
   ImGui_ImplFreeGLUT_MouseFunc(button, state, x, y);
 }
@@ -530,7 +549,7 @@ void GLUTMotionCallback(const int x, const int y) {
     ui_manager.MarkMouseMotion(mouse_pos);
   }
   // Update FbxSdk
-  gSceneContext->OnMouseMotion(x, y);
+  fbx_ctrl.OnMotion(x, y);
   // Update ImGui
   ImGui_ImplFreeGLUT_MotionFunc(x, y);
 }
@@ -552,68 +571,60 @@ void GLUTTimerCallback(const int val) {
     return;
   }
 
-  bool redisplay = false;
+  // Get the elapsed time
+  const float elapsed_time =
+      static_cast<float>(ui_manager.CalcElapsedSeconds());
 
   // Update camera transformation
   if (ui_manager.IsKeyDown('w')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, -1.0f));
     UpdateGlobalTrans();
     UpdateLighting();
-    redisplay = true;
   }
   if (ui_manager.IsKeyDown('s')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, 1.0f));
     UpdateGlobalTrans();
     UpdateLighting();
-    redisplay = true;
   }
   if (ui_manager.IsKeyDown('a')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(-1.0f, 0.0f, 0.0f));
     UpdateGlobalTrans();
     UpdateLighting();
-    redisplay = true;
   }
   if (ui_manager.IsKeyDown('d')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(1.0f, 0.0f, 0.0f));
     UpdateGlobalTrans();
     UpdateLighting();
-    redisplay = true;
   }
   if (ui_manager.IsKeyDown('z')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, 1.0f, 0.0f));
     UpdateGlobalTrans();
     UpdateLighting();
-    redisplay = true;
   }
   if (ui_manager.IsKeyDown('x')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, -1.0f, 0.0f));
     UpdateGlobalTrans();
     UpdateLighting();
-    redisplay = true;
   }
 
   // Update model transformation
   if (ui_manager.IsKeyDown('q')) {
     scene_shader.UpdateSceneModelTrans(glm::radians(1.0f));
-    redisplay = true;
   }
   if (ui_manager.IsKeyDown('e')) {
     scene_shader.UpdateSceneModelTrans(glm::radians(-1.0f));
-    redisplay = true;
   }
 
   // Update time
-  const float elapsed_time =
-      static_cast<float>(ui_manager.CalcElapsedSeconds());
   postproc_shader.UpdateTime(elapsed_time);
 
-  // Redisplay only when necessary
-  if (redisplay) {
-    // Mark the current window as needing to be redisplayed
-    glutPostRedisplay();
-  }
+  // Update FBX
+  // fbx_ctrl.SetTime(elapsed_time / 5.0f);
+
+  // Mark the current window as needing to be redisplayed
+  glutPostRedisplay();
 
   // Register the timer callback again
   glutTimerFunc(kTimerInterval, GLUTTimerCallback, val);
@@ -782,29 +793,13 @@ void EnterGLUTLoop() { glutMainLoop(); }
 
 int main(int argc, char *argv[]) {
   try {
-    // Set exit function to destroy objects created by the FBX SDK.
-    atexit(ExitFunction);
-
-    // Use a custom memory allocator
-    FbxSetMallocHandler(MyMemoryAllocator::MyMalloc);
-    FbxSetReallocHandler(MyMemoryAllocator::MyRealloc);
-    FbxSetFreeHandler(MyMemoryAllocator::MyFree);
-    FbxSetCallocHandler(MyMemoryAllocator::MyCalloc);
-
     InitGLUT(argc, argv);
     as::InitGLEW();
     ConfigGL();
+    InitFbx();
     InitImGui();
     RegisterGLUTCallbacks();
     CreateGLUTMenus();
-
-    // Initialize OpenGL.
-    const bool lSupportVBO = InitializeOpenGL();
-
-    gSceneContext = new SceneContext(
-        "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
-        DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT, lSupportVBO);
-
     EnterGLUTLoop();
     DestoryImGui();
   } catch (const std::exception &ex) {

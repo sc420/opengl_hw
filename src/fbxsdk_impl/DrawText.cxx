@@ -24,7 +24,7 @@ const char TEXTURE_MAX_GLYPH = 0x7E;
 const int TEXTURE_GLYPH_COUNT = TEXTURE_MAX_GLYPH - TEXTURE_MIN_GLYPH + 1;
 }  // namespace
 
-DrawText::DrawText()
+FbxDrawText::FbxDrawText()
     : mGlyph(NULL),
       mTextureName(0),
       mPointSize(DEFAULT_POINT_SIZE),
@@ -32,13 +32,13 @@ DrawText::DrawText()
   Initialize();
 }
 
-DrawText::~DrawText() {
+FbxDrawText::~FbxDrawText() {
   delete[] mGlyph;
 
   glDeleteTextures(1, &mTextureName);
 }
 
-void DrawText::Display(const char* pText) {
+void FbxDrawText::Display(const char* pText) {
   if (!mGlyph || mTextureName == 0) return;
 
   // Push OpenGL attributes.
@@ -102,7 +102,7 @@ void DrawText::Display(const char* pText) {
   glPopAttrib();
 }
 
-void DrawText::Initialize() {
+void FbxDrawText::Initialize() {
   FILE* lFile = NULL;
   FBXSDK_fopen(lFile, TEXTURE_FILENAME, "rb");
   if (lFile == NULL) {
