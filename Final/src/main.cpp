@@ -389,7 +389,7 @@ void InitGLUT(int argc, char *argv[]) {
   glutInit(&argc, argv);
   glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
   glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
-  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+  glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_MULTISAMPLE);
   as::SetGLWindowInitRelativeCenterPos(kInitWindowRelativeCenterPos,
                                        kInitWindowSize);
   as::SetGLWindowInitSize(kInitWindowSize);
@@ -406,6 +406,7 @@ void ConfigGLSettings() {
   glClearStencil(0);
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_MULTISAMPLE_ARB);
 
   // Enable stencil test
   glEnable(GL_STENCIL_TEST);
