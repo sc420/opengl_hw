@@ -33,7 +33,7 @@ void ctrl::FbxController::PostDraw() {
     gSceneContext->SetZoomMode(SceneContext::ZOOM_POSITION);
 
     // Draw the first frame
-    SetTime(0.0f);
+    // SetTime(0.0f);
   }
 }
 
