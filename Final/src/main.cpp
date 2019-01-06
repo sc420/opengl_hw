@@ -6,6 +6,7 @@
 #include "as/gl/gl_tools.hpp"
 #include "as/trans/camera.hpp"
 
+#include "aircraft_controller.hpp"
 #include "depth_shader.hpp"
 #include "diff_shader.hpp"
 #include "fbx_controller.hpp"
@@ -64,6 +65,10 @@ shader::SkyboxShader skybox_shader;
  * Controllers
  ******************************************************************************/
 
+// Only for the black hawk
+ctrl::AircraftController aircraft_ctrl(glm::vec3(0.0f, -200.0f, -1700.0f),
+                                       glm::vec3(0.0f, 0.0f, 0.0f), 10.0f, 1.0f,
+                                       1e-3f, 1e-3f);
 ctrl::FbxController fbx_ctrl;
 
 /*******************************************************************************
@@ -529,11 +534,30 @@ void GLUTTimerCallback(const int val) {
     scene_shader.UpdateSceneModelTrans(glm::radians(-1.0f));
   }
 
+  // Update black hawk transformation
+  if (ui_manager.IsKeyDown('t')) {
+    aircraft_ctrl.AddPos(glm::vec3(0.0f, 0.0f, -1.0f));
+  }
+  if (ui_manager.IsKeyDown('g')) {
+    aircraft_ctrl.AddPos(glm::vec3(0.0f, 0.0f, 1.0f));
+  }
+  if (ui_manager.IsKeyDown('f')) {
+    aircraft_ctrl.AddPos(glm::vec3(-1.0f, 0.0f, 0.0f));
+  }
+  if (ui_manager.IsKeyDown('h')) {
+    aircraft_ctrl.AddPos(glm::vec3(1.0f, 0.0f, 0.0f));
+  }
+
   // Update time
   postproc_shader.UpdateTime(elapsed_time);
 
+  // Update aircraft controller
+  aircraft_ctrl.Update();
+
   // Update FBX
   fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);
+  fbx_ctrl.SetModelTransform(aircraft_ctrl.GetPos(),
+                             glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
 
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();

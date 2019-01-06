@@ -117,6 +117,9 @@
     <ClInclude Include="..\include\as\trans\camera.hpp">
       <Filter>include\as\trans</Filter>
     </ClInclude>
+    <ClInclude Include="include\aircraft_controller.hpp">
+      <Filter>Final\include</Filter>
+    </ClInclude>
     <ClInclude Include="include\depth_shader.hpp">
       <Filter>Final\include</Filter>
     </ClInclude>
@@ -247,6 +250,9 @@
     </ClCompile>
     <ClCompile Include="..\src\imgui\imgui_widgets.cpp">
       <Filter>src\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\aircraft_controller.cpp">
+      <Filter>Final\src</Filter>
     </ClCompile>
     <ClCompile Include="src\depth_shader.cpp">
       <Filter>Final\src</Filter>

@@ -182,6 +182,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="..\include\as\model\texture.hpp" />
     <ClInclude Include="..\include\as\model\vertex.hpp" />
     <ClInclude Include="..\include\as\trans\camera.hpp" />
+    <ClInclude Include="include\aircraft_controller.hpp" />
     <ClInclude Include="include\depth_shader.hpp" />
     <ClInclude Include="include\diff_shader.hpp" />
     <ClInclude Include="include\fbx_controller.hpp" />
@@ -227,6 +228,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\imgui\imgui_impl_freeglut.cpp" />
     <ClCompile Include="..\src\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="..\src\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\aircraft_controller.cpp" />
     <ClCompile Include="src\depth_shader.cpp" />
     <ClCompile Include="src\diff_shader.cpp" />
     <ClCompile Include="src\fbx_controller.cpp" />
