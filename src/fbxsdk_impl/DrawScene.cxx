@@ -6,7 +6,7 @@
    Use of this software is subject to the terms of the Autodesk license
 agreement provided at the time of installation or download, or which otherwise
 accompanies this software in either electronic or hard copy form.
- 
+
 ****************************************************************************************/
 
 #include "fbxsdk_impl/DrawScene.h"
@@ -297,7 +297,7 @@ to calculate: influence = (targetShape - baseGeometry) * weight * 0.01
         But if there are more than one targetShapes on this channel, this is an
 in-between blendshape, also called progressive morph. The calculation of
 influence is different.
-        
+
         For example, given two in-between targets, the full weight percentage of
 first target is 50, and the full weight percentage of the second target is 100.
         When the weight percentage reach 50, the base geometry is already be

@@ -108,111 +108,6 @@ class MyMemoryAllocator {
 // Function to destroy objects created by the FBX SDK.
 void ExitFunction() { delete gSceneContext; }
 
-// Create the menus to select the current camera and the current animation
-// stack.
-void CreateMenus() {
-  // Create the submenu to select the current camera.
-  int lCameraMenu = glutCreateMenu(CameraSelectionCallback);
-
-  // Add the producer cameras.
-  glutAddMenuEntry(FBXSDK_CAMERA_PERSPECTIVE, PRODUCER_PERSPECTIVE_ITEM);
-  glutAddMenuEntry(FBXSDK_CAMERA_TOP, PRODUCER_TOP_ITEM);
-  glutAddMenuEntry(FBXSDK_CAMERA_BOTTOM, PRODUCER_BOTTOM_ITEM);
-  glutAddMenuEntry(FBXSDK_CAMERA_FRONT, PRODUCER_FRONT_ITEM);
-  glutAddMenuEntry(FBXSDK_CAMERA_BACK, PRODUCER_BACK_ITEM);
-  glutAddMenuEntry(FBXSDK_CAMERA_RIGHT, PRODUCER_RIGHT_ITEM);
-  glutAddMenuEntry(FBXSDK_CAMERA_LEFT, PRODUCER_LEFT_ITEM);
-
-  // Add the camera switcher if there is at least one camera in the scene.
-  const FbxArray<FbxNode *> &lCameraArray = gSceneContext->GetCameraArray();
-  if (lCameraArray.GetCount() > 0) {
-    glutAddMenuEntry(FBXSDK_CAMERA_SWITCHER, CAMERA_SWITCHER_ITEM);
-  }
-
-  // Add the cameras contained in the scene.
-  for (int lCameraIndex = 0; lCameraIndex < lCameraArray.GetCount();
-       ++lCameraIndex) {
-    glutAddMenuEntry(lCameraArray[lCameraIndex]->GetName(), lCameraIndex);
-  }
-
-  // Create the submenu to select the current animation stack.
-  int lAnimStackMenu = glutCreateMenu(AnimStackSelectionCallback);
-  int lCurrentAnimStackIndex = 0;
-
-  // Add the animation stack names.
-  const FbxArray<FbxString *> &lAnimStackNameArray =
-      gSceneContext->GetAnimStackNameArray();
-  for (int lPoseIndex = 0; lPoseIndex < lAnimStackNameArray.GetCount();
-       ++lPoseIndex) {
-    glutAddMenuEntry(lAnimStackNameArray[lPoseIndex]->Buffer(), lPoseIndex);
-
-    // Track the current animation stack index.
-    if (lAnimStackNameArray[lPoseIndex]->Compare(
-            gSceneContext->GetScene()->ActiveAnimStackName.Get()) == 0) {
-      lCurrentAnimStackIndex = lPoseIndex;
-    }
-  }
-
-  // Call the animation stack selection callback immediately to
-  // initialize the start, stop and current time.
-  AnimStackSelectionCallback(lCurrentAnimStackIndex);
-
-  const int lShadingModeMenu = glutCreateMenu(ShadingModeSelectionCallback);
-  glutAddMenuEntry(MENU_STRING_SHADING_MODE_WIREFRAME,
-                   MENU_SHADING_MODE_WIREFRAME);
-  glutAddMenuEntry(MENU_STRING_SHADING_MODE_SHADED, MENU_SHADING_MODE_SHADED);
-
-  int lBindPoseCount = 0;
-  int lRestPoseCount = 0;
-  // Create a submenu for bind poses
-  int lBindPoseMenu = glutCreateMenu(PoseSelectionCallback);
-
-  // Add the list of bind poses
-  const FbxArray<FbxPose *> &lPoseArray = gSceneContext->GetPoseArray();
-  for (int lPoseIndex = 0; lPoseIndex < lPoseArray.GetCount(); ++lPoseIndex) {
-    if (lPoseArray[lPoseIndex]->IsBindPose()) {
-      glutAddMenuEntry(lPoseArray[lPoseIndex]->GetName(), lPoseIndex);
-      lBindPoseCount++;
-    }
-  }
-
-  // Create a submenu for rest poses
-  int lRestPoseMenu = glutCreateMenu(PoseSelectionCallback);
-
-  // Add the list of bind poses
-  for (int lPoseIndex = 0; lPoseIndex < lPoseArray.GetCount(); ++lPoseIndex) {
-    if (lPoseArray[lPoseIndex]->IsRestPose()) {
-      glutAddMenuEntry(lPoseArray[lPoseIndex]->GetName(), lPoseIndex);
-      lRestPoseCount++;
-    }
-  }
-
-  // Create the submenu to go to a specific pose
-  int lPoseMenu = 0;
-  if (lBindPoseCount > 0 || lRestPoseCount > 0) {
-    lPoseMenu = glutCreateMenu(PoseSelectionCallback);
-    if (lBindPoseCount > 0) glutAddSubMenu("Bind Pose", lBindPoseMenu);
-    if (lRestPoseCount > 0) glutAddSubMenu("Rest Pose", lRestPoseMenu);
-  }
-
-  // Create the submenu to zoom mode
-  int lZoomMenu = glutCreateMenu(CameraZoomModeCallback);
-  glutAddMenuEntry("Zooming lens", MENU_ZOOM_FOCAL_LENGTH);
-  glutAddMenuEntry("Zooming Position", MENU_ZOOM_POSITION);
-
-  // Build the main menu.
-  glutCreateMenu(MenuSelectionCallback);
-  glutAddSubMenu("Select Camera", lCameraMenu);
-  glutAddSubMenu("Select Animation Stack", lAnimStackMenu);
-  glutAddSubMenu("Select Shading Mode", lShadingModeMenu);
-  if (lBindPoseCount > 0 || lRestPoseCount > 0)
-    glutAddSubMenu("Go to Pose", lPoseMenu);
-  glutAddSubMenu("Zoom Mode", lZoomMenu);
-  glutAddMenuEntry("Play", PLAY_ANIMATION);
-  glutAddMenuEntry("Exit", MENU_EXIT);
-  glutAttachMenu(GLUT_RIGHT_BUTTON);
-}
-
 // Select the current camera.
 void CameraSelectionCallback(int pItem) {
   const FbxArray<FbxNode *> &lCameraArray = gSceneContext->GetCameraArray();
@@ -586,11 +481,12 @@ void GLUTDisplayCallback() {
   as::ClearDepthBuffer();
   postproc_shader.Draw();
 
-  // Draw ImGui on default framebuffer
+  // Draw fbx on default framebuffer
   scene_shader.UseDefaultFramebuffer();
-
   gSceneContext->OnDisplay();
 
+  // Draw ImGui on default framebuffer
+  scene_shader.UseDefaultFramebuffer();
   DrawImGui();
 
   // Swap double buffers
@@ -603,11 +499,11 @@ void GLUTDisplayCallback() {
     // status message is displayed before.
     gSceneContext->LoadFile();
 
-    // CreateMenus();
-
     // Set the current animation stack and set the start, stop and current
     // time.
     gSceneContext->SetCurrentAnimStack(0);
+    // Set the current pose
+    gSceneContext->SetCurrentPoseIndex(0);
     // Set the pesepective camera
     gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_PERSPECTIVE);
     // Set the zoom mode
