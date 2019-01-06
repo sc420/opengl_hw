@@ -17,6 +17,18 @@ void ctrl::FbxController::Initialize(const std::string& fbx_path,
 
 void ctrl::FbxController::Draw() { gSceneContext->OnDisplay(); }
 
+void ctrl::FbxController::GetCameraTransform(glm::vec3& position,
+                                             glm::vec3& up_vector,
+                                             float& roll) {
+  fbxsdk::FbxDouble3 fbx_position;
+  fbxsdk::FbxDouble3 fbx_up_vector;
+  double fbx_roll;
+  gSceneContext->GetCameraTransform(fbx_position, fbx_up_vector, fbx_roll);
+  position = glm::vec3(fbx_position[0], fbx_position[1], fbx_position[2]);
+  up_vector = glm::vec3(fbx_up_vector[0], fbx_up_vector[1], fbx_up_vector[2]);
+  roll = static_cast<float>(fbx_roll);
+}
+
 void ctrl::FbxController::SetTime(const double ratio) {
   // Ask to display the current frame only if necessary.
   if (gSceneContext->GetStatus() == SceneContext::MUST_BE_REFRESHED) {
@@ -24,6 +36,18 @@ void ctrl::FbxController::SetTime(const double ratio) {
   }
 
   gSceneContext->SetTime(ratio);
+}
+
+void ctrl::FbxController::SetModelTransform(const glm::vec3& position,
+                                            const glm::vec3& up_vector,
+                                            const float& roll) {
+  // TODO: Try using  glm::value_ptr()
+  const glm::vec3 reverse_position = (-position);
+  fbxsdk::FbxDouble3 fbx_position(reverse_position[0], reverse_position[1],
+                                  reverse_position[2]);
+  fbxsdk::FbxDouble3 fbx_up_vector(up_vector[0], up_vector[1], up_vector[2]);
+  const double fbx_roll = roll;
+  gSceneContext->SetCameraTransform(fbx_position, fbx_up_vector, fbx_roll);
 }
 
 void ctrl::FbxController::OnReshape(const int width, const int height) {

@@ -920,6 +920,15 @@ void SceneContext::SetZoomMode(CameraZoomMode pZoomMode) {
   }
 }
 
+void SceneContext::GetCameraTransform(fbxsdk::FbxDouble3& position,
+                                      fbxsdk::FbxDouble3& up_vector,
+                                      double& roll) {
+  FbxCamera* lCamera = GetCurrentCamera(mScene);
+  position = lCamera->Position.Get();
+  up_vector = lCamera->UpVector.Get();
+  roll = lCamera->Roll.Get();
+}
+
 void SceneContext::SetTime(const double ratio) {
   // Loop in the animation stack if not paused.
   if (mStop > mStart && !mPause) {
@@ -950,4 +959,13 @@ void SceneContext::SetCameraAspect(FbxCamera::EAspectRatioMode mode,
                                    const double width, const double height) {
   FbxCamera* lCamera = GetCurrentCamera(mScene);
   lCamera->SetAspect(mode, width, height);
+}
+
+void SceneContext::SetCameraTransform(const fbxsdk::FbxDouble3 position,
+                                      const fbxsdk::FbxDouble3 up_vector,
+                                      const double roll) {
+  FbxCamera* lCamera = GetCurrentCamera(mScene);
+  lCamera->Position.Set(position);
+  lCamera->UpVector.Set(up_vector);
+  lCamera->Roll.Set(roll);
 }

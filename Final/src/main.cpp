@@ -236,6 +236,21 @@ void UpdateImGui() {
     ImGui::Text("FPS: %.1f", io.Framerate);
   }
 
+  ImGui::SetNextTreeNodeOpen(true);
+  if (ImGui::CollapsingHeader("FBX Camera")) {
+    glm::vec3 position;
+    glm::vec3 up_vector;
+    float roll;
+
+    fbx_ctrl.GetCameraTransform(position, up_vector, roll);
+
+    ImGui::Text("Position: (%.1f, %.1f, %.1f)", position[0], position[1],
+                position[2]);
+    ImGui::Text("Up Vector: (%.1f, %.1f, %.1f)", up_vector[0], up_vector[1],
+                up_vector[2]);
+    ImGui::Text("Roll: %.1f", roll);
+  }
+
   ImGui::End();
 }
 
