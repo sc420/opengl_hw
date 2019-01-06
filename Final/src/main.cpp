@@ -15,42 +15,9 @@
 #include "skybox_shader.hpp"
 
 void ExitFunction();
-void CreateMenus();
-void CameraSelectionCallback(int pItem);
-void CameraZoomModeCallback(int pItem);
-void AnimStackSelectionCallback(int pItem);
-void MenuSelectionCallback(int pItem);
-void PoseSelectionCallback(int pItem);
-void ShadingModeSelectionCallback(int pItem);
 void TimerCallback(int);
-void DisplayCallback();
-void ReshapeCallback(int pWidth, int pHeight);
-void KeyboardCallback(unsigned char pKey, int, int);
-void MouseCallback(int button, int state, int x, int y);
-void MotionCallback(int x, int y);
 
 SceneContext *gSceneContext;
-
-// Menu item ids.
-#define PRODUCER_PERSPECTIVE_ITEM 100
-#define PRODUCER_TOP_ITEM 101
-#define PRODUCER_BOTTOM_ITEM 102
-#define PRODUCER_FRONT_ITEM 103
-#define PRODUCER_BACK_ITEM 104
-#define PRODUCER_RIGHT_ITEM 105
-#define PRODUCER_LEFT_ITEM 106
-#define CAMERA_SWITCHER_ITEM 107
-#define PLAY_ANIMATION 200
-
-const int MENU_SHADING_MODE_WIREFRAME = 300;
-const int MENU_SHADING_MODE_SHADED = 301;
-const char *MENU_STRING_SHADING_MODE_WIREFRAME = "Wireframe";
-const char *MENU_STRING_SHADING_MODE_SHADED = "Shaded";
-
-const int MENU_ZOOM_FOCAL_LENGTH = 401;
-const int MENU_ZOOM_POSITION = 402;
-
-const int MENU_EXIT = 400;
 
 const int DEFAULT_WINDOW_WIDTH = 720;
 const int DEFAULT_WINDOW_HEIGHT = 450;
@@ -108,63 +75,6 @@ class MyMemoryAllocator {
 // Function to destroy objects created by the FBX SDK.
 void ExitFunction() { delete gSceneContext; }
 
-// Select the current camera.
-void CameraSelectionCallback(int pItem) {
-  const FbxArray<FbxNode *> &lCameraArray = gSceneContext->GetCameraArray();
-  if (pItem == PRODUCER_PERSPECTIVE_ITEM) {
-    gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_PERSPECTIVE);
-  } else if (pItem == PRODUCER_TOP_ITEM) {
-    gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_TOP);
-  } else if (pItem == PRODUCER_BOTTOM_ITEM) {
-    gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_BOTTOM);
-  } else if (pItem == PRODUCER_FRONT_ITEM) {
-    gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_FRONT);
-  } else if (pItem == PRODUCER_BACK_ITEM) {
-    gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_BACK);
-  } else if (pItem == PRODUCER_RIGHT_ITEM) {
-    gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_RIGHT);
-  } else if (pItem == PRODUCER_LEFT_ITEM) {
-    gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_LEFT);
-  } else if (pItem == CAMERA_SWITCHER_ITEM) {
-    gSceneContext->SetCurrentCamera(FBXSDK_CAMERA_SWITCHER);
-  } else if (pItem >= 0 && pItem < lCameraArray.GetCount()) {
-    gSceneContext->SetCurrentCamera(lCameraArray[pItem]->GetName());
-  }
-}
-
-void CameraZoomModeCallback(int pItem) {
-  if (pItem == MENU_ZOOM_FOCAL_LENGTH)
-    gSceneContext->SetZoomMode(SceneContext::ZOOM_FOCAL_LENGTH);
-  else
-    gSceneContext->SetZoomMode(SceneContext::ZOOM_POSITION);
-}
-
-// Select the current animation stack and set the start, stop and current time.
-void AnimStackSelectionCallback(int pItem) {
-  gSceneContext->SetCurrentAnimStack(pItem);
-}
-
-void PoseSelectionCallback(int pItem) {
-  gSceneContext->SetCurrentPoseIndex(pItem);
-}
-
-void ShadingModeSelectionCallback(int pItem) {
-  if (pItem == MENU_SHADING_MODE_WIREFRAME) {
-    gSceneContext->SetShadingMode(SHADING_MODE_WIREFRAME);
-  } else if (pItem == MENU_SHADING_MODE_SHADED) {
-    gSceneContext->SetShadingMode(SHADING_MODE_SHADED);
-  }
-}
-
-// Exit the application from the main menu.
-void MenuSelectionCallback(int pItem) {
-  if (pItem == PLAY_ANIMATION) {
-    gSceneContext->SetCurrentPoseIndex(-1);
-  } else if (pItem == MENU_EXIT) {
-    exit(0);
-  }
-}
-
 // Trigger the display of the current frame.
 void TimerCallback(int) {
   // Ask to display the current frame only if necessary.
@@ -178,27 +88,6 @@ void TimerCallback(int) {
   glutTimerFunc((unsigned int)gSceneContext->GetFrameTime().GetMilliSeconds(),
                 TimerCallback, 0);
 }
-
-// Resize the application window.
-void ReshapeCallback(int pWidth, int pHeight) {
-  gSceneContext->OnReshape(pWidth, pHeight);
-}
-
-// Exit the application from the keyboard.
-void KeyboardCallback(unsigned char pKey, int /*pX*/, int /*pY*/) {
-  // Exit on ESC key.
-  if (pKey == 27) {
-    exit(0);
-  }
-
-  gSceneContext->OnKeyboard(pKey);
-}
-
-void MouseCallback(int button, int state, int x, int y) {
-  gSceneContext->OnMouse(button, state, x, y);
-}
-
-void MotionCallback(int x, int y) { gSceneContext->OnMouseMotion(x, y); }
 
 /*******************************************************************************
  * Constants
@@ -563,7 +452,7 @@ void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
   // Mark key state down
   ui_manager.MarkKeyDown(key);
   // Update FbxSdk
-  KeyboardCallback(key, x, y);
+  gSceneContext->OnKeyboard(key);
   // Update ImGui
   ImGui_ImplFreeGLUT_KeyboardFunc(key, x, y);
 }
@@ -600,7 +489,7 @@ void GLUTMouseCallback(const int button, const int state, const int x,
   // Update mouse position
   postproc_shader.UpdateMousePos(mouse_pos);
   // Update FbxSdk
-  MouseCallback(button, state, x, y);
+  gSceneContext->OnMouse(button, state, x, y);
   // Update ImGui
   ImGui_ImplFreeGLUT_MouseFunc(button, state, x, y);
 }
@@ -641,7 +530,7 @@ void GLUTMotionCallback(const int x, const int y) {
     ui_manager.MarkMouseMotion(mouse_pos);
   }
   // Update FbxSdk
-  MotionCallback(x, y);
+  gSceneContext->OnMouseMotion(x, y);
   // Update ImGui
   ImGui_ImplFreeGLUT_MotionFunc(x, y);
 }
@@ -894,17 +783,10 @@ int main(int argc, char *argv[]) {
     ConfigGL();
     InitImGui();
     RegisterGLUTCallbacks();
-    // CreateGLUTMenus();
+    CreateGLUTMenus();
 
     // Initialize OpenGL.
     const bool lSupportVBO = InitializeOpenGL();
-
-    // set glut callbacks
-    // glutDisplayFunc(DisplayCallback);
-    // glutReshapeFunc(ReshapeCallback);
-    glutKeyboardFunc(KeyboardCallback);
-    glutMouseFunc(MouseCallback);
-    glutMotionFunc(MotionCallback);
 
     gSceneContext = new SceneContext(
         "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
