@@ -49,6 +49,9 @@
     <Filter Include="src\imgui">
       <UniqueIdentifier>{47fd6c40-16e8-492a-a454-1d230d462741}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\fbxsdk_impl">
+      <UniqueIdentifier>{dbe46048-a004-4c70-9f02-18c3a70d1451}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\as\common.hpp">
@@ -196,6 +199,33 @@
     </ClCompile>
     <ClCompile Include="..\src\as\trans\camera.cpp">
       <Filter>src\as\trans</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fbxsdk_impl\DrawScene.cxx">
+      <Filter>src\fbxsdk_impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fbxsdk_impl\DrawText.cxx">
+      <Filter>src\fbxsdk_impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fbxsdk_impl\FbxSdk_Common.cxx">
+      <Filter>src\fbxsdk_impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fbxsdk_impl\GetPosition.cxx">
+      <Filter>src\fbxsdk_impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fbxsdk_impl\GlFunctions.cxx">
+      <Filter>src\fbxsdk_impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fbxsdk_impl\SceneCache.cxx">
+      <Filter>src\fbxsdk_impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fbxsdk_impl\SceneContext.cxx">
+      <Filter>src\fbxsdk_impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fbxsdk_impl\SetCamera.cxx">
+      <Filter>src\fbxsdk_impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\fbxsdk_impl\targa.cxx">
+      <Filter>src\fbxsdk_impl</Filter>
     </ClCompile>
     <ClCompile Include="..\src\imgui\imgui.cpp">
       <Filter>src\imgui</Filter>

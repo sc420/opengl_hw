@@ -86,6 +86,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <PostBuildEvent>
       <Command>xcopy /d /e /y "$(SolutionDir)bin\*.*" "$(OutDir)"
@@ -106,6 +107,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -126,6 +128,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,6 +147,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -207,6 +211,15 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="..\src\as\model\texture.cpp" />
     <ClCompile Include="..\src\as\model\vertex.cpp" />
     <ClCompile Include="..\src\as\trans\camera.cpp" />
+    <ClCompile Include="..\src\fbxsdk_impl\DrawScene.cxx" />
+    <ClCompile Include="..\src\fbxsdk_impl\DrawText.cxx" />
+    <ClCompile Include="..\src\fbxsdk_impl\FbxSdk_Common.cxx" />
+    <ClCompile Include="..\src\fbxsdk_impl\GetPosition.cxx" />
+    <ClCompile Include="..\src\fbxsdk_impl\GlFunctions.cxx" />
+    <ClCompile Include="..\src\fbxsdk_impl\SceneCache.cxx" />
+    <ClCompile Include="..\src\fbxsdk_impl\SceneContext.cxx" />
+    <ClCompile Include="..\src\fbxsdk_impl\SetCamera.cxx" />
+    <ClCompile Include="..\src\fbxsdk_impl\targa.cxx" />
     <ClCompile Include="..\src\imgui\imgui.cpp" />
     <ClCompile Include="..\src\imgui\imgui_demo.cpp" />
     <ClCompile Include="..\src\imgui\imgui_draw.cpp" />

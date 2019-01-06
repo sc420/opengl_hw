@@ -188,6 +188,10 @@ void GLAPIENTRY GLMessageCallback(const GLenum source, const GLenum type,
   if (type == 0x8250) {
     return;
   }
+  // Ignore API_ID_DEPRECATED_TARGET
+  if (type == 0x824D) {
+    return;
+  }
   /* Print the message */
   std::cerr << "GL Callback: "
             << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "")
