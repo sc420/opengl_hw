@@ -6,7 +6,7 @@
    Use of this software is subject to the terms of the Autodesk license
 agreement provided at the time of installation or download, or which otherwise
 accompanies this software in either electronic or hard copy form.
- 
+ 
 ****************************************************************************************/
 
 #include "fbxsdk_impl/DrawScene.h"
@@ -57,18 +57,19 @@ void InitializeLights(const FbxScene* pScene, const FbxTime& pTime,
   LightCache::IntializeEnvironment(
       pScene->GetGlobalSettings().GetAmbientColor());
 
+  // REMOVE: Don't draw light
   // Setting the lights before drawing the whole scene
-  const int lLightCount = pScene->GetSrcObjectCount<FbxLight>();
-  for (int lLightIndex = 0; lLightIndex < lLightCount; ++lLightIndex) {
-    FbxLight* lLight = pScene->GetSrcObject<FbxLight>(lLightIndex);
-    FbxNode* lNode = lLight->GetNode();
-    if (lNode) {
-      FbxAMatrix lGlobalPosition = GetGlobalPosition(lNode, pTime, pPose);
-      FbxAMatrix lGeometryOffset = GetGeometry(lNode);
-      FbxAMatrix lGlobalOffPosition = lGlobalPosition * lGeometryOffset;
-      DrawLight(lNode, pTime, lGlobalOffPosition);
-    }
-  }
+  // const int lLightCount = pScene->GetSrcObjectCount<FbxLight>();
+  // for (int lLightIndex = 0; lLightIndex < lLightCount; ++lLightIndex) {
+  //  FbxLight* lLight = pScene->GetSrcObject<FbxLight>(lLightIndex);
+  //  FbxNode* lNode = lLight->GetNode();
+  //  if (lNode) {
+  //    FbxAMatrix lGlobalPosition = GetGlobalPosition(lNode, pTime, pPose);
+  //    FbxAMatrix lGeometryOffset = GetGeometry(lNode);
+  //    FbxAMatrix lGlobalOffPosition = lGlobalPosition * lGeometryOffset;
+  //    DrawLight(lNode, pTime, lGlobalOffPosition);
+  //  }
+  //}
 }
 
 // Draw recursively each node of the scene. To avoid recomputing
@@ -296,7 +297,7 @@ to calculate: influence = (targetShape - baseGeometry) * weight * 0.01
         But if there are more than one targetShapes on this channel, this is an
 in-between blendshape, also called progressive morph. The calculation of
 influence is different.
-        
+        
         For example, given two in-between targets, the full weight percentage of
 first target is 50, and the full weight percentage of the second target is 100.
         When the weight percentage reach 50, the base geometry is already be

@@ -660,6 +660,7 @@ bool SceneContext::OnDisplay() {
       InitializeLights(mScene, mCurrentTime, lPose);
       DrawNodeRecursive(mSelectedNode, mCurrentTime, mCurrentAnimLayer,
                         lDummyGlobalPosition, lPose, mShadingMode);
+      // REMOVE: Don't display grid
       // DisplayGrid(lDummyGlobalPosition);
     }
     // Otherwise, draw the whole scene.
@@ -667,6 +668,7 @@ bool SceneContext::OnDisplay() {
       InitializeLights(mScene, mCurrentTime, lPose);
       DrawNodeRecursive(mScene->GetRootNode(), mCurrentTime, mCurrentAnimLayer,
                         lDummyGlobalPosition, lPose, mShadingMode);
+      // REMOVE: Don't display grid
       // DisplayGrid(lDummyGlobalPosition);
     }
 
