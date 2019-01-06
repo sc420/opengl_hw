@@ -256,6 +256,14 @@ void InitFbx() {
   fbx_ctrl.Initialize(
       "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
       kInitWindowSize);
+
+  fbx_ctrl.Draw();
+
+  fbx_ctrl.PostDraw();
+
+  glutTimerFunc(
+      (unsigned int)fbx_ctrl.gSceneContext->GetFrameTime().GetMilliSeconds(),
+      TimerCallback, 0);
 }
 
 /*******************************************************************************
@@ -398,16 +406,6 @@ void GLUTDisplayCallback() {
 
   // Swap double buffers
   glutSwapBuffers();
-
-  // Import the scene if it's ready to load.
-  if (fbx_ctrl.gSceneContext->GetStatus() == SceneContext::MUST_BE_LOADED) {
-    fbx_ctrl.PostDraw();
-
-    // Call the timer to display the first frame.
-    glutTimerFunc(
-        (unsigned int)fbx_ctrl.gSceneContext->GetFrameTime().GetMilliSeconds(),
-        TimerCallback, 0);
-  }
 }
 
 void GLUTReshapeCallback(const int width, const int height) {
