@@ -921,10 +921,12 @@ void SceneContext::SetZoomMode(CameraZoomMode pZoomMode) {
 }
 
 void SceneContext::GetCameraTransform(fbxsdk::FbxDouble3& position,
+                                      fbxsdk::FbxDouble3& interest_position,
                                       fbxsdk::FbxDouble3& up_vector,
                                       double& roll) {
   FbxCamera* lCamera = GetCurrentCamera(mScene);
   position = lCamera->Position.Get();
+  interest_position = lCamera->InterestPosition.Get();
   up_vector = lCamera->UpVector.Get();
   roll = lCamera->Roll.Get();
 }
@@ -955,17 +957,21 @@ void SceneContext::SetTime(const double ratio) {
   }
 }
 
-void SceneContext::SetCameraAspect(FbxCamera::EAspectRatioMode mode,
+void SceneContext::SetCameraAspect(fbxsdk::FbxCamera::EAspectRatioMode mode,
                                    const double width, const double height) {
   FbxCamera* lCamera = GetCurrentCamera(mScene);
   lCamera->SetAspect(mode, width, height);
 }
 
-void SceneContext::SetCameraTransform(const fbxsdk::FbxDouble3 position,
-                                      const fbxsdk::FbxDouble3 up_vector,
-                                      const double roll) {
+void SceneContext::SetCameraTransform(
+    const fbxsdk::FbxDouble3& position,
+    const fbxsdk::FbxDouble3& interest_position,
+    const fbxsdk::FbxDouble3& up_vector, const double roll) {
   FbxCamera* lCamera = GetCurrentCamera(mScene);
   lCamera->Position.Set(position);
+  lCamera->InterestPosition.Set(interest_position);
   lCamera->UpVector.Set(up_vector);
   lCamera->Roll.Set(roll);
+
+  lCamera->LockInterestNavigation = false;
 }

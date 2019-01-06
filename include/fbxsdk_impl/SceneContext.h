@@ -87,16 +87,18 @@ class SceneContext {
 
   // ADD: Get camera transformation
   void GetCameraTransform(fbxsdk::FbxDouble3 &position,
+                          fbxsdk::FbxDouble3 &interest_position,
                           fbxsdk::FbxDouble3 &up_vector, double &roll);
 
   // ADD: Set the time directly
   void SetTime(const double ratio);
   // ADD: Set camera aspect
-  void SetCameraAspect(FbxCamera::EAspectRatioMode mode, const double width,
-                       const double height);
+  void SetCameraAspect(fbxsdk::FbxCamera::EAspectRatioMode mode,
+                       const double width, const double height);
   // ADD: Set camera transformation
-  void SetCameraTransform(const fbxsdk::FbxDouble3 position,
-                          const fbxsdk::FbxDouble3 up_vector,
+  void SetCameraTransform(const fbxsdk::FbxDouble3 &position,
+                          const fbxsdk::FbxDouble3 &interest_position,
+                          const fbxsdk::FbxDouble3 &up_vector,
                           const double roll);
 
  private:

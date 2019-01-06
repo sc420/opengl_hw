@@ -242,16 +242,16 @@ void UpdateImGui() {
 
   ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::CollapsingHeader("FBX Camera")) {
-    glm::vec3 position;
-    glm::vec3 up_vector;
+    glm::vec3 eye;
+    glm::vec3 center;
+    glm::vec3 up;
     float roll;
 
-    fbx_ctrl.GetCameraTransform(position, up_vector, roll);
+    fbx_ctrl.GetCameraTransform(eye, center, up, roll);
 
-    ImGui::Text("Position: (%.1f, %.1f, %.1f)", position[0], position[1],
-                position[2]);
-    ImGui::Text("Up Vector: (%.1f, %.1f, %.1f)", up_vector[0], up_vector[1],
-                up_vector[2]);
+    ImGui::Text("Eye: (%.1f, %.1f, %.1f)", eye[0], eye[1], eye[2]);
+    ImGui::Text("Center: (%.1f, %.1f, %.1f)", center[0], center[1], center[2]);
+    ImGui::Text("Up: (%.1f, %.1f, %.1f)", up[0], up[1], up[2]);
     ImGui::Text("Roll: %.1f", roll);
   }
 
@@ -557,6 +557,7 @@ void GLUTTimerCallback(const int val) {
   // Update FBX
   fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);
   fbx_ctrl.SetModelTransform(aircraft_ctrl.GetPos(),
+                             glm::vec3(0.0f, 0.0f, -1.0f),
                              glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
 
   // Mark the current window as needing to be redisplayed

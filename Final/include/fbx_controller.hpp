@@ -61,13 +61,13 @@ class FbxController {
 
   void Draw();
 
-  void GetCameraTransform(glm::vec3 &position, glm::vec3 &up_vector,
+  void GetCameraTransform(glm::vec3 &eye, glm::vec3 &center, glm::vec3 &up,
                           float &roll);
 
   void SetTime(const double ratio);
 
-  void SetModelTransform(const glm::vec3 &position, const glm::vec3 &up_vector,
-                         const float &roll);
+  void SetModelTransform(const glm::vec3 &eye, const glm::vec3 &dir,
+                         const glm::vec3 &up, const float &roll);
 
   void OnReshape(const int width, const int height);
 
