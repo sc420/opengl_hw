@@ -5,68 +5,51 @@
 namespace ctrl {
 class AircraftController {
  public:
-  AircraftController(const glm::vec3 &pos, const glm::vec3 &vel,
-                     const glm::vec3 &rot, const glm::vec3 &pos_adjust_factor,
-                     const glm::vec3 &vel_adjust_factor,
-                     const glm::vec3 &rot_adjust_factor,
-                     const glm::vec3 &pos_bounce_force,
-                     const glm::vec3 &vel_bounce_force,
-                     const glm::vec3 &rot_bounce_force);
+  AircraftController(const glm::vec3 &pos, const glm::vec3 &dir,
+                     const glm::vec3 &drift_dir, const float speed,
+                     const glm::vec3 &drift_dir_adjust_factor,
+                     const float speed_adjust_factor,
+                     const glm::vec3 &drift_dir_bounce_force,
+                     const float speed_bounce_force);
 
   glm::vec3 GetPos() const;
 
-  glm::vec3 GetVel() const;
+  glm::vec3 GetDir() const;
 
-  glm::vec3 GetRot() const;
+  glm::vec3 GetDriftDir() const;
 
-  glm::vec3 GetRotDir() const;
+  float GetSpeed() const;
 
-  glm::vec3 GetRotUp() const;
+  void AddDriftDir(const glm::vec3 &add_drift_dir);
 
-  void SetPreferPos(const glm::vec3 &prefer_pos);
-
-  void SetPreferVel(const glm::vec3 &prefer_vel);
-
-  void SetPreferRot(const glm::vec3 &prefer_rot);
-
-  void AddPos(const glm::vec3 &add_pos);
-
-  void AddVel(const glm::vec3 &add_vel);
-
-  void RotateVel(const glm::vec3 &rotate_vel);
-
-  void AddRot(const glm::vec3 &add_rot);
+  void AddSpeed(const float add_speed);
 
   void Update();
 
  private:
   glm::vec3 pos_;
-  glm::vec3 vel_;
-  glm::vec3 rot_;
+  // Quaternion format
+  glm::vec3 dir_;
+  // Quaternion format
+  glm::vec3 drift_dir_;
+  float speed_;
 
-  glm::vec3 prefer_pos_;
-  glm::vec3 prefer_vel_;
-  glm::vec3 prefer_rot_;
+  glm::vec3 prefer_drift_dir_;
+  float prefer_speed_;
 
-  glm::vec3 pos_adjust_factor_;
-  glm::vec3 vel_adjust_factor_;
-  glm::vec3 rot_adjust_factor_;
+  glm::vec3 drift_dir_adjust_factor_;
+  float speed_adjust_factor_;
 
-  glm::vec3 pos_bounce_force_;
-  glm::vec3 vel_bounce_force_;
-  glm::vec3 rot_bounce_force_;
+  glm::vec3 drift_dir_bounce_force_;
+  float speed_bounce_force_;
 
-  glm::vec3 CalcPosBounceForce() const;
+  glm::vec3 CalcDriftDirBounceForce() const;
 
-  glm::vec3 CalcVelBounceForce() const;
+  float CalcSpeedBounceForce() const;
 
-  glm::vec3 CalcRotBounceForce() const;
+  glm::vec3 CalcDriftDirDrift() const;
 
-  glm::vec3 CalcPosDrift() const;
-
-  glm::vec3 CalcVelDrift() const;
-
-  glm::vec3 CalcRotDrift() const;
+  float CalcSpeedDrift() const;
 
   glm::mat4 CalcRotMatrix(const glm::vec3 &rot_axes) const;
 };

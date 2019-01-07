@@ -67,13 +67,21 @@ shader::SkyboxShader skybox_shader;
  ******************************************************************************/
 
 // Only for the black hawk
-ctrl::FbxCameraController aircraft_ctrl(
-    glm::vec3(0.0f, -600.0f, -2300.0f),
+ctrl::FbxCameraController fbx_camera_ctrl(
+    // Position, Rotation
+    1e-2f * glm::vec3(0.0f, -600.0f, -2300.0f),
     glm::vec3(glm::radians(-10.0f), 0.0f, 0.0f),
-
-    glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(1e-4f, 1e-2f, 1e-2f),
-
+    // Adjust factor
+    1e-2f * glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(1e-4f, 1e-2f, 1e-2f),
+    // Bounce force
     glm::vec3(1e-3f, 1e-3f, 1e-4f), glm::vec3(1e-4f, 1e-2f, 1e-1f));
+ctrl::AircraftController aircraft_ctrl(
+    // Position, Direction, Drift direction, Speed
+    glm::vec3(10.0f, 5.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0f), 1e-2f,
+    // Adjust factor
+    glm::vec3(1e-5f), 1e-3f,
+    // Bounce force
+    glm::vec3(1e1f), 1e1f);
 ctrl::FbxController fbx_ctrl;
 
 /*******************************************************************************
@@ -228,24 +236,26 @@ void UpdateImGui() {
   const glm::vec3 camera_pos = camera_trans.GetEye();
   const glm::vec3 camera_angles = glm::degrees(camera_trans.GetAngles());
 
+  static bool has_opened = false;
+
   /* Debug Widget */
 
   ImGui::Begin("Debug");
 
-  ImGui::SetNextTreeNodeOpen(true);
+  if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::CollapsingHeader("Camera")) {
     ImGui::Text("Position: (%.1f, %.1f, %.1f)", camera_pos.x, camera_pos.y,
                 camera_pos.z);
-    ImGui::Text("Angles (Degree): (%.1f, %.1f, %.1f)", camera_angles.x,
+    ImGui::Text("Angles (Degree): (%.2f, %.2f, %.2f)", camera_angles.x,
                 camera_angles.y, camera_angles.z);
   }
 
-  ImGui::SetNextTreeNodeOpen(true);
+  if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::CollapsingHeader("Performance")) {
     ImGui::Text("FPS: %.1f", io.Framerate);
   }
 
-  ImGui::SetNextTreeNodeOpen(true);
+  if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
   if (ImGui::CollapsingHeader("FBX Camera")) {
     glm::vec3 eye;
     glm::vec3 center;
@@ -259,6 +269,23 @@ void UpdateImGui() {
     ImGui::Text("Up: (%.1f, %.1f, %.1f)", up[0], up[1], up[2]);
     ImGui::Text("Roll: %.1f", roll);
   }
+
+  if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+  ImGui::SetNextTreeNodeOpen(true);
+  if (ImGui::CollapsingHeader("Aircraft Controller")) {
+    const glm::vec3 pos = aircraft_ctrl.GetPos();
+    const glm::vec3 dir = aircraft_ctrl.GetDir();
+    const glm::vec3 drift_dir = aircraft_ctrl.GetDriftDir();
+    const float speed = aircraft_ctrl.GetSpeed();
+
+    ImGui::Text("Pos: (%.1f, %.1f, %.1f)", pos[0], pos[1], pos[2]);
+    ImGui::Text("Dir: (%.2f, %.2f, %.2f)", dir[0], dir[1], dir[2]);
+    ImGui::Text("Drift Dir: (%.2f, %.2f, %.2f)", drift_dir[0], drift_dir[1],
+                drift_dir[2]);
+    ImGui::Text("Speed: %.3f", speed);
+  }
+
+  has_opened = true;
 
   ImGui::End();
 }
@@ -499,20 +526,28 @@ void GLUTTimerCallback(const int val) {
 
   // Update black hawk transformation
   if (ui_manager.IsKeyDown('w')) {
-    aircraft_ctrl.AddPos(glm::vec3(0.0f, 1.0f, -1.0f));
-    aircraft_ctrl.AddRot(glm::vec3(-1.0f, 0.0f, 0.0f));
+    fbx_camera_ctrl.AddPos(glm::vec3(0.0f, 1.0f, -1.0f));
+    fbx_camera_ctrl.AddRot(glm::vec3(-1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddDriftDir(glm::vec3(1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddSpeed(1.0f);
   }
   if (ui_manager.IsKeyDown('s')) {
-    aircraft_ctrl.AddPos(glm::vec3(0.0f, -1.0f, 1.0f));
-    aircraft_ctrl.AddRot(glm::vec3(1.0f, 0.0f, 0.0f));
+    fbx_camera_ctrl.AddPos(glm::vec3(0.0f, -1.0f, 1.0f));
+    fbx_camera_ctrl.AddRot(glm::vec3(1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddDriftDir(glm::vec3(-1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddSpeed(-1.0f);
   }
   if (ui_manager.IsKeyDown('a')) {
-    aircraft_ctrl.AddPos(glm::vec3(-1.0f, 0.0f, 0.0f));
-    aircraft_ctrl.AddRot(glm::vec3(0.0f, 0.0f, -1.0f));
+    fbx_camera_ctrl.AddPos(glm::vec3(-1.0f, 0.0f, 0.0f));
+    fbx_camera_ctrl.AddRot(glm::vec3(0.0f, 0.0f, -1.0f));
+    aircraft_ctrl.AddDriftDir(glm::vec3(0.0f, -1.0f, 0.0f));
+    aircraft_ctrl.AddSpeed(-1e-1f);
   }
   if (ui_manager.IsKeyDown('d')) {
-    aircraft_ctrl.AddPos(glm::vec3(1.0f, 0.0f, 0.0f));
-    aircraft_ctrl.AddRot(glm::vec3(0.0f, 0.0f, 1.0f));
+    fbx_camera_ctrl.AddPos(glm::vec3(1.0f, 0.0f, 0.0f));
+    fbx_camera_ctrl.AddRot(glm::vec3(0.0f, 0.0f, 1.0f));
+    aircraft_ctrl.AddDriftDir(glm::vec3(0.0f, 1.0f, 0.0f));
+    aircraft_ctrl.AddSpeed(-1e-1f);
   }
 
   // Camera transformation for debugging
@@ -551,8 +586,8 @@ void GLUTTimerCallback(const int val) {
   // const float angle =
   //    glm::acos(glm::dot(aircraft_pos_vel, orig_axis) /
   //              (glm::length(aircraft_pos_vel) * glm::length(orig_axis)));
-  // camera_trans.SetEye(aircraft_pos_ctrl.GetPos());
-  // camera_trans.SetAngles(glm::vec3(0.0f, angle, 0.0f));
+  camera_trans.SetEye(aircraft_ctrl.GetPos());
+  camera_trans.SetAngles(aircraft_ctrl.GetDir());
 
   // Update camera transformation
   UpdateGlobalTrans();
@@ -561,14 +596,18 @@ void GLUTTimerCallback(const int val) {
   // Update time
   postproc_shader.UpdateTime(elapsed_time);
 
+  // Update fbx camera controller
+  fbx_camera_ctrl.Update();
+
   // Update aircraft controller
   aircraft_ctrl.Update();
 
   // Update FBX
   fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);
-  const glm::vec3 aircraft_rot = aircraft_ctrl.GetRot();
-  fbx_ctrl.SetModelTransform(aircraft_ctrl.GetPos(), aircraft_ctrl.GetRotDir(),
-                             aircraft_ctrl.GetRotUp(), 0.0f);
+  const glm::vec3 aircraft_rot = fbx_camera_ctrl.GetRot();
+  fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(),
+                             fbx_camera_ctrl.GetRotDir(),
+                             fbx_camera_ctrl.GetRotUp(), 0.0f);
 
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();

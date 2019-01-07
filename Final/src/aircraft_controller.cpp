@@ -1,108 +1,69 @@
 #include "aircraft_controller.hpp"
 
 ctrl::AircraftController::AircraftController(
-    const glm::vec3 &pos, const glm::vec3 &vel, const glm::vec3 &rot,
-    const glm::vec3 &pos_adjust_factor, const glm::vec3 &vel_adjust_factor,
-    const glm::vec3 &rot_adjust_factor, const glm::vec3 &pos_bounce_force,
-    const glm::vec3 &vel_bounce_force, const glm::vec3 &rot_bounce_force)
+    const glm::vec3 &pos, const glm::vec3 &dir, const glm::vec3 &drift_dir,
+    const float speed, const glm::vec3 &drift_dir_adjust_factor,
+    const float speed_adjust_factor, const glm::vec3 &drift_dir_bounce_force,
+    const float speed_bounce_force)
     : pos_(pos),
-      vel_(vel),
-      rot_(rot),
-      prefer_pos_(pos),
-      prefer_vel_(vel),
-      prefer_rot_(rot),
-      pos_adjust_factor_(pos_adjust_factor),
-      vel_adjust_factor_(vel_adjust_factor),
-      rot_adjust_factor_(rot_adjust_factor),
-      pos_bounce_force_(pos_bounce_force),
-      vel_bounce_force_(vel_bounce_force),
-      rot_bounce_force_(rot_bounce_force) {}
+      dir_(dir),
+      drift_dir_(drift_dir),
+      speed_(speed),
+      prefer_drift_dir_(drift_dir),
+      prefer_speed_(speed),
+      drift_dir_adjust_factor_(drift_dir_adjust_factor),
+      speed_adjust_factor_(speed_adjust_factor),
+      drift_dir_bounce_force_(drift_dir_bounce_force),
+      speed_bounce_force_(speed_bounce_force) {}
 
 glm::vec3 ctrl::AircraftController::GetPos() const { return pos_; }
 
-glm::vec3 ctrl::AircraftController::GetVel() const { return vel_; }
+glm::vec3 ctrl::AircraftController::GetDir() const { return dir_; }
 
-glm::vec3 ctrl::AircraftController::GetRot() const { return rot_; }
+glm::vec3 ctrl::AircraftController::GetDriftDir() const { return drift_dir_; }
 
-glm::vec3 ctrl::AircraftController::GetRotDir() const {
-  const glm::mat4 rot_matrix = CalcRotMatrix(rot_);
-  const glm::vec4 axis = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
-  return rot_matrix * axis;
+float ctrl::AircraftController::GetSpeed() const { return speed_; }
+
+void ctrl::AircraftController::AddDriftDir(const glm::vec3 &add_drift_dir) {
+  drift_dir_ += drift_dir_adjust_factor_ * add_drift_dir;
 }
 
-glm::vec3 ctrl::AircraftController::GetRotUp() const {
-  const glm::mat4 rot_matrix = CalcRotMatrix(rot_);
-  const glm::vec4 axis = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
-  return rot_matrix * axis;
-}
-
-void ctrl::AircraftController::SetPreferPos(const glm::vec3 &prefer_pos) {
-  prefer_pos_ = prefer_pos;
-}
-
-void ctrl::AircraftController::SetPreferVel(const glm::vec3 &prefer_vel) {
-  prefer_vel_ = prefer_vel;
-}
-
-void ctrl::AircraftController::SetPreferRot(const glm::vec3 &prefer_rot) {
-  prefer_rot_ = prefer_rot;
-}
-
-void ctrl::AircraftController::AddPos(const glm::vec3 &add_pos) {
-  pos_ += pos_adjust_factor_ * add_pos;
-}
-
-void ctrl::AircraftController::AddVel(const glm::vec3 &add_vel) {
-  vel_ += vel_adjust_factor_ * add_vel;
-}
-
-void ctrl::AircraftController::RotateVel(const glm::vec3 &rotate_vel) {
-  const glm::mat4 rot_matrix = CalcRotMatrix(rotate_vel);
-  vel_ = rot_matrix * glm::vec4(vel_, 0.0f);
-}
-
-void ctrl::AircraftController::AddRot(const glm::vec3 &add_rot) {
-  rot_ += rot_adjust_factor_ * add_rot;
+void ctrl::AircraftController::AddSpeed(const float add_speed) {
+  speed_ += speed_adjust_factor_ * add_speed;
 }
 
 void ctrl::AircraftController::Update() {
+  // Update the direction
+  dir_ = dir_ + drift_dir_;
+  dir_ = glm::mod(dir_, 2.0f * glm::pi<float>());
+
   // Update the position
-  pos_ += vel_;
+  pos_ += speed_ *
+          glm::vec3(CalcRotMatrix(dir_) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f));
 
   // Bounce back the values
-  pos_ += CalcPosBounceForce() * (-CalcPosDrift());
-  vel_ += CalcVelBounceForce() * (-CalcVelDrift());
-  rot_ += CalcRotBounceForce() * (-CalcRotDrift());
+  drift_dir_ += CalcDriftDirBounceForce() * (-CalcDriftDirDrift());
+  speed_ += CalcSpeedBounceForce() * (-CalcSpeedDrift());
 }
 
-glm::vec3 ctrl::AircraftController::CalcPosBounceForce() const {
+glm::vec3 ctrl::AircraftController::CalcDriftDirBounceForce() const {
   const glm::vec3 linear_force =
-      pos_bounce_force_ * glm::length(CalcPosDrift());
+      drift_dir_bounce_force_ * glm::length(CalcDriftDirDrift());
   return glm::exp(linear_force) - 1.0f;
 }
 
-glm::vec3 ctrl::AircraftController::CalcVelBounceForce() const {
-  const glm::vec3 linear_force =
-      vel_bounce_force_ * glm::length(CalcVelDrift());
+float ctrl::AircraftController::CalcSpeedBounceForce() const {
+  const float linear_force =
+      speed_bounce_force_ * glm::length(CalcSpeedDrift());
   return glm::exp(linear_force) - 1.0f;
 }
 
-glm::vec3 ctrl::AircraftController::CalcRotBounceForce() const {
-  const glm::vec3 linear_force =
-      rot_bounce_force_ * glm::length(CalcRotDrift());
-  return glm::exp(linear_force) - 1.0f;
+glm::vec3 ctrl::AircraftController::CalcDriftDirDrift() const {
+  return drift_dir_ - prefer_drift_dir_;
 }
 
-glm::vec3 ctrl::AircraftController::CalcPosDrift() const {
-  return pos_ - prefer_pos_;
-}
-
-glm::vec3 ctrl::AircraftController::CalcVelDrift() const {
-  return vel_ - prefer_vel_;
-}
-
-glm::vec3 ctrl::AircraftController::CalcRotDrift() const {
-  return rot_ - prefer_rot_;
+float ctrl::AircraftController::CalcSpeedDrift() const {
+  return speed_ - prefer_speed_;
 }
 
 glm::mat4 ctrl::AircraftController::CalcRotMatrix(
