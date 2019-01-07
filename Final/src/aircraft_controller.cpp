@@ -34,12 +34,15 @@ void ctrl::AircraftController::AddSpeed(const float add_speed) {
 
 void ctrl::AircraftController::Update() {
   // Update the direction
-  dir_ = dir_ + drift_dir_;
-  dir_ = glm::mod(dir_, 2.0f * glm::pi<float>());
+  dir_ = glm::mod(dir_ + drift_dir_, 2.0f * glm::pi<float>());
 
   // Update the position
-  pos_ += speed_ *
-          glm::vec3(CalcRotMatrix(dir_) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f));
+  const glm::vec3 drift_pos =
+      glm::vec3(CalcRotMatrix(dir_) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f));
+  pos_ += speed_ * drift_pos;
+
+  std::cerr << drift_pos[0] << " " << drift_pos[1] << " " << drift_pos[2]
+            << std::endl;
 
   // Bounce back the values
   drift_dir_ += CalcDriftDirBounceForce() * (-CalcDriftDirDrift());
@@ -67,13 +70,8 @@ float ctrl::AircraftController::CalcSpeedDrift() const {
 }
 
 glm::mat4 ctrl::AircraftController::CalcRotMatrix(
-    const glm::vec3 &rot_axes) const {
+    const glm::vec3 &radian_angles) const {
   // TODO: Merge with other code
-  const glm::quat pitch =
-      glm::angleAxis(rot_axes.x, glm::vec3(1.0f, 0.0f, 0.0f));
-  const glm::quat yaw = glm::angleAxis(rot_axes.y, glm::vec3(0.0f, 1.0f, 0.0f));
-  const glm::quat roll =
-      glm::angleAxis(rot_axes.z, glm::vec3(0.0f, 0.0f, 1.0f));
-  const glm::quat orientation = glm::normalize(pitch * yaw * roll);
-  return glm::mat4_cast(orientation);
+  const glm::quat quaternion = glm::quat(radian_angles);
+  return glm::mat4_cast(quaternion);
 }

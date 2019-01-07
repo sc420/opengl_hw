@@ -487,7 +487,7 @@ void GLUTMotionCallback(const int x, const int y) {
         case Modes::navigation: {
           const glm::ivec2 diff = mouse_pos - ui_manager.GetMousePos();
           camera_trans.AddAngles(kCameraRotationSensitivity *
-                                 glm::vec3(diff.y, diff.x, 0.0f));
+                                 glm::vec3((-diff.y), (-diff.x), 0.0f));
         } break;
         default: { throw new std::runtime_error("Unknown mode"); }
       }
@@ -528,25 +528,25 @@ void GLUTTimerCallback(const int val) {
   if (ui_manager.IsKeyDown('w')) {
     fbx_camera_ctrl.AddPos(glm::vec3(0.0f, 1.0f, -1.0f));
     fbx_camera_ctrl.AddRot(glm::vec3(-1.0f, 0.0f, 0.0f));
-    aircraft_ctrl.AddDriftDir(glm::vec3(1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddDriftDir(glm::vec3(-1.0f, 0.0f, 0.0f));
     aircraft_ctrl.AddSpeed(1.0f);
   }
   if (ui_manager.IsKeyDown('s')) {
     fbx_camera_ctrl.AddPos(glm::vec3(0.0f, -1.0f, 1.0f));
     fbx_camera_ctrl.AddRot(glm::vec3(1.0f, 0.0f, 0.0f));
-    aircraft_ctrl.AddDriftDir(glm::vec3(-1.0f, 0.0f, 0.0f));
-    aircraft_ctrl.AddSpeed(-1.0f);
+    aircraft_ctrl.AddDriftDir(glm::vec3(1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddSpeed(-1e-1f);
   }
   if (ui_manager.IsKeyDown('a')) {
     fbx_camera_ctrl.AddPos(glm::vec3(-1.0f, 0.0f, 0.0f));
     fbx_camera_ctrl.AddRot(glm::vec3(0.0f, 0.0f, -1.0f));
-    aircraft_ctrl.AddDriftDir(glm::vec3(0.0f, -1.0f, 0.0f));
+    aircraft_ctrl.AddDriftDir(glm::vec3(0.0f, 1.0f, 0.0f));
     aircraft_ctrl.AddSpeed(-1e-1f);
   }
   if (ui_manager.IsKeyDown('d')) {
     fbx_camera_ctrl.AddPos(glm::vec3(1.0f, 0.0f, 0.0f));
     fbx_camera_ctrl.AddRot(glm::vec3(0.0f, 0.0f, 1.0f));
-    aircraft_ctrl.AddDriftDir(glm::vec3(0.0f, 1.0f, 0.0f));
+    aircraft_ctrl.AddDriftDir(glm::vec3(0.0f, -1.0f, 0.0f));
     aircraft_ctrl.AddSpeed(-1e-1f);
   }
 
@@ -580,12 +580,7 @@ void GLUTTimerCallback(const int val) {
     scene_shader.UpdateSceneModelTrans(glm::radians(-1.0f));
   }
 
-  //// Update camera eye from aircraft position controller
-  // const glm::vec3 aircraft_pos_vel = aircraft_pos_ctrl.GetVel();
-  // const glm::vec3 orig_axis = glm::vec3(0.0f, 0.0f, -1.0f);
-  // const float angle =
-  //    glm::acos(glm::dot(aircraft_pos_vel, orig_axis) /
-  //              (glm::length(aircraft_pos_vel) * glm::length(orig_axis)));
+  // Update camera eye and angles from aircraft controller
   camera_trans.SetEye(aircraft_ctrl.GetPos());
   camera_trans.SetAngles(aircraft_ctrl.GetDir());
 
