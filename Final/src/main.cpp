@@ -9,6 +9,7 @@
 #include "aircraft_controller.hpp"
 #include "depth_shader.hpp"
 #include "diff_shader.hpp"
+#include "fbx_camera_controller.hpp"
 #include "fbx_controller.hpp"
 #include "postproc_shader.hpp"
 #include "scene_shader.hpp"
@@ -66,11 +67,13 @@ shader::SkyboxShader skybox_shader;
  ******************************************************************************/
 
 // Only for the black hawk
-ctrl::AircraftController aircraft_ctrl(
+ctrl::FbxCameraController aircraft_ctrl(
     glm::vec3(0.0f, -600.0f, -2300.0f),
-    glm::vec3(glm::radians(-10.0f), 0.0f, 0.0f), glm::vec3(10.0f, 1.0f, 1.0f),
-    glm::vec3(1e-4f, 1e-2f, 1e-2f), glm::vec3(1e-3f, 1e-3f, 1e-4f),
-    glm::vec3(1e-4f, 1e-2f, 1e-1f));
+    glm::vec3(glm::radians(-10.0f), 0.0f, 0.0f),
+
+    glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(1e-4f, 1e-2f, 1e-2f),
+
+    glm::vec3(1e-3f, 1e-3f, 1e-4f), glm::vec3(1e-4f, 1e-2f, 1e-1f));
 ctrl::FbxController fbx_ctrl;
 
 /*******************************************************************************
@@ -494,38 +497,44 @@ void GLUTTimerCallback(const int val) {
   const float elapsed_time =
       static_cast<float>(ui_manager.CalcElapsedSeconds());
 
-  // Update camera transformation
+  // Update black hawk transformation
   if (ui_manager.IsKeyDown('w')) {
-    camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, -1.0f));
-    UpdateGlobalTrans();
-    UpdateLighting();
+    aircraft_ctrl.AddPos(glm::vec3(0.0f, 1.0f, -1.0f));
+    aircraft_ctrl.AddRot(glm::vec3(-1.0f, 0.0f, 0.0f));
   }
   if (ui_manager.IsKeyDown('s')) {
-    camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, 1.0f));
-    UpdateGlobalTrans();
-    UpdateLighting();
+    aircraft_ctrl.AddPos(glm::vec3(0.0f, -1.0f, 1.0f));
+    aircraft_ctrl.AddRot(glm::vec3(1.0f, 0.0f, 0.0f));
   }
   if (ui_manager.IsKeyDown('a')) {
-    camera_trans.AddEye(kCameraMovingStep * glm::vec3(-1.0f, 0.0f, 0.0f));
-    UpdateGlobalTrans();
-    UpdateLighting();
+    aircraft_ctrl.AddPos(glm::vec3(-1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddRot(glm::vec3(0.0f, 0.0f, -1.0f));
   }
   if (ui_manager.IsKeyDown('d')) {
+    aircraft_ctrl.AddPos(glm::vec3(1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddRot(glm::vec3(0.0f, 0.0f, 1.0f));
+  }
+
+  // Camera transformation for debugging
+  if (ui_manager.IsKeyDown('t')) {
+    camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, -1.0f));
+  }
+  if (ui_manager.IsKeyDown('g')) {
+    camera_trans.AddEye(kCameraMovingStep * glm::vec3(0.0f, 0.0f, 1.0f));
+  }
+  if (ui_manager.IsKeyDown('f')) {
+    camera_trans.AddEye(kCameraMovingStep * glm::vec3(-1.0f, 0.0f, 0.0f));
+  }
+  if (ui_manager.IsKeyDown('h')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(1.0f, 0.0f, 0.0f));
-    UpdateGlobalTrans();
-    UpdateLighting();
   }
   if (ui_manager.IsKeyDown('z')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, 1.0f, 0.0f));
-    UpdateGlobalTrans();
-    UpdateLighting();
   }
   if (ui_manager.IsKeyDown('x')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, -1.0f, 0.0f));
-    UpdateGlobalTrans();
-    UpdateLighting();
   }
 
   // Update model transformation
@@ -536,23 +545,18 @@ void GLUTTimerCallback(const int val) {
     scene_shader.UpdateSceneModelTrans(glm::radians(-1.0f));
   }
 
-  // Update black hawk transformation
-  if (ui_manager.IsKeyDown('t')) {
-    aircraft_ctrl.AddPos(glm::vec3(0.0f, 1.0f, -1.0f));
-    aircraft_ctrl.AddRot(glm::vec3(-1.0f, 0.0f, 0.0f));
-  }
-  if (ui_manager.IsKeyDown('g')) {
-    aircraft_ctrl.AddPos(glm::vec3(0.0f, -1.0f, 1.0f));
-    aircraft_ctrl.AddRot(glm::vec3(1.0f, 0.0f, 0.0f));
-  }
-  if (ui_manager.IsKeyDown('f')) {
-    aircraft_ctrl.AddPos(glm::vec3(-1.0f, 0.0f, 0.0f));
-    aircraft_ctrl.AddRot(glm::vec3(0.0f, 0.0f, -1.0f));
-  }
-  if (ui_manager.IsKeyDown('h')) {
-    aircraft_ctrl.AddPos(glm::vec3(1.0f, 0.0f, 0.0f));
-    aircraft_ctrl.AddRot(glm::vec3(0.0f, 0.0f, 1.0f));
-  }
+  //// Update camera eye from aircraft position controller
+  // const glm::vec3 aircraft_pos_vel = aircraft_pos_ctrl.GetVel();
+  // const glm::vec3 orig_axis = glm::vec3(0.0f, 0.0f, -1.0f);
+  // const float angle =
+  //    glm::acos(glm::dot(aircraft_pos_vel, orig_axis) /
+  //              (glm::length(aircraft_pos_vel) * glm::length(orig_axis)));
+  // camera_trans.SetEye(aircraft_pos_ctrl.GetPos());
+  // camera_trans.SetAngles(glm::vec3(0.0f, angle, 0.0f));
+
+  // Update camera transformation
+  UpdateGlobalTrans();
+  UpdateLighting();
 
   // Update time
   postproc_shader.UpdateTime(elapsed_time);

@@ -3,19 +3,15 @@
 #include "as/common.hpp"
 
 namespace ctrl {
-class AircraftController {
+class FbxCameraController {
  public:
-  AircraftController(const glm::vec3 &pos, const glm::vec3 &vel,
-                     const glm::vec3 &rot, const glm::vec3 &pos_adjust_factor,
-                     const glm::vec3 &vel_adjust_factor,
-                     const glm::vec3 &rot_adjust_factor,
-                     const glm::vec3 &pos_bounce_force,
-                     const glm::vec3 &vel_bounce_force,
-                     const glm::vec3 &rot_bounce_force);
+  FbxCameraController(const glm::vec3 &pos, const glm::vec3 &rot,
+                      const glm::vec3 &pos_adjust_factor,
+                      const glm::vec3 &rot_adjust_factor,
+                      const glm::vec3 &pos_bounce_force,
+                      const glm::vec3 &rot_bounce_force);
 
   glm::vec3 GetPos() const;
-
-  glm::vec3 GetVel() const;
 
   glm::vec3 GetRot() const;
 
@@ -41,30 +37,22 @@ class AircraftController {
 
  private:
   glm::vec3 pos_;
-  glm::vec3 vel_;
   glm::vec3 rot_;
 
   glm::vec3 prefer_pos_;
-  glm::vec3 prefer_vel_;
   glm::vec3 prefer_rot_;
 
   glm::vec3 pos_adjust_factor_;
-  glm::vec3 vel_adjust_factor_;
   glm::vec3 rot_adjust_factor_;
 
   glm::vec3 pos_bounce_force_;
-  glm::vec3 vel_bounce_force_;
   glm::vec3 rot_bounce_force_;
 
   glm::vec3 CalcPosBounceForce() const;
 
-  glm::vec3 CalcVelBounceForce() const;
-
   glm::vec3 CalcRotBounceForce() const;
 
   glm::vec3 CalcPosDrift() const;
-
-  glm::vec3 CalcVelDrift() const;
 
   glm::vec3 CalcRotDrift() const;
 

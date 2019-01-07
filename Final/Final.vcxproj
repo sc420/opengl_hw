@@ -185,6 +185,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClInclude Include="include\aircraft_controller.hpp" />
     <ClInclude Include="include\depth_shader.hpp" />
     <ClInclude Include="include\diff_shader.hpp" />
+    <ClInclude Include="include\fbx_camera_controller.hpp" />
     <ClInclude Include="include\fbx_controller.hpp" />
     <ClInclude Include="include\postproc_shader.hpp" />
     <ClInclude Include="include\scene_model_dto.hpp" />
@@ -231,6 +232,7 @@ xcopy /d /e /y "$(ProjectDir)assets\*.*" "$(OutDir)assets\"</Command>
     <ClCompile Include="src\aircraft_controller.cpp" />
     <ClCompile Include="src\depth_shader.cpp" />
     <ClCompile Include="src\diff_shader.cpp" />
+    <ClCompile Include="src\fbx_camera_controller.cpp" />
     <ClCompile Include="src\fbx_controller.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\postproc_shader.cpp" />

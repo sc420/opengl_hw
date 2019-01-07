@@ -126,6 +126,9 @@
     <ClInclude Include="include\diff_shader.hpp">
       <Filter>Final\include</Filter>
     </ClInclude>
+    <ClInclude Include="include\fbx_camera_controller.hpp">
+      <Filter>Final\include</Filter>
+    </ClInclude>
     <ClInclude Include="include\fbx_controller.hpp">
       <Filter>Final\include</Filter>
     </ClInclude>
@@ -258,6 +261,9 @@
       <Filter>Final\src</Filter>
     </ClCompile>
     <ClCompile Include="src\diff_shader.cpp">
+      <Filter>Final\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fbx_camera_controller.cpp">
       <Filter>Final\src</Filter>
     </ClCompile>
     <ClCompile Include="src\fbx_controller.cpp">
