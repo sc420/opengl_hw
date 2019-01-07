@@ -84,10 +84,12 @@ void ctrl::FbxCameraController::Update() {
   pos_ += pos_change_;
   rot_ += rot_change_;
   scaling_ += scaling_change_;
+
   // Decay changes
   pos_change_ *= pos_change_decay_;
   rot_change_ *= rot_change_decay_;
   scaling_change_ *= scaling_change_decay_;
+
   // Bounce back the values
   pos_ += CalcPosBounceForce() * (-CalcPosDiff());
   rot_ += CalcRotBounceForce() * (-CalcRotDiff());

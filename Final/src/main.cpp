@@ -84,9 +84,13 @@ ctrl::AircraftController aircraft_ctrl(
     // Position, Direction, Drift direction, Speed
     glm::vec3(10.0f, 5.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0f), 1e-2f,
     // Adjust factor
-    glm::vec3(1e-3f), 1e-3f,
+    glm::vec3(1e-4f), 1e-4f,
+    // Max change
+    glm::vec3(1e-2f), 1e-2f,
+    // Change decay
+    glm::vec3(0.9f), 0.9f,
     // Bounce force
-    glm::vec3(1e1f), 1e1f);
+    glm::vec3(1e1f), 1.0f);
 ctrl::FbxController fbx_ctrl;
 
 /*******************************************************************************

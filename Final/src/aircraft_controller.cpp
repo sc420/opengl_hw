@@ -3,16 +3,24 @@
 ctrl::AircraftController::AircraftController(
     const glm::vec3 &pos, const glm::vec3 &dir, const glm::vec3 &drift_dir,
     const float speed, const glm::vec3 &drift_dir_adjust_factor,
-    const float speed_adjust_factor, const glm::vec3 &drift_dir_bounce_force,
+    const float speed_adjust_factor, const glm::vec3 &max_drift_dir_change,
+    const float max_speed_change, const glm::vec3 &drift_dir_change_decay,
+    const float speed_change_decay, const glm::vec3 &drift_dir_bounce_force,
     const float speed_bounce_force)
     : pos_(pos),
       dir_(dir),
       drift_dir_(drift_dir),
       speed_(speed),
+      drift_dir_change_(glm::vec3(0.0f)),
+      speed_change_(0.0f),
       prefer_drift_dir_(drift_dir),
       prefer_speed_(speed),
       drift_dir_adjust_factor_(drift_dir_adjust_factor),
       speed_adjust_factor_(speed_adjust_factor),
+      max_drift_dir_change_(max_drift_dir_change),
+      max_speed_change_(max_speed_change),
+      drift_dir_change_decay_(drift_dir_change_decay),
+      speed_change_decay_(speed_change_decay),
       drift_dir_bounce_force_(drift_dir_bounce_force),
       speed_bounce_force_(speed_bounce_force) {}
 
@@ -25,14 +33,22 @@ glm::vec3 ctrl::AircraftController::GetDriftDir() const { return drift_dir_; }
 float ctrl::AircraftController::GetSpeed() const { return speed_; }
 
 void ctrl::AircraftController::AddDriftDir(const glm::vec3 &add_drift_dir) {
-  drift_dir_ += drift_dir_adjust_factor_ * add_drift_dir;
+  drift_dir_change_ += drift_dir_adjust_factor_ * add_drift_dir;
+  drift_dir_change_ = glm::min(drift_dir_change_, max_drift_dir_change_);
+  drift_dir_change_ = glm::max(drift_dir_change_, (-max_drift_dir_change_));
 }
 
 void ctrl::AircraftController::AddSpeed(const float add_speed) {
-  speed_ += speed_adjust_factor_ * add_speed;
+  speed_change_ += speed_adjust_factor_ * add_speed;
+  speed_change_ = glm::min(speed_change_, max_speed_change_);
+  speed_change_ = glm::max(speed_change_, (-max_speed_change_));
 }
 
 void ctrl::AircraftController::Update() {
+  // Update values
+  drift_dir_ += drift_dir_change_;
+  speed_ += speed_change_;
+
   // Update the direction
   dir_ = glm::mod(dir_ + drift_dir_, 2.0f * glm::pi<float>());
 
@@ -40,6 +56,10 @@ void ctrl::AircraftController::Update() {
   const glm::vec3 drift_pos =
       glm::vec3(CalcRotMatrix(dir_) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f));
   pos_ += speed_ * drift_pos;
+
+  // Decay changes
+  drift_dir_change_ *= drift_dir_change_decay_;
+  speed_change_ *= speed_change_decay_;
 
   // Bounce back the values
   drift_dir_ += CalcDriftDirBounceForce() * (-CalcDriftDirDiff());

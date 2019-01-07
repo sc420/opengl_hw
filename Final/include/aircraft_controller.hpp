@@ -5,12 +5,13 @@
 namespace ctrl {
 class AircraftController {
  public:
-  AircraftController(const glm::vec3 &pos, const glm::vec3 &dir,
-                     const glm::vec3 &drift_dir, const float speed,
-                     const glm::vec3 &drift_dir_adjust_factor,
-                     const float speed_adjust_factor,
-                     const glm::vec3 &drift_dir_bounce_force,
-                     const float speed_bounce_force);
+  AircraftController(
+      const glm::vec3 &pos, const glm::vec3 &dir, const glm::vec3 &drift_dir,
+      const float speed, const glm::vec3 &drift_dir_adjust_factor,
+      const float speed_adjust_factor, const glm::vec3 &max_drift_dir_change,
+      const float max_speed_change, const glm::vec3 &drift_dir_change_decay,
+      const float speed_change_decay, const glm::vec3 &drift_dir_bounce_force,
+      const float speed_bounce_force);
 
   glm::vec3 GetPos() const;
 
@@ -34,11 +35,20 @@ class AircraftController {
   glm::vec3 drift_dir_;
   float speed_;
 
+  glm::vec3 drift_dir_change_;
+  float speed_change_;
+
   glm::vec3 prefer_drift_dir_;
   float prefer_speed_;
 
   glm::vec3 drift_dir_adjust_factor_;
   float speed_adjust_factor_;
+
+  glm::vec3 max_drift_dir_change_;
+  float max_speed_change_;
+
+  glm::vec3 drift_dir_change_decay_;
+  float speed_change_decay_;
 
   glm::vec3 drift_dir_bounce_force_;
   float speed_bounce_force_;
