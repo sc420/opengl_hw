@@ -21,15 +21,9 @@ class FbxCameraController {
 
   void SetPreferPos(const glm::vec3 &prefer_pos);
 
-  void SetPreferVel(const glm::vec3 &prefer_vel);
-
   void SetPreferRot(const glm::vec3 &prefer_rot);
 
   void AddPos(const glm::vec3 &add_pos);
-
-  void AddVel(const glm::vec3 &add_vel);
-
-  void RotateVel(const glm::vec3 &rotate_vel);
 
   void AddRot(const glm::vec3 &add_rot);
 
