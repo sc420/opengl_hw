@@ -47,9 +47,9 @@ class AircraftController {
 
   float CalcSpeedBounceForce() const;
 
-  glm::vec3 CalcDriftDirDrift() const;
+  glm::vec3 CalcDriftDirDiff() const;
 
-  float CalcSpeedDrift() const;
+  float CalcSpeedDiff() const;
 
   glm::mat4 CalcRotMatrix(const glm::vec3 &angles) const;
 };

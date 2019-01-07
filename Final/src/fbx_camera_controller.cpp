@@ -47,27 +47,25 @@ void ctrl::FbxCameraController::AddRot(const glm::vec3 &add_rot) {
 
 void ctrl::FbxCameraController::Update() {
   // Bounce back the values
-  pos_ += CalcPosBounceForce() * (-CalcPosDrift());
-  rot_ += CalcRotBounceForce() * (-CalcRotDrift());
+  pos_ += CalcPosBounceForce() * (-CalcPosDiff());
+  rot_ += CalcRotBounceForce() * (-CalcRotDiff());
 }
 
 glm::vec3 ctrl::FbxCameraController::CalcPosBounceForce() const {
-  const glm::vec3 linear_force =
-      pos_bounce_force_ * glm::length(CalcPosDrift());
+  const glm::vec3 linear_force = pos_bounce_force_ * glm::length(CalcPosDiff());
   return glm::exp(linear_force) - 1.0f;
 }
 
 glm::vec3 ctrl::FbxCameraController::CalcRotBounceForce() const {
-  const glm::vec3 linear_force =
-      rot_bounce_force_ * glm::length(CalcRotDrift());
+  const glm::vec3 linear_force = rot_bounce_force_ * glm::length(CalcRotDiff());
   return glm::exp(linear_force) - 1.0f;
 }
 
-glm::vec3 ctrl::FbxCameraController::CalcPosDrift() const {
+glm::vec3 ctrl::FbxCameraController::CalcPosDiff() const {
   return pos_ - prefer_pos_;
 }
 
-glm::vec3 ctrl::FbxCameraController::CalcRotDrift() const {
+glm::vec3 ctrl::FbxCameraController::CalcRotDiff() const {
   return rot_ - prefer_rot_;
 }
 

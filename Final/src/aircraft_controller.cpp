@@ -42,27 +42,26 @@ void ctrl::AircraftController::Update() {
   pos_ += speed_ * drift_pos;
 
   // Bounce back the values
-  drift_dir_ += CalcDriftDirBounceForce() * (-CalcDriftDirDrift());
-  speed_ += CalcSpeedBounceForce() * (-CalcSpeedDrift());
+  drift_dir_ += CalcDriftDirBounceForce() * (-CalcDriftDirDiff());
+  speed_ += CalcSpeedBounceForce() * (-CalcSpeedDiff());
 }
 
 glm::vec3 ctrl::AircraftController::CalcDriftDirBounceForce() const {
   const glm::vec3 linear_force =
-      drift_dir_bounce_force_ * glm::length(CalcDriftDirDrift());
+      drift_dir_bounce_force_ * glm::length(CalcDriftDirDiff());
   return glm::exp(linear_force) - 1.0f;
 }
 
 float ctrl::AircraftController::CalcSpeedBounceForce() const {
-  const float linear_force =
-      speed_bounce_force_ * glm::length(CalcSpeedDrift());
+  const float linear_force = speed_bounce_force_ * glm::length(CalcSpeedDiff());
   return glm::exp(linear_force) - 1.0f;
 }
 
-glm::vec3 ctrl::AircraftController::CalcDriftDirDrift() const {
+glm::vec3 ctrl::AircraftController::CalcDriftDirDiff() const {
   return drift_dir_ - prefer_drift_dir_;
 }
 
-float ctrl::AircraftController::CalcSpeedDrift() const {
+float ctrl::AircraftController::CalcSpeedDiff() const {
   return speed_ - prefer_speed_;
 }
 

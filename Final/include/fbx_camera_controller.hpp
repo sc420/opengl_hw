@@ -46,9 +46,9 @@ class FbxCameraController {
 
   glm::vec3 CalcRotBounceForce() const;
 
-  glm::vec3 CalcPosDrift() const;
+  glm::vec3 CalcPosDiff() const;
 
-  glm::vec3 CalcRotDrift() const;
+  glm::vec3 CalcRotDiff() const;
 
   glm::mat4 CalcRotMatrix(const glm::vec3 &angles) const;
 };
