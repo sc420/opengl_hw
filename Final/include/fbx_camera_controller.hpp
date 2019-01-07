@@ -10,8 +10,9 @@ class FbxCameraController {
       const glm::vec3 &pos_adjust_factor, const glm::vec3 &rot_adjust_factor,
       const glm::vec3 &scaling_adjust_factor, const glm::vec3 &max_pos_change,
       const glm::vec3 &max_rot_change, const glm::vec3 &max_scaling_change,
-      const glm::vec3 &pos_bounce_force, const glm::vec3 &rot_bounce_force,
-      const glm::vec3 &scaling_bounce_force);
+      const glm::vec3 &pos_change_decay, const glm::vec3 &rot_change_decay,
+      const glm::vec3 &scaling_change_decay, const glm::vec3 &pos_bounce_force,
+      const glm::vec3 &rot_bounce_force, const glm::vec3 &scaling_bounce_force);
 
   glm::vec3 GetPos() const;
 
@@ -42,6 +43,10 @@ class FbxCameraController {
   glm::vec3 rot_;
   glm::vec3 scaling_;
 
+  glm::vec3 pos_change_;
+  glm::vec3 rot_change_;
+  glm::vec3 scaling_change_;
+
   glm::vec3 prefer_pos_;
   glm::vec3 prefer_rot_;
   glm::vec3 prefer_scaling_;
@@ -53,6 +58,10 @@ class FbxCameraController {
   glm::vec3 max_pos_change_;
   glm::vec3 max_rot_change_;
   glm::vec3 max_scaling_change_;
+
+  glm::vec3 pos_change_decay_;
+  glm::vec3 rot_change_decay_;
+  glm::vec3 scaling_change_decay_;
 
   glm::vec3 pos_bounce_force_;
   glm::vec3 rot_bounce_force_;
