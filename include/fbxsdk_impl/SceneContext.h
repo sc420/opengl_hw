@@ -100,6 +100,10 @@ class SceneContext {
                           const fbxsdk::FbxDouble3 &interest_position,
                           const fbxsdk::FbxDouble3 &up_vector,
                           const double roll);
+  // ADD: Set model transformation
+  void SetModelTransform(const fbxsdk::FbxDouble3 &translation,
+                         const fbxsdk::FbxDouble3 &rotation,
+                         const fbxsdk::FbxDouble3 &scaling);
 
  private:
   // Display information about current status in the left-up corner of the

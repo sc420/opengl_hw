@@ -18,13 +18,13 @@ glm::vec3 ctrl::FbxCameraController::GetPos() const { return pos_; }
 glm::vec3 ctrl::FbxCameraController::GetRot() const { return rot_; }
 
 glm::vec3 ctrl::FbxCameraController::GetRotDir() const {
-  const glm::mat4 rot_matrix = CalcRotMatrix(rot_);
+  const glm::mat4 rot_matrix = CalcRotMatrix((-rot_));
   const glm::vec4 axis = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
   return rot_matrix * axis;
 }
 
 glm::vec3 ctrl::FbxCameraController::GetRotUp() const {
-  const glm::mat4 rot_matrix = CalcRotMatrix(rot_);
+  const glm::mat4 rot_matrix = CalcRotMatrix((-rot_));
   const glm::vec4 axis = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
   return rot_matrix * axis;
 }
@@ -72,13 +72,8 @@ glm::vec3 ctrl::FbxCameraController::CalcRotDrift() const {
 }
 
 glm::mat4 ctrl::FbxCameraController::CalcRotMatrix(
-    const glm::vec3 &rot_axes) const {
+    const glm::vec3 &angles) const {
   // TODO: Merge with other code
-  const glm::quat pitch =
-      glm::angleAxis(rot_axes.x, glm::vec3(1.0f, 0.0f, 0.0f));
-  const glm::quat yaw = glm::angleAxis(rot_axes.y, glm::vec3(0.0f, 1.0f, 0.0f));
-  const glm::quat roll =
-      glm::angleAxis(rot_axes.z, glm::vec3(0.0f, 0.0f, 1.0f));
-  const glm::quat orientation = glm::normalize(pitch * yaw * roll);
-  return glm::mat4_cast(orientation);
+  const glm::quat quaternion = glm::quat(angles);
+  return glm::mat4_cast(quaternion);
 }

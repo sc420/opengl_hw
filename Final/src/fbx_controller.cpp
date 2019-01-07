@@ -41,11 +41,10 @@ void ctrl::FbxController::SetTime(const double ratio) {
   gSceneContext->SetTime(ratio);
 }
 
-void ctrl::FbxController::SetModelTransform(const glm::vec3& eye,
-                                            const glm::vec3& dir,
-                                            const glm::vec3& up,
-                                            const float& roll) {
-  // TODO: Try using  glm::value_ptr()
+void ctrl::FbxController::SetCameraTransform(const glm::vec3& eye,
+                                             const glm::vec3& dir,
+                                             const glm::vec3& up,
+                                             const float& roll) {
   const glm::vec3 reverse_eye = (-eye);
   const glm::vec3 reverse_center = (-(eye - dir));
   fbxsdk::FbxDouble3 fbx_position(reverse_eye[0], reverse_eye[1],
@@ -56,6 +55,16 @@ void ctrl::FbxController::SetModelTransform(const glm::vec3& eye,
   const double fbx_roll = roll;
   gSceneContext->SetCameraTransform(fbx_position, fbx_interest_position,
                                     fbx_up_vector, fbx_roll);
+}
+
+void ctrl::FbxController::SetModelTransform(const glm::vec3& translation,
+                                            const glm::vec3& rotation,
+                                            const glm::vec3& scale) {
+  fbxsdk::FbxDouble3 fbx_translation(translation[0], translation[1],
+                                     translation[2]);
+  fbxsdk::FbxDouble3 fbx_rotation(rotation[0], rotation[1], rotation[2]);
+  fbxsdk::FbxDouble3 fbx_scale(scale[0], scale[1], scale[2]);
+  gSceneContext->SetModelTransform(fbx_translation, fbx_rotation, fbx_scale);
 }
 
 void ctrl::FbxController::OnReshape(const int width, const int height) {

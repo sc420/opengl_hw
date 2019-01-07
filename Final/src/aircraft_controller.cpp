@@ -41,9 +41,6 @@ void ctrl::AircraftController::Update() {
       glm::vec3(CalcRotMatrix(dir_) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f));
   pos_ += speed_ * drift_pos;
 
-  std::cerr << drift_pos[0] << " " << drift_pos[1] << " " << drift_pos[2]
-            << std::endl;
-
   // Bounce back the values
   drift_dir_ += CalcDriftDirBounceForce() * (-CalcDriftDirDrift());
   speed_ += CalcSpeedBounceForce() * (-CalcSpeedDrift());
@@ -70,8 +67,8 @@ float ctrl::AircraftController::CalcSpeedDrift() const {
 }
 
 glm::mat4 ctrl::AircraftController::CalcRotMatrix(
-    const glm::vec3 &radian_angles) const {
+    const glm::vec3 &angles) const {
   // TODO: Merge with other code
-  const glm::quat quaternion = glm::quat(radian_angles);
+  const glm::quat quaternion = glm::quat(angles);
   return glm::mat4_cast(quaternion);
 }

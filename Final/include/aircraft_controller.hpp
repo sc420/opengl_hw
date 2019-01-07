@@ -51,6 +51,6 @@ class AircraftController {
 
   float CalcSpeedDrift() const;
 
-  glm::mat4 CalcRotMatrix(const glm::vec3 &rot_axes) const;
+  glm::mat4 CalcRotMatrix(const glm::vec3 &angles) const;
 };
 }  // namespace ctrl

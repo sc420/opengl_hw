@@ -69,17 +69,17 @@ shader::SkyboxShader skybox_shader;
 // Only for the black hawk
 ctrl::FbxCameraController fbx_camera_ctrl(
     // Position, Rotation
-    1e-2f * glm::vec3(0.0f, -600.0f, -2300.0f),
+    1e-2f * glm::vec3(0.0f, -500.0f, -2300.0f),
     glm::vec3(glm::radians(-10.0f), 0.0f, 0.0f),
     // Adjust factor
-    1e-2f * glm::vec3(10.0f, 1.0f, 1.0f), glm::vec3(1e-4f, 1e-2f, 1e-2f),
+    1e-2f * glm::vec3(10.0f, 1.0f, 5.0f), glm::vec3(1e-2f, 1e-2f, 1e-2f),
     // Bounce force
-    glm::vec3(1e-3f, 1e-3f, 1e-4f), glm::vec3(1e-4f, 1e-2f, 1e-1f));
+    glm::vec3(1e-3f, 1e-3f, 1e-2f), glm::vec3(1e-2f, 1e-2f, 1e-1f));
 ctrl::AircraftController aircraft_ctrl(
     // Position, Direction, Drift direction, Speed
     glm::vec3(10.0f, 5.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0f), 1e-2f,
     // Adjust factor
-    glm::vec3(1e-5f), 1e-3f,
+    glm::vec3(1e-4f), 1e-3f,
     // Bounce force
     glm::vec3(1e1f), 1e1f);
 ctrl::FbxController fbx_ctrl;
@@ -526,15 +526,13 @@ void GLUTTimerCallback(const int val) {
 
   // Update black hawk transformation
   if (ui_manager.IsKeyDown('w')) {
-    fbx_camera_ctrl.AddPos(glm::vec3(0.0f, 1.0f, -1.0f));
+    // fbx_camera_ctrl.AddPos(glm::vec3(0.0f, 1.0f, 1.0f));
     fbx_camera_ctrl.AddRot(glm::vec3(-1.0f, 0.0f, 0.0f));
-    aircraft_ctrl.AddDriftDir(glm::vec3(-1.0f, 0.0f, 0.0f));
     aircraft_ctrl.AddSpeed(1.0f);
   }
   if (ui_manager.IsKeyDown('s')) {
-    fbx_camera_ctrl.AddPos(glm::vec3(0.0f, -1.0f, 1.0f));
+    // fbx_camera_ctrl.AddPos(glm::vec3(0.0f, -1.0f, -1.0f));
     fbx_camera_ctrl.AddRot(glm::vec3(1.0f, 0.0f, 0.0f));
-    aircraft_ctrl.AddDriftDir(glm::vec3(1.0f, 0.0f, 0.0f));
     aircraft_ctrl.AddSpeed(-1e-1f);
   }
   if (ui_manager.IsKeyDown('a')) {
@@ -597,12 +595,12 @@ void GLUTTimerCallback(const int val) {
   // Update aircraft controller
   aircraft_ctrl.Update();
 
-  // Update FBX
+  // Update FBX controller
   fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);
-  const glm::vec3 aircraft_rot = fbx_camera_ctrl.GetRot();
-  fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(),
-                             fbx_camera_ctrl.GetRotDir(),
-                             fbx_camera_ctrl.GetRotUp(), 0.0f);
+  fbx_ctrl.SetCameraTransform(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+                              glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+  fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(), fbx_camera_ctrl.GetRot(),
+                             glm::vec3(1.0f));
 
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();

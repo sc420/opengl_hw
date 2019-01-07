@@ -975,3 +975,12 @@ void SceneContext::SetCameraTransform(
 
   lCamera->LockInterestNavigation = false;
 }
+
+void SceneContext::SetModelTransform(const fbxsdk::FbxDouble3& translation,
+                                     const fbxsdk::FbxDouble3& rotation,
+                                     const fbxsdk::FbxDouble3& scaling) {
+  fbxsdk::FbxNode* root_node = mScene->GetRootNode();
+  root_node->LclTranslation.Set(translation);
+  root_node->LclRotation.Set(rotation);
+  root_node->LclScaling.Set(scaling);
+}
