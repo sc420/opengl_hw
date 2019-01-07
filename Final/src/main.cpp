@@ -68,13 +68,17 @@ shader::SkyboxShader skybox_shader;
 
 // Only for the black hawk
 ctrl::FbxCameraController fbx_camera_ctrl(
-    // Position, Rotation
+    // Position, Rotation, Scaling
     1e-2f * glm::vec3(0.0f, -400.0f, -2300.0f),
-    glm::vec3(glm::radians(-10.0f), 0.0f, 0.0f),
+    glm::vec3(glm::radians(-10.0f), 0.0f, 0.0f), glm::vec3(1e-2f),
     // Adjust factor
     1e-2f * glm::vec3(10.0f, 1.0f, 10.0f), glm::vec3(1e-2f, 1e-2f, 1e-2f),
+    glm::vec3(0.0f),
+    // Max change
+    1e-2f * glm::vec3(10.0f), glm::vec3(1.0f), glm::vec3(0.0f),
     // Bounce force
-    glm::vec3(1e-3f, 1e-3f, 1e-2f), glm::vec3(1e-1f, 1e-2f, 1e-1f));
+    glm::vec3(1e-3f, 1e-3f, 1e-2f), glm::vec3(1e-1f, 1e-2f, 1e-1f),
+    glm::vec3(0.0f));
 ctrl::AircraftController aircraft_ctrl(
     // Position, Direction, Drift direction, Speed
     glm::vec3(10.0f, 5.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0f), 1e-2f,
@@ -616,7 +620,7 @@ void GLUTTimerCallback(const int val) {
   fbx_ctrl.SetCameraTransform(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
                               glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
   fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(), fbx_camera_ctrl.GetRot(),
-                             glm::vec3(1.0f));
+                             fbx_camera_ctrl.GetScaling());
 
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();
