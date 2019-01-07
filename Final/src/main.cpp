@@ -69,7 +69,7 @@ shader::SkyboxShader skybox_shader;
 // Only for the black hawk
 ctrl::FbxCameraController fbx_camera_ctrl(
     // Position, Rotation
-    1e-2f * glm::vec3(0.0f, -500.0f, -2300.0f),
+    1e-2f * glm::vec3(0.0f, -400.0f, -2300.0f),
     glm::vec3(glm::radians(-10.0f), 0.0f, 0.0f),
     // Adjust factor
     1e-2f * glm::vec3(10.0f, 1.0f, 5.0f), glm::vec3(1e-2f, 1e-2f, 1e-2f),
@@ -268,6 +268,22 @@ void UpdateImGui() {
     ImGui::Text("Center: (%.1f, %.1f, %.1f)", center[0], center[1], center[2]);
     ImGui::Text("Up: (%.1f, %.1f, %.1f)", up[0], up[1], up[2]);
     ImGui::Text("Roll: %.1f", roll);
+  }
+
+  if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+  if (ImGui::CollapsingHeader("FBX Model")) {
+    glm::vec3 translation;
+    glm::vec3 rotation;
+    glm::vec3 scaling;
+
+    fbx_ctrl.GetModelTransform(translation, rotation, scaling);
+
+    ImGui::Text("Translation: (%.1f, %.1f, %.1f)", translation[0],
+                translation[1], translation[2]);
+    ImGui::Text("Rotation: (%.2f, %.2f, %.2f)", rotation[0], rotation[1],
+                rotation[2]);
+    ImGui::Text("Scaling: (%.1f, %.1f, %.1f)", scaling[0], scaling[1],
+                scaling[2]);
   }
 
   if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
@@ -537,13 +553,13 @@ void GLUTTimerCallback(const int val) {
   }
   if (ui_manager.IsKeyDown('a')) {
     fbx_camera_ctrl.AddPos(glm::vec3(-1.0f, 0.0f, 0.0f));
-    fbx_camera_ctrl.AddRot(glm::vec3(0.0f, 0.0f, -1.0f));
+    fbx_camera_ctrl.AddRot(glm::vec3(0.0f, 0.0f, 1.0f));
     aircraft_ctrl.AddDriftDir(glm::vec3(0.0f, 1.0f, 0.0f));
     aircraft_ctrl.AddSpeed(-1e-1f);
   }
   if (ui_manager.IsKeyDown('d')) {
     fbx_camera_ctrl.AddPos(glm::vec3(1.0f, 0.0f, 0.0f));
-    fbx_camera_ctrl.AddRot(glm::vec3(0.0f, 0.0f, 1.0f));
+    fbx_camera_ctrl.AddRot(glm::vec3(0.0f, 0.0f, -1.0f));
     aircraft_ctrl.AddDriftDir(glm::vec3(0.0f, -1.0f, 0.0f));
     aircraft_ctrl.AddSpeed(-1e-1f);
   }

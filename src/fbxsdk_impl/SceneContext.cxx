@@ -931,6 +931,15 @@ void SceneContext::GetCameraTransform(fbxsdk::FbxDouble3& position,
   roll = lCamera->Roll.Get();
 }
 
+void SceneContext::GetModelTransform(fbxsdk::FbxDouble3& translation,
+                                     fbxsdk::FbxDouble3& rotation,
+                                     fbxsdk::FbxDouble3& scaling) {
+  fbxsdk::FbxNode* root_node = mScene->GetRootNode();
+  translation = root_node->LclTranslation.Get();
+  rotation = root_node->LclRotation.Get();
+  scaling = root_node->LclScaling.Get();
+}
+
 void SceneContext::SetTime(const double ratio) {
   // Loop in the animation stack if not paused.
   if (mStop > mStart && !mPause) {
@@ -983,4 +992,7 @@ void SceneContext::SetModelTransform(const fbxsdk::FbxDouble3& translation,
   root_node->LclTranslation.Set(translation);
   root_node->LclRotation.Set(rotation);
   root_node->LclScaling.Set(scaling);
+
+  root_node->SetRotationOrder(FbxNode::eDestinationPivot,
+                              fbxsdk::FbxEuler::eOrderXYZ);
 }

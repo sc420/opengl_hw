@@ -32,6 +32,20 @@ void ctrl::FbxController::GetCameraTransform(glm::vec3& eye, glm::vec3& center,
   roll = static_cast<float>(fbx_roll);
 }
 
+void ctrl::FbxController::GetModelTransform(glm::vec3& translation,
+                                            glm::vec3& rotation,
+                                            glm::vec3& scaling) {
+  fbxsdk::FbxDouble3 fbx_translation;
+  fbxsdk::FbxDouble3 fbx_rotation;
+  fbxsdk::FbxDouble3 fbx_scaling;
+  gSceneContext->GetModelTransform(fbx_translation, fbx_rotation, fbx_scaling);
+  translation =
+      glm::vec3(fbx_translation[0], fbx_translation[1], fbx_translation[2]);
+  rotation = glm::vec3(fbx_rotation[0], fbx_rotation[1], fbx_rotation[2]);
+  rotation = glm::radians(rotation);
+  scaling = glm::vec3(fbx_scaling[0], fbx_scaling[1], fbx_scaling[2]);
+}
+
 void ctrl::FbxController::SetTime(const double ratio) {
   // Ask to display the current frame only if necessary.
   if (gSceneContext->GetStatus() == SceneContext::MUST_BE_REFRESHED) {
@@ -59,12 +73,15 @@ void ctrl::FbxController::SetCameraTransform(const glm::vec3& eye,
 
 void ctrl::FbxController::SetModelTransform(const glm::vec3& translation,
                                             const glm::vec3& rotation,
-                                            const glm::vec3& scale) {
+                                            const glm::vec3& scaling) {
+  const glm::vec3 rotation_degress = glm::degrees(rotation);
   fbxsdk::FbxDouble3 fbx_translation(translation[0], translation[1],
                                      translation[2]);
-  fbxsdk::FbxDouble3 fbx_rotation(rotation[0], rotation[1], rotation[2]);
-  fbxsdk::FbxDouble3 fbx_scale(scale[0], scale[1], scale[2]);
-  gSceneContext->SetModelTransform(fbx_translation, fbx_rotation, fbx_scale);
+  // The order is around XYZ axes
+  fbxsdk::FbxDouble3 fbx_rotation(rotation_degress[0], rotation_degress[1],
+                                  rotation_degress[2]);
+  fbxsdk::FbxDouble3 fbx_scaling(scaling[0], scaling[1], scaling[2]);
+  gSceneContext->SetModelTransform(fbx_translation, fbx_rotation, fbx_scaling);
 }
 
 void ctrl::FbxController::OnReshape(const int width, const int height) {

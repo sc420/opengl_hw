@@ -89,6 +89,10 @@ class SceneContext {
   void GetCameraTransform(fbxsdk::FbxDouble3 &position,
                           fbxsdk::FbxDouble3 &interest_position,
                           fbxsdk::FbxDouble3 &up_vector, double &roll);
+  // ADD: Get model transformation
+  void GetModelTransform(fbxsdk::FbxDouble3 &translation,
+                         fbxsdk::FbxDouble3 &rotation,
+                         fbxsdk::FbxDouble3 &scaling);
 
   // ADD: Set the time directly
   void SetTime(const double ratio);
