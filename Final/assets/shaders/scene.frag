@@ -5,6 +5,7 @@
  ******************************************************************************/
 
 const float kPi = 3.1415926535897932384626433832795f;
+const float kDiscardAlphaHigh = 0.1f;
 const float kEnvMapBlendRatio = 0.35f;
 const float kParallaxHeightScale = 0.01f;
 const float kParallaxMapMinNumLayers = 4.0f;
@@ -206,7 +207,7 @@ vec4 GetAmbientColor() {
     tex_color = model_material.ambient_color;
   }
   const vec4 affecting_color =
-      lighting.light_intensity.x * vec4(lighting.light_color, 1.0f);
+      vec4(lighting.light_intensity.x * lighting.light_color, 1.0f);
   return affecting_color * tex_color;
 }
 
@@ -220,8 +221,9 @@ vec4 GetDiffuseColor() {
   const vec3 norm = GetTangentNorm();
   const vec3 light_dir = GetTangentLightDir();
   const float diffuse_strength = max(dot(norm, light_dir), 0.0f);
-  const vec4 affecting_color = lighting.light_intensity.y * diffuse_strength *
-                               vec4(lighting.light_color, 1.0f);
+  const vec4 affecting_color =
+      vec4(lighting.light_intensity.y * diffuse_strength * lighting.light_color,
+           1.0f);
   return affecting_color * tex_color;
 }
 
@@ -238,9 +240,10 @@ vec4 GetSpecularColor() {
   const float energy_conservation = (8.0f + shininess) / (8.0f * kPi);
   const float specular_strength =
       pow(max(dot(norm, halfway_dir), 0.0f), shininess);
-  const vec4 affecting_color = lighting.light_intensity.z *
-                               energy_conservation * specular_strength *
-                               vec4(lighting.light_color, 1.0f);
+  const vec4 affecting_color =
+      vec4(lighting.light_intensity.z * energy_conservation *
+               specular_strength * lighting.light_color,
+           1.0f);
   return affecting_color * tex_color;
 }
 
@@ -264,8 +267,14 @@ vec4 GetBlinnPhongShadowColor() {
   const vec4 ambient_color = GetAmbientColor();
   const vec4 diffuse_color = GetDiffuseColor();
   const vec4 specular_color = GetSpecularColor();
-  const float shadow = CalcShadow();
-  return ambient_color + (1.0f - shadow) * (diffuse_color + specular_color);
+  const vec4 non_shadow = vec4(vec3(1.0f - CalcShadow()), 1.0f);
+  const vec4 color =
+      ambient_color + non_shadow * (diffuse_color + specular_color);
+  // Check whether to discard the fragment if the alpha is too low
+  if (ambient_color.a < kDiscardAlphaHigh) {
+    discard;
+  }
+  return color;
 }
 
 vec4 CalcFinalColor() {

@@ -32,7 +32,7 @@ static const auto kCameraZoomingStep = 1.0f;
 static const auto kTimerInterval = 10;
 /* Debug */
 static const auto kSeeFromLight = false;
-static const auto kUpdateCameraFromAircraftController = true;
+static const auto kUpdateCameraFromAircraftController = false;
 
 /*******************************************************************************
  * Camera States
@@ -154,6 +154,10 @@ void ConfigGLSettings() {
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_MULTISAMPLE_ARB);
+  glEnable(GL_BLEND);
+
+  // Set blending function
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Enable stencil test
   glEnable(GL_STENCIL_TEST);

@@ -244,7 +244,17 @@ void shader::SceneShader::LoadModels() {
           aiProcess_Triangulate | aiProcess_GenNormals |
           aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
           aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
-      "ground", 1, gl_managers_);
+      "ground", 3, gl_managers_);
+  // Surrounding mountains
+  scene_models_["surround"] = dto::SceneModel(
+      "surround",
+      "assets/models/MountainsGreen0070/"
+      "quad.obj",
+      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
+          aiProcess_Triangulate | aiProcess_GenNormals |
+          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
+          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
+      "surround", 3, gl_managers_);
 }
 
 void shader::SceneShader::InitModels() {
@@ -264,20 +274,26 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("ground").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
   scene_models_.at("ground").SetLightIntensity(glm::vec3(0.5f, 0.5f, 1.0f));
   scene_models_.at("ground").SetUseEnvMap(false);
+  // Surrounding mountains
+  scene_models_.at("surround").SetTranslation(glm::vec3(90.0f, 10.0f, 00.0f));
+  scene_models_.at("surround")
+      .SetRotation(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f));
+  scene_models_.at("surround").SetScaling(30.0f * glm::vec3(3.0f, 1.0f, 1.0f));
+  scene_models_.at("surround").SetLightPos(GetLightPos());
+  scene_models_.at("surround").SetLightColor(glm::vec3(1.0f));
+  scene_models_.at("surround").SetLightIntensity(glm::vec3(0.3f, 0.0f, 0.0f));
+  scene_models_.at("surround").SetUseEnvMap(false);
 
-  std::vector<glm::vec3> instancing_translations = {
-      glm::vec3(0.0f), glm::vec3(1e4f * 20.0f, 0.0f, 0.0f),
-      glm::vec3(0.0f, 1e4f * 20.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1e4f * 20.0f)};
-  std::vector<glm::vec3> instancing_rotations = {
-      glm::vec3(0.0f), glm::vec3(glm::radians(90.0f), 0.0f, 0.0f),
-      glm::vec3(0.0f, glm::radians(90.0f), 0.0f),
-      glm::vec3(0.0f, 0.0f, glm::radians(90.0f))};
+  /* Instancing */
 
-  scene_models_.at("ground").SetInstancingTranslations(instancing_translations);
-  scene_models_.at("ground").SetInstancingRotations(instancing_rotations);
-
-  scene_models_.at("scene").SetInstancingTranslations(instancing_translations);
-  scene_models_.at("scene").SetInstancingRotations(instancing_rotations);
+  scene_models_.at("ground").SetInstancingTranslations(std::vector<glm::vec3>{
+      glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1e4f * -45.0f),
+      glm::vec3(0.0f, 0.0f, 1e4f * 45.0f), glm::vec3(1e4f * -45.0f, 0.0f, 0.0f),
+      glm::vec3(1e4f * 45.0f, 0.0f, 0.0f),
+      glm::vec3(1e4f * -45.0f, 0.0f, 1e4f * -45.0f),
+      glm::vec3(1e4f * -45.0f, 0.0f, 1e4f * 45.0f),
+      glm::vec3(1e4f * 45.0f, 0.0f, 1e4f * -45.0f),
+      glm::vec3(1e4f * 45.0f, 0.0f, 1e4f * 45.0f)});
 }
 
 /*******************************************************************************

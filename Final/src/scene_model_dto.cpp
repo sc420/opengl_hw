@@ -193,7 +193,7 @@ void dto::SceneModel::InitTextures(const std::string &tex_unit_group_name,
       texture_manager.BindTexture(path, GL_TEXTURE_2D, tex_unit_name);
       // Initialize the texture
       texture_manager.InitTexture2D(path, GL_TEXTURE_2D, num_mipmap_levels,
-                                    GL_RGBA8, width, height);
+                                    GL_BGRA, width, height);
       // Update the texture
       texture_manager.UpdateTexture2D(path, GL_TEXTURE_2D, 0, 0, 0, width,
                                       height, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -203,6 +203,12 @@ void dto::SceneModel::InitTextures(const std::string &tex_unit_group_name,
           path, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
       texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D,
                                          GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                                         GL_CLAMP_TO_EDGE);
+      texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+                                         GL_CLAMP_TO_EDGE);
+      texture_manager.SetTextureParamInt(path, GL_TEXTURE_2D, GL_TEXTURE_WRAP_R,
+                                         GL_CLAMP_TO_EDGE);
     }
   }
 }
