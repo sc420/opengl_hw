@@ -10,6 +10,7 @@
 * [OPENGL FPS CAMERA QUATERNION](http://in2gpu.com/2016/03/14/opengl-fps-camera-quaternion/)
 * [OpenGL Angles to Axes](http://www.songho.ca/opengl/gl_anglestoaxes.html)
 * [Improvements for shadow mapping in OpenGL and GLSL](http://www.sunandblackcat.com/tipFullView.php?l=eng&topicid=35)
+* [CREATE A FOG SHADER](http://in2gpu.com/2014/07/22/create-fog-shader/)
 
 ## Libraries
 

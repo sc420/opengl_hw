@@ -51,7 +51,10 @@ layout(location = 1) out VSTangentLighting {
 }
 vs_tangent_lighting;
 
-layout(location = 8) out VSDepth { vec4 light_space_pos; }
+layout(location = 8) out VSDepth {
+  vec4 light_space_pos;
+  vec4 camera_space_pos;
+}
 vs_depth;
 
 /*******************************************************************************
@@ -161,13 +164,15 @@ void OutputTangentLighting() {
  ******************************************************************************/
 
 void main() {
+  const vec4 pos = vec4(in_pos, 1.0f);
   // Calculate vertex position
-  gl_Position = CalcTrans() * vec4(in_pos, 1.0f);
+  gl_Position = CalcTrans() * pos;
   // Pass texture coordinates
   vs_tex.coords = in_tex_coords;
   // Calculate tangent lighting
   OutputTangentLighting();
   // Calculate light space vertex position
-  vs_depth.light_space_pos =
-      lighting.light_trans * model_trans.trans * vec4(in_pos, 1.0f);
+  vs_depth.light_space_pos = lighting.light_trans * model_trans.trans * pos;
+  // Calculate camera space vertex position
+  vs_depth.camera_space_pos = global_trans.view * CalcModel() * pos;
 }

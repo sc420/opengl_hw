@@ -356,7 +356,7 @@ void DrawImGui() {
  * GL States Updaters
  ******************************************************************************/
 
-void UpdateGlobalTrans() {
+dto::GlobalTrans GetCameraTrans() {
   dto::GlobalTrans global_trans;
   const glm::mat4 identity(1.0f);
   const float aspect_ratio = ui_manager.GetWindowAspectRatio();
@@ -364,6 +364,11 @@ void UpdateGlobalTrans() {
       glm::perspective(glm::radians(80.0f), aspect_ratio, 1e-3f, 1e3f);
   global_trans.view = camera_trans.GetTrans();
   global_trans.model = identity;
+  return global_trans;
+}
+
+void UpdateGlobalTrans() {
+  dto::GlobalTrans global_trans = GetCameraTrans();
 
   // DEBUG: See from light source
   if (kSeeFromLight) {
@@ -399,10 +404,9 @@ void GLUTDisplayCallback() {
   // Update states
   UpdateStates();
 
-  // Draw the scene depth on depth framebuffer
+  // Draw the scene depth from light source on depth framebuffer
   depth_shader.UseDepthFramebuffer();
-  as::ClearDepthBuffer();
-  depth_shader.Draw(window_size);
+  depth_shader.DrawFromLight(window_size);
 
   // Update wireframe rendering
   if (render_wireframe) {

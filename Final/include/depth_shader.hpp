@@ -12,6 +12,11 @@ class SceneShader;
 
 class DepthShader : public Shader {
  public:
+  enum class DepthTextureTypes {
+    kFromLight,
+    kFromCamera,
+  };
+
   /* Shader Registrations */
 
   void RegisterSceneShader(SceneShader &scene_shader);
@@ -24,25 +29,32 @@ class DepthShader : public Shader {
 
   void InitUniformBlocks();
 
-  void InitDepthTexture();
+  void InitDepthTexture(const DepthTextureTypes depth_tex_type);
 
   /* GL Drawing Methods */
 
-  void Draw(const glm::ivec2 &window_size);
+  void DrawFromLight(const glm::ivec2 &window_size);
 
-  void DrawModelWithoutTextures(const dto::SceneModel &scene_model);
+  void DrawFromCamera(const glm::ivec2 &window_size,
+                      const dto::GlobalTrans &camera_trans);
 
   dto::GlobalTrans GetLightTrans() const;
 
   void UseDepthFramebuffer();
 
+  void UseDepthTexture(const DepthTextureTypes depth_tex_type);
+
   /* Name Management */
 
   std::string GetId() const override;
 
-  std::string GetDepthTextureName() const;
+  std::string GetDepthTextureName(const DepthTextureTypes depth_tex_type) const;
 
-  std::string GetDepthTextureUnitName() const;
+  std::string GetDepthTextureUnitName(
+      const DepthTextureTypes depth_tex_type) const;
+
+  std::string DepthTextureTypeToName(
+      const DepthTextureTypes depth_tex_type) const;
 
  protected:
   /* Name Management */
@@ -59,15 +71,12 @@ class DepthShader : public Shader {
 
  private:
   /* Constants */
-
   static const glm::ivec2 kDepthMapSize;
 
   /* Shaders */
-
   SceneShader *scene_shader_;
 
   /* GL States */
-
   dto::GlobalTrans global_trans_;
   dto::ModelTrans model_trans_;
 
@@ -76,5 +85,9 @@ class DepthShader : public Shader {
   void UpdateGlobalTrans(const dto::GlobalTrans &global_trans);
 
   void UpdateModelTrans(const dto::SceneModel &scene_model);
+
+  /* GL Drawing Methods */
+
+  void DrawModelWithoutTextures(const dto::SceneModel &scene_model);
 };
 }  // namespace shader

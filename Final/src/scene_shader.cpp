@@ -73,12 +73,18 @@ void shader::SceneShader::BindTextures() {
   texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP,
                               skybox_unit_name);
   uniform_manager.SetUniform1Int(program_name, "skybox_tex", skybox_unit_idx);
-  // Bind the depth map texture
-  const std::string depth_tex_name = depth_shader_->GetDepthTextureName();
-  const std::string depth_unit_name = depth_shader_->GetDepthTextureUnitName();
-  const GLuint depth_unit_idx = texture_manager.GetUnitIdx(depth_tex_name);
-  texture_manager.BindTexture(depth_tex_name, GL_TEXTURE_2D, depth_unit_name);
-  uniform_manager.SetUniform1Int(program_name, "depth_map_tex", depth_unit_idx);
+
+  // Bind the depth texture from light view
+  const std::string light_depth_tex_name = depth_shader_->GetDepthTextureName(
+      shader::DepthShader::DepthTextureTypes::kFromLight);
+  const std::string light_depth_unit_name =
+      depth_shader_->GetDepthTextureUnitName(
+          shader::DepthShader::DepthTextureTypes::kFromLight);
+  texture_manager.BindTexture(light_depth_tex_name, GL_TEXTURE_2D,
+                              light_depth_unit_name);
+  uniform_manager.SetUniform1Int(
+      program_name, "light_depth_map_tex",
+      texture_manager.GetUnitIdx(light_depth_tex_name));
 }
 
 /*******************************************************************************
@@ -273,7 +279,7 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("ground").SetLightIntensity(glm::vec3(0.5f, 0.7f, 1.0f));
   scene_models_.at("ground").SetUseEnvMap(false);
   // Surrounding mountains
-  scene_models_.at("surround").SetTranslation(glm::vec3(90.0f, 10.0f, 00.0f));
+  scene_models_.at("surround").SetTranslation(glm::vec3(80.0f, 10.0f, 00.0f));
   scene_models_.at("surround")
       .SetRotation(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f));
   scene_models_.at("surround").SetScaling(30.0f * glm::vec3(3.0f, 1.0f, 1.0f));

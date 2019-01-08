@@ -47,7 +47,7 @@ uniform sampler2D diffuse_tex;
 uniform sampler2D specular_tex;
 uniform sampler2D height_tex;
 uniform sampler2D normals_tex;
-uniform sampler2D depth_map_tex;
+uniform sampler2D light_depth_map_tex;
 uniform samplerCube skybox_tex;
 
 /*******************************************************************************
@@ -66,7 +66,10 @@ layout(location = 1) in VSTangentLighting {
 }
 vs_tangent_lighting;
 
-layout(location = 8) in VSDepth { vec4 light_space_pos; }
+layout(location = 8) in VSDepth {
+  vec4 light_space_pos;
+  vec4 camera_space_pos;
+}
 vs_depth;
 
 /*******************************************************************************
@@ -183,11 +186,11 @@ float CalcShadow() {
   }
   // Perform PCF
   float shadow = 0.0f;
-  const vec2 scale = 1.0f / textureSize(depth_map_tex, 0);
+  const vec2 scale = 1.0f / textureSize(light_depth_map_tex, 0);
   for (float x = -1.0f; x <= 1.0f; x++) {
     for (float y = -1.0f; y <= 1.0f; y++) {
       const float light_depth =
-          texture(depth_map_tex, proj_coords.xy + vec2(x, y) * scale).x;
+          texture(light_depth_map_tex, proj_coords.xy + vec2(x, y) * scale).x;
       shadow += view_depth - bias > light_depth ? 1.0f : 0.0f;
     }
   }
@@ -263,7 +266,7 @@ vec4 GetEnvironmentMapColor() {
  * Color Blending
  ******************************************************************************/
 
-vec4 GetBlinnPhongShadowColor() {
+vec4 CalcBlinnPhongShadowColor() {
   const vec4 ambient_color = GetAmbientColor();
   const vec4 diffuse_color = GetDiffuseColor();
   const vec4 specular_color = GetSpecularColor();
@@ -277,19 +280,36 @@ vec4 GetBlinnPhongShadowColor() {
   return color;
 }
 
-vec4 CalcFinalColor() {
+vec4 MixWithEnvMapColor() {
   // Calculate environment mapping blend ratio
   float env_map_blend_ratio = kEnvMapBlendRatio;
   if (!model_material.use_env_map) {
     env_map_blend_ratio = 0.0f;
   }
   // Blend Blinn-Phong color with environment mapped color
-  return (1.0f - env_map_blend_ratio) * GetBlinnPhongShadowColor() +
+  return (1.0f - env_map_blend_ratio) * CalcBlinnPhongShadowColor() +
          env_map_blend_ratio * GetEnvironmentMapColor();
+}
+
+// Reference: http://in2gpu.com/2014/07/22/create-fog-shader/
+vec4 MixWithFogColor() {
+  const vec4 kFogColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
+  const float kFogDensity = 0.01f;
+  const vec4 orig_color = MixWithEnvMapColor();
+
+  // Calculate range-based distance
+  const float dist = length(vs_depth.camera_space_pos);
+
+  // Calculate fog factor
+  float fogFactor = 1.0f / exp((dist * kFogDensity) * (dist * kFogDensity));
+  fogFactor = clamp(fogFactor, 0.0f, 1.0f);
+
+  // Mix the original color with fog color
+  return mix(kFogColor, orig_color, fogFactor);
 }
 
 /*******************************************************************************
  * Entry Point
  ******************************************************************************/
 
-void main() { fs_color = CalcFinalColor(); }
+void main() { fs_color = MixWithFogColor(); }
