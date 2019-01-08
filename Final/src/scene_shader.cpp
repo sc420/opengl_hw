@@ -65,9 +65,6 @@ void shader::SceneShader::BindTextures() {
   const std::string skybox_tex_name = skybox_shader_->GetTextureName();
   const std::string skybox_unit_name = GetSkyboxTextureUnitName();
 
-  // Use the program
-  UseProgram();
-
   // Bind the skybox texture
   const GLuint skybox_unit_idx = texture_manager.GetUnitIdx(skybox_tex_name);
   texture_manager.BindTexture(skybox_tex_name, GL_TEXTURE_CUBE_MAP,

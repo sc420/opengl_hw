@@ -29,6 +29,7 @@ void shader::SkyboxShader::Init() {
   InitVertexArrays();
   InitUniformBlocks();
   InitTextures();
+  BindTextures();
 }
 
 void shader::SkyboxShader::InitVertexArrays() {
@@ -118,6 +119,20 @@ void shader::SkyboxShader::InitTextures() {
   }
 }
 
+void shader::SkyboxShader::BindTextures() {
+  // Get managers
+  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
+  // Get names
+  const std::string program_name = GetProgramName();
+  const std::string tex_name = GetTextureName();
+
+  // Get the unit index
+  const GLuint unit_idx = texture_manager.GetUnitIdx(tex_name);
+  // Set the texture handler to the unit index
+  uniform_manager.SetUniform1Int(program_name, "skybox_tex", unit_idx);
+}
+
 /*******************************************************************************
  * GL Drawing Methods
  ******************************************************************************/
@@ -125,7 +140,6 @@ void shader::SkyboxShader::InitTextures() {
 void shader::SkyboxShader::Draw() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
-  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string program_name = GetProgramName();
   const std::string tex_name = GetTextureName();
@@ -136,15 +150,13 @@ void shader::SkyboxShader::Draw() {
   UseProgram();
   // Bind the texture
   texture_manager.BindTexture(tex_name);
-  // Get the unit index
-  const GLuint unit_idx = texture_manager.GetUnitIdx(tex_name);
-  // Set the texture handler to the unit index
-  uniform_manager.SetUniform1Int(program_name, "skybox_tex", unit_idx);
+
   // Draw each mesh with its own texture
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
     const as::Mesh &mesh = meshes.at(mesh_idx);
     // Get the array indexes
     const std::vector<size_t> &idxs = mesh.GetIdxs();
+
     /* Draw vertex arrays */
     UseMesh(program_name, mesh_idx);
     glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);

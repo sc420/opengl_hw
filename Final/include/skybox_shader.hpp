@@ -26,6 +26,8 @@ class SkyboxShader : public Shader {
 
   void InitTextures();
 
+  void BindTextures();
+
   /* GL Drawing Methods */
 
   void Draw();

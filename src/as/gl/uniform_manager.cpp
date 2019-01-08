@@ -31,6 +31,7 @@ void as::UniformManager::SetUniform1Float(const std::string &program_name,
                                           const std::string &var_name,
                                           const GLfloat v0) {
   const GLint var_hdlr = GetUniformVarHdlr(program_name, var_name);
+  program_manager_->UseProgram(program_name);
   glUniform1f(var_hdlr, v0);
 }
 
@@ -38,6 +39,7 @@ void as::UniformManager::SetUniform1Int(const std::string &program_name,
                                         const std::string &var_name,
                                         const GLint v0) {
   const GLint var_hdlr = GetUniformVarHdlr(program_name, var_name);
+  program_manager_->UseProgram(program_name);
   glUniform1i(var_hdlr, v0);
 }
 

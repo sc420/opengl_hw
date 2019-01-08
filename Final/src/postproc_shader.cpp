@@ -80,6 +80,9 @@ void shader::PostprocShader::UpdateScreenTextures(const GLsizei width,
         framebuffer_name, tex_name, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D, 0);
   }
+
+  // Set texture unit indexes
+  SetTextureUnitIdxs();
 }
 
 void shader::PostprocShader::UpdateScreenRenderbuffers(const GLsizei width,
@@ -124,8 +127,7 @@ void shader::PostprocShader::Draw() {
 
   // Use the program
   UseProgram();
-  // Set texture unit indexes
-  SetTextureUnitIdxs();
+
   // Update the buffer
   buffer_manager.UpdateBuffer(buffer_name);
   // Check whether to enable multi-pass filtering

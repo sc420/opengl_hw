@@ -213,6 +213,7 @@ void shader::DiffShader::SetTextureUnitIdxs() {
 
   // Use the program
   UseProgram();
+
   // Set all texture unit indexes
   const DiffTypes diff_types[] = {DiffTypes::kObj, DiffTypes::kNoObj,
                                   DiffTypes::kBg};
