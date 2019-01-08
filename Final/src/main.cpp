@@ -404,17 +404,17 @@ void GLUTDisplayCallback() {
   as::ClearDepthBuffer();
   depth_shader.Draw(window_size);
 
-  // Draw the scene on postproc framebuffer
-  postproc_shader.UseScreenFramebuffer();
-  as::ClearColorBuffer();
-  as::ClearDepthBuffer();
-
   // Update wireframe rendering
   if (render_wireframe) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   } else {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
+
+  // Draw the scene on postproc framebuffer
+  postproc_shader.UseScreenFramebuffer();
+  as::ClearColorBuffer();
+  as::ClearDepthBuffer();
 
   fbx_ctrl.Draw();
   scene_shader.Draw();
