@@ -572,6 +572,16 @@ void GLUTTimerCallback(const int val) {
     aircraft_ctrl.AddDriftDir(glm::vec3(0.0f, -1.0f, 0.0f));
     aircraft_ctrl.AddSpeed(-1e-1f);
   }
+  if (ui_manager.IsKeyDown('z')) {
+    fbx_camera_ctrl.AddPos(glm::vec3(0.0f, 1.0f, 0.0f));
+    aircraft_ctrl.AddDriftDir(glm::vec3(1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddSpeed(-5e-2f);
+  }
+  if (ui_manager.IsKeyDown('x')) {
+    fbx_camera_ctrl.AddPos(glm::vec3(0.0f, -1.0f, 0.0f));
+    aircraft_ctrl.AddDriftDir(glm::vec3(-1.0f, 0.0f, 0.0f));
+    aircraft_ctrl.AddSpeed(-5e-2f);
+  }
 
   // Camera transformation for debugging
   if (ui_manager.IsKeyDown('t')) {
@@ -586,11 +596,11 @@ void GLUTTimerCallback(const int val) {
   if (ui_manager.IsKeyDown('h')) {
     camera_trans.AddEye(kCameraMovingStep * glm::vec3(1.0f, 0.0f, 0.0f));
   }
-  if (ui_manager.IsKeyDown('z')) {
+  if (ui_manager.IsKeyDown('c')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, 1.0f, 0.0f));
   }
-  if (ui_manager.IsKeyDown('x')) {
+  if (ui_manager.IsKeyDown('v')) {
     camera_trans.AddEyeWorldSpace(kCameraMovingStep *
                                   glm::vec3(0.0f, -1.0f, 0.0f));
   }

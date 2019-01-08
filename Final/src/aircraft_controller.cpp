@@ -53,8 +53,8 @@ void ctrl::AircraftController::Update() {
   dir_ = glm::mod(dir_ + drift_dir_, 2.0f * glm::pi<float>());
 
   // Update the position
-  const glm::vec3 drift_pos =
-      glm::vec3(CalcRotMatrix(dir_) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f));
+  const glm::vec4 forward_dir = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
+  const glm::vec3 drift_pos = glm::vec3(CalcRotMatrix(dir_) * forward_dir);
   pos_ += speed_ * drift_pos;
 
   // Decay changes
