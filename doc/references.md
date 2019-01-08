@@ -30,4 +30,5 @@
 * [TurboSquid](https://www.turbosquid.com/)
 * [Clara.io](https://clara.io/)
 * [HDRI Haven](https://hdrihaven.com/)
+* [Textures.com](www.textures.com)
 * [Skyboxes for download - Custom Map Makers](http://www.custommapmakers.org/skyboxes.php)
