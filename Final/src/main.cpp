@@ -94,6 +94,12 @@ ctrl::AircraftController aircraft_ctrl(
 ctrl::FbxController fbx_ctrl;
 
 /*******************************************************************************
+ * Rendering States
+ ******************************************************************************/
+
+bool render_wireframe = false;
+
+/*******************************************************************************
  * User Interface States
  ******************************************************************************/
 
@@ -249,70 +255,86 @@ void UpdateImGui() {
 
   /* Debug Widget */
 
-  ImGui::Begin("Debug");
+  {
+    ImGui::Begin("Debug");
 
-  if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
-  if (ImGui::CollapsingHeader("Camera")) {
-    ImGui::Text("Position: (%.1f, %.1f, %.1f)", camera_pos.x, camera_pos.y,
-                camera_pos.z);
-    ImGui::Text("Angles (Degree): (%.2f, %.2f, %.2f)", camera_angles.x,
-                camera_angles.y, camera_angles.z);
+    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("Camera")) {
+      ImGui::Text("Position: (%.1f, %.1f, %.1f)", camera_pos.x, camera_pos.y,
+                  camera_pos.z);
+      ImGui::Text("Angles (Degree): (%.2f, %.2f, %.2f)", camera_angles.x,
+                  camera_angles.y, camera_angles.z);
+    }
+
+    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("Performance")) {
+      ImGui::Text("FPS: %.1f", io.Framerate);
+    }
+
+    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("FBX Camera")) {
+      glm::vec3 eye;
+      glm::vec3 center;
+      glm::vec3 up;
+      float roll;
+
+      fbx_ctrl.GetCameraTransform(eye, center, up, roll);
+
+      ImGui::Text("Eye: (%.1f, %.1f, %.1f)", eye[0], eye[1], eye[2]);
+      ImGui::Text("Center: (%.1f, %.1f, %.1f)", center[0], center[1],
+                  center[2]);
+      ImGui::Text("Up: (%.1f, %.1f, %.1f)", up[0], up[1], up[2]);
+      ImGui::Text("Roll: %.1f", roll);
+    }
+
+    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("FBX Model")) {
+      glm::vec3 translation;
+      glm::vec3 rotation;
+      glm::vec3 scaling;
+
+      fbx_ctrl.GetModelTransform(translation, rotation, scaling);
+
+      ImGui::Text("Translation: (%.1f, %.1f, %.1f)", translation[0],
+                  translation[1], translation[2]);
+      ImGui::Text("Rotation: (%.2f, %.2f, %.2f)", rotation[0], rotation[1],
+                  rotation[2]);
+      ImGui::Text("Scaling: (%.1f, %.1f, %.1f)", scaling[0], scaling[1],
+                  scaling[2]);
+    }
+
+    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+    ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("Aircraft Controller")) {
+      const glm::vec3 pos = aircraft_ctrl.GetPos();
+      const glm::vec3 dir = aircraft_ctrl.GetDir();
+      const glm::vec3 drift_dir = aircraft_ctrl.GetDriftDir();
+      const float speed = aircraft_ctrl.GetSpeed();
+
+      ImGui::Text("Pos: (%.1f, %.1f, %.1f)", pos[0], pos[1], pos[2]);
+      ImGui::Text("Dir: (%.2f, %.2f, %.2f)", dir[0], dir[1], dir[2]);
+      ImGui::Text("Drift Dir: (%.2f, %.2f, %.2f)", drift_dir[0], drift_dir[1],
+                  drift_dir[2]);
+      ImGui::Text("Speed: %.3f", speed);
+    }
+
+    ImGui::End();
   }
 
-  if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
-  if (ImGui::CollapsingHeader("Performance")) {
-    ImGui::Text("FPS: %.1f", io.Framerate);
-  }
+  /* Rendering Widget */
 
-  if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
-  if (ImGui::CollapsingHeader("FBX Camera")) {
-    glm::vec3 eye;
-    glm::vec3 center;
-    glm::vec3 up;
-    float roll;
+  {
+    ImGui::Begin("Render");
 
-    fbx_ctrl.GetCameraTransform(eye, center, up, roll);
+    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("Mode")) {
+      ImGui::Checkbox("Wireframe", &render_wireframe);
+    }
 
-    ImGui::Text("Eye: (%.1f, %.1f, %.1f)", eye[0], eye[1], eye[2]);
-    ImGui::Text("Center: (%.1f, %.1f, %.1f)", center[0], center[1], center[2]);
-    ImGui::Text("Up: (%.1f, %.1f, %.1f)", up[0], up[1], up[2]);
-    ImGui::Text("Roll: %.1f", roll);
-  }
-
-  if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
-  if (ImGui::CollapsingHeader("FBX Model")) {
-    glm::vec3 translation;
-    glm::vec3 rotation;
-    glm::vec3 scaling;
-
-    fbx_ctrl.GetModelTransform(translation, rotation, scaling);
-
-    ImGui::Text("Translation: (%.1f, %.1f, %.1f)", translation[0],
-                translation[1], translation[2]);
-    ImGui::Text("Rotation: (%.2f, %.2f, %.2f)", rotation[0], rotation[1],
-                rotation[2]);
-    ImGui::Text("Scaling: (%.1f, %.1f, %.1f)", scaling[0], scaling[1],
-                scaling[2]);
-  }
-
-  if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
-  ImGui::SetNextTreeNodeOpen(true);
-  if (ImGui::CollapsingHeader("Aircraft Controller")) {
-    const glm::vec3 pos = aircraft_ctrl.GetPos();
-    const glm::vec3 dir = aircraft_ctrl.GetDir();
-    const glm::vec3 drift_dir = aircraft_ctrl.GetDriftDir();
-    const float speed = aircraft_ctrl.GetSpeed();
-
-    ImGui::Text("Pos: (%.1f, %.1f, %.1f)", pos[0], pos[1], pos[2]);
-    ImGui::Text("Dir: (%.2f, %.2f, %.2f)", dir[0], dir[1], dir[2]);
-    ImGui::Text("Drift Dir: (%.2f, %.2f, %.2f)", drift_dir[0], drift_dir[1],
-                drift_dir[2]);
-    ImGui::Text("Speed: %.3f", speed);
+    ImGui::End();
   }
 
   has_opened = true;
-
-  ImGui::End();
 }
 
 void DrawImGui() {
@@ -380,9 +402,20 @@ void GLUTDisplayCallback() {
   postproc_shader.UseScreenFramebuffer();
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
+
+  // Update wireframe rendering
+  if (render_wireframe) {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  } else {
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  }
+
   fbx_ctrl.Draw();
   scene_shader.Draw();
   skybox_shader.Draw();
+
+  // Restore polygon mode
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   // Draw post-processing effects on default framebuffer
   scene_shader.UseDefaultFramebuffer();
