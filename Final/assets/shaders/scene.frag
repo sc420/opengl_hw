@@ -294,7 +294,7 @@ vec4 MixWithEnvMapColor() {
 // Reference: http://in2gpu.com/2014/07/22/create-fog-shader/
 vec4 MixWithFogColor() {
   const vec4 kFogColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
-  const float kFogDensity = 0.01f;
+  const float kFogDensity = 0.03f;
   const vec4 orig_color = MixWithEnvMapColor();
 
   // Calculate range-based distance

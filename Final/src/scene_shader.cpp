@@ -250,7 +250,7 @@ void shader::SceneShader::LoadModels() {
   scene_models_["surround"] = dto::SceneModel(
       "surround",
       "assets/models/MountainsGreen0070/"
-      "quad.obj",
+      "tube.obj",
       aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
           aiProcess_Triangulate | aiProcess_GenNormals |
           aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
@@ -276,10 +276,9 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("ground").SetLightIntensity(glm::vec3(0.5f, 0.7f, 1.0f));
   scene_models_.at("ground").SetUseEnvMap(false);
   // Surrounding mountains
-  scene_models_.at("surround").SetTranslation(glm::vec3(80.0f, 10.0f, 00.0f));
-  scene_models_.at("surround")
-      .SetRotation(glm::vec3(0.0f, glm::radians(-90.0f), 0.0f));
-  scene_models_.at("surround").SetScaling(30.0f * glm::vec3(3.0f, 1.0f, 1.0f));
+  scene_models_.at("surround").SetTranslation(glm::vec3(0.0f));
+  scene_models_.at("surround").SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+  scene_models_.at("surround").SetScaling(glm::vec3(0.5f, 0.2f, 0.5f));
   scene_models_.at("surround").SetLightPos(GetLightPos());
   scene_models_.at("surround").SetLightColor(glm::vec3(1.0f));
   scene_models_.at("surround").SetLightIntensity(glm::vec3(0.3f, 0.0f, 0.0f));

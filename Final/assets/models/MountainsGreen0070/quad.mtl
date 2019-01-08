@@ -1,8 +1,0 @@
-newmtl quad
-Ka 1 1 1
-Kd 0 0 0
-Ks 0 0 0
-Ns 10.0
-d 1
-illum 1
-map_Ka TexturesCom_MountainsGreen0070_2_masked_S.png
