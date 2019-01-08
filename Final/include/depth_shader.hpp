@@ -30,7 +30,7 @@ class DepthShader : public Shader {
 
   void Draw(const glm::ivec2 &window_size);
 
-  void DrawModelWithoutTextures(const as::Model &model,
+  void DrawModelWithoutTextures(const dto::SceneModel &scene_model,
                                 const std::string &group_name);
 
   dto::GlobalTrans GetLightTrans() const;

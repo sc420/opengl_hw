@@ -94,13 +94,11 @@ void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
     const dto::SceneModel &scene_model = pair.second;
     // Get names
     const std::string group_name = scene_model.GetVertexArrayGroupName();
-    // Get model
-    const as::Model &model = scene_model.GetModel();
 
     // Update states
     UpdateModelTrans(scene_model);
     // Draw the model
-    DrawModelWithoutTextures(model, group_name);
+    DrawModelWithoutTextures(scene_model, group_name);
   }
 
   // Reset the viewport
@@ -108,7 +106,9 @@ void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
 }
 
 void shader::DepthShader::DrawModelWithoutTextures(
-    const as::Model &model, const std::string &group_name) {
+    const dto::SceneModel &scene_model, const std::string &group_name) {
+  // Get model
+  const as::Model &model = scene_model.GetModel();
   // Get meshes
   const std::vector<as::Mesh> &meshes = model.GetMeshes();
 
@@ -119,7 +119,8 @@ void shader::DepthShader::DrawModelWithoutTextures(
     const std::vector<size_t> &idxs = mesh.GetIdxs();
     /* Draw Vertex Arrays */
     UseMesh(group_name, mesh_idx);
-    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
+    glDrawElementsInstanced(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr,
+                            scene_model.GetNumInstancing());
   }
 }
 

@@ -272,7 +272,7 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("ground").SetScaling(glm::vec3(1e-4f));
   scene_models_.at("ground").SetLightPos(GetLightPos());
   scene_models_.at("ground").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
-  scene_models_.at("ground").SetLightIntensity(glm::vec3(0.5f, 0.5f, 1.0f));
+  scene_models_.at("ground").SetLightIntensity(glm::vec3(0.5f, 0.7f, 1.0f));
   scene_models_.at("ground").SetUseEnvMap(false);
   // Surrounding mountains
   scene_models_.at("surround").SetTranslation(glm::vec3(90.0f, 10.0f, 00.0f));
