@@ -29,7 +29,6 @@ layout(std140) uniform ModelMaterial {
 model_material;
 
 layout(std140) uniform Lighting {
-  mat4 fixed_norm_model;
   mat4 light_trans;
   vec3 light_color;
   vec3 light_pos;

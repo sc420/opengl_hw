@@ -15,7 +15,6 @@ layout(std140) uniform ModelTrans { mat4 trans; }
 model_trans;
 
 layout(std140) uniform Lighting {
-  mat4 fixed_norm_model;
   mat4 light_trans;
   vec3 light_color;
   vec3 light_pos;
@@ -101,16 +100,6 @@ mat4 QuatToRotationMatrix(vec4 quat) {
  * Transformations
  ******************************************************************************/
 
-mat3 CalcWorldToTangConverter() {
-  const mat3 fixed_norm_model = mat3(lighting.fixed_norm_model);
-  const vec3 tangent_n = normalize(fixed_norm_model * in_norm);
-  const vec3 tangent_t = normalize(fixed_norm_model * in_tangent);
-  const vec3 ortho_tangent_t =
-      normalize(tangent_t - dot(tangent_t, tangent_n) * tangent_n);
-  const vec3 ortho_tangent_b = cross(tangent_n, ortho_tangent_t);
-  return transpose(mat3(ortho_tangent_t, ortho_tangent_b, tangent_n));
-}
-
 mat4 CalcInstancingTrans() {
   mat4 translation_mat;
   mat4 scaling_mat;
@@ -130,13 +119,22 @@ mat4 CalcInstancingTrans() {
          scaling_mat;
 }
 
-mat4 CalcTrans() {
-  return global_trans.proj * global_trans.view * global_trans.model *
-         model_trans.trans * CalcInstancingTrans();
-}
-
 mat4 CalcModel() {
   return global_trans.model * model_trans.trans * CalcInstancingTrans();
+}
+
+mat4 CalcTrans() { return global_trans.proj * global_trans.view * CalcModel(); }
+
+mat3 CalcFixedNormalModel() { return transpose(inverse(mat3(CalcModel()))); }
+
+mat3 CalcWorldToTangConverter() {
+  const mat3 fixed_norm_model = CalcFixedNormalModel();
+  const vec3 tangent_n = normalize(fixed_norm_model * in_norm);
+  const vec3 tangent_t = normalize(fixed_norm_model * in_tangent);
+  const vec3 ortho_tangent_t =
+      normalize(tangent_t - dot(tangent_t, tangent_n) * tangent_n);
+  const vec3 ortho_tangent_b = cross(tangent_n, ortho_tangent_t);
+  return transpose(mat3(ortho_tangent_t, ortho_tangent_b, tangent_n));
 }
 
 /*******************************************************************************

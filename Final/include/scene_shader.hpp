@@ -40,11 +40,8 @@ class SceneShader : public Shader {
   };
 
   struct Lighting {
-    // NOTE: Don't use mat2 or mat3 because each column is padded like vec4
-    // Reference: https://www.khronos.org/opengl/wiki/Talk:Uniform_Buffer_Object
-    glm::mat4 fixed_norm_model;  // 64*0=0, +64->64
-    glm::mat4 light_trans;       // 64*1=64, +64->128
-    glm::vec3 light_color;       // 16*8=128, +12->140
+    glm::mat4 light_trans;  // 64*1=64, +64->128
+    glm::vec3 light_color;  // 16*8=128, +12->140
 
     bool pad_light_pos[4];  // +4->144
     glm::vec3 light_pos;    // 16*9=144, +12->156
@@ -170,8 +167,6 @@ class SceneShader : public Shader {
   void UpdateModelMaterial(const dto::SceneModel &scene_model);
 
   void UpdateModelMaterial(const as::Material &material);
-
-  void UpdateFixedNormModel();
 
   /* GL Drawing Methods */
 

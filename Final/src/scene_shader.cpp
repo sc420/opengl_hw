@@ -128,8 +128,6 @@ void shader::SceneShader::UpdateGlobalTrans(
   global_trans_ = global_trans;
   // Update the buffer
   buffer_manager.UpdateBuffer(buffer_name);
-  // Update also the fixed normal model
-  UpdateFixedNormModel();
 }
 
 void shader::SceneShader::UpdateSceneModelTrans(const float add_rotation) {
@@ -396,9 +394,6 @@ void shader::SceneShader::UpdateModelTrans(const dto::SceneModel &scene_model) {
   model_trans_.trans = scene_model.GetTrans();
   // Update the buffer
   buffer_manager.UpdateBuffer(buffer_name);
-
-  // Update also the fixed normal model
-  UpdateFixedNormModel();
 }
 
 void shader::SceneShader::UpdateLighting(const dto::SceneModel &scene_model) {
@@ -441,18 +436,6 @@ void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
   model_material_.shininess = material.GetShininess();
   // Update the buffer
   const std::string buffer_name = GetModelMaterialBufferName();
-  buffer_manager.UpdateBuffer(buffer_name);
-}
-
-// TODO: Move to shader
-void shader::SceneShader::UpdateFixedNormModel() {
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  // Update fixed normal model
-  const glm::mat4 model = global_trans_.model * model_trans_.trans;
-  lighting_.fixed_norm_model =
-      glm::mat4(glm::transpose(glm::inverse(glm::mat3(model))));
-  // Update the buffer
-  const std::string buffer_name = GetLightingBufferName();
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
