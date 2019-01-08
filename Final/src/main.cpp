@@ -30,6 +30,9 @@ static const auto kCameraRotationSensitivity = 0.003f;
 static const auto kCameraZoomingStep = 1.0f;
 /* Timers */
 static const auto kTimerInterval = 10;
+/* Debug */
+static const auto kSeeFromLight = false;
+static const auto kUpdateCameraFromAircraftController = true;
 
 /*******************************************************************************
  * Camera States
@@ -359,7 +362,9 @@ void UpdateGlobalTrans() {
   global_trans.model = identity;
 
   // DEBUG: See from light source
-  global_trans.proj = scene_shader.GetLightProjection();
+  if (kSeeFromLight) {
+    global_trans.proj = scene_shader.GetLightProjection();
+  }
 
   scene_shader.UpdateGlobalTrans(global_trans);
 }
@@ -644,8 +649,10 @@ void GLUTTimerCallback(const int val) {
   }
 
   // Update camera eye and angles from aircraft controller
-  // camera_trans.SetEye(aircraft_ctrl.GetPos());
-  // camera_trans.SetAngles(aircraft_ctrl.GetDir());
+  if (kUpdateCameraFromAircraftController) {
+    camera_trans.SetEye(aircraft_ctrl.GetPos());
+    camera_trans.SetAngles(aircraft_ctrl.GetDir());
+  }
 
   // Update camera transformation
   UpdateGlobalTrans();
@@ -838,8 +845,10 @@ void EnterGLUTLoop() { glutMainLoop(); }
 int main(int argc, char *argv[]) {
   try {
     // DEBUG: See from light source
-    camera_trans.SetEye(scene_shader.GetLightPos());
-    camera_trans.SetAngles(scene_shader.GetLightAngles());
+    if (kSeeFromLight) {
+      camera_trans.SetEye(scene_shader.GetLightPos());
+      camera_trans.SetAngles(scene_shader.GetLightAngles());
+    }
 
     InitGLUT(argc, argv);
     as::InitGLEW();
