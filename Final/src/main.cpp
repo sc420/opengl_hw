@@ -40,11 +40,6 @@ as::CameraTrans camera_trans(glm::vec3(10.0f, 5.0f, 0.0f),
                              glm::vec3(glm::radians(30.0f), glm::radians(0.0f),
                                        glm::radians(0.0f)));
 
-// as::CameraTrans camera_trans(glm::vec3(-20.0, 30.0f, 30.0f),
-//                             glm::vec3(glm::radians(-30.0f),
-//                                       glm::radians(-30.0f),
-//                                       glm::radians(0.0f)));
-
 /*******************************************************************************
  * GL Managers
  ******************************************************************************/
@@ -360,9 +355,11 @@ void UpdateGlobalTrans() {
   const float aspect_ratio = ui_manager.GetWindowAspectRatio();
   global_trans.proj =
       glm::perspective(glm::radians(80.0f), aspect_ratio, 1e-3f, 1e3f);
-  // global_trans.proj = glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, 1e-3f, 1e3f);
   global_trans.view = camera_trans.GetTrans();
   global_trans.model = identity;
+
+  // DEBUG: See from light source
+  global_trans.proj = scene_shader.GetLightProjection();
 
   scene_shader.UpdateGlobalTrans(global_trans);
 }
@@ -840,6 +837,10 @@ void EnterGLUTLoop() { glutMainLoop(); }
 
 int main(int argc, char *argv[]) {
   try {
+    // DEBUG: See from light source
+    camera_trans.SetEye(scene_shader.GetLightPos());
+    camera_trans.SetAngles(scene_shader.GetLightAngles());
+
     InitGLUT(argc, argv);
     as::InitGLEW();
     ConfigGL();

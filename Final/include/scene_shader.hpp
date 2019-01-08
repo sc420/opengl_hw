@@ -87,6 +87,8 @@ class SceneShader : public Shader {
 
   glm::vec3 GetLightAngles() const;
 
+  glm::mat4 GetLightProjection() const;
+
   /* State Updaters */
 
   void UpdateGlobalTrans(const dto::GlobalTrans &global_trans);

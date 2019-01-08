@@ -116,8 +116,11 @@ glm::vec3 shader::SceneShader::GetLightPos() const {
 }
 
 glm::vec3 shader::SceneShader::GetLightAngles() const {
-  return glm::vec3(glm::radians(-30.0f), glm::radians(-30.0f),
-                   glm::radians(0.0f));
+  return glm::radians(glm::vec3(-30.0f, -30.0f, 0.0f));
+}
+
+glm::mat4 shader::SceneShader::GetLightProjection() const {
+  return glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, 1e-3f, 1e3f);
 }
 
 /*******************************************************************************
