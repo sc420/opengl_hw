@@ -115,6 +115,11 @@ glm::vec3 shader::SceneShader::GetLightPos() const {
   return glm::vec3(-20.0f, 30.0f, 30.0f);
 }
 
+glm::vec3 shader::SceneShader::GetLightAngles() const {
+  return glm::vec3(glm::radians(-30.0f), glm::radians(-30.0f),
+                   glm::radians(0.0f));
+}
+
 /*******************************************************************************
  * State Updaters
  ******************************************************************************/
