@@ -161,10 +161,6 @@ class SceneShader : public Shader {
 
   void InitLightTrans();
 
-  /* GL Drawing Methods */
-
-  void UseInstancingTransform(const dto::SceneModel &scene_model);
-
   /* State Updaters */
 
   void UpdateModelTrans(const dto::SceneModel &scene_model);
