@@ -120,6 +120,15 @@ class SceneShader : public Shader {
 
   std::string GetLightingBufferName() const;
 
+  std::string GetInstancingTranslationsBufferName(
+      const dto::SceneModel &scene_model) const;
+
+  std::string GetInstancingRotationsBufferName(
+      const dto::SceneModel &scene_model) const;
+
+  std::string GetInstancingScalingsBufferName(
+      const dto::SceneModel &scene_model) const;
+
   std::string GetSkyboxTextureUnitName() const;
 
   std::string GetModelTransUniformBlockName() const;

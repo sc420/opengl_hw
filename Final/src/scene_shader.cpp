@@ -193,6 +193,21 @@ std::string shader::SceneShader::GetLightingBufferName() const {
   return GetProgramName() + "lighting";
 }
 
+std::string shader::SceneShader::GetInstancingTranslationsBufferName(
+    const dto::SceneModel &scene_model) const {
+  return "buffer/instancing/translations/" + scene_model.GetId();
+}
+
+std::string shader::SceneShader::GetInstancingRotationsBufferName(
+    const dto::SceneModel &scene_model) const {
+  return "buffer/instancing/rotations/" + scene_model.GetId();
+}
+
+std::string shader::SceneShader::GetInstancingScalingsBufferName(
+    const dto::SceneModel &scene_model) const {
+  return "buffer/instancing/scalings/" + scene_model.GetId();
+}
+
 std::string shader::SceneShader::GetSkyboxTextureUnitName() const {
   return GetProgramName() + "/skybox";
 }
@@ -258,11 +273,11 @@ void shader::SceneShader::InitModels() {
       glm::vec3(0.0f, glm::radians(90.0f), 0.0f),
       glm::vec3(0.0f, 0.0f, glm::radians(90.0f))};
 
-  // scene_models_.at("ground").SetInstancingTranslations(instancing_translations);
-  // scene_models_.at("ground").SetInstancingRotations(instancing_rotations);
+  scene_models_.at("ground").SetInstancingTranslations(instancing_translations);
+  scene_models_.at("ground").SetInstancingRotations(instancing_rotations);
 
-  // scene_models_.at("scene").SetInstancingTranslations(instancing_translations);
-  // scene_models_.at("scene").SetInstancingRotations(instancing_rotations);
+  scene_models_.at("scene").SetInstancingTranslations(instancing_translations);
+  scene_models_.at("scene").SetInstancingRotations(instancing_rotations);
 }
 
 /*******************************************************************************
@@ -303,11 +318,11 @@ void shader::SceneShader::InitInstancingVertexArrays() {
     // Get names
     const std::string group_name = scene_model.GetVertexArrayGroupName();
     const std::string translations_buffer_name =
-        "buffer/instancing/translations/" + scene_model.GetId();
+        GetInstancingTranslationsBufferName(scene_model);
     const std::string rotations_buffer_name =
-        "buffer/instancing/rotations/" + scene_model.GetId();
+        GetInstancingRotationsBufferName(scene_model);
     const std::string scalings_buffer_name =
-        "buffer/instancing/scalings/" + scene_model.GetId();
+        GetInstancingScalingsBufferName(scene_model);
 
     /* Generate buffers */
     buffer_manager.GenBuffer(translations_buffer_name);
