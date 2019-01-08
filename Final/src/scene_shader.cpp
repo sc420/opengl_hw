@@ -252,11 +252,11 @@ void shader::SceneShader::InitModels() {
       glm::vec3(0.0f, glm::radians(90.0f), 0.0f),
       glm::vec3(0.0f, 0.0f, glm::radians(90.0f))};
 
-  scene_models_.at("ground").SetInstancingTranslations(instancing_translations);
+  // scene_models_.at("ground").SetInstancingTranslations(instancing_translations);
   // scene_models_.at("ground").SetInstancingRotations(instancing_rotations);
 
   // scene_models_.at("scene").SetInstancingTranslations(instancing_translations);
-  scene_models_.at("scene").SetInstancingRotations(instancing_rotations);
+  // scene_models_.at("scene").SetInstancingRotations(instancing_rotations);
 }
 
 /*******************************************************************************

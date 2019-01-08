@@ -128,8 +128,8 @@ dto::GlobalTrans shader::DepthShader::GetLightTrans() const {
   const glm::vec3 light_pos = scene_shader_->GetLightPos();
   // Use a camera at the light position
   const as::CameraTrans camera_trans(
-      light_pos,
-      glm::vec3(glm::radians(30.0f), glm::radians(30.0f), glm::radians(0.0f)));
+      light_pos, glm::vec3(glm::radians(-30.0f), glm::radians(-30.0f),
+                           glm::radians(0.0f)));
   // Set the light space
   const glm::mat4 light_proj =
       glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, 1e-3f, 1e3f);
