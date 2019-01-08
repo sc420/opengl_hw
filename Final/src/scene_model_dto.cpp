@@ -36,10 +36,27 @@ void dto::SceneModel::SetTranslation(const glm::vec3 &translation) {
   translation_ = translation;
 }
 
-void dto::SceneModel::SetScale(const glm::vec3 &scale) { scale_ = scale; }
-
 void dto::SceneModel::SetRotation(const glm::vec3 &rotation) {
   rotation_ = rotation;
+}
+
+void dto::SceneModel::SetScaling(const glm::vec3 &scaling) {
+  scaling_ = scaling;
+}
+
+void dto::SceneModel::SetInstancingTranslations(
+    const std::vector<glm::vec3> &translations) {
+  instancing_translations_ = translations;
+}
+
+void dto::SceneModel::SetInstancingRotation(
+    const std::vector<glm::vec3> &rotations) {
+  instancing_rotations_ = rotations;
+}
+
+void dto::SceneModel::SetInstancingScaling(
+    const std::vector<glm::vec3> &scalings) {
+  instancing_scalings_ = scalings;
 }
 
 void dto::SceneModel::SetLightPos(const glm::vec3 &light_pos) {
@@ -63,24 +80,17 @@ void dto::SceneModel::SetUseEnvMap(const bool use_env_map) {
  ******************************************************************************/
 
 glm::mat4 dto::SceneModel::GetTrans() const {
-  const glm::mat4 identity = glm::mat4(1.0f);
-  glm::mat4 trans = glm::mat4(1.0f);
+  return GetTransformMatrix(translation_, rotation_, scaling_);
+}
 
-  trans = glm::scale(identity, scale_) * trans;
-
-  // Convert quaternion to rotation matrix
-  const glm::quat pitch =
-      glm::angleAxis(rotation_.x, glm::vec3(1.0f, 0.0f, 0.0f));
-  const glm::quat yaw =
-      glm::angleAxis(rotation_.y, glm::vec3(0.0f, 1.0f, 0.0f));
-  const glm::quat roll =
-      glm::angleAxis(rotation_.z, glm::vec3(0.0f, 0.0f, 1.0f));
-  const glm::quat orientation = glm::normalize(pitch * yaw * roll);
-  trans = glm::mat4_cast(orientation) * trans;
-
-  trans = glm::translate(identity, translation_) * trans;
-
-  return trans;
+std::vector<glm::mat4> dto::SceneModel::GetInstancingTransforms() const {
+  std::vector<glm::mat4> transforms;
+  for (size_t i = 0; i < instancing_translations_.size(); i++) {
+    transforms.push_back(GetTransformMatrix(instancing_translations_[i],
+                                            instancing_rotations_[i],
+                                            instancing_scalings_[i]));
+  }
+  return transforms;
 }
 
 glm::vec3 dto::SceneModel::GetLightPos() const { return light_pos_; }
@@ -150,6 +160,23 @@ void dto::SceneModel::InitTextures(const std::string &tex_unit_group_name,
                                          GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
   }
+}
+
+glm::mat4 dto::SceneModel::GetTransformMatrix(const glm::vec3 &translation,
+                                              const glm::vec3 &rotation,
+                                              const glm::vec3 &scaling) const {
+  const glm::mat4 identity = glm::mat4(1.0f);
+  glm::mat4 trans = glm::mat4(1.0f);
+
+  trans = glm::scale(identity, scaling) * trans;
+
+  // Convert quaternion to rotation matrix
+  const glm::quat quaternion = glm::quat(rotation);
+  trans = glm::mat4_cast(quaternion) * trans;
+
+  trans = glm::translate(identity, translation) * trans;
+
+  return trans;
 }
 
 /*******************************************************************************

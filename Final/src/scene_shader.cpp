@@ -230,16 +230,16 @@ void shader::SceneShader::LoadModels() {
 void shader::SceneShader::InitModels() {
   // Scene
   scene_models_.at("scene").SetTranslation(glm::vec3(-10.0f, 0.0f, -8.0f));
-  scene_models_.at("scene").SetScale(glm::vec3(0.5f, 0.35f, 0.5f));
   scene_models_.at("scene").SetRotation(glm::vec3(0.0f));
+  scene_models_.at("scene").SetScaling(glm::vec3(0.5f, 0.35f, 0.5f));
   scene_models_.at("scene").SetLightPos(GetLightPos());
   scene_models_.at("scene").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
   scene_models_.at("scene").SetLightIntensity(glm::vec3(0.1f, 1.0f, 1.0f));
   scene_models_.at("scene").SetUseEnvMap(true);
   // Ground
   scene_models_.at("ground").SetTranslation(glm::vec3(0.0f));
-  scene_models_.at("ground").SetScale(glm::vec3(1e-4f));
   scene_models_.at("ground").SetRotation(glm::vec3(0.0f));
+  scene_models_.at("ground").SetScaling(glm::vec3(1e-4f));
   scene_models_.at("ground").SetLightPos(GetLightPos());
   scene_models_.at("ground").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
   scene_models_.at("ground").SetLightIntensity(glm::vec3(0.5f, 0.5f, 1.0f));

@@ -28,9 +28,15 @@ class SceneModel {
 
   void SetTranslation(const glm::vec3 &translation);
 
-  void SetScale(const glm::vec3 &scale);
-
   void SetRotation(const glm::vec3 &rotation);
+
+  void SetScaling(const glm::vec3 &scaling);
+
+  void SetInstancingTranslations(const std::vector<glm::vec3> &translations);
+
+  void SetInstancingRotation(const std::vector<glm::vec3> &rotations);
+
+  void SetInstancingScaling(const std::vector<glm::vec3> &scalings);
 
   void SetLightPos(const glm::vec3 &light_pos);
 
@@ -43,6 +49,8 @@ class SceneModel {
   /* State Getters */
 
   glm::mat4 GetTrans() const;
+
+  std::vector<glm::mat4> GetInstancingTransforms() const;
 
   glm::vec3 GetLightPos() const;
 
@@ -61,8 +69,13 @@ class SceneModel {
 
   /* Transformation */
   glm::vec3 translation_;
-  glm::vec3 scale_;
   glm::vec3 rotation_;
+  glm::vec3 scaling_;
+
+  /* Instancing */
+  std::vector<glm::vec3> instancing_translations_;
+  std::vector<glm::vec3> instancing_rotations_;
+  std::vector<glm::vec3> instancing_scalings_;
 
   /* Lighting */
   glm::vec3 light_pos_;
@@ -81,6 +94,12 @@ class SceneModel {
   void InitTextures(const std::string &tex_unit_group_name,
                     const GLsizei num_mipmap_levels,
                     as::GLManagers *gl_managers);
+
+  /* GL Drawing Methods */
+
+  glm::mat4 GetTransformMatrix(const glm::vec3 &translation,
+                               const glm::vec3 &rotation,
+                               const glm::vec3 &scaling) const;
 
   /* Name Management */
 
