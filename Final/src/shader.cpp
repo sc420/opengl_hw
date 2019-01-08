@@ -144,14 +144,13 @@ void shader::Shader::UseMesh(const std::string& group_name,
       gl_managers_->GetVertexSpecManager();
   // Get names
   const std::string va_name = GetMeshVertexArrayName(group_name, mesh_idx);
-  const std::string buffer_name =
-      GetMeshVertexArrayBufferName(group_name, mesh_idx);
   const std::string idxs_buffer_name =
       GetMeshVertexArrayIdxsBufferName(group_name, mesh_idx);
   // Use the vertex array
   vertex_spec_manager.BindVertexArray(va_name);
   // Use the buffers
-  buffer_manager.BindBuffer(buffer_name);
+  // NOTE: We have to do this because index buffer is not associated with vertex
+  // array (Reference: https://stackoverflow.com/a/33863481)
   buffer_manager.BindBuffer(idxs_buffer_name);
 }
 
