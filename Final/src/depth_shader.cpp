@@ -92,13 +92,11 @@ void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
   const auto &scene_models = scene_shader_->GetSceneModels();
   for (const auto &pair : scene_models) {
     const dto::SceneModel &scene_model = pair.second;
-    // Get names
-    const std::string group_name = scene_model.GetVertexArrayGroupName();
 
     // Update states
     UpdateModelTrans(scene_model);
     // Draw the model
-    DrawModelWithoutTextures(scene_model, group_name);
+    DrawModelWithoutTextures(scene_model);
   }
 
   // Reset the viewport
@@ -106,11 +104,13 @@ void shader::DepthShader::Draw(const glm::ivec2 &window_size) {
 }
 
 void shader::DepthShader::DrawModelWithoutTextures(
-    const dto::SceneModel &scene_model, const std::string &group_name) {
+    const dto::SceneModel &scene_model) {
   // Get model
   const as::Model &model = scene_model.GetModel();
   // Get meshes
   const std::vector<as::Mesh> &meshes = model.GetMeshes();
+  // Get names
+  const std::string group_name = scene_model.GetVertexArrayGroupName();
 
   // Draw each mesh with its own texture
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {

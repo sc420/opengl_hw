@@ -183,7 +183,6 @@ class SceneShader : public Shader {
 
   /* GL Drawing Methods */
 
-  void DrawModel(const dto::SceneModel &scene_model,
-                 const std::string &group_name);
+  void DrawModel(const dto::SceneModel &scene_model);
 };
 }  // namespace shader

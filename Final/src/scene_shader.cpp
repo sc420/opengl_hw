@@ -91,15 +91,13 @@ void shader::SceneShader::Draw() {
 
   for (const auto &pair : scene_models_) {
     const dto::SceneModel &scene_model = pair.second;
-    // Get names
-    const std::string group_name = scene_model.GetVertexArrayGroupName();
 
     // Update states
     UpdateModelTrans(scene_model);
     UpdateLighting(scene_model);
     UpdateModelMaterial(scene_model);
     // Draw the model
-    DrawModel(scene_model, group_name);
+    DrawModel(scene_model);
   }
 }
 
@@ -482,13 +480,13 @@ void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
  * GL Drawing Methods (Private)
  ******************************************************************************/
 
-void shader::SceneShader::DrawModel(const dto::SceneModel &scene_model,
-                                    const std::string &group_name) {
+void shader::SceneShader::DrawModel(const dto::SceneModel &scene_model) {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string program_name = GetProgramName();
+  const std::string group_name = scene_model.GetVertexArrayGroupName();
   // Get model
   const as::Model &model = scene_model.GetModel();
   // Get meshes
