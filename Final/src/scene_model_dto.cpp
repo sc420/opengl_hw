@@ -49,12 +49,12 @@ void dto::SceneModel::SetInstancingTranslations(
   instancing_translations_ = translations;
 }
 
-void dto::SceneModel::SetInstancingRotation(
+void dto::SceneModel::SetInstancingRotations(
     const std::vector<glm::vec3> &rotations) {
   instancing_rotations_ = rotations;
 }
 
-void dto::SceneModel::SetInstancingScaling(
+void dto::SceneModel::SetInstancingScalings(
     const std::vector<glm::vec3> &scalings) {
   instancing_scalings_ = scalings;
 }
@@ -83,14 +83,59 @@ glm::mat4 dto::SceneModel::GetTrans() const {
   return GetTransformMatrix(translation_, rotation_, scaling_);
 }
 
-std::vector<glm::mat4> dto::SceneModel::GetInstancingTransforms() const {
-  std::vector<glm::mat4> transforms;
-  for (size_t i = 0; i < instancing_translations_.size(); i++) {
-    transforms.push_back(GetTransformMatrix(instancing_translations_[i],
-                                            instancing_rotations_[i],
-                                            instancing_scalings_[i]));
+const std::vector<glm::vec3> dto::SceneModel::GetInstancingTranslations()
+    const {
+  if (instancing_translations_.empty()) {
+    return GetDefaultInstancingTransforms(glm::vec3(0.0f));
+  } else {
+    return instancing_translations_;
   }
-  return transforms;
+}
+
+const std::vector<glm::vec3> dto::SceneModel::GetInstancingRotations() const {
+  if (instancing_rotations_.empty()) {
+    return GetDefaultInstancingTransforms(glm::vec3(0.0f));
+  } else {
+    return instancing_rotations_;
+  }
+}
+
+const std::vector<glm::vec3> dto::SceneModel::GetInstancingScalings() const {
+  if (instancing_scalings_.empty()) {
+    return GetDefaultInstancingTransforms(glm::vec3(1.0f));
+  } else {
+    return instancing_scalings_;
+  }
+}
+
+size_t dto::SceneModel::GetNumInstancing() const {
+  size_t num = 0;
+  if (!instancing_translations_.empty()) {
+    num = instancing_translations_.size();
+  }
+  if (!instancing_rotations_.empty()) {
+    if (num > 0 && num != instancing_rotations_.size()) {
+      throw std::runtime_error(
+          "All instancing transformations should have the same size");
+    }
+    num = instancing_rotations_.size();
+  }
+  if (!instancing_scalings_.empty()) {
+    if (num > 0 && num != instancing_scalings_.size()) {
+      throw std::runtime_error(
+          "All instancing transformations should have the same size");
+    }
+    num = instancing_scalings_.size();
+  }
+
+  // Force the number to be at least 1
+  if (num == 0) num = 1;
+
+  return num;
+}
+
+size_t dto::SceneModel::GetInstancingMemSize() const {
+  return GetNumInstancing() * sizeof(glm::vec3);
 }
 
 glm::vec3 dto::SceneModel::GetLightPos() const { return light_pos_; }
@@ -162,6 +207,10 @@ void dto::SceneModel::InitTextures(const std::string &tex_unit_group_name,
   }
 }
 
+/*******************************************************************************
+ * GL Drawing Methods (Private)
+ ******************************************************************************/
+
 glm::mat4 dto::SceneModel::GetTransformMatrix(const glm::vec3 &translation,
                                               const glm::vec3 &rotation,
                                               const glm::vec3 &scaling) const {
@@ -177,6 +226,15 @@ glm::mat4 dto::SceneModel::GetTransformMatrix(const glm::vec3 &translation,
   trans = glm::translate(identity, translation) * trans;
 
   return trans;
+}
+
+/*******************************************************************************
+ * State Getters (Private)
+ ******************************************************************************/
+
+std::vector<glm::vec3> dto::SceneModel::GetDefaultInstancingTransforms(
+    const glm::vec3 &default_transform) const {
+  return std::vector<glm::vec3>(GetNumInstancing(), default_transform);
 }
 
 /*******************************************************************************

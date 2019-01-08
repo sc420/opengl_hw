@@ -40,6 +40,7 @@ void shader::SceneShader::Init() {
   LoadModels();
   InitModels();
   InitVertexArrays();
+  InitInstancingVertexArrays();
   InitUniformBlocks();
   InitLightTrans();
 }
@@ -92,15 +93,14 @@ void shader::SceneShader::Draw() {
     const dto::SceneModel &scene_model = pair.second;
     // Get names
     const std::string group_name = scene_model.GetVertexArrayGroupName();
-    // Get model
-    const as::Model &model = scene_model.GetModel();
 
     // Update states
     UpdateModelTrans(scene_model);
     UpdateLighting(scene_model);
     UpdateModelMaterial(scene_model);
     // Draw the model
-    DrawModel(model, group_name);
+    UseInstancingTransform(scene_model);
+    DrawModel(scene_model, group_name);
   }
 }
 
@@ -244,6 +244,19 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("ground").SetLightColor(glm::vec3(1.0f, 1.0f, 1.0f));
   scene_models_.at("ground").SetLightIntensity(glm::vec3(0.5f, 0.5f, 1.0f));
   scene_models_.at("ground").SetUseEnvMap(false);
+
+  std::vector<glm::vec3> instancing_translations = {
+      glm::vec3(0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f),
+      glm::vec3(0.0f, 0.0f, 1.0f)};
+  scene_models_.at("ground").SetInstancingTranslations(instancing_translations);
+
+  std::vector<glm::vec3> instancing_rotations = {
+      glm::vec3(0.0f), glm::vec3(glm::radians(90.0f), 0.0f, 0.0f),
+      glm::vec3(0.0f, glm::radians(90.0f), 0.0f),
+      glm::vec3(0.0f, 0.0f, glm::radians(90.0f))};
+
+  scene_models_.at("scene").SetInstancingTranslations(instancing_translations);
+  scene_models_.at("scene").SetInstancingRotations(instancing_rotations);
 }
 
 /*******************************************************************************
@@ -255,6 +268,93 @@ void shader::SceneShader::InitVertexArrays() {
     const dto::SceneModel &scene_model = pair.second;
     InitVertexArray(scene_model.GetVertexArrayGroupName(),
                     scene_model.GetModel());
+  }
+}
+
+void shader::SceneShader::InitInstancingVertexArrays() {
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  as::VertexSpecManager &vertex_spec_manager =
+      gl_managers_->GetVertexSpecManager();
+
+  for (const auto &pair : scene_models_) {
+    const dto::SceneModel &scene_model = pair.second;
+
+    // Get model
+    const as::Model &model = scene_model.GetModel();
+    // Get meshes
+    const std::vector<as::Mesh> &meshes = model.GetMeshes();
+    // Get instancing transformations
+    // TODO: Should use a DTO class
+    const std::vector<glm::vec3> instancing_translations =
+        scene_model.GetInstancingTranslations();
+    const std::vector<glm::vec3> instancing_rotations =
+        scene_model.GetInstancingRotations();
+    const std::vector<glm::vec3> instancing_scalings =
+        scene_model.GetInstancingScalings();
+    // Get memory sizes
+    const size_t instancing_mem_size = scene_model.GetInstancingMemSize();
+    // Get names
+    const std::string group_name = scene_model.GetVertexArrayGroupName();
+    const std::string translatins_buffer_name =
+        "buffer/instancing/translations/" + scene_model.GetId();
+    const std::string rotations_buffer_name =
+        "buffer/instancing/rotations/" + scene_model.GetId();
+    const std::string scalings_buffer_name =
+        "buffer/instancing/scalings/" + scene_model.GetId();
+
+    /* Generate buffers */
+    buffer_manager.GenBuffer(translatins_buffer_name);
+    buffer_manager.GenBuffer(rotations_buffer_name);
+    buffer_manager.GenBuffer(scalings_buffer_name);
+
+    /* Initialize buffers */
+    buffer_manager.InitBuffer(translatins_buffer_name, GL_ARRAY_BUFFER,
+                              instancing_mem_size, nullptr, GL_STATIC_DRAW);
+    buffer_manager.InitBuffer(rotations_buffer_name, GL_ARRAY_BUFFER,
+                              instancing_mem_size, nullptr, GL_STATIC_DRAW);
+    buffer_manager.InitBuffer(scalings_buffer_name, GL_ARRAY_BUFFER,
+                              instancing_mem_size, nullptr, GL_STATIC_DRAW);
+
+    /* Update buffers */
+    buffer_manager.UpdateBuffer(translatins_buffer_name, GL_ARRAY_BUFFER, 0,
+                                instancing_mem_size,
+                                instancing_translations.data());
+    buffer_manager.UpdateBuffer(rotations_buffer_name, GL_ARRAY_BUFFER, 0,
+                                instancing_mem_size,
+                                instancing_rotations.data());
+    buffer_manager.UpdateBuffer(scalings_buffer_name, GL_ARRAY_BUFFER, 0,
+                                instancing_mem_size,
+                                instancing_scalings.data());
+
+    // Apply to all meshes
+    for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+      const std::string va_name = GetMeshVertexArrayName(group_name, mesh_idx);
+
+      /* Bind vertex arrays to buffers */
+      vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 4, 3, GL_FLOAT,
+                                                GL_FALSE, 0);
+      vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 5, 3, GL_FLOAT,
+                                                GL_FALSE, 0);
+      vertex_spec_manager.SpecifyVertexArrayOrg(va_name, 6, 3, GL_FLOAT,
+                                                GL_FALSE, 0);
+
+      vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 4, 4);
+      vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 5, 5);
+      vertex_spec_manager.AssocVertexAttribToBindingPoint(va_name, 6, 6);
+
+      vertex_spec_manager.BindBufferToBindingPoint(
+          va_name, translatins_buffer_name, 4, 0, sizeof(glm::vec3));
+      vertex_spec_manager.BindBufferToBindingPoint(
+          va_name, rotations_buffer_name, 5, 0, sizeof(glm::vec3));
+      vertex_spec_manager.BindBufferToBindingPoint(
+          va_name, scalings_buffer_name, 6, 0, sizeof(glm::vec3));
+
+      /* Modify vertex array updating rates */
+      glVertexAttribDivisor(4, 1);
+      glVertexAttribDivisor(5, 1);
+      glVertexAttribDivisor(6, 1);
+    }
   }
 }
 
@@ -280,6 +380,28 @@ void shader::SceneShader::InitLightTrans() {
       global_trans.proj * global_trans.view * global_trans.model;
   // Update the buffer
   buffer_manager.UpdateBuffer(buffer_name);
+}
+
+/*******************************************************************************
+ * GL Drawing Methods (Private)
+ ******************************************************************************/
+
+void shader::SceneShader::UseInstancingTransform(
+    const dto::SceneModel &scene_model) {
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string translatins_buffer_name =
+      "buffer/instancing/translations/" + scene_model.GetId();
+  const std::string rotations_buffer_name =
+      "buffer/instancing/rotations/" + scene_model.GetId();
+  const std::string scalings_buffer_name =
+      "buffer/instancing/scalings/" + scene_model.GetId();
+
+  // Use the buffers
+  buffer_manager.BindBuffer(translatins_buffer_name);
+  buffer_manager.BindBuffer(rotations_buffer_name);
+  buffer_manager.BindBuffer(scalings_buffer_name);
 }
 
 /*******************************************************************************
@@ -359,13 +481,15 @@ void shader::SceneShader::UpdateFixedNormModel() {
  * GL Drawing Methods (Private)
  ******************************************************************************/
 
-void shader::SceneShader::DrawModel(const as::Model &model,
+void shader::SceneShader::DrawModel(const dto::SceneModel &scene_model,
                                     const std::string &group_name) {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
   // Get names
   const std::string program_name = GetProgramName();
+  // Get model
+  const as::Model &model = scene_model.GetModel();
   // Get meshes
   const std::vector<as::Mesh> &meshes = model.GetMeshes();
 
@@ -414,6 +538,7 @@ void shader::SceneShader::DrawModel(const as::Model &model,
     }
     /* Draw Vertex Arrays */
     UseMesh(group_name, mesh_idx);
-    glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
+    glDrawElementsInstanced(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr,
+                            scene_model.GetNumInstancing());
   }
 }

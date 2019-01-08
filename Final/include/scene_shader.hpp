@@ -155,9 +155,15 @@ class SceneShader : public Shader {
 
   void InitVertexArrays();
 
+  void InitInstancingVertexArrays();
+
   void InitUniformBlocks();
 
   void InitLightTrans();
+
+  /* GL Drawing Methods */
+
+  void UseInstancingTransform(const dto::SceneModel &scene_model);
 
   /* State Updaters */
 
@@ -173,6 +179,7 @@ class SceneShader : public Shader {
 
   /* GL Drawing Methods */
 
-  void DrawModel(const as::Model &model, const std::string &group_name);
+  void DrawModel(const dto::SceneModel &scene_model,
+                 const std::string &group_name);
 };
 }  // namespace shader

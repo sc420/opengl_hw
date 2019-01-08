@@ -614,8 +614,8 @@ void GLUTTimerCallback(const int val) {
   }
 
   // Update camera eye and angles from aircraft controller
-  camera_trans.SetEye(aircraft_ctrl.GetPos());
-  camera_trans.SetAngles(aircraft_ctrl.GetDir());
+  // camera_trans.SetEye(aircraft_ctrl.GetPos());
+  // camera_trans.SetAngles(aircraft_ctrl.GetDir());
 
   // Update camera transformation
   UpdateGlobalTrans();

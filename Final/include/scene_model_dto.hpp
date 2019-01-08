@@ -34,9 +34,9 @@ class SceneModel {
 
   void SetInstancingTranslations(const std::vector<glm::vec3> &translations);
 
-  void SetInstancingRotation(const std::vector<glm::vec3> &rotations);
+  void SetInstancingRotations(const std::vector<glm::vec3> &rotations);
 
-  void SetInstancingScaling(const std::vector<glm::vec3> &scalings);
+  void SetInstancingScalings(const std::vector<glm::vec3> &scalings);
 
   void SetLightPos(const glm::vec3 &light_pos);
 
@@ -50,7 +50,15 @@ class SceneModel {
 
   glm::mat4 GetTrans() const;
 
-  std::vector<glm::mat4> GetInstancingTransforms() const;
+  const std::vector<glm::vec3> GetInstancingTranslations() const;
+
+  const std::vector<glm::vec3> GetInstancingRotations() const;
+
+  const std::vector<glm::vec3> GetInstancingScalings() const;
+
+  size_t GetNumInstancing() const;
+
+  size_t GetInstancingMemSize() const;
 
   glm::vec3 GetLightPos() const;
 
@@ -100,6 +108,11 @@ class SceneModel {
   glm::mat4 GetTransformMatrix(const glm::vec3 &translation,
                                const glm::vec3 &rotation,
                                const glm::vec3 &scaling) const;
+
+  /* State Getters */
+
+  std::vector<glm::vec3> GetDefaultInstancingTransforms(
+      const glm::vec3 &default_transform) const;
 
   /* Name Management */
 

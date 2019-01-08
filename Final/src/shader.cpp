@@ -71,10 +71,10 @@ void shader::Shader::InitVertexArray(const std::string& group_name,
   for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
     const as::Mesh& mesh = meshes.at(mesh_idx);
     // Get names
-    const std::string& va_name = GetMeshVertexArrayName(group_name, mesh_idx);
-    const std::string& buffer_name =
+    const std::string va_name = GetMeshVertexArrayName(group_name, mesh_idx);
+    const std::string buffer_name =
         GetMeshVertexArrayBufferName(group_name, mesh_idx);
-    const std::string& idxs_buffer_name =
+    const std::string idxs_buffer_name =
         GetMeshVertexArrayIdxsBufferName(group_name, mesh_idx);
     // Get mesh data
     const std::vector<as::Vertex>& vertices = mesh.GetVertices();
@@ -143,10 +143,10 @@ void shader::Shader::UseMesh(const std::string& group_name,
   const as::VertexSpecManager& vertex_spec_manager =
       gl_managers_->GetVertexSpecManager();
   // Get names
-  const std::string& va_name = GetMeshVertexArrayName(group_name, mesh_idx);
-  const std::string& buffer_name =
+  const std::string va_name = GetMeshVertexArrayName(group_name, mesh_idx);
+  const std::string buffer_name =
       GetMeshVertexArrayBufferName(group_name, mesh_idx);
-  const std::string& idxs_buffer_name =
+  const std::string idxs_buffer_name =
       GetMeshVertexArrayIdxsBufferName(group_name, mesh_idx);
   // Use the vertex array
   vertex_spec_manager.BindVertexArray(va_name);
