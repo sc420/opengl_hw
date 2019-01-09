@@ -5,6 +5,13 @@
 namespace shader {
 class PostprocShader : public Shader {
  public:
+  enum class PostprocFramebufferTypes {
+    kDrawOriginal,
+    kDrawScaling,
+    kBlurScaling,
+    kCombining,
+  };
+
   enum class PostprocTextureTypes {
     kOriginal,
     kHdr,
@@ -48,12 +55,14 @@ class PostprocShader : public Shader {
 
   void UpdatePostprocTextures(const GLsizei width, const GLsizei height);
 
-  void UpdatePostprocRenderbuffers(const GLsizei width, const GLsizei height);
+  void UpdatePostprocRenderbuffer(const GLsizei width, const GLsizei height);
 
-  void UsePostprocFramebuffer();
+  void UsePostprocFramebuffer(
+      const PostprocFramebufferTypes postproc_framebuffer_type);
 
-  void Draw(const PostprocTextureTypes postproc_tex_type =
-                PostprocTextureTypes::kOriginal);
+  void DrawBloom();
+
+  void DrawPostprocEffects();
 
   /* State Updaters */
 
@@ -76,22 +85,29 @@ class PostprocShader : public Shader {
 
   std::string GetPostprocInputsBufferName() const;
 
-  std::string GetScreenFramebufferName() const;
+  std::string GetPostprocFramebufferName(
+      const PostprocFramebufferTypes postproc_framebuffer_type) const;
 
   std::string GetQuadVertexArrayGroupName() const;
 
-  std::string GetScreenTextureName(
+  std::string GetPostprocTextureName(
       const PostprocTextureTypes postproc_tex_type) const;
 
-  std::string GetScreenTextureUnitName(
+  std::string GetPostprocTextureUnitName(
       const PostprocTextureTypes postproc_tex_type) const;
 
-  std::string GetScreenDepthRenderbufferName(
-      const PostprocTextureTypes postproc_tex_type) const;
+  std::string GetPostprocDepthRenderbufferName(
+      const PostprocFramebufferTypes postproc_framebuffer_type) const;
 
   std::string GetPostprocInputsUniformBlockName() const;
 
   /* Type Conversions */
+
+  std::string PostprocFramebufferTypeToName(
+      const PostprocFramebufferTypes postproc_framebuffer_type) const;
+
+  int PostprocFramebufferTypeToNum(
+      const PostprocFramebufferTypes postproc_framebuffer_type) const;
 
   std::string PostprocTextureTypeToName(
       const PostprocTextureTypes postproc_tex_type) const;
@@ -106,10 +122,14 @@ class PostprocShader : public Shader {
   /* States */
   PostprocInputs postproc_inputs_;
 
+  /* State Updaters */
+
+  void UpdatePostprocInputs();
+
   /* GL Drawing Methods */
 
   void SetTextureUnitIdxs();
 
-  void DrawToTexture(const PostprocTextureTypes postproc_tex_type);
+  void DrawToTextures();
 };
 }  // namespace shader

@@ -1,6 +1,9 @@
 #include "postproc_shader.hpp"
 
-shader::PostprocShader::PostprocShader() : postproc_inputs_(PostprocInputs()) {}
+shader::PostprocShader::PostprocShader() : postproc_inputs_(PostprocInputs()) {
+  // TODO: debug
+  postproc_inputs_.effect_idx = kEffectBloomEffect;
+}
 
 /*******************************************************************************
  * GL Initializations
@@ -23,11 +26,24 @@ void shader::PostprocShader::InitFramebuffers() {
   // Get managers
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
-  // Get names
-  const std::string framebuffer_name = GetScreenFramebufferName();
+
+  // Set framebuffer types to initialize
+  const PostprocFramebufferTypes postproc_framebuffer_types[] = {
+      PostprocFramebufferTypes::kDrawOriginal,
+      PostprocFramebufferTypes::kDrawScaling,
+      PostprocFramebufferTypes::kBlurScaling,
+      PostprocFramebufferTypes::kCombining};
 
   // Create framebuffer
-  framebuffer_manager.GenFramebuffer(framebuffer_name);
+  for (const PostprocFramebufferTypes postproc_framebuffer_type :
+       postproc_framebuffer_types) {
+    // Get names
+    const std::string framebuffer_name =
+        GetPostprocFramebufferName(postproc_framebuffer_type);
+
+    // Generate framebuffer
+    framebuffer_manager.GenFramebuffer(framebuffer_name);
+  }
 }
 
 void shader::PostprocShader::InitVertexArrays() {
@@ -50,6 +66,13 @@ void shader::PostprocShader::UpdatePostprocTextures(const GLsizei width,
       gl_managers_->GetFramebufferManager();
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
 
+  // Set framebuffer types to attach
+  const PostprocFramebufferTypes postproc_framebuffer_types[] = {
+      PostprocFramebufferTypes::kDrawOriginal,
+      PostprocFramebufferTypes::kDrawScaling,
+      PostprocFramebufferTypes::kBlurScaling,
+      PostprocFramebufferTypes::kCombining};
+
   // Set texture types to update
   const PostprocTextureTypes postproc_tex_types[] = {
       PostprocTextureTypes::kOriginal, PostprocTextureTypes::kHdr};
@@ -57,9 +80,8 @@ void shader::PostprocShader::UpdatePostprocTextures(const GLsizei width,
   // Configure textures
   for (const PostprocTextureTypes postproc_tex_type : postproc_tex_types) {
     // Get names
-    const std::string framebuffer_name = GetScreenFramebufferName();
-    const std::string tex_name = GetScreenTextureName(postproc_tex_type);
-    const std::string unit_name = GetScreenTextureUnitName(postproc_tex_type);
+    const std::string tex_name = GetPostprocTextureName(postproc_tex_type);
+    const std::string unit_name = GetPostprocTextureUnitName(postproc_tex_type);
     // Get indexes
     const int color_attachment_idx =
         PostprocTextureTypeToNum(postproc_tex_type);
@@ -83,31 +105,46 @@ void shader::PostprocShader::UpdatePostprocTextures(const GLsizei width,
     texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
                                        GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // Attach textures to framebuffers
-    framebuffer_manager.AttachTexture2DToFramebuffer(
-        framebuffer_name, tex_name, GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0 + color_attachment_idx, GL_TEXTURE_2D, 0);
+    for (const PostprocFramebufferTypes postproc_framebuffer_type :
+         postproc_framebuffer_types) {
+      // Get names
+      const std::string framebuffer_name =
+          GetPostprocFramebufferName(postproc_framebuffer_type);
+
+      framebuffer_manager.AttachTexture2DToFramebuffer(
+          framebuffer_name, tex_name, GL_FRAMEBUFFER,
+          GL_COLOR_ATTACHMENT0 + color_attachment_idx, GL_TEXTURE_2D, 0);
+    }
   }
+
+  // Tell GL we're drawing to multiple attachments
+  unsigned int attachments[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT0 + 1};
+  glDrawBuffers(2, attachments);
 
   // Set texture unit indexes
   SetTextureUnitIdxs();
 }
 
-void shader::PostprocShader::UpdatePostprocRenderbuffers(const GLsizei width,
-                                                         const GLsizei height) {
+void shader::PostprocShader::UpdatePostprocRenderbuffer(const GLsizei width,
+                                                        const GLsizei height) {
   // Get managers
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
 
-  // Set texture types to update
-  const PostprocTextureTypes postproc_tex_types[] = {
-      PostprocTextureTypes::kOriginal, PostprocTextureTypes::kHdr};
+  // Set framebuffer types to attach
+  const PostprocFramebufferTypes postproc_framebuffer_types[] = {
+      PostprocFramebufferTypes::kDrawOriginal,
+      PostprocFramebufferTypes::kDrawScaling,
+      PostprocFramebufferTypes::kBlurScaling,
+      PostprocFramebufferTypes::kCombining};
 
-  // Configure renderbuffers
-  for (const PostprocTextureTypes postproc_tex_type : postproc_tex_types) {
+  for (const PostprocFramebufferTypes postproc_framebuffer_type :
+       postproc_framebuffer_types) {
     // Get names
-    const std::string framebuffer_name = GetScreenFramebufferName();
+    const std::string framebuffer_name =
+        GetPostprocFramebufferName(postproc_framebuffer_type);
     const std::string renderbuffer_name =
-        GetScreenDepthRenderbufferName(postproc_tex_type);
+        GetPostprocDepthRenderbufferName(postproc_framebuffer_type);
 
     // Check whether to delete old renderbuffer
     if (framebuffer_manager.HasRenderbuffer(renderbuffer_name)) {
@@ -125,31 +162,39 @@ void shader::PostprocShader::UpdatePostprocRenderbuffers(const GLsizei width,
   }
 }
 
-void shader::PostprocShader::UsePostprocFramebuffer() {
+void shader::PostprocShader::UsePostprocFramebuffer(
+    const PostprocFramebufferTypes postproc_framebuffer_type) {
+  // Get managers
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
-  const std::string framebuffer_name = GetScreenFramebufferName();
+  // Get names
+  const std::string framebuffer_name =
+      GetPostprocFramebufferName(postproc_framebuffer_type);
+
+  // Bind the framebuffer
   framebuffer_manager.BindFramebuffer(framebuffer_name, GL_FRAMEBUFFER);
 }
 
-void shader::PostprocShader::Draw(
-    const PostprocTextureTypes postproc_tex_type) {
-  // Get managers
-  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
-  // Get names
-  const std::string buffer_name = GetPostprocInputsBufferName();
+void shader::PostprocShader::DrawBloom() {
+  //// Use the program
+  // UseProgram();
 
+  //// Update postproc inputs
+  // UpdatePassIdx(0);
+  // UpdatePostprocInputs();
+
+  // DrawToTextures();
+}
+
+void shader::PostprocShader::DrawPostprocEffects() {
   // Use the program
   UseProgram();
 
-  // Update the buffer
-  buffer_manager.UpdateBuffer(buffer_name);
-  // Check whether to enable multi-pass filtering
-  if (postproc_inputs_.effect_idx == Effects::kEffectBloomEffect) {
-    DrawToTexture(postproc_tex_type);
-  } else {
-    DrawToTexture(postproc_tex_type);
-  }
+  // Update postproc inputs
+  UpdatePassIdx(1);
+  UpdatePostprocInputs();
+
+  DrawToTextures();
 }
 
 /*******************************************************************************
@@ -190,30 +235,32 @@ std::string shader::PostprocShader::GetPostprocInputsBufferName() const {
   return GetProgramName() + "/buffer/postproc_inputs";
 }
 
-std::string shader::PostprocShader::GetScreenFramebufferName() const {
-  return GetProgramName() + "framebuffer";
+std::string shader::PostprocShader::GetPostprocFramebufferName(
+    const PostprocFramebufferTypes postproc_framebuffer_type) const {
+  return GetProgramName() + "framebuffer" +
+         PostprocFramebufferTypeToName(postproc_framebuffer_type);
 }
 
 std::string shader::PostprocShader::GetQuadVertexArrayGroupName() const {
   return GetProgramName() + "/vertex_array/group";
 }
 
-std::string shader::PostprocShader::GetScreenTextureName(
+std::string shader::PostprocShader::GetPostprocTextureName(
     const PostprocTextureTypes postproc_tex_type) const {
   return GetProgramName() + "/texture/postproc/" +
          PostprocTextureTypeToName(postproc_tex_type);
 }
 
-std::string shader::PostprocShader::GetScreenTextureUnitName(
+std::string shader::PostprocShader::GetPostprocTextureUnitName(
     const PostprocTextureTypes postproc_tex_type) const {
   return GetProgramName() + "/texture_unit_name/postproc/" +
          PostprocTextureTypeToName(postproc_tex_type);
 }
 
-std::string shader::PostprocShader::GetScreenDepthRenderbufferName(
-    const PostprocTextureTypes postproc_tex_type) const {
+std::string shader::PostprocShader::GetPostprocDepthRenderbufferName(
+    const PostprocFramebufferTypes postproc_framebuffer_type) const {
   return GetProgramName() + "/renderbuffer/postproc/" +
-         PostprocTextureTypeToName(postproc_tex_type);
+         PostprocFramebufferTypeToName(postproc_framebuffer_type);
 }
 
 std::string shader::PostprocShader::GetPostprocInputsUniformBlockName() const {
@@ -223,6 +270,38 @@ std::string shader::PostprocShader::GetPostprocInputsUniformBlockName() const {
 /*******************************************************************************
  * Type Conversions (Private)
  ******************************************************************************/
+
+std::string shader::PostprocShader::PostprocFramebufferTypeToName(
+    const PostprocFramebufferTypes postproc_framebuffer_type) const {
+  switch (postproc_framebuffer_type) {
+    case PostprocFramebufferTypes::kDrawOriginal:
+      return "draw_original";
+    case PostprocFramebufferTypes::kDrawScaling:
+      return "draw_scaling";
+    case PostprocFramebufferTypes::kBlurScaling:
+      return "blur_scaling";
+    case PostprocFramebufferTypes::kCombining:
+      return "combining";
+    default:
+      throw std::runtime_error("Unknown postproc framebuffer type");
+  }
+}
+
+int shader::PostprocShader::PostprocFramebufferTypeToNum(
+    const PostprocFramebufferTypes postproc_framebuffer_type) const {
+  switch (postproc_framebuffer_type) {
+    case PostprocFramebufferTypes::kDrawOriginal:
+      return 0;
+    case PostprocFramebufferTypes::kDrawScaling:
+      return 1;
+    case PostprocFramebufferTypes::kBlurScaling:
+      return 2;
+    case PostprocFramebufferTypes::kCombining:
+      return 3;
+    default:
+      throw std::runtime_error("Unknown postproc framebuffer type");
+  }
+}
 
 std::string shader::PostprocShader::PostprocTextureTypeToName(
     const PostprocTextureTypes postproc_tex_type) const {
@@ -252,6 +331,20 @@ int shader::PostprocShader::PostprocTextureTypeToNum(
  * GL Drawing Methods (Private)
  ******************************************************************************/
 
+void shader::PostprocShader::UpdatePostprocInputs() {
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string buffer_name = GetPostprocInputsBufferName();
+
+  // Update the buffer
+  buffer_manager.UpdateBuffer(buffer_name);
+}
+
+/*******************************************************************************
+ * GL Drawing Methods (Private)
+ ******************************************************************************/
+
 void shader::PostprocShader::SetTextureUnitIdxs() {
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
@@ -259,9 +352,9 @@ void shader::PostprocShader::SetTextureUnitIdxs() {
   // Get names
   const std::string program_name = GetProgramName();
   const std::string original_tex_name =
-      GetScreenTextureName(PostprocTextureTypes::kOriginal);
+      GetPostprocTextureName(PostprocTextureTypes::kOriginal);
   const std::string hdr_tex_name =
-      GetScreenTextureName(PostprocTextureTypes::kHdr);
+      GetPostprocTextureName(PostprocTextureTypes::kHdr);
   // Get the unit indexes
   const GLuint original_unit_idx =
       texture_manager.GetUnitIdx(original_tex_name);
@@ -272,13 +365,9 @@ void shader::PostprocShader::SetTextureUnitIdxs() {
   uniform_manager.SetUniform1Int(program_name, "hdr_tex", hdr_unit_idx);
 }
 
-void shader::PostprocShader::DrawToTexture(
-    const PostprocTextureTypes postproc_tex_type) {
-  // Get managers
-  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+void shader::PostprocShader::DrawToTextures() {
   // Get names
   const std::string group_name = GetQuadVertexArrayGroupName();
-  const std::string tex_name = GetScreenTextureName(postproc_tex_type);
   // Get the mesh
   const std::vector<as::Mesh> &meshes = quad_model_.GetMeshes();
   const as::Mesh &mesh = meshes.front();
@@ -287,8 +376,6 @@ void shader::PostprocShader::DrawToTexture(
 
   // Use the first mesh
   UseMesh(group_name, 0);
-  // Bind the texture
-  texture_manager.BindTexture(tex_name);
   // Draw the mesh
   glDrawElements(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr);
 }

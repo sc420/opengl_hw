@@ -506,8 +506,9 @@ void GLUTDisplayCallback() {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
 
-  // Draw the scene on postproc framebuffer
-  postproc_shader.UsePostprocFramebuffer();
+  // Draw the scene on postproc framebuffer "draw original"
+  postproc_shader.UsePostprocFramebuffer(
+      shader::PostprocShader::PostprocFramebufferTypes::kDrawOriginal);
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
 
@@ -518,11 +519,15 @@ void GLUTDisplayCallback() {
   // Restore polygon mode
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+  // Draw bloom effects on postproc framebuffers "draw scaling", "blur scaling"
+  // and "combining"
+  postproc_shader.DrawBloom();
+
   // Draw post-processing effects on default framebuffer
   scene_shader.UseDefaultFramebuffer();
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
-  postproc_shader.Draw();
+  postproc_shader.DrawPostprocEffects();
 
   // Draw ImGui on default framebuffer
   scene_shader.UseDefaultFramebuffer();
@@ -546,7 +551,7 @@ void GLUTReshapeCallback(const int width, const int height) {
   // Update screen textures
   postproc_shader.UpdatePostprocTextures(width, height);
   // Update screen depth renderbuffers
-  postproc_shader.UpdatePostprocRenderbuffers(width, height);
+  postproc_shader.UpdatePostprocRenderbuffer(width, height);
   // Update differential rendering stencil renderbuffers
   diff_shader.UpdateObjDiffRenderbuffer(width, height);
   // Update differential rendering framebuffer textures

@@ -67,11 +67,9 @@ layout(location = 1) out vec4 fs_hdr_color;
  * Texture Handlers
  ******************************************************************************/
 
-vec4 GetTexel(vec2 coord) { return texture(original_tex, coord); }
+vec4 GetTexel(const vec2 coord) { return texture(original_tex, coord); }
 
-vec4 GetMultipassTexel(sampler2D tex, vec2 coord) {
-  return texture(tex, coord);
-}
+vec4 GetHdrTexel(const vec2 coord) { return texture(hdr_tex, coord); }
 
 vec2 GetTextureSize() { return textureSize(original_tex, 0); }
 
@@ -285,47 +283,47 @@ vec4 CalcBrightness(vec4 color) {
   }
 }
 
-vec4 CalcGaussianBlur(sampler2D tex, bool horizontal) {
-  const int len = 5;
-  const float weight[len] =
-      float[](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);
-  const vec2 window_size = GetTextureSize();
-  vec4 sum = weight[0] * GetMultipassTexel(tex, vs_tex_coords);
-  if (horizontal) {
-    for (int x = 1; x < len; x++) {
-      const vec2 ofs = vec2(x, 0.0f) / window_size;
-      sum += weight[x] * GetMultipassTexel(tex, vs_tex_coords + ofs);
-      sum += weight[x] * GetMultipassTexel(tex, vs_tex_coords - ofs);
-    }
-  } else {
-    for (int y = 1; y < len; y++) {
-      const vec2 ofs = vec2(0.0f, y) / window_size;
-      sum += weight[y] * GetMultipassTexel(tex, vs_tex_coords + ofs);
-      sum += weight[y] * GetMultipassTexel(tex, vs_tex_coords - ofs);
-    }
-  }
-  return vec4(vec3(sum), 1.0f);
-}
+// vec4 CalcGaussianBlur(sampler2D tex, bool horizontal) {
+//  const int len = 5;
+//  const float weight[len] =
+//      float[](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);
+//  const vec2 window_size = GetTextureSize();
+//  vec4 sum = weight[0] * GetMultipassTexel(tex, vs_tex_coords);
+//  if (horizontal) {
+//    for (int x = 1; x < len; x++) {
+//      const vec2 ofs = vec2(x, 0.0f) / window_size;
+//      sum += weight[x] * GetMultipassTexel(tex, vs_tex_coords + ofs);
+//      sum += weight[x] * GetMultipassTexel(tex, vs_tex_coords - ofs);
+//    }
+//  } else {
+//    for (int y = 1; y < len; y++) {
+//      const vec2 ofs = vec2(0.0f, y) / window_size;
+//      sum += weight[y] * GetMultipassTexel(tex, vs_tex_coords + ofs);
+//      sum += weight[y] * GetMultipassTexel(tex, vs_tex_coords - ofs);
+//    }
+//  }
+//  return vec4(vec3(sum), 1.0f);
+//}
 
-vec4 CalcBloomEffectMixedColor(vec4 orig_color, vec4 blurred_color) {
-  return 0.3f * orig_color + 1.0f * blurred_color;
-}
-
-vec4 CalcBloomEffect() {
-  const int kNumMultipass = 10;
-
-  const int pass_idx = postproc_inputs.pass_idx;
-  if (pass_idx == 0) {
-    return 0.8f * GetTexel(vs_tex_coords) +
-           0.5f * CalcBrightness(GetTexel(vs_tex_coords));
-  } else if (pass_idx < 1 + kNumMultipass * 2) {
-    return CalcGaussianBlur(hdr_tex, true);
-  } else {
-    const vec4 orig_color = GetTexel(vs_tex_coords);
-    const vec4 blurred_color = GetMultipassTexel(hdr_tex, vs_tex_coords);
-    return CalcBloomEffectMixedColor(orig_color, blurred_color);
-  }
-}
+// vec4 CalcBloomEffectMixedColor(vec4 orig_color, vec4 blurred_color) {
+//  return 0.3f * orig_color + 1.0f * blurred_color;
+//}
+//
+// vec4 CalcBloomEffect() {
+//  const int kNumMultipass = 10;
+//
+//  const int pass_idx = postproc_inputs.pass_idx;
+//  if (pass_idx == 0) {
+//    return 0.8f * GetTexel(vs_tex_coords) +
+//           0.5f * CalcBrightness(GetTexel(vs_tex_coords));
+//  } else if (pass_idx < 1 + kNumMultipass * 2) {
+//    return CalcGaussianBlur(hdr_tex, true);
+//  } else {
+//    const vec4 orig_color = GetTexel(vs_tex_coords);
+//    const vec4 blurred_color = GetMultipassTexel(hdr_tex, vs_tex_coords);
+//    return CalcBloomEffectMixedColor(orig_color, blurred_color);
+//  }
+//}
 
 /*******************************************************************************
  * Post-processing / Magnifier
@@ -637,34 +635,38 @@ vec4 CalcSpecial() {
 
 vec4 CalcOriginal() {
   const vec4 color = GetTexel(vs_tex_coords);
-  return pow(color, vec4(1.0f / kGamma));
+  // TODO: Use gamma correction
+  //  return pow(color, vec4(1.0f / kGamma));
+  return color;
 }
 
 vec4 CalcPostproc() {
-  switch (postproc_inputs.effect_idx) {
-    case kPostprocEffectImgAbs: {
-      return CalcImageAbstraction();
-    } break;
-    case kPostprocEffectLaplacian: {
-      return CalcLaplacian();
-    } break;
-    case kPostprocEffectSharpness: {
-      return CalcSharpness();
-    } break;
-    case kPostprocEffectPixelation: {
-      return CalcPixelation();
-    } break;
-    case kPostprocEffectBloomEffect: {
-      return CalcBloomEffect();
-    } break;
-    case kPostprocEffectMagnifier: {
-      return CalcMagnifier();
-    } break;
-    case kPostprocEffectSpecial: {
-      return CalcSpecial();
-    } break;
-    default: { return kErrorColor; }
-  }
+  //  switch (postproc_inputs.effect_idx) {
+  //    case kPostprocEffectImgAbs: {
+  //      return CalcImageAbstraction();
+  //    } break;
+  //    case kPostprocEffectLaplacian: {
+  //      return CalcLaplacian();
+  //    } break;
+  //    case kPostprocEffectSharpness: {
+  //      return CalcSharpness();
+  //    } break;
+  //    case kPostprocEffectPixelation: {
+  //      return CalcPixelation();
+  //    } break;
+  //    case kPostprocEffectBloomEffect: {
+  //      return GetHdrTexel(vs_tex_coords);
+  //    } break;
+  //    case kPostprocEffectMagnifier: {
+  //      return CalcMagnifier();
+  //    } break;
+  //    case kPostprocEffectSpecial: {
+  //      return CalcSpecial();
+  //    } break;
+  //    default: { return kErrorColor; }
+  //  }
+
+  return GetHdrTexel(vs_tex_coords);
 }
 
 /*******************************************************************************
@@ -672,6 +674,21 @@ vec4 CalcPostproc() {
  ******************************************************************************/
 
 void main() {
+  if (postproc_inputs.pass_idx == 0) {
+    fs_original_color = CalcOriginal();
+
+    // Output HDR color
+    const float brightness =
+        dot(fs_original_color.rgb, vec3(0.2126f, 0.7152f, 0.0722f));
+    if (brightness > 0.5f) {
+      fs_original_color = vec4(fs_original_color.rgb, 1.0f);
+    } else {
+      fs_original_color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    }
+
+    return;
+  }
+
   const int display_mode = CalcDisplayMode();
   switch (display_mode) {
     case kDisplayModePostproc: {
