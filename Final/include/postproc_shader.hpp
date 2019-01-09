@@ -13,8 +13,10 @@ class PostprocShader : public Shader {
   };
 
   enum class PostprocTextureTypes {
-    kOriginal,
-    kHdr,
+    kOriginal1,
+    kHdr1,
+    kOriginal2,
+    kHdr2,
   };
 
   enum Effects {
@@ -60,7 +62,11 @@ class PostprocShader : public Shader {
   void UsePostprocFramebuffer(
       const PostprocFramebufferTypes postproc_framebuffer_type);
 
-  void DrawBloom();
+  void UsePostprocTexture(
+      const PostprocFramebufferTypes postproc_framebuffer_type,
+      const PostprocTextureTypes postproc_tex_type, const int scaling_idx);
+
+  void DrawBloom(const glm::ivec2 &window_size);
 
   void DrawPostprocEffects();
 
@@ -91,15 +97,45 @@ class PostprocShader : public Shader {
   std::string GetQuadVertexArrayGroupName() const;
 
   std::string GetPostprocTextureName(
-      const PostprocTextureTypes postproc_tex_type) const;
+      const PostprocTextureTypes postproc_tex_type,
+      const int scaling_idx) const;
 
   std::string GetPostprocTextureUnitName(
-      const PostprocTextureTypes postproc_tex_type) const;
+      const PostprocTextureTypes postproc_tex_type,
+      const int scaling_idx) const;
 
   std::string GetPostprocDepthRenderbufferName(
       const PostprocFramebufferTypes postproc_framebuffer_type) const;
 
   std::string GetPostprocInputsUniformBlockName() const;
+
+ private:
+  /* Constants */
+  static const int kNumBloomScaling;
+
+  /* Models */
+  as::Model quad_model_;
+
+  /* States */
+  PostprocInputs postproc_inputs_;
+
+  /* State Getters */
+
+  PostprocTextureTypes GetPassOriginalTextureType(const int pass_idx,
+                                                  const bool read) const;
+
+  PostprocTextureTypes GetPassHdrTextureType(const int pass_idx,
+                                             const bool read) const;
+
+  /* State Updaters */
+
+  void UpdatePostprocInputs();
+
+  /* GL Drawing Methods */
+
+  void SetTextureUnitIdxs(const int pass_idx, const int scaling_idx);
+
+  void DrawToTextures();
 
   /* Type Conversions */
 
@@ -109,27 +145,13 @@ class PostprocShader : public Shader {
   int PostprocFramebufferTypeToNum(
       const PostprocFramebufferTypes postproc_framebuffer_type) const;
 
+  int GetPostprocTextureTypeNumBloomScaling(
+      const PostprocTextureTypes postproc_tex_type) const;
+
   std::string PostprocTextureTypeToName(
       const PostprocTextureTypes postproc_tex_type) const;
 
   int PostprocTextureTypeToNum(
       const PostprocTextureTypes postproc_tex_type) const;
-
- private:
-  /* Models */
-  as::Model quad_model_;
-
-  /* States */
-  PostprocInputs postproc_inputs_;
-
-  /* State Updaters */
-
-  void UpdatePostprocInputs();
-
-  /* GL Drawing Methods */
-
-  void SetTextureUnitIdxs();
-
-  void DrawToTextures();
 };
 }  // namespace shader

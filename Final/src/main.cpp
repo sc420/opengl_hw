@@ -509,6 +509,12 @@ void GLUTDisplayCallback() {
   // Draw the scene on postproc framebuffer "draw original"
   postproc_shader.UsePostprocFramebuffer(
       shader::PostprocShader::PostprocFramebufferTypes::kDrawOriginal);
+  postproc_shader.UsePostprocTexture(
+      shader::PostprocShader::PostprocFramebufferTypes::kDrawOriginal,
+      shader::PostprocShader::PostprocTextureTypes::kOriginal2, 0);
+  postproc_shader.UsePostprocTexture(
+      shader::PostprocShader::PostprocFramebufferTypes::kDrawOriginal,
+      shader::PostprocShader::PostprocTextureTypes::kHdr2, 0);
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
 
@@ -521,7 +527,7 @@ void GLUTDisplayCallback() {
 
   // Draw bloom effects on postproc framebuffers "draw scaling", "blur scaling"
   // and "combining"
-  postproc_shader.DrawBloom();
+  // postproc_shader.DrawBloom(window_size);
 
   // Draw post-processing effects on default framebuffer
   scene_shader.UseDefaultFramebuffer();
