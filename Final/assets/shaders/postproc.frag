@@ -118,23 +118,21 @@ int CalcDisplayMode() {
 // https://learnopengl.com/Advanced-Lighting/Bloom
 // https://en.wikipedia.org/wiki/Relative_luminance
 vec4 ColorToHdr(const vec4 color) {
-  const float kBrightnessLow = 0.5f;
-
   const float brightness = dot(vec3(color), vec3(0.2126f, 0.7152f, 0.0722f));
-  if (brightness > kBrightnessLow) {
-    return color;
-  } else {
-    return kBlackColor;
-  }
+  return brightness * color;
 }
 
 vec4 CalcCombiningBlurredHdr() {
+  const float kExposure = 0.1f;
+
   const vec4 orig_color = GetTexel(original_tex, vs_tex_coords);
   const vec4 blurred_hdr_color1 = GetTexel(scaled_hdr_tex1, vs_tex_coords);
   const vec4 blurred_hdr_color2 = GetTexel(scaled_hdr_tex2, vs_tex_coords);
   const vec4 blurred_hdr_color3 = GetTexel(scaled_hdr_tex3, vs_tex_coords);
-  return orig_color + blurred_hdr_color1 + blurred_hdr_color2 +
-         blurred_hdr_color3;
+  const vec4 sum_hdr_color =
+      blurred_hdr_color1 + blurred_hdr_color2 + blurred_hdr_color3;
+
+  return clamp(orig_color + kExposure * sum_hdr_color, 0.0f, 1.0f);
 }
 
 /*******************************************************************************
