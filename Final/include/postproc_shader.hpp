@@ -36,7 +36,8 @@ class PostprocShader : public Shader {
     glm::vec2 mouse_pos;    // 8*1=8, +8->16
     int effect_idx;         // 4*4=16, +4->20
     int pass_idx;           // 4*5=20, +4->24
-    float time;             // 4*6=24, +4->28
+    int scaling_idx;        // 4*6=24, +4->28
+    float time;             // 4*7=28, +4->32
   };
 
   PostprocShader();
@@ -79,6 +80,8 @@ class PostprocShader : public Shader {
   void UpdateEffectIdx(const int effect_idx);
 
   void UpdatePassIdx(const int pass_idx);
+
+  void UpdateScalingIdx(const int scaling_idx);
 
   void UpdateTime(const float time);
 
@@ -134,6 +137,8 @@ class PostprocShader : public Shader {
   /* GL Drawing Methods */
 
   void SetTextureUnitIdxs(const int pass_idx, const int scaling_idx);
+
+  void SetScalingTextureUnitIdxs(const int pass_idx);
 
   void DrawToTextures();
 

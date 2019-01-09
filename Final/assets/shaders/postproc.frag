@@ -39,6 +39,7 @@ layout(std140) uniform PostprocInputs {
   vec2 mouse_pos;
   int effect_idx;
   int pass_idx;
+  int scaling_idx;
   float time;
 }
 postproc_inputs;
@@ -49,6 +50,10 @@ postproc_inputs;
 
 uniform sampler2D original_tex;
 uniform sampler2D hdr_tex;
+/* Scaling HDR Textures */
+uniform sampler2D scaled_hdr_tex1;
+uniform sampler2D scaled_hdr_tex2;
+uniform sampler2D scaled_hdr_tex3;
 
 /*******************************************************************************
  * Inputs
@@ -121,6 +126,15 @@ vec4 ColorToHdr(const vec4 color) {
   } else {
     return kBlackColor;
   }
+}
+
+vec4 CalcCombiningBlurredHdr() {
+  const vec4 orig_color = GetTexel(original_tex, vs_tex_coords);
+  const vec4 blurred_hdr_color1 = GetTexel(scaled_hdr_tex1, vs_tex_coords);
+  const vec4 blurred_hdr_color2 = GetTexel(scaled_hdr_tex2, vs_tex_coords);
+  const vec4 blurred_hdr_color3 = GetTexel(scaled_hdr_tex3, vs_tex_coords);
+  return orig_color + blurred_hdr_color1 + blurred_hdr_color2 +
+         blurred_hdr_color3;
 }
 
 /*******************************************************************************
@@ -706,18 +720,26 @@ void main() {
        * by other shaders */
     case 1: {
       /* Draw original and HDR (Multiple scaling) */
-      fs_original_color = CalcOriginal();
+      if (postproc_inputs.scaling_idx == 0) {
+        fs_original_color = CalcOriginal();
+      } else {
+        fs_original_color = vec4(0.0f);
+      }
       fs_hdr_color = ColorToHdr(CalcOriginal());
     } break;
     case 2: {
       /* Blur HDR (Multiple scaling) */
-      fs_original_color = CalcOriginal();
+      if (postproc_inputs.scaling_idx == 0) {
+        fs_original_color = CalcOriginal();
+      } else {
+        fs_original_color = vec4(0.0f);
+      }
       fs_hdr_color = CalcGaussianBlur(hdr_tex, true);
     } break;
     case 3: {
       /* Combine original and blurred HDR (Single pass) */
-      fs_original_color = GetTexel(hdr_tex, vs_tex_coords);
-      fs_hdr_color = kRedColor;
+      fs_original_color = CalcCombiningBlurredHdr();
+      fs_hdr_color = kErrorColor;
     } break;
     case 4: {
       /* Draw post-processing effects (Single pass) */

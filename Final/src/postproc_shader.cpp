@@ -245,25 +245,33 @@ void shader::PostprocShader::DrawBloom(const glm::ivec2 &window_size) {
     as::ClearColorBuffer();
     as::ClearDepthBuffer();
 
+    // Check whether to set all scaling texture unit indexes
+    if (framebuffer_type == PostprocFramebufferTypes::kCombining) {
+      SetScalingTextureUnitIdxs(pass_idx);
+    }
+
     // Draw for each scaling
     glm::ivec2 cur_size = window_size;
     for (int scaling_idx = 0; scaling_idx < num_scaling; scaling_idx++) {
+      // Update pass index
+      UpdatePassIdx(pass_idx);
+      // Update scaling index
+      UpdateScalingIdx(scaling_idx);
+      // Update postproc inputs buffer
+      UpdatePostprocInputs();
+
+      // Set texture unit indexes as inputs
+      SetTextureUnitIdxs(pass_idx, scaling_idx);
+
       // Use the textures as outputs
       UsePostprocTexture(framebuffer_type,
                          GetPassOriginalTextureType(pass_idx, false), 0);
       UsePostprocTexture(framebuffer_type,
                          GetPassHdrTextureType(pass_idx, false), scaling_idx);
 
-      // Update pass index
-      UpdatePassIdx(pass_idx);
-      // Update postproc inputs buffer
-      UpdatePostprocInputs();
-
       // Update view port
       glViewport(0, 0, cur_size.x, cur_size.y);
 
-      // Set texture unit indexes as inputs
-      SetTextureUnitIdxs(pass_idx, scaling_idx);
       // Draw
       DrawToTextures();
 
@@ -314,6 +322,10 @@ void shader::PostprocShader::UpdateEffectIdx(const int effect_idx) {
 
 void shader::PostprocShader::UpdatePassIdx(const int pass_idx) {
   postproc_inputs_.pass_idx = pass_idx;
+}
+
+void shader::PostprocShader::UpdateScalingIdx(const int scaling_idx) {
+  postproc_inputs_.scaling_idx = scaling_idx;
 }
 
 void shader::PostprocShader::UpdateTime(const float time) {
@@ -421,8 +433,6 @@ void shader::PostprocShader::SetTextureUnitIdxs(const int pass_idx,
   // Get managers
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
-  // Get types
-
   // Get names
   const std::string program_name = GetProgramName();
   const std::string original_tex_name =
@@ -433,15 +443,41 @@ void shader::PostprocShader::SetTextureUnitIdxs(const int pass_idx,
   const GLuint original_unit_idx =
       texture_manager.GetUnitIdx(original_tex_name);
   const GLuint hdr_unit_idx = texture_manager.GetUnitIdx(hdr_tex_name);
+
   // Set the texture handlers to the unit indexes
   uniform_manager.SetUniform1Int(program_name, "original_tex",
                                  original_unit_idx);
   uniform_manager.SetUniform1Int(program_name, "hdr_tex", hdr_unit_idx);
+}
 
-  std::cerr << "Pass index: " << pass_idx << std::endl;
+void shader::PostprocShader::SetScalingTextureUnitIdxs(const int pass_idx) {
+  // Get managers
+  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  as::UniformManager &uniform_manager = gl_managers_->GetUniformManager();
+  // Get names
+  const std::string program_name = GetProgramName();
+  const std::string original_tex_name =
+      GetPostprocTextureName(GetPassOriginalTextureType(pass_idx, true), 0);
+  // Get unit indexes
+  const GLuint original_unit_idx =
+      texture_manager.GetUnitIdx(original_tex_name);
 
-  std::cerr << "Read original tex name: " << original_tex_name << std::endl;
-  std::cerr << "Read HDR tex name: " << hdr_tex_name << std::endl;
+  // Set the texture handlers to the unit indexes
+  uniform_manager.SetUniform1Int(program_name, "original_tex",
+                                 original_unit_idx);
+
+  for (int scaling_idx = 0; scaling_idx < kNumBloomScaling; scaling_idx++) {
+    // Get names
+    const std::string hdr_tex_name = GetPostprocTextureName(
+        GetPassHdrTextureType(pass_idx, true), scaling_idx);
+    // Get unit indexes
+    const GLuint hdr_unit_idx = texture_manager.GetUnitIdx(hdr_tex_name);
+
+    // Set the texture handlers to the unit indexes
+    uniform_manager.SetUniform1Int(
+        program_name, "scaled_hdr_tex" + std::to_string(scaling_idx + 1),
+        hdr_unit_idx);
+  }
 }
 
 void shader::PostprocShader::DrawToTextures() {
