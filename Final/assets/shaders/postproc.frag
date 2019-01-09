@@ -123,7 +123,7 @@ vec4 ColorToHdr(const vec4 color) {
 }
 
 vec4 CalcCombiningBlurredHdr() {
-  const float kExposure = 0.5f;
+  const float kExposure = 1.0f;
 
   const vec4 orig_color = GetTexel(original_tex, vs_tex_coords);
   const vec4 blurred_hdr_color1 = GetTexel(scaled_hdr_tex1, vs_tex_coords);
