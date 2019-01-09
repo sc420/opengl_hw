@@ -94,7 +94,7 @@ void shader::PostprocShader::UpdatePostprocTextures(const GLsizei width,
           GetPostprocTextureUnitName(postproc_tex_type, scaling_idx);
       // Get indexes
       const int color_attachment_idx =
-          PostprocTextureTypeToNum(postproc_tex_type);
+          PostprocTextureTypeToNum(postproc_tex_type) % 2;
 
       // Check whether to delete old texture
       if (texture_manager.HasTexture(tex_name)) {
@@ -123,11 +123,11 @@ void shader::PostprocShader::UpdatePostprocTextures(const GLsizei width,
 
         framebuffer_manager.AttachTexture2DToFramebuffer(
             framebuffer_name, tex_name, GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0 + (color_attachment_idx % 2), GL_TEXTURE_2D,
-            0);
+            GL_COLOR_ATTACHMENT0 + color_attachment_idx, GL_TEXTURE_2D, 0);
 
         // Tell GL we're drawing to multiple attachments
-        unsigned int attachments[] = {
+        framebuffer_manager.BindFramebuffer(framebuffer_name);
+        const unsigned int attachments[] = {
             GL_COLOR_ATTACHMENT0 + 0,
             GL_COLOR_ATTACHMENT0 + 1,
         };
@@ -204,7 +204,8 @@ void shader::PostprocShader::UsePostprocTexture(
   const std::string tex_name =
       GetPostprocTextureName(postproc_tex_type, scaling_idx);
   // Get indexes
-  const int color_attachment_idx = PostprocTextureTypeToNum(postproc_tex_type);
+  const int color_attachment_idx =
+      (PostprocTextureTypeToNum(postproc_tex_type) % 2);
 
   // Bind the texture
   texture_manager.BindTexture(tex_name);
@@ -212,135 +213,85 @@ void shader::PostprocShader::UsePostprocTexture(
   // Attach the texture to the framebuffer
   framebuffer_manager.AttachTexture2DToFramebuffer(
       framebuffer_name, tex_name, GL_FRAMEBUFFER,
-      GL_COLOR_ATTACHMENT0 + (color_attachment_idx % 2), GL_TEXTURE_2D, 0);
+      GL_COLOR_ATTACHMENT0 + color_attachment_idx, GL_TEXTURE_2D, 0);
 }
 
 void shader::PostprocShader::DrawBloom(const glm::ivec2 &window_size) {
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
+  {
+    /* Blur HDR colors in scaling texture and draw to "blur scaling" framebuffer
+     */
 
-  const unsigned int attachments[] = {
-      GL_COLOR_ATTACHMENT0 + 0,
-      GL_COLOR_ATTACHMENT0 + 1,
-  };
+    const int pass_idx = 1;
 
-  //// Use the program
-  // UseProgram();
+    // Use the framebuffer
+    UsePostprocFramebuffer(PostprocFramebufferTypes::kBlurScaling);
+    as::ClearColorBuffer();
+    as::ClearDepthBuffer();
 
-  ///* Draw original and HDR colors to scaling textures to "draw scaling"
-  // * framebuffer */
+    // Use the textures as outputs
+    UsePostprocTexture(PostprocFramebufferTypes::kBlurScaling,
+                       GetPassOriginalTextureType(pass_idx, false), 0);
+    UsePostprocTexture(PostprocFramebufferTypes::kBlurScaling,
+                       GetPassHdrTextureType(pass_idx, false), 0);
 
-  //// Use the framebuffer
-  // UsePostprocFramebuffer(PostprocFramebufferTypes::kDrawScaling);
-  // as::ClearColorBuffer();
-  // as::ClearDepthBuffer();
+    // Update pass index
+    UpdatePassIdx(pass_idx);
+    // Update postproc inputs buffer
+    UpdatePostprocInputs();
 
-  //// Use the textures as outputs
-  // UsePostprocTexture(GetPassOriginalTextureType(0, false), 0);
-  // UsePostprocTexture(GetPassHdrTextureType(0, false), 0);
+    // Set texture unit indexes as inputs
+    SetTextureUnitIdxs(pass_idx, 0);
+    // Draw
+    DrawToTextures();
+  }
 
-  // framebuffer_manager.AttachTexture2DToFramebuffer(
-  //    GetPostprocFramebufferName(PostprocFramebufferTypes::kDrawScaling),
-  //    GetPostprocTextureName(GetPassOriginalTextureType(0, false), 0),
-  //    GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + 0, GL_TEXTURE_2D, 0);
-  // framebuffer_manager.AttachTexture2DToFramebuffer(
-  //    GetPostprocFramebufferName(PostprocFramebufferTypes::kDrawScaling),
-  //    GetPostprocTextureName(GetPassHdrTextureType(0, false), 0),
-  //    GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + 1, GL_TEXTURE_2D, 0);
-  // glDrawBuffers(2, attachments);
+  {
+    /* Combine original color and blurred HDR colors and draw to "combining"
+     * framebuffer */
 
-  //// Update pass index
-  // UpdatePassIdx(0);
-  //// Update postproc inputs buffer
-  // UpdatePostprocInputs();
+    const int pass_idx = 2;
 
-  //// Set texture unit indexes as inputs
-  // SetTextureUnitIdxs(0, 0);
-  //// Draw
-  // DrawToTextures();
+    // Use the framebuffer
+    UsePostprocFramebuffer(PostprocFramebufferTypes::kCombining);
+    as::ClearColorBuffer();
+    as::ClearDepthBuffer();
 
-  /* Blur HDR colors in scaling texture and draw to "blur scaling" framebuffer
-   */
+    // Use the textures as outputs
+    UsePostprocTexture(PostprocFramebufferTypes::kCombining,
+                       GetPassOriginalTextureType(pass_idx, false), 0);
+    UsePostprocTexture(PostprocFramebufferTypes::kCombining,
+                       GetPassHdrTextureType(pass_idx, false), 0);
 
-  // Use the framebuffer
-  UsePostprocFramebuffer(PostprocFramebufferTypes::kBlurScaling);
-  as::ClearColorBuffer();
-  as::ClearDepthBuffer();
+    // Update pass index
+    UpdatePassIdx(pass_idx);
+    // Update postproc inputs buffer
+    UpdatePostprocInputs();
 
-  // Use the textures as outputs
-  UsePostprocTexture(PostprocFramebufferTypes::kBlurScaling,
-                     GetPassOriginalTextureType(1, false), 0);
-  UsePostprocTexture(PostprocFramebufferTypes::kBlurScaling,
-                     GetPassHdrTextureType(1, false), 0);
-
-  framebuffer_manager.AttachTexture2DToFramebuffer(
-      GetPostprocFramebufferName(PostprocFramebufferTypes::kDrawScaling),
-      GetPostprocTextureName(GetPassOriginalTextureType(1, false), 0),
-      GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + 0, GL_TEXTURE_2D, 0);
-  framebuffer_manager.AttachTexture2DToFramebuffer(
-      GetPostprocFramebufferName(PostprocFramebufferTypes::kDrawScaling),
-      GetPostprocTextureName(GetPassHdrTextureType(1, false), 0),
-      GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + 1, GL_TEXTURE_2D, 0);
-  glDrawBuffers(2, attachments);
-
-  // Update pass index
-  UpdatePassIdx(1);
-  // Update postproc inputs buffer
-  UpdatePostprocInputs();
-
-  // Set texture unit indexes as inputs
-  SetTextureUnitIdxs(1, 0);
-  // Draw
-  DrawToTextures();
-
-  /* Combine original color and blurred HDR colors and draw to "combining"
-   * framebuffer */
-
-  // Use the framebuffer
-  UsePostprocFramebuffer(PostprocFramebufferTypes::kCombining);
-  as::ClearColorBuffer();
-  as::ClearDepthBuffer();
-
-  // Use the textures as outputs
-  UsePostprocTexture(PostprocFramebufferTypes::kCombining,
-                     GetPassOriginalTextureType(2, false), 0);
-  UsePostprocTexture(PostprocFramebufferTypes::kCombining,
-                     GetPassHdrTextureType(2, false), 0);
-
-  glDrawBuffers(2, attachments);
-
-  std::cerr << "Write original texture output: "
-            << GetPostprocTextureName(GetPassOriginalTextureType(2, false), 0)
-            << std::endl;
-  std::cerr << "Write HDR texture output: "
-            << GetPostprocTextureName(GetPassHdrTextureType(2, false), 0)
-            << std::endl;
-
-  // Update pass index
-  UpdatePassIdx(2);
-  // Update postproc inputs buffer
-  UpdatePostprocInputs();
-
-  // Set texture unit indexes as inputs
-  SetTextureUnitIdxs(2, 0);
-  // Draw
-  DrawToTextures();
+    // Set texture unit indexes as inputs
+    SetTextureUnitIdxs(pass_idx, 0);
+    // Draw
+    DrawToTextures();
+  }
 }
 
 void shader::PostprocShader::DrawPostprocEffects() {
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
+  // Set pass index
+  const int pass_idx = 3;
 
   // Use the program
   UseProgram();
 
   // Update pass index
-  UpdatePassIdx(3);
+  UpdatePassIdx(pass_idx);
   // Update postproc inputs
   UpdatePostprocInputs();
 
   // Set texture unit indexes
-  SetTextureUnitIdxs(3, 0);
+  SetTextureUnitIdxs(pass_idx, 0);
   // Draw
   DrawToTextures();
 }
