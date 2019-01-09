@@ -30,6 +30,8 @@ static const auto kCameraRotationSensitivity = 0.003f;
 static const auto kCameraZoomingStep = 1.0f;
 /* Timers */
 static const auto kTimerInterval = 10;
+/* Camera Shaking */
+static const auto kCameraShakingMaxWind = 0.1f;
 /* Debug */
 static const auto kSeeFromLight = false;
 static const auto kUpdateCameraFromAircraftController = true;
@@ -92,10 +94,22 @@ ctrl::AircraftController aircraft_ctrl(
 ctrl::FbxController fbx_ctrl;
 
 /*******************************************************************************
+ * Random Number Generators
+ ******************************************************************************/
+
+// Camera shaking
+std::random_device rand_device;
+std::mt19937 rand_engine(rand_device());
+std::uniform_real_distribution<float> camera_shaking_distrib(-1e-2f, 1e-2f);
+float camera_shaking_wind = 0.0f;
+
+/*******************************************************************************
  * Rendering States
  ******************************************************************************/
 
 bool render_wireframe = false;
+bool use_aircraft_wind = false;
+bool use_camera_wind = false;
 
 /*******************************************************************************
  * User Interface States
@@ -208,27 +222,47 @@ void ConfigGL() {
 }
 
 /*******************************************************************************
- * Controller Initializations
+ * Controller Updaters
  ******************************************************************************/
 
-void InitFbxCameraController() {
-  fbx_camera_ctrl.SetWind(
-      // Position wind, Rotation wind
-      glm::vec3(0.0f), glm::vec3(0.0f),
-      // Adjust factors
-      glm::vec3(1e-2f), glm::vec3(1e-4f),
-      // Max wind
-      glm::vec3(1e-3f), glm::vec3(1e-5f));
+void UpdateFbxCameraController() {
+  if (use_aircraft_wind) {
+    fbx_camera_ctrl.SetWind(
+        // Position wind, Rotation wind
+        glm::vec3(0.0f), glm::vec3(0.0f),
+        // Adjust factors
+        glm::vec3(1e-2f), glm::vec3(1e-4f),
+        // Max wind
+        glm::vec3(1e-3f), glm::vec3(1e-5f));
+  } else {
+    fbx_camera_ctrl.SetWind(
+        // Position wind, Rotation wind
+        glm::vec3(0.0f), glm::vec3(0.0f),
+        // Adjust factors
+        glm::vec3(0.0f), glm::vec3(0.0f),
+        // Max wind
+        glm::vec3(0.0f), glm::vec3(0.0f));
+  }
 }
 
-void InitAircraftController() {
-  aircraft_ctrl.SetWind(
-      // Drift direction wind, speed wind
-      glm::vec3(0.0f), 0.0f,
-      // Adjust factors
-      glm::vec3(0.0f, 1e-8f, 0.0f), 1e-7f,
-      // Max wind
-      glm::vec3(1e-6f), 1e-5f);
+void UpdateAircraftController() {
+  if (use_aircraft_wind) {
+    aircraft_ctrl.SetWind(
+        // Drift direction wind, speed wind
+        glm::vec3(0.0f), 0.0f,
+        // Adjust factors
+        glm::vec3(0.0f, 1e-8f, 0.0f), 1e-7f,
+        // Max wind
+        glm::vec3(1e-6f), 1e-5f);
+  } else {
+    aircraft_ctrl.SetWind(
+        // Drift direction wind, speed wind
+        glm::vec3(0.0f), 0.0f,
+        // Adjust factors
+        glm::vec3(0.0f), 0.0f,
+        // Max wind
+        glm::vec3(0.0f), 0.0f);
+  }
 }
 
 /*******************************************************************************
@@ -355,7 +389,13 @@ void UpdateImGui() {
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Mode")) {
       ImGui::Checkbox("Wireframe", &render_wireframe);
+      ImGui::Checkbox("Camera Wind", &use_camera_wind);
+      ImGui::Checkbox("Aircraft Wind", &use_aircraft_wind);
     }
+
+    // Update controllers
+    UpdateFbxCameraController();
+    UpdateAircraftController();
 
     ImGui::End();
   }
@@ -374,6 +414,33 @@ void DrawImGui() {
   // Draw ImGui on default framebuffer
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+/*******************************************************************************
+ * Random Number Generators
+ ******************************************************************************/
+
+glm::vec3 GenRand(std::uniform_real_distribution<float> &distrib) {
+  return glm::vec3(distrib(rand_engine), distrib(rand_engine),
+                   distrib(rand_engine));
+}
+
+/*******************************************************************************
+ * Camera Shaking
+ ******************************************************************************/
+
+glm::vec3 GetCameraShaked(const glm::vec3 &v) {
+  if (use_camera_wind) {
+    return v + camera_shaking_wind * GenRand(camera_shaking_distrib);
+  } else {
+    return v;
+  }
+}
+
+void UpdateCameraShakingWind() {
+  camera_shaking_wind += GenRand(camera_shaking_distrib).x;
+  camera_shaking_wind = glm::clamp(
+      camera_shaking_wind, (-kCameraShakingMaxWind), kCameraShakingMaxWind);
 }
 
 /*******************************************************************************
@@ -682,8 +749,11 @@ void GLUTTimerCallback(const int val) {
 
   // Update camera eye and angles from aircraft controller
   if (kUpdateCameraFromAircraftController) {
-    camera_trans.SetEye(aircraft_ctrl.GetPos());
-    camera_trans.SetAngles(aircraft_ctrl.GetDir());
+    const glm::vec3 aircraft_pos = aircraft_ctrl.GetPos();
+    const glm::vec3 aircraft_dir = aircraft_ctrl.GetDir();
+
+    camera_trans.SetEye(GetCameraShaked(aircraft_pos));
+    camera_trans.SetAngles(GetCameraShaked(aircraft_dir));
   }
 
   // Update camera transformation
@@ -705,6 +775,9 @@ void GLUTTimerCallback(const int val) {
                               glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
   fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(), fbx_camera_ctrl.GetRot(),
                              fbx_camera_ctrl.GetScaling());
+
+  // Update camera shaking wind
+  UpdateCameraShakingWind();
 
   // Mark the current window as needing to be redisplayed
   glutPostRedisplay();
@@ -885,8 +958,6 @@ int main(int argc, char *argv[]) {
     InitGLUT(argc, argv);
     as::InitGLEW();
     ConfigGL();
-    InitFbxCameraController();
-    InitAircraftController();
     InitFbx();
     InitImGui();
     RegisterGLUTCallbacks();
