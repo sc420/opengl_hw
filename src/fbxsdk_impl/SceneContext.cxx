@@ -513,10 +513,10 @@ bool SceneContext::LoadFile() {
                          mScene->GetGlobalSettings().GetTimeMode());
 
       // Print the keyboard shortcuts.
-      FBXSDK_printf("Play/Pause Animation: Space Bar.\n");
-      FBXSDK_printf("Camera Rotate: Left Mouse Button.\n");
-      FBXSDK_printf("Camera Pan: Left Mouse Button + Middle Mouse Button.\n");
-      FBXSDK_printf("Camera Zoom: Middle Mouse Button.\n");
+      // FBXSDK_printf("Play/Pause Animation: Space Bar.\n");
+      // FBXSDK_printf("Camera Rotate: Left Mouse Button.\n");
+      // FBXSDK_printf("Camera Pan: Left Mouse Button + Middle Mouse
+      // Button.\n"); FBXSDK_printf("Camera Zoom: Middle Mouse Button.\n");
 
       lResult = true;
     } else {

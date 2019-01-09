@@ -11,6 +11,11 @@
 * [OpenGL Angles to Axes](http://www.songho.ca/opengl/gl_anglestoaxes.html)
 * [Improvements for shadow mapping in OpenGL and GLSL](http://www.sunandblackcat.com/tipFullView.php?l=eng&topicid=35)
 * [CREATE A FOG SHADER](http://in2gpu.com/2014/07/22/create-fog-shader/)
+* [How to quickly add bloom to your game engine](http://chrismdp.com/2015/06/how-to-quickly-add-bloom-to-your-engine/)
+
+## Tips
+
+* [What is the best way to handle FBOs in OpenGL?](https://stackoverflow.com/a/2203931)
 
 ## Libraries
 

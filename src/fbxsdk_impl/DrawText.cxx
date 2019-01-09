@@ -106,8 +106,9 @@ void FbxDrawText::Initialize() {
   FILE* lFile = NULL;
   FBXSDK_fopen(lFile, TEXTURE_FILENAME, "rb");
   if (lFile == NULL) {
-    FBXSDK_printf("Warning: Failed to open %s and no text will be displayed.\n",
-                  TEXTURE_FILENAME);
+    // FBXSDK_printf("Warning: Failed to open %s and no text will be
+    // displayed.\n",
+    //              TEXTURE_FILENAME);
     return;
   }
 
