@@ -721,7 +721,7 @@ void main() {
     } break;
     case 4: {
       /* Draw post-processing effects (Single pass) */
-      fs_original_color = kErrorColor;
+      fs_original_color = CalcOriginal();
       fs_hdr_color = kErrorColor;
     } break;
     default: {

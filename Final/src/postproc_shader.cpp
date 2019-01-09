@@ -219,68 +219,68 @@ void shader::PostprocShader::UsePostprocTexture(
 void shader::PostprocShader::DrawBloom(const glm::ivec2 &window_size) {
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
-  {
-    /* Blur HDR colors in scaling texture and draw to "blur scaling" framebuffer
-     */
+  for (int pass_idx = 1; pass_idx <= 3; pass_idx++) {
+    // Select framebuffer type
+    PostprocFramebufferTypes framebuffer_type;
+    if (pass_idx == 1) {
+      framebuffer_type = PostprocFramebufferTypes::kDrawScaling;
+    } else if (pass_idx == 2) {
+      framebuffer_type = PostprocFramebufferTypes::kBlurScaling;
+    } else if (pass_idx == 3) {
+      framebuffer_type = PostprocFramebufferTypes::kCombining;
+    }
 
-    const int pass_idx = 1;
+    // Set number of scaling
+    int num_scaling;
+    if (pass_idx == 1) {
+      num_scaling = kNumBloomScaling;
+    } else if (pass_idx == 2) {
+      num_scaling = kNumBloomScaling;
+    } else if (pass_idx == 3) {
+      num_scaling = 1;
+    }
 
     // Use the framebuffer
-    UsePostprocFramebuffer(PostprocFramebufferTypes::kBlurScaling);
+    UsePostprocFramebuffer(framebuffer_type);
     as::ClearColorBuffer();
     as::ClearDepthBuffer();
 
-    // Use the textures as outputs
-    UsePostprocTexture(PostprocFramebufferTypes::kBlurScaling,
-                       GetPassOriginalTextureType(pass_idx, false), 0);
-    UsePostprocTexture(PostprocFramebufferTypes::kBlurScaling,
-                       GetPassHdrTextureType(pass_idx, false), 0);
+    // Draw for each scaling
+    glm::ivec2 cur_size = window_size;
+    for (int scaling_idx = 0; scaling_idx < num_scaling; scaling_idx++) {
+      // Use the textures as outputs
+      UsePostprocTexture(framebuffer_type,
+                         GetPassOriginalTextureType(pass_idx, false), 0);
+      UsePostprocTexture(framebuffer_type,
+                         GetPassHdrTextureType(pass_idx, false), scaling_idx);
 
-    // Update pass index
-    UpdatePassIdx(pass_idx);
-    // Update postproc inputs buffer
-    UpdatePostprocInputs();
+      // Update pass index
+      UpdatePassIdx(pass_idx);
+      // Update postproc inputs buffer
+      UpdatePostprocInputs();
 
-    // Set texture unit indexes as inputs
-    SetTextureUnitIdxs(pass_idx, 0);
-    // Draw
-    DrawToTextures();
+      // Update view port
+      glViewport(0, 0, cur_size.x, cur_size.y);
+
+      // Set texture unit indexes as inputs
+      SetTextureUnitIdxs(pass_idx, scaling_idx);
+      // Draw
+      DrawToTextures();
+
+      // Shrink window size
+      cur_size /= 2;
+    }
   }
 
-  {
-    /* Combine original color and blurred HDR colors and draw to "combining"
-     * framebuffer */
-
-    const int pass_idx = 2;
-
-    // Use the framebuffer
-    UsePostprocFramebuffer(PostprocFramebufferTypes::kCombining);
-    as::ClearColorBuffer();
-    as::ClearDepthBuffer();
-
-    // Use the textures as outputs
-    UsePostprocTexture(PostprocFramebufferTypes::kCombining,
-                       GetPassOriginalTextureType(pass_idx, false), 0);
-    UsePostprocTexture(PostprocFramebufferTypes::kCombining,
-                       GetPassHdrTextureType(pass_idx, false), 0);
-
-    // Update pass index
-    UpdatePassIdx(pass_idx);
-    // Update postproc inputs buffer
-    UpdatePostprocInputs();
-
-    // Set texture unit indexes as inputs
-    SetTextureUnitIdxs(pass_idx, 0);
-    // Draw
-    DrawToTextures();
-  }
+  // Restore view port
+  glViewport(0, 0, window_size.x, window_size.y);
 }
 
 void shader::PostprocShader::DrawPostprocEffects() {
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
   // Set pass index
-  const int pass_idx = 3;
+  const int pass_idx = 4;
 
   // Use the program
   UseProgram();
