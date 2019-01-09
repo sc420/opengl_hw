@@ -110,6 +110,7 @@ float camera_shaking_wind = 0.0f;
 bool render_wireframe = false;
 bool use_aircraft_wind = false;
 bool use_camera_wind = false;
+bool use_hdr = false;
 
 /*******************************************************************************
  * User Interface States
@@ -391,6 +392,7 @@ void UpdateImGui() {
       ImGui::Checkbox("Wireframe", &render_wireframe);
       ImGui::Checkbox("Camera Wind", &use_camera_wind);
       ImGui::Checkbox("Aircraft Wind", &use_aircraft_wind);
+      ImGui::Checkbox("HDR", &use_hdr);
     }
 
     // Update controllers
@@ -520,9 +522,12 @@ void GLUTDisplayCallback() {
   // Restore polygon mode
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-  // Draw bloom effects on postproc framebuffers "draw scaling", "blur scaling"
-  // and "combining"
-  postproc_shader.DrawBloom(window_size);
+  if (use_hdr) {
+    // Draw bloom effects on postproc framebuffers "draw scaling", "blur
+    // scaling"
+    // and "combining"
+    postproc_shader.DrawBloom(window_size);
+  }
 
   // Draw post-processing effects on default framebuffer
   scene_shader.UseDefaultFramebuffer();
