@@ -119,7 +119,7 @@ bool use_camera_wind = false;
 enum class Modes { comparison, navigation };
 
 // Current mode
-Modes cur_mode = Modes::navigation;
+Modes cur_mode = Modes::comparison;
 
 /*******************************************************************************
  * Menus
@@ -507,7 +507,7 @@ void GLUTDisplayCallback() {
   }
 
   // Draw the scene on postproc framebuffer
-  postproc_shader.UseScreenFramebuffer();
+  postproc_shader.UsePostprocFramebuffer();
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
 
@@ -520,6 +520,7 @@ void GLUTDisplayCallback() {
 
   // Draw post-processing effects on default framebuffer
   scene_shader.UseDefaultFramebuffer();
+  as::ClearColorBuffer();
   as::ClearDepthBuffer();
   postproc_shader.Draw();
 
@@ -543,9 +544,9 @@ void GLUTReshapeCallback(const int width, const int height) {
   // Set the viewport
   glViewport(0, 0, width, height);
   // Update screen textures
-  postproc_shader.UpdateScreenTextures(width, height);
+  postproc_shader.UpdatePostprocTextures(width, height);
   // Update screen depth renderbuffers
-  postproc_shader.UpdateScreenRenderbuffers(width, height);
+  postproc_shader.UpdatePostprocRenderbuffers(width, height);
   // Update differential rendering stencil renderbuffers
   diff_shader.UpdateObjDiffRenderbuffer(width, height);
   // Update differential rendering framebuffer textures

@@ -5,6 +5,11 @@
 namespace shader {
 class PostprocShader : public Shader {
  public:
+  enum class PostprocTextureTypes {
+    kOriginal,
+    kHdr,
+  };
+
   enum Effects {
     kEffectImgAbs,
     kEffectLaplacian,
@@ -41,13 +46,14 @@ class PostprocShader : public Shader {
 
   /* GL Drawing Methods */
 
-  void UpdateScreenTextures(const GLsizei width, const GLsizei height);
+  void UpdatePostprocTextures(const GLsizei width, const GLsizei height);
 
-  void UpdateScreenRenderbuffers(const GLsizei width, const GLsizei height);
+  void UpdatePostprocRenderbuffers(const GLsizei width, const GLsizei height);
 
-  void UseScreenFramebuffer(const int screen_idx = 0);
+  void UsePostprocFramebuffer();
 
-  void Draw();
+  void Draw(const PostprocTextureTypes postproc_tex_type =
+                PostprocTextureTypes::kOriginal);
 
   /* State Updaters */
 
@@ -70,36 +76,40 @@ class PostprocShader : public Shader {
 
   std::string GetPostprocInputsBufferName() const;
 
-  std::string GetScreenFramebufferName(const int screen_idx) const;
+  std::string GetScreenFramebufferName() const;
 
   std::string GetQuadVertexArrayGroupName() const;
 
-  std::string GetScreenTextureName(const int screen_idx) const;
+  std::string GetScreenTextureName(
+      const PostprocTextureTypes postproc_tex_type) const;
 
-  std::string GetScreenTextureUnitName(const int screen_idx) const;
+  std::string GetScreenTextureUnitName(
+      const PostprocTextureTypes postproc_tex_type) const;
 
-  std::string GetScreenDepthRenderbufferName(const int screen_idx) const;
+  std::string GetScreenDepthRenderbufferName(
+      const PostprocTextureTypes postproc_tex_type) const;
 
   std::string GetPostprocInputsUniformBlockName() const;
 
+  /* Type Conversions */
+
+  std::string PostprocTextureTypeToName(
+      const PostprocTextureTypes postproc_tex_type) const;
+
+  int PostprocTextureTypeToNum(
+      const PostprocTextureTypes postproc_tex_type) const;
+
  private:
-  /* Constants */
-
-  static const int kNumFramebuffers;
-  static const int kNumMultipass;
-
   /* Models */
-
   as::Model quad_model_;
 
   /* States */
-
   PostprocInputs postproc_inputs_;
 
   /* GL Drawing Methods */
 
   void SetTextureUnitIdxs();
 
-  void DrawScreenWithTexture(const int tex_idx);
+  void DrawToTexture(const PostprocTextureTypes postproc_tex_type);
 };
 }  // namespace shader

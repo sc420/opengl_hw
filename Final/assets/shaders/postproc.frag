@@ -46,9 +46,8 @@ postproc_inputs;
  * Textures
  ******************************************************************************/
 
-uniform sampler2D screen_tex;
-uniform sampler2D multipass_tex1;
-uniform sampler2D multipass_tex2;
+uniform sampler2D original_tex;
+uniform sampler2D hdr_tex;
 
 /*******************************************************************************
  * Inputs
@@ -66,13 +65,13 @@ layout(location = 0) out vec4 fs_color;
  * Texture Handlers
  ******************************************************************************/
 
-vec4 GetTexel(vec2 coord) { return texture(screen_tex, coord); }
+vec4 GetTexel(vec2 coord) { return texture(original_tex, coord); }
 
 vec4 GetMultipassTexel(sampler2D tex, vec2 coord) {
   return texture(tex, coord);
 }
 
-vec2 GetTextureSize() { return textureSize(screen_tex, 0); }
+vec2 GetTextureSize() { return textureSize(original_tex, 0); }
 
 /*******************************************************************************
  * Display Mode Handlers
@@ -318,15 +317,10 @@ vec4 CalcBloomEffect() {
     return 0.8f * GetTexel(vs_tex_coords) +
            0.5f * CalcBrightness(GetTexel(vs_tex_coords));
   } else if (pass_idx < 1 + kNumMultipass * 2) {
-    const bool horizontal = (pass_idx % 2 == 0);
-    if ((pass_idx + 1) % 2 == 0) {
-      return CalcGaussianBlur(multipass_tex1, horizontal);
-    } else {
-      return CalcGaussianBlur(multipass_tex2, horizontal);
-    }
+    return CalcGaussianBlur(hdr_tex, true);
   } else {
     const vec4 orig_color = GetTexel(vs_tex_coords);
-    const vec4 blurred_color = GetMultipassTexel(multipass_tex1, vs_tex_coords);
+    const vec4 blurred_color = GetMultipassTexel(hdr_tex, vs_tex_coords);
     return CalcBloomEffectMixedColor(orig_color, blurred_color);
   }
 }
@@ -621,7 +615,7 @@ vec4 GlitchShaderB(vec2 fragCoord) {
 
   float wow = clamp(mod(noise(iTime + uv.y), 1.0), 0.0, 1.0) * 2.0 - 1.0;
   vec3 finalColor;
-  finalColor += distort(screen_tex, uv, 4.0);
+  finalColor += distort(original_tex, uv, 4.0);
   fragColor = vec4(finalColor, 1.0);
 
   return fragColor;
