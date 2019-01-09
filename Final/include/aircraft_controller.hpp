@@ -21,6 +21,11 @@ class AircraftController {
 
   float GetSpeed() const;
 
+  void SetWind(const glm::vec3 &drift_dir_wind, const float speed_wind,
+               const glm::vec3 &drift_dir_wind_adjust_factor,
+               const float speed_wind_adjust_factor,
+               const glm::vec3 &max_drift_dir_wind, const float max_speed_wind);
+
   void AddDriftDir(const glm::vec3 &add_drift_dir);
 
   void AddSpeed(const float add_speed);
@@ -28,6 +33,10 @@ class AircraftController {
   void Update();
 
  private:
+  std::random_device rand_device_;
+  std::mt19937 rand_engine_;
+  std::uniform_real_distribution<float> distrib_;
+
   glm::vec3 pos_;
   // Quaternion format
   glm::vec3 dir_;
@@ -53,6 +62,16 @@ class AircraftController {
   glm::vec3 drift_dir_bounce_force_;
   float speed_bounce_force_;
 
+  /* Wind */
+  glm::vec3 drift_dir_wind_;
+  float speed_wind_;
+
+  glm::vec3 drift_dir_wind_adjust_factor_;
+  float speed_wind_adjust_factor_;
+
+  glm::vec3 max_drift_dir_wind_;
+  float max_speed_wind_;
+
   glm::vec3 CalcDriftDirBounceForce() const;
 
   float CalcSpeedBounceForce() const;
@@ -62,5 +81,9 @@ class AircraftController {
   float CalcSpeedDiff() const;
 
   glm::mat4 CalcRotMatrix(const glm::vec3 &angles) const;
+
+  /* Random Numbers */
+
+  glm::vec3 GenRand();
 };
 }  // namespace ctrl

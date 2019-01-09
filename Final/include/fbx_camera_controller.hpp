@@ -30,6 +30,11 @@ class FbxCameraController {
 
   void SetPreferScaling(const glm::vec3 &prefer_scaling);
 
+  void SetWind(const glm::vec3 &pos_wind, const glm::vec3 &rot_wind,
+               const glm::vec3 &pos_wind_adjust_factor,
+               const glm::vec3 &rot_wind_adjust_factor,
+               const glm::vec3 &max_pos_wind, const glm::vec3 &max_rot_wind);
+
   void AddPos(const glm::vec3 &add_pos);
 
   void AddRot(const glm::vec3 &add_rot);
@@ -39,6 +44,10 @@ class FbxCameraController {
   void Update();
 
  private:
+  std::random_device rand_device_;
+  std::mt19937 rand_engine_;
+  std::uniform_real_distribution<float> distrib_;
+
   glm::vec3 pos_;
   glm::vec3 rot_;
   glm::vec3 scaling_;
@@ -67,6 +76,16 @@ class FbxCameraController {
   glm::vec3 rot_bounce_force_;
   glm::vec3 scaling_bounce_force_;
 
+  /* Wind */
+  glm::vec3 pos_wind_;
+  glm::vec3 rot_wind_;
+
+  glm::vec3 pos_wind_adjust_factor_;
+  glm::vec3 rot_wind_adjust_factor_;
+
+  glm::vec3 max_pos_wind_;
+  glm::vec3 max_rot_wind_;
+
   glm::vec3 CalcPosBounceForce() const;
 
   glm::vec3 CalcRotBounceForce() const;
@@ -80,5 +99,9 @@ class FbxCameraController {
   glm::vec3 CalcScalingDiff() const;
 
   glm::mat4 CalcRotMatrix(const glm::vec3 &angles) const;
+
+  /* Random Numbers */
+
+  glm::vec3 GenRand();
 };
 }  // namespace ctrl

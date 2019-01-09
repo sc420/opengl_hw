@@ -28,7 +28,16 @@ ctrl::FbxCameraController::FbxCameraController(
       scaling_change_decay_(scaling_change_decay),
       pos_bounce_force_(pos_bounce_force),
       rot_bounce_force_(rot_bounce_force),
-      scaling_bounce_force_(scaling_bounce_force) {}
+      scaling_bounce_force_(scaling_bounce_force),
+      pos_wind_(glm::vec3(0.0f)),
+      rot_wind_(glm::vec3(0.0f)),
+      pos_wind_adjust_factor_(glm::vec3(0.0f)),
+      rot_wind_adjust_factor_(glm::vec3(0.0f)),
+      max_pos_wind_(glm::vec3(0.0f)),
+      max_rot_wind_(glm::vec3(0.0f)) {
+  rand_engine_ = std::mt19937(rand_device_());
+  distrib_ = std::uniform_real_distribution<float>(-1.0f, 1.0f);
+}
 
 glm::vec3 ctrl::FbxCameraController::GetPos() const { return pos_; }
 
@@ -61,6 +70,20 @@ void ctrl::FbxCameraController::SetPreferScaling(
   prefer_scaling_ = prefer_scaling;
 }
 
+void ctrl::FbxCameraController::SetWind(const glm::vec3 &pos_wind,
+                                        const glm::vec3 &rot_wind,
+                                        const glm::vec3 &pos_wind_adjust_factor,
+                                        const glm::vec3 &rot_wind_adjust_factor,
+                                        const glm::vec3 &max_pos_wind,
+                                        const glm::vec3 &max_rot_wind) {
+  pos_wind_ = pos_wind;
+  rot_wind_ = rot_wind;
+  pos_wind_adjust_factor_ = pos_wind_adjust_factor;
+  rot_wind_adjust_factor_ = rot_wind_adjust_factor;
+  max_pos_wind_ = max_pos_wind;
+  max_rot_wind_ = max_rot_wind;
+}
+
 void ctrl::FbxCameraController::AddPos(const glm::vec3 &add_pos) {
   pos_change_ += pos_adjust_factor_ * add_pos;
   pos_change_ = glm::min(pos_change_, max_pos_change_);
@@ -80,6 +103,16 @@ void ctrl::FbxCameraController::AddScaling(const glm::vec3 &add_scaling) {
 }
 
 void ctrl::FbxCameraController::Update() {
+  // Update wind
+  pos_wind_ += GenRand() * pos_wind_adjust_factor_;
+  pos_wind_ = glm::clamp(pos_wind_, (-max_pos_wind_), max_pos_wind_);
+  rot_wind_ += GenRand() * rot_wind_adjust_factor_;
+  rot_wind_ = glm::clamp(rot_wind_, (-max_rot_wind_), max_rot_wind_);
+
+  // Add wind to the changes
+  pos_change_ += pos_wind_;
+  rot_change_ += rot_wind_;
+
   // Update values
   pos_ += pos_change_;
   rot_ += rot_change_;
@@ -129,4 +162,9 @@ glm::mat4 ctrl::FbxCameraController::CalcRotMatrix(
   // TODO: Merge with other code
   const glm::quat quaternion = glm::quat(angles);
   return glm::mat4_cast(quaternion);
+}
+
+glm::vec3 ctrl::FbxCameraController::GenRand() {
+  return glm::vec3(distrib_(rand_engine_), distrib_(rand_engine_),
+                   distrib_(rand_engine_));
 }

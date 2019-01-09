@@ -22,7 +22,16 @@ ctrl::AircraftController::AircraftController(
       drift_dir_change_decay_(drift_dir_change_decay),
       speed_change_decay_(speed_change_decay),
       drift_dir_bounce_force_(drift_dir_bounce_force),
-      speed_bounce_force_(speed_bounce_force) {}
+      speed_bounce_force_(speed_bounce_force),
+      drift_dir_wind_(glm::vec3(0.0f)),
+      speed_wind_(0.0f),
+      drift_dir_wind_adjust_factor_(glm::vec3(0.0f)),
+      speed_wind_adjust_factor_(0.0f),
+      max_drift_dir_wind_(glm::vec3(0.0f)),
+      max_speed_wind_(0.0f) {
+  rand_engine_ = std::mt19937(rand_device_());
+  distrib_ = std::uniform_real_distribution<float>(-1.0f, 1.0f);
+}
 
 glm::vec3 ctrl::AircraftController::GetPos() const { return pos_; }
 
@@ -31,6 +40,19 @@ glm::vec3 ctrl::AircraftController::GetDir() const { return dir_; }
 glm::vec3 ctrl::AircraftController::GetDriftDir() const { return drift_dir_; }
 
 float ctrl::AircraftController::GetSpeed() const { return speed_; }
+
+void ctrl::AircraftController::SetWind(
+    const glm::vec3 &drift_dir_wind, const float speed_wind,
+    const glm::vec3 &drift_dir_wind_adjust_factor,
+    const float speed_wind_adjust_factor, const glm::vec3 &max_drift_dir_wind,
+    const float max_speed_wind) {
+  drift_dir_wind_ = drift_dir_wind;
+  speed_wind_ = speed_wind;
+  drift_dir_wind_adjust_factor_ = drift_dir_wind_adjust_factor;
+  speed_wind_adjust_factor_ = speed_wind_adjust_factor;
+  max_drift_dir_wind_ = max_drift_dir_wind;
+  max_speed_wind_ = max_speed_wind;
+}
 
 void ctrl::AircraftController::AddDriftDir(const glm::vec3 &add_drift_dir) {
   drift_dir_change_ += drift_dir_adjust_factor_ * add_drift_dir;
@@ -45,6 +67,17 @@ void ctrl::AircraftController::AddSpeed(const float add_speed) {
 }
 
 void ctrl::AircraftController::Update() {
+  // Update wind
+  drift_dir_wind_ += GenRand() * drift_dir_wind_adjust_factor_;
+  drift_dir_wind_ =
+      glm::clamp(drift_dir_wind_, (-max_drift_dir_wind_), max_drift_dir_wind_);
+  speed_wind_ += GenRand().x * speed_wind_adjust_factor_;
+  speed_wind_ = glm::clamp(speed_wind_, (-max_speed_wind_), max_speed_wind_);
+
+  // Add wind to the changes
+  drift_dir_change_ += drift_dir_wind_;
+  speed_change_ += speed_wind_;
+
   // Update values
   drift_dir_ += drift_dir_change_;
   speed_ += speed_change_;
@@ -90,4 +123,10 @@ glm::mat4 ctrl::AircraftController::CalcRotMatrix(
   // TODO: Merge with other code
   const glm::quat quaternion = glm::quat(angles);
   return glm::mat4_cast(quaternion);
+}
+
+glm::vec3 ctrl::AircraftController::GenRand() {
+  // TODO: Merge with other code
+  return glm::vec3(distrib_(rand_engine_), distrib_(rand_engine_),
+                   distrib_(rand_engine_));
 }

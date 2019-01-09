@@ -32,7 +32,7 @@ static const auto kCameraZoomingStep = 1.0f;
 static const auto kTimerInterval = 10;
 /* Debug */
 static const auto kSeeFromLight = false;
-static const auto kUpdateCameraFromAircraftController = false;
+static const auto kUpdateCameraFromAircraftController = true;
 
 /*******************************************************************************
  * Camera States
@@ -205,6 +205,30 @@ void ConfigGL() {
   ConfigGLSettings();
   InitUiManager();
   InitShaders();
+}
+
+/*******************************************************************************
+ * Controller Initializations
+ ******************************************************************************/
+
+void InitFbxCameraController() {
+  fbx_camera_ctrl.SetWind(
+      // Position wind, Rotation wind
+      glm::vec3(0.0f), glm::vec3(0.0f),
+      // Adjust factors
+      glm::vec3(1e-2f), glm::vec3(1e-4f),
+      // Max wind
+      glm::vec3(1e-3f), glm::vec3(1e-5f));
+}
+
+void InitAircraftController() {
+  aircraft_ctrl.SetWind(
+      // Drift direction wind, speed wind
+      glm::vec3(0.0f), 0.0f,
+      // Adjust factors
+      glm::vec3(0.0f, 1e-8f, 0.0f), 1e-7f,
+      // Max wind
+      glm::vec3(1e-6f), 1e-5f);
 }
 
 /*******************************************************************************
@@ -861,6 +885,8 @@ int main(int argc, char *argv[]) {
     InitGLUT(argc, argv);
     as::InitGLEW();
     ConfigGL();
+    InitFbxCameraController();
+    InitAircraftController();
     InitFbx();
     InitImGui();
     RegisterGLUTCallbacks();
