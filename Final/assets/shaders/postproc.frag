@@ -118,8 +118,10 @@ int CalcDisplayMode() {
 // https://learnopengl.com/Advanced-Lighting/Bloom
 // https://en.wikipedia.org/wiki/Relative_luminance
 vec4 ColorToHdr(const vec4 color) {
+  const float kBrightnessScaling = 1.5f;
+
   const float brightness = dot(vec3(color), vec3(0.2126f, 0.7152f, 0.0722f));
-  return 1.5f * brightness * color;
+  return kBrightnessScaling * brightness * color;
 }
 
 vec4 CalcCombiningBlurredHdr() {
