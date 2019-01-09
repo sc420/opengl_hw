@@ -28,6 +28,12 @@ std::string dto::SceneModel::GetVertexArrayGroupName() const {
 
 const as::Model &dto::SceneModel::GetModel() const { return model_; }
 
+glm::vec3 dto::SceneModel::GetTranslation() const { return translation_; }
+
+glm::vec3 dto::SceneModel::GetRotation() const { return rotation_; }
+
+glm::vec3 dto::SceneModel::GetScaling() const { return scaling_; }
+
 /*******************************************************************************
  * State Setters
  ******************************************************************************/

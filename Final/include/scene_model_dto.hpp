@@ -24,6 +24,12 @@ class SceneModel {
 
   const as::Model &GetModel() const;
 
+  glm::vec3 GetTranslation() const;
+
+  glm::vec3 GetRotation() const;
+
+  glm::vec3 GetScaling() const;
+
   /* State Setters */
 
   void SetTranslation(const glm::vec3 &translation);

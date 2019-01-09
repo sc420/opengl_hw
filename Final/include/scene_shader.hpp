@@ -67,6 +67,8 @@ class SceneShader : public Shader {
 
   const std::map<std::string, dto::SceneModel> &GetSceneModels() const;
 
+  dto::SceneModel &GetSceneModel(const std::string &scene_model_name);
+
   /* GL Initializations */
 
   void Init();

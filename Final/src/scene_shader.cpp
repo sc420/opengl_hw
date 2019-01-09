@@ -30,6 +30,15 @@ const std::map<std::string, dto::SceneModel>
   return scene_models_;
 }
 
+dto::SceneModel &shader::SceneShader::GetSceneModel(
+    const std::string &scene_model_name) {
+  if (scene_models_.count(scene_model_name) == 0) {
+    throw std::runtime_error("Could not find scene model name '" +
+                             scene_model_name + "'");
+  }
+  return scene_models_.at(scene_model_name);
+}
+
 /*******************************************************************************
  * GL Initializations
  ******************************************************************************/
@@ -113,15 +122,15 @@ dto::GlobalTrans shader::SceneShader::GetGlobalTrans() const {
 }
 
 glm::vec3 shader::SceneShader::GetLightPos() const {
-  return glm::vec3(-20.0f, 30.0f, 30.0f);
+  return glm::vec3(25.0f, 50.0f, 100.0f);
 }
 
 glm::vec3 shader::SceneShader::GetLightAngles() const {
-  return glm::radians(glm::vec3(-30.0f, -30.0f, 0.0f));
+  return glm::radians(glm::vec3(330.0f, 14.0f, 0.0f));
 }
 
 glm::mat4 shader::SceneShader::GetLightProjection() const {
-  return glm::ortho(-15.0f, 15.0f, -15.0f, 15.0f, 1e-3f, 1e3f);
+  return glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 1e-3f, 1e3f);
 }
 
 /*******************************************************************************
@@ -256,6 +265,14 @@ void shader::SceneShader::LoadModels() {
           aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
           aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
       "surround", 3, gl_managers_);
+  // Electric tower
+  scene_models_["tower"] = dto::SceneModel(
+      "tower", "assets/models/tower/tower.obj",
+      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
+          aiProcess_Triangulate | aiProcess_GenNormals |
+          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
+          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
+      "tower", 3, gl_managers_);
 }
 
 void shader::SceneShader::InitModels() {
@@ -283,6 +300,14 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("surround").SetLightColor(glm::vec3(1.0f));
   scene_models_.at("surround").SetLightIntensity(glm::vec3(0.3f, 0.0f, 0.0f));
   scene_models_.at("surround").SetUseEnvMap(false);
+  // Electric tower
+  scene_models_.at("tower").SetTranslation(glm::vec3(13.6f, 1.8f, -3.8f));
+  scene_models_.at("tower").SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+  scene_models_.at("tower").SetScaling(5e-2f * glm::vec3(1.0f));
+  scene_models_.at("tower").SetLightPos(GetLightPos());
+  scene_models_.at("tower").SetLightColor(glm::vec3(1.0f));
+  scene_models_.at("tower").SetLightIntensity(glm::vec3(1.0f, 1.0f, 0.0f));
+  scene_models_.at("tower").SetUseEnvMap(false);
 
   /* Instancing */
 
@@ -294,6 +319,8 @@ void shader::SceneShader::InitModels() {
       glm::vec3(1e4f * -45.0f, 0.0f, 1e4f * 45.0f),
       glm::vec3(1e4f * 45.0f, 0.0f, 1e4f * -45.0f),
       glm::vec3(1e4f * 45.0f, 0.0f, 1e4f * 45.0f)});
+  scene_models_.at("tower").SetInstancingTranslations(
+      std::vector<glm::vec3>{glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 80.0f)});
 }
 
 /*******************************************************************************
