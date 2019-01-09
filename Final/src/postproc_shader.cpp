@@ -38,12 +38,14 @@ void shader::PostprocShader::InitFramebuffers() {
   // Create framebuffer
   for (const PostprocFramebufferTypes postproc_framebuffer_type :
        postproc_framebuffer_types) {
-    // Get names
-    const std::string framebuffer_name =
-        GetPostprocFramebufferName(postproc_framebuffer_type);
+    for (int scaling_idx = 0; scaling_idx < kNumBloomScaling; scaling_idx++) {
+      // Get names
+      const std::string framebuffer_name =
+          GetPostprocFramebufferName(postproc_framebuffer_type, scaling_idx);
 
-    // Generate framebuffer
-    framebuffer_manager.GenFramebuffer(framebuffer_name);
+      // Generate framebuffer
+      framebuffer_manager.GenFramebuffer(framebuffer_name);
+    }
   }
 }
 
@@ -122,7 +124,7 @@ void shader::PostprocShader::UpdatePostprocTextures(const GLsizei width,
            postproc_framebuffer_types) {
         // Get names
         const std::string framebuffer_name =
-            GetPostprocFramebufferName(postproc_framebuffer_type);
+            GetPostprocFramebufferName(postproc_framebuffer_type, scaling_idx);
 
         framebuffer_manager.AttachTexture2DToFramebuffer(
             framebuffer_name, tex_name, GL_FRAMEBUFFER,
@@ -160,36 +162,46 @@ void shader::PostprocShader::UpdatePostprocRenderbuffer(const GLsizei width,
 
   for (const PostprocFramebufferTypes postproc_framebuffer_type :
        postproc_framebuffer_types) {
-    // Get names
-    const std::string framebuffer_name =
-        GetPostprocFramebufferName(postproc_framebuffer_type);
-    const std::string renderbuffer_name =
-        GetPostprocDepthRenderbufferName(postproc_framebuffer_type);
+    // Update each scaling renderbuffer
+    GLsizei cur_width = width;
+    GLsizei cur_height = height;
+    for (int scaling_idx = 0; scaling_idx < kNumBloomScaling; scaling_idx++) {
+      // Get names
+      const std::string framebuffer_name =
+          GetPostprocFramebufferName(postproc_framebuffer_type, scaling_idx);
+      const std::string renderbuffer_name = GetPostprocDepthRenderbufferName(
+          postproc_framebuffer_type, scaling_idx);
 
-    // Check whether to delete old renderbuffer
-    if (framebuffer_manager.HasRenderbuffer(renderbuffer_name)) {
-      framebuffer_manager.DeleteRenderbuffer(renderbuffer_name);
+      // Check whether to delete old renderbuffer
+      if (framebuffer_manager.HasRenderbuffer(renderbuffer_name)) {
+        framebuffer_manager.DeleteRenderbuffer(renderbuffer_name);
+      }
+      // Create renderbuffers
+      framebuffer_manager.GenRenderbuffer(renderbuffer_name);
+      // Initialize renderbuffers
+      framebuffer_manager.InitRenderbuffer(renderbuffer_name, GL_RENDERBUFFER,
+                                           GL_DEPTH_COMPONENT, cur_width,
+                                           cur_height);
+      // Attach renderbuffers to framebuffers
+      framebuffer_manager.AttachRenderbufferToFramebuffer(
+          framebuffer_name, renderbuffer_name, GL_FRAMEBUFFER,
+          GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER);
+
+      cur_width /= 2;
+      cur_height /= 2;
     }
-    // Create renderbuffers
-    framebuffer_manager.GenRenderbuffer(renderbuffer_name);
-    // Initialize renderbuffers
-    framebuffer_manager.InitRenderbuffer(renderbuffer_name, GL_RENDERBUFFER,
-                                         GL_DEPTH_COMPONENT, width, height);
-    // Attach renderbuffers to framebuffers
-    framebuffer_manager.AttachRenderbufferToFramebuffer(
-        framebuffer_name, renderbuffer_name, GL_FRAMEBUFFER,
-        GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER);
   }
 }
 
 void shader::PostprocShader::UsePostprocFramebuffer(
-    const PostprocFramebufferTypes postproc_framebuffer_type) {
+    const PostprocFramebufferTypes postproc_framebuffer_type,
+    const int scaling_idx) {
   // Get managers
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
   // Get names
   const std::string framebuffer_name =
-      GetPostprocFramebufferName(postproc_framebuffer_type);
+      GetPostprocFramebufferName(postproc_framebuffer_type, scaling_idx);
 
   // Bind the framebuffer
   framebuffer_manager.BindFramebuffer(framebuffer_name, GL_FRAMEBUFFER);
@@ -202,7 +214,7 @@ void shader::PostprocShader::UseDefaultPostprocTextures() {
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   // Get names
   const std::string framebuffer_name =
-      GetPostprocFramebufferName(PostprocFramebufferTypes::kDrawOriginal);
+      GetPostprocFramebufferName(PostprocFramebufferTypes::kDrawOriginal, 0);
   const std::string original_tex_name =
       GetPostprocTextureName(PostprocTextureTypes::kOriginal2, 0);
   const std::string hdr_tex_name =
@@ -230,7 +242,7 @@ void shader::PostprocShader::UsePostprocTexture(
   as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
   // Get names
   const std::string framebuffer_name =
-      GetPostprocFramebufferName(postproc_framebuffer_type);
+      GetPostprocFramebufferName(postproc_framebuffer_type, scaling_idx);
   const std::string tex_name =
       GetPostprocTextureName(postproc_tex_type, scaling_idx);
   // Get indexes
@@ -274,21 +286,19 @@ void shader::PostprocShader::DrawBloom(const glm::ivec2 &window_size) {
       num_scaling = 1;
     }
 
-    // Use the framebuffer
-    UsePostprocFramebuffer(framebuffer_type);
-    as::ClearColorBuffer();
-    as::ClearDepthBuffer();
-
     // Check whether to set all scaling texture unit indexes
     if (framebuffer_type == PostprocFramebufferTypes::kCombining) {
       SetScalingTextureUnitIdxs(pass_idx);
     }
 
-    SetScalingTextureUnitIdxs(pass_idx);
-
     // Draw for each scaling
     glm::ivec2 cur_size = window_size;
     for (int scaling_idx = 0; scaling_idx < num_scaling; scaling_idx++) {
+      // Use the framebuffer
+      UsePostprocFramebuffer(framebuffer_type, scaling_idx);
+      as::ClearColorBuffer();
+      as::ClearDepthBuffer();
+
       // Update pass index
       UpdatePassIdx(pass_idx);
       // Update scaling index
@@ -310,8 +320,6 @@ void shader::PostprocShader::DrawBloom(const glm::ivec2 &window_size) {
 
       // Draw
       DrawToTextures();
-
-      UseDefaultFramebuffer();
 
       // Shrink window size
       cur_size /= 2;
@@ -385,9 +393,11 @@ std::string shader::PostprocShader::GetPostprocInputsBufferName() const {
 }
 
 std::string shader::PostprocShader::GetPostprocFramebufferName(
-    const PostprocFramebufferTypes postproc_framebuffer_type) const {
+    const PostprocFramebufferTypes postproc_framebuffer_type,
+    const int scaling_idx) const {
   return GetProgramName() + "framebuffer" +
-         PostprocFramebufferTypeToName(postproc_framebuffer_type);
+         PostprocFramebufferTypeToName(postproc_framebuffer_type) +
+         "/scaling-" + std::to_string(scaling_idx);
 }
 
 std::string shader::PostprocShader::GetQuadVertexArrayGroupName() const {
@@ -409,9 +419,11 @@ std::string shader::PostprocShader::GetPostprocTextureUnitName(
 }
 
 std::string shader::PostprocShader::GetPostprocDepthRenderbufferName(
-    const PostprocFramebufferTypes postproc_framebuffer_type) const {
+    const PostprocFramebufferTypes postproc_framebuffer_type,
+    const int scaling_idx) const {
   return GetProgramName() + "/renderbuffer/postproc/" +
-         PostprocFramebufferTypeToName(postproc_framebuffer_type);
+         PostprocFramebufferTypeToName(postproc_framebuffer_type) +
+         "/scaling-" + std::to_string(scaling_idx);
 }
 
 std::string shader::PostprocShader::GetPostprocInputsUniformBlockName() const {

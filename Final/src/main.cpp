@@ -508,7 +508,7 @@ void GLUTDisplayCallback() {
 
   // Draw the scene on postproc framebuffer "draw original"
   postproc_shader.UsePostprocFramebuffer(
-      shader::PostprocShader::PostprocFramebufferTypes::kDrawOriginal);
+      shader::PostprocShader::PostprocFramebufferTypes::kDrawOriginal, 0);
   postproc_shader.UseDefaultPostprocTextures();
   as::ClearColorBuffer();
   as::ClearDepthBuffer();

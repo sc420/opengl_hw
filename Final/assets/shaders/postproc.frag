@@ -119,7 +119,7 @@ int CalcDisplayMode() {
 // https://en.wikipedia.org/wiki/Relative_luminance
 vec4 ColorToHdr(const vec4 color) {
   const float brightness = dot(vec3(color), vec3(0.2126f, 0.7152f, 0.0722f));
-  return brightness * color;
+  return 1.5f * brightness * color;
 }
 
 vec4 CalcCombiningBlurredHdr() {

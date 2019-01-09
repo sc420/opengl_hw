@@ -62,7 +62,8 @@ class PostprocShader : public Shader {
   void UpdatePostprocRenderbuffer(const GLsizei width, const GLsizei height);
 
   void UsePostprocFramebuffer(
-      const PostprocFramebufferTypes postproc_framebuffer_type);
+      const PostprocFramebufferTypes postproc_framebuffer_type,
+      const int scaling_idx);
 
   void UseDefaultPostprocTextures();
 
@@ -98,7 +99,8 @@ class PostprocShader : public Shader {
   std::string GetPostprocInputsBufferName() const;
 
   std::string GetPostprocFramebufferName(
-      const PostprocFramebufferTypes postproc_framebuffer_type) const;
+      const PostprocFramebufferTypes postproc_framebuffer_type,
+      const int scaling_idx) const;
 
   std::string GetQuadVertexArrayGroupName() const;
 
@@ -111,7 +113,8 @@ class PostprocShader : public Shader {
       const int scaling_idx) const;
 
   std::string GetPostprocDepthRenderbufferName(
-      const PostprocFramebufferTypes postproc_framebuffer_type) const;
+      const PostprocFramebufferTypes postproc_framebuffer_type,
+      const int scaling_idx) const;
 
   std::string GetPostprocInputsUniformBlockName() const;
 
