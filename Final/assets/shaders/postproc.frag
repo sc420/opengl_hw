@@ -702,14 +702,16 @@ vec4 CalcInteractivePostproc() {
 
 void main() {
   switch (postproc_inputs.pass_idx) {
+      /* The color is directly drawn to the postproc framebuffer at pass index 0
+       * by other shaders */
     case 1: {
       /* Draw original and HDR (Multiple scaling) */
       fs_original_color = CalcOriginal();
-      fs_hdr_color = kRedColor;
+      fs_hdr_color = ColorToHdr(CalcOriginal());
     } break;
     case 2: {
       /* Blur HDR (Multiple scaling) */
-      fs_original_color = CalcOriginal();
+      fs_original_color = GetTexel(hdr_tex, vs_tex_coords);
       fs_hdr_color = kRedColor;
     } break;
     case 3: {
