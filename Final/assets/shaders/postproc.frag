@@ -711,12 +711,12 @@ void main() {
     } break;
     case 2: {
       /* Blur HDR (Multiple scaling) */
-      fs_original_color = GetTexel(hdr_tex, vs_tex_coords);
-      fs_hdr_color = kRedColor;
+      fs_original_color = CalcOriginal();
+      fs_hdr_color = CalcGaussianBlur(hdr_tex, true);
     } break;
     case 3: {
       /* Combine original and blurred HDR (Single pass) */
-      fs_original_color = CalcOriginal();
+      fs_original_color = GetTexel(hdr_tex, vs_tex_coords);
       fs_hdr_color = kRedColor;
     } break;
     case 4: {
