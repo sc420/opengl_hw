@@ -300,10 +300,11 @@ vec4 CalcCombiningBlurredHdr() {
  * Post-processing / Bloom Effect
  ******************************************************************************/
 
+// Weight is generated from http://dev.theomader.com/gaussian-kernel-calculator/
 vec4 CalcGaussianBlur(const sampler2D tex, const bool horizontal) {
-  const int len = 5;
-  const float weight[len] =
-      float[](0.227027f, 0.1945946f, 0.1216216f, 0.054054f, 0.016216f);
+  const int len = 2;
+  // Sigma = 1
+  const float weight[len] = float[](0.44198, 0.27901f);
   const vec2 window_size = GetTextureSize(tex);
   vec4 sum = weight[0] * GetTexel(tex, vs_tex_coords);
   if (horizontal) {
@@ -319,7 +320,7 @@ vec4 CalcGaussianBlur(const sampler2D tex, const bool horizontal) {
       sum += weight[y] * GetTexel(tex, vs_tex_coords - ofs);
     }
   }
-  return vec4(vec3(sum), 1.0f);
+  return sum;
 }
 
 // vec4 CalcBloomEffectMixedColor(vec4 orig_color, vec4 blurred_color) {
