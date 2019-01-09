@@ -527,7 +527,7 @@ void GLUTDisplayCallback() {
 
   // Draw bloom effects on postproc framebuffers "draw scaling", "blur scaling"
   // and "combining"
-  // postproc_shader.DrawBloom(window_size);
+  postproc_shader.DrawBloom(window_size);
 
   // Draw post-processing effects on default framebuffer
   scene_shader.UseDefaultFramebuffer();

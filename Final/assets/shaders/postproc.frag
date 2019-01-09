@@ -702,35 +702,29 @@ vec4 CalcInteractivePostproc() {
 
 void main() {
   switch (postproc_inputs.pass_idx) {
-    case 0: {
-      /* Draw original and HDR (Multiple scaling) */
-      fs_original_color = kRedColor;
-      fs_hdr_color = kRedColor;
-    } break;
     case 1: {
-      /* Blur HDR (Multiple scaling) */
+      /* Draw original and HDR (Multiple scaling) */
       fs_original_color = CalcOriginal();
-      fs_hdr_color = CalcGaussianBlur(hdr_tex, true);
-
-      fs_original_color = kRedColor;
       fs_hdr_color = kRedColor;
     } break;
     case 2: {
-      /* Combine original and blurred HDR (Single pass) */
-      fs_original_color = kErrorColor;
-      fs_hdr_color = kErrorColor;
+      /* Blur HDR (Multiple scaling) */
+      fs_original_color = CalcOriginal();
+      fs_hdr_color = kRedColor;
     } break;
     case 3: {
-      /* Draw post-processing effects (Single pass) */
-      fs_original_color = kRedColor;
+      /* Combine original and blurred HDR (Single pass) */
+      fs_original_color = CalcOriginal();
       fs_hdr_color = kRedColor;
+    } break;
+    case 4: {
+      /* Draw post-processing effects (Single pass) */
+      fs_original_color = kErrorColor;
+      fs_hdr_color = kErrorColor;
     } break;
     default: {
       fs_original_color = kErrorColor;
       fs_hdr_color = kErrorColor;
     }
   }
-
-  fs_original_color = CalcOriginal();
-  fs_hdr_color = kErrorColor;
 }
