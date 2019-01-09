@@ -14,6 +14,7 @@
 #include "postproc_shader.hpp"
 #include "scene_shader.hpp"
 #include "skybox_shader.hpp"
+#include "sound_controller.hpp"
 
 /*******************************************************************************
  * Constants
@@ -92,6 +93,7 @@ ctrl::AircraftController aircraft_ctrl(
     // Bounce force
     glm::vec3(1e1f), 1.0f);
 ctrl::FbxController fbx_ctrl;
+ctrl::SoundController sound_ctrl;
 
 /*******************************************************************************
  * Random Number Generators
@@ -220,6 +222,16 @@ void ConfigGL() {
   ConfigGLSettings();
   InitUiManager();
   InitShaders();
+}
+
+/*******************************************************************************
+ * Controller Initializations
+ ******************************************************************************/
+
+void InitSoundController() {
+  sound_ctrl.Register3DSound("helicopter_hovering",
+                             "assets/sound/helicopter-hovering-01.wav",
+                             glm::vec3(0.0f, 0.0f, 1.0f), true);
 }
 
 /*******************************************************************************
@@ -788,6 +800,12 @@ void GLUTTimerCallback(const int val) {
   fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(), fbx_camera_ctrl.GetRot(),
                              fbx_camera_ctrl.GetScaling());
 
+  // Update sound controller
+  sound_ctrl.Set3DSoundPosition(
+      "helicopter_hovering",
+      glm::pow(glm::vec3(0.2f * fbx_camera_ctrl.GetPos().x, 0.0f, 0.0f),
+               glm::vec3(2.0f)));
+
   // Update camera shaking wind
   UpdateCameraShakingWind();
 
@@ -972,6 +990,7 @@ int main(int argc, char *argv[]) {
     ConfigGL();
     InitFbx();
     InitImGui();
+    InitSoundController();
     RegisterGLUTCallbacks();
     CreateGLUTMenus();
     EnterGLUTLoop();

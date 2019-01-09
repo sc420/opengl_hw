@@ -147,6 +147,9 @@
     <ClInclude Include="include\skybox_shader.hpp">
       <Filter>Final\include</Filter>
     </ClInclude>
+    <ClInclude Include="include\sound_controller.hpp">
+      <Filter>Final\include</Filter>
+    </ClInclude>
     <ClInclude Include="include\trans_dto.hpp">
       <Filter>Final\include</Filter>
     </ClInclude>
@@ -285,6 +288,9 @@
       <Filter>Final\src</Filter>
     </ClCompile>
     <ClCompile Include="src\skybox_shader.cpp">
+      <Filter>Final\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sound_controller.cpp">
       <Filter>Final\src</Filter>
     </ClCompile>
   </ItemGroup>

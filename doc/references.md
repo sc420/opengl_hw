@@ -28,6 +28,7 @@
 * [tinyobjloader](https://github.com/syoyo/tinyobjloader): 1.0.6
 * [ImGui](https://github.com/ocornut/imgui): 1.66
 * [FbxSdk](https://www.autodesk.com/products/fbx/overview): 2019.0
+* [irrKlang](https://www.ambiera.com/irrklang/): 1.6.0 x32
 
 ## Assets
 
@@ -38,3 +39,4 @@
 * [HDRI Haven](https://hdrihaven.com/)
 * [Textures.com](www.textures.com)
 * [Skyboxes for download - Custom Map Makers](http://www.custommapmakers.org/skyboxes.php)
+* [SoundJay.com](https://www.soundjay.com/)
