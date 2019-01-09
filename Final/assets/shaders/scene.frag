@@ -114,6 +114,15 @@ vec3 GetTangentHalfwayDir() {
 }
 
 /*******************************************************************************
+ * Viewing Direction Calculations
+ ******************************************************************************/
+
+vec3 GetViewingDir() {
+  const vec3 view_dir = GetTangentViewDir();
+  return vs_tangent_lighting.tang_to_world_mat * (-view_dir);
+}
+
+/*******************************************************************************
  * Parallax Mapping
  ******************************************************************************/
 
@@ -263,6 +272,28 @@ vec4 GetEnvironmentMapColor() {
 }
 
 /*******************************************************************************
+ * Color Space Conversions
+ ******************************************************************************/
+
+// Reference: http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
+vec3 RgbToHsv(const vec3 c) {
+  const vec4 K = vec4(0.0f, -1.0f / 3.0f, 2.0f / 3.0f, -1.0f);
+  const vec4 p = c.g < c.b ? vec4(c.bg, K.wz) : vec4(c.gb, K.xy);
+  const vec4 q = c.r < p.x ? vec4(p.xyw, c.r) : vec4(c.r, p.yzx);
+
+  const float d = q.x - min(q.w, q.y);
+  const float e = 1.0e-10f;
+  return vec3(abs(q.z + (q.w - q.y) / (6.0f * d + e)), d / (q.x + e), q.x);
+}
+
+// Reference: http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl
+vec3 HsvToRgb(const vec3 c) {
+  const vec4 K = vec4(1.0f, 2.0f / 3.0f, 1.0f / 3.0f, 3.0f);
+  const vec3 p = abs(fract(c.xxx + K.xyz) * 6.0f - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0f, 1.0f), c.y);
+}
+
+/*******************************************************************************
  * Color Blending
  ******************************************************************************/
 
@@ -293,19 +324,39 @@ vec4 MixWithEnvMapColor() {
 
 // Reference: http://in2gpu.com/2014/07/22/create-fog-shader/
 vec4 MixWithFogColor() {
-  const vec4 kFogColor = vec4(0.5f, 0.5f, 0.5f, 1.0f);
-  const float kFogDensity = 0.03f;
+  const vec3 kFogColor = vec3(150.0f, 150.0f, 150.0f) / 255.0f;
+  const float kFogDensity = 0.02f;
+  const float kMixWithSkyboxRatio = 0.5f;
+  const float kMaxFogAdjust = 0.2f;
+  const float kFogDistExp = 0.005f;
+  const float kMinFogDistAdjust = 0.5f;
+
+  // Get original color
   const vec4 orig_color = MixWithEnvMapColor();
+
+  // Get skybox color
+  const vec4 skybox_color = texture(skybox_tex, GetViewingDir());
+  // Convert to HSV color space
+  const vec3 skybox_color_hsv = RgbToHsv(vec3(skybox_color));
 
   // Calculate range-based distance
   const float dist = length(vs_depth.camera_space_pos);
+
+  // Move the light of fog color into the hue of skybox color
+  vec3 fog_color_hsv = RgbToHsv(kFogColor);
+  fog_color_hsv.z +=
+      clamp(kMixWithSkyboxRatio * (skybox_color_hsv.z - fog_color_hsv.z),
+            (-kMaxFogAdjust), kMaxFogAdjust);
+  fog_color_hsv.z *=
+      clamp(1.0f - pow(1.0f - dist, kFogDistExp), kMinFogDistAdjust, 1.0f);
+  vec4 adjusted_fog_color = vec4(HsvToRgb(fog_color_hsv), 1.0f);
 
   // Calculate fog factor
   float fogFactor = 1.0f / exp((dist * kFogDensity) * (dist * kFogDensity));
   fogFactor = clamp(fogFactor, 0.0f, 1.0f);
 
-  // Mix the original color with fog color
-  return mix(kFogColor, orig_color, fogFactor);
+  // Mix the original color with the adjusted fog color
+  return mix(adjusted_fog_color, orig_color, fogFactor);
 }
 
 /*******************************************************************************

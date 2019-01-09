@@ -420,9 +420,9 @@ void GLUTDisplayCallback() {
   as::ClearColorBuffer();
   as::ClearDepthBuffer();
 
-  fbx_ctrl.Draw();
-  scene_shader.Draw();
   skybox_shader.Draw();
+  scene_shader.Draw();
+  fbx_ctrl.Draw();
 
   // Restore polygon mode
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
