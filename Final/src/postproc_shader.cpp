@@ -31,7 +31,8 @@ void shader::PostprocShader::InitFramebuffers() {
   const PostprocFramebufferTypes postproc_framebuffer_types[] = {
       PostprocFramebufferTypes::kDrawOriginal,
       PostprocFramebufferTypes::kDrawScaling,
-      PostprocFramebufferTypes::kBlurScaling,
+      PostprocFramebufferTypes::kBlurScalingHorizontal,
+      PostprocFramebufferTypes::kBlurScalingVertical,
       PostprocFramebufferTypes::kCombining};
 
   // Create framebuffer
@@ -70,7 +71,8 @@ void shader::PostprocShader::UpdatePostprocTextures(const GLsizei width,
   const PostprocFramebufferTypes postproc_framebuffer_types[] = {
       PostprocFramebufferTypes::kDrawOriginal,
       PostprocFramebufferTypes::kDrawScaling,
-      PostprocFramebufferTypes::kBlurScaling,
+      PostprocFramebufferTypes::kBlurScalingHorizontal,
+      PostprocFramebufferTypes::kBlurScalingVertical,
       PostprocFramebufferTypes::kCombining};
 
   // Set texture types to update
@@ -104,10 +106,11 @@ void shader::PostprocShader::UpdatePostprocTextures(const GLsizei width,
       texture_manager.GenTexture(tex_name);
       // Update texture
       texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, unit_name);
-      texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 1, GL_RGB8,
-                                    cur_width, cur_height);
+      texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, kNumMipmapLevels,
+                                    GL_BGRA, cur_width, cur_height);
       texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                         GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                                         GL_TEXTURE_MIN_FILTER,
+                                         GL_LINEAR_MIPMAP_LINEAR);
       texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
                                          GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
@@ -151,7 +154,8 @@ void shader::PostprocShader::UpdatePostprocRenderbuffer(const GLsizei width,
   const PostprocFramebufferTypes postproc_framebuffer_types[] = {
       PostprocFramebufferTypes::kDrawOriginal,
       PostprocFramebufferTypes::kDrawScaling,
-      PostprocFramebufferTypes::kBlurScaling,
+      PostprocFramebufferTypes::kBlurScalingHorizontal,
+      PostprocFramebufferTypes::kBlurScalingVertical,
       PostprocFramebufferTypes::kCombining};
 
   for (const PostprocFramebufferTypes postproc_framebuffer_type :
@@ -191,6 +195,32 @@ void shader::PostprocShader::UsePostprocFramebuffer(
   framebuffer_manager.BindFramebuffer(framebuffer_name, GL_FRAMEBUFFER);
 }
 
+void shader::PostprocShader::UseDefaultPostprocTextures() {
+  // Get managers
+  as::FramebufferManager &framebuffer_manager =
+      gl_managers_->GetFramebufferManager();
+  as::TextureManager &texture_manager = gl_managers_->GetTextureManager();
+  // Get names
+  const std::string framebuffer_name =
+      GetPostprocFramebufferName(PostprocFramebufferTypes::kDrawOriginal);
+  const std::string original_tex_name =
+      GetPostprocTextureName(PostprocTextureTypes::kOriginal2, 0);
+  const std::string hdr_tex_name =
+      GetPostprocTextureName(PostprocTextureTypes::kHdr2, 0);
+
+  // Bind the texture
+  texture_manager.BindTexture(original_tex_name);
+  texture_manager.BindTexture(hdr_tex_name);
+
+  // Attach the textures to the framebuffers
+  framebuffer_manager.AttachTexture2DToFramebuffer(
+      framebuffer_name, original_tex_name, GL_FRAMEBUFFER,
+      GL_COLOR_ATTACHMENT0 + 0, GL_TEXTURE_2D, 0);
+  framebuffer_manager.AttachTexture2DToFramebuffer(
+      framebuffer_name, hdr_tex_name, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + 1,
+      GL_TEXTURE_2D, 0);
+}
+
 void shader::PostprocShader::UsePostprocTexture(
     const PostprocFramebufferTypes postproc_framebuffer_type,
     const PostprocTextureTypes postproc_tex_type, const int scaling_idx) {
@@ -219,14 +249,16 @@ void shader::PostprocShader::UsePostprocTexture(
 void shader::PostprocShader::DrawBloom(const glm::ivec2 &window_size) {
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
-  for (int pass_idx = 1; pass_idx <= 3; pass_idx++) {
+  for (int pass_idx = 1; pass_idx <= 4; pass_idx++) {
     // Select framebuffer type
     PostprocFramebufferTypes framebuffer_type;
     if (pass_idx == 1) {
       framebuffer_type = PostprocFramebufferTypes::kDrawScaling;
     } else if (pass_idx == 2) {
-      framebuffer_type = PostprocFramebufferTypes::kBlurScaling;
+      framebuffer_type = PostprocFramebufferTypes::kBlurScalingHorizontal;
     } else if (pass_idx == 3) {
+      framebuffer_type = PostprocFramebufferTypes::kBlurScalingVertical;
+    } else if (pass_idx == 4) {
       framebuffer_type = PostprocFramebufferTypes::kCombining;
     }
 
@@ -237,6 +269,8 @@ void shader::PostprocShader::DrawBloom(const glm::ivec2 &window_size) {
     } else if (pass_idx == 2) {
       num_scaling = kNumBloomScaling;
     } else if (pass_idx == 3) {
+      num_scaling = kNumBloomScaling;
+    } else if (pass_idx == 4) {
       num_scaling = 1;
     }
 
@@ -249,6 +283,8 @@ void shader::PostprocShader::DrawBloom(const glm::ivec2 &window_size) {
     if (framebuffer_type == PostprocFramebufferTypes::kCombining) {
       SetScalingTextureUnitIdxs(pass_idx);
     }
+
+    SetScalingTextureUnitIdxs(pass_idx);
 
     // Draw for each scaling
     glm::ivec2 cur_size = window_size;
@@ -275,6 +311,8 @@ void shader::PostprocShader::DrawBloom(const glm::ivec2 &window_size) {
       // Draw
       DrawToTextures();
 
+      UseDefaultFramebuffer();
+
       // Shrink window size
       cur_size /= 2;
     }
@@ -288,7 +326,7 @@ void shader::PostprocShader::DrawPostprocEffects() {
   as::FramebufferManager &framebuffer_manager =
       gl_managers_->GetFramebufferManager();
   // Set pass index
-  const int pass_idx = 4;
+  const int pass_idx = 5;
 
   // Use the program
   UseProgram();
@@ -299,7 +337,7 @@ void shader::PostprocShader::DrawPostprocEffects() {
   UpdatePostprocInputs();
 
   // Set texture unit indexes
-  SetTextureUnitIdxs(pass_idx, 0);
+  SetScalingTextureUnitIdxs(pass_idx);
   // Draw
   DrawToTextures();
 }
@@ -384,6 +422,7 @@ std::string shader::PostprocShader::GetPostprocInputsUniformBlockName() const {
  * Constants (Private)
  ******************************************************************************/
 
+const GLsizei shader::PostprocShader::kNumMipmapLevels = 3;
 const int shader::PostprocShader::kNumBloomScaling = 3;
 
 /*******************************************************************************
@@ -506,8 +545,10 @@ std::string shader::PostprocShader::PostprocFramebufferTypeToName(
       return "draw_original";
     case PostprocFramebufferTypes::kDrawScaling:
       return "draw_scaling";
-    case PostprocFramebufferTypes::kBlurScaling:
-      return "blur_scaling";
+    case PostprocFramebufferTypes::kBlurScalingHorizontal:
+      return "blur_scaling_horizontal";
+    case PostprocFramebufferTypes::kBlurScalingVertical:
+      return "blur_scaling_vertical";
     case PostprocFramebufferTypes::kCombining:
       return "combining";
     default:
@@ -522,10 +563,12 @@ int shader::PostprocShader::PostprocFramebufferTypeToNum(
       return 0;
     case PostprocFramebufferTypes::kDrawScaling:
       return 1;
-    case PostprocFramebufferTypes::kBlurScaling:
+    case PostprocFramebufferTypes::kBlurScalingHorizontal:
       return 2;
-    case PostprocFramebufferTypes::kCombining:
+    case PostprocFramebufferTypes::kBlurScalingVertical:
       return 3;
+    case PostprocFramebufferTypes::kCombining:
+      return 4;
     default:
       throw std::runtime_error("Unknown postproc framebuffer type");
   }

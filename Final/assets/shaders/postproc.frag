@@ -123,7 +123,7 @@ vec4 ColorToHdr(const vec4 color) {
 }
 
 vec4 CalcCombiningBlurredHdr() {
-  const float kExposure = 0.1f;
+  const float kExposure = 0.5f;
 
   const vec4 orig_color = GetTexel(original_tex, vs_tex_coords);
   const vec4 blurred_hdr_color1 = GetTexel(scaled_hdr_tex1, vs_tex_coords);
@@ -320,7 +320,7 @@ vec4 CalcGaussianBlur(const sampler2D tex, const bool horizontal) {
       sum += weight[y] * GetTexel(tex, vs_tex_coords - ofs);
     }
   }
-  return sum;
+  return clamp(sum, 0.0f, 1.0f);
 }
 
 // vec4 CalcBloomEffectMixedColor(vec4 orig_color, vec4 blurred_color) {
@@ -727,7 +727,7 @@ void main() {
       fs_hdr_color = ColorToHdr(CalcOriginal());
     } break;
     case 2: {
-      /* Blur HDR (Multiple scaling) */
+      /* Blur HDR horizontally (Multiple scaling) */
       if (postproc_inputs.scaling_idx == 0) {
         fs_original_color = CalcOriginal();
       } else {
@@ -736,11 +736,20 @@ void main() {
       fs_hdr_color = CalcGaussianBlur(hdr_tex, true);
     } break;
     case 3: {
+      /* Blur HDR vertically (Multiple scaling) */
+      if (postproc_inputs.scaling_idx == 0) {
+        fs_original_color = CalcOriginal();
+      } else {
+        fs_original_color = vec4(0.0f);
+      }
+      fs_hdr_color = CalcGaussianBlur(hdr_tex, false);
+    } break;
+    case 4: {
       /* Combine original and blurred HDR (Single pass) */
       fs_original_color = CalcCombiningBlurredHdr();
       fs_hdr_color = kErrorColor;
     } break;
-    case 4: {
+    case 5: {
       /* Draw post-processing effects (Single pass) */
       fs_original_color = CalcOriginal();
       fs_hdr_color = kErrorColor;

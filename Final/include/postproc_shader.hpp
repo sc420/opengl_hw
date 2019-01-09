@@ -8,7 +8,8 @@ class PostprocShader : public Shader {
   enum class PostprocFramebufferTypes {
     kDrawOriginal,
     kDrawScaling,
-    kBlurScaling,
+    kBlurScalingHorizontal,
+    kBlurScalingVertical,
     kCombining,
   };
 
@@ -63,6 +64,8 @@ class PostprocShader : public Shader {
   void UsePostprocFramebuffer(
       const PostprocFramebufferTypes postproc_framebuffer_type);
 
+  void UseDefaultPostprocTextures();
+
   void UsePostprocTexture(
       const PostprocFramebufferTypes postproc_framebuffer_type,
       const PostprocTextureTypes postproc_tex_type, const int scaling_idx);
@@ -114,6 +117,7 @@ class PostprocShader : public Shader {
 
  private:
   /* Constants */
+  static const GLsizei kNumMipmapLevels;
   static const int kNumBloomScaling;
 
   /* Models */
