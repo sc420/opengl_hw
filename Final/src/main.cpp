@@ -39,9 +39,9 @@ static const auto kSeeFromLight = false;
 // Camera
 static const auto kUpdateCameraFromAircraftController = false;
 // Model editing
-static const auto kEditingModelName = "industrial_building";
+static const auto kEditingModelName = "tower";
 static const auto kEditingModelScalingStep = 0.01f;
-static const auto kEditingModelRotationStep = 0.1f;
+static const auto kEditingModelRotationStep = 0.01f;
 static const auto kEditingModelTranslationStep = 0.1f;
 
 /*******************************************************************************
@@ -395,9 +395,12 @@ void UpdateImGui() {
     if (ImGui::CollapsingHeader("Model Editing")) {
       const dto::SceneModel &scene_model =
           scene_shader.GetSceneModel(kEditingModelName);
-      const glm::vec3 trans = scene_model.GetTranslation();
-      const glm::vec3 rot = scene_model.GetRotation();
-      const glm::vec3 scaling = scene_model.GetScaling();
+      const glm::vec3 trans =
+          scene_model.GetInstancingTranslation(editing_model_instance_idx);
+      const glm::vec3 rot =
+          scene_model.GetInstancingRotation(editing_model_instance_idx);
+      const glm::vec3 scaling =
+          scene_model.GetInstancingScaling(editing_model_instance_idx);
 
       ImGui::Text("Model: %s[%d]", kEditingModelName,
                   editing_model_instance_idx);
@@ -637,13 +640,13 @@ void GLUTSpecialCallback(const int key, const int x, const int y) {
       const int num_instancing =
           scene_shader.GetSceneModel(kEditingModelName).GetNumInstancing();
       editing_model_instance_idx =
-          (editing_model_instance_idx + 1) % num_instancing;
+          (editing_model_instance_idx + num_instancing - 1) % num_instancing;
     } break;
     case GLUT_KEY_RIGHT: {
       const int num_instancing =
           scene_shader.GetSceneModel(kEditingModelName).GetNumInstancing();
       editing_model_instance_idx =
-          (editing_model_instance_idx + num_instancing - 1) % num_instancing;
+          (editing_model_instance_idx + 1) % num_instancing;
     } break;
   }
 
@@ -805,12 +808,14 @@ void GLUTTimerCallback(const int val) {
           editing_model_instance_idx,
           scene_model.GetInstancingScaling(editing_model_instance_idx) *
               glm::vec3(1.0f - kEditingModelScalingStep));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown(']')) {
       scene_model.SetInstancingScaling(
           editing_model_instance_idx,
           scene_model.GetInstancingScaling(editing_model_instance_idx) *
               glm::vec3(1.0f + kEditingModelScalingStep));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     // Rotation
     if (ui_manager.IsKeyDown('1')) {
@@ -818,36 +823,42 @@ void GLUTTimerCallback(const int val) {
           editing_model_instance_idx,
           scene_model.GetInstancingRotation(editing_model_instance_idx) +
               kEditingModelRotationStep * glm::vec3(-1.0f, 0.0f, 0.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown('2')) {
       scene_model.SetInstancingRotation(
           editing_model_instance_idx,
           scene_model.GetInstancingRotation(editing_model_instance_idx) +
               kEditingModelRotationStep * glm::vec3(1.0f, 0.0f, 0.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown('3')) {
       scene_model.SetInstancingRotation(
           editing_model_instance_idx,
           scene_model.GetInstancingRotation(editing_model_instance_idx) +
               kEditingModelRotationStep * glm::vec3(0.0f, -1.0f, 0.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown('4')) {
       scene_model.SetInstancingRotation(
           editing_model_instance_idx,
           scene_model.GetInstancingRotation(editing_model_instance_idx) +
               kEditingModelRotationStep * glm::vec3(0.0f, 1.0f, 0.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown('5')) {
       scene_model.SetInstancingRotation(
           editing_model_instance_idx,
           scene_model.GetInstancingRotation(editing_model_instance_idx) +
               kEditingModelRotationStep * glm::vec3(0.0f, 0.0f, -1.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown('6')) {
       scene_model.SetInstancingRotation(
           editing_model_instance_idx,
           scene_model.GetInstancingRotation(editing_model_instance_idx) +
               kEditingModelRotationStep * glm::vec3(0.0f, 0.0f, 1.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     // Translation
     if (ui_manager.IsKeyDown('i')) {
@@ -856,36 +867,42 @@ void GLUTTimerCallback(const int val) {
               editing_model_instance_idx,
               scene_model.GetInstancingTranslation(editing_model_instance_idx) +
                   kEditingModelTranslationStep * glm::vec3(0.0f, 0.0f, -1.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown('k')) {
       scene_model.SetInstancingTranslation(
           editing_model_instance_idx,
           scene_model.GetInstancingTranslation(editing_model_instance_idx) +
               kEditingModelTranslationStep * glm::vec3(0.0f, 0.0f, 1.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown('j')) {
       scene_model.SetInstancingTranslation(
           editing_model_instance_idx,
           scene_model.GetInstancingTranslation(editing_model_instance_idx) +
               kEditingModelTranslationStep * glm::vec3(-1.0f, 0.0f, 0.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown('l')) {
       scene_model.SetInstancingTranslation(
           editing_model_instance_idx,
           scene_model.GetInstancingTranslation(editing_model_instance_idx) +
               kEditingModelTranslationStep * glm::vec3(1.0f, 0.0f, 0.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown('b')) {
       scene_model.SetInstancingTranslation(
           editing_model_instance_idx,
           scene_model.GetInstancingTranslation(editing_model_instance_idx) +
               kEditingModelTranslationStep * glm::vec3(0.0f, 1.0f, 0.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
     if (ui_manager.IsKeyDown('n')) {
       scene_model.SetInstancingTranslation(
           editing_model_instance_idx,
           scene_model.GetInstancingTranslation(editing_model_instance_idx) +
               kEditingModelTranslationStep * glm::vec3(0.0f, -1.0f, 0.0f));
+      scene_shader.UpdateSceneModel(scene_model);
     }
   }
 

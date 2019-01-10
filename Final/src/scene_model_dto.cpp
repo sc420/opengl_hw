@@ -222,16 +222,6 @@ void dto::SceneModel::LoadFile(const std::string &path,
 }
 
 /*******************************************************************************
- * State Initialization (Private)
- ******************************************************************************/
-
-void dto::SceneModel::InitInstancingTransforms() {
-  instancing_translations_ = std::vector<glm::vec3>{glm::vec3(0.0f)};
-  instancing_rotations_ = std::vector<glm::vec3>{glm::vec3(0.0f)};
-  instancing_scalings_ = std::vector<glm::vec3>{glm::vec3(1.0f)};
-}
-
-/*******************************************************************************
  * GL Initialization (Private)
  ******************************************************************************/
 

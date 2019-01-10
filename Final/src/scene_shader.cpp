@@ -163,6 +163,37 @@ void shader::SceneShader::UpdateViewPos(const glm::vec3 &view_pos) {
   buffer_manager.UpdateBuffer(buffer_name);
 }
 
+void shader::SceneShader::UpdateSceneModel(const dto::SceneModel &scene_model) {
+  // Get managers
+  as::BufferManager &buffer_manager = gl_managers_->GetBufferManager();
+  // Get names
+  const std::string translations_buffer_name =
+      GetInstancingTranslationsBufferName(scene_model);
+  const std::string rotations_buffer_name =
+      GetInstancingRotationsBufferName(scene_model);
+  const std::string scalings_buffer_name =
+      GetInstancingScalingsBufferName(scene_model);
+  // Get instancing transformations
+  // TODO: Should use a DTO class
+  const std::vector<glm::vec3> instancing_translations =
+      scene_model.GetInstancingTranslations();
+  const std::vector<glm::vec3> instancing_rotations =
+      scene_model.GetInstancingRotations();
+  const std::vector<glm::vec3> instancing_scalings =
+      scene_model.GetInstancingScalings();
+  // Get memory sizes
+  const size_t instancing_mem_size = scene_model.GetInstancingMemSize();
+
+  /* Update buffers */
+  buffer_manager.UpdateBuffer(translations_buffer_name, GL_ARRAY_BUFFER, 0,
+                              instancing_mem_size,
+                              instancing_translations.data());
+  buffer_manager.UpdateBuffer(rotations_buffer_name, GL_ARRAY_BUFFER, 0,
+                              instancing_mem_size, instancing_rotations.data());
+  buffer_manager.UpdateBuffer(scalings_buffer_name, GL_ARRAY_BUFFER, 0,
+                              instancing_mem_size, instancing_scalings.data());
+}
+
 void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
   use_normal_height = toggle;
 }

@@ -116,10 +116,6 @@ class SceneModel {
 
   void LoadFile(const std::string &path, const unsigned int flags);
 
-  /* State Initialization */
-
-  void InitInstancingTransforms();
-
   /* GL Initialization */
 
   void InitTextures(const std::string &tex_unit_group_name,

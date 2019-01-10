@@ -99,6 +99,8 @@ class SceneShader : public Shader {
 
   void UpdateViewPos(const glm::vec3 &view_pos);
 
+  void UpdateSceneModel(const dto::SceneModel &scene_model);
+
   void ToggleNormalHeight(const bool toggle);
 
   /* Name Management */
