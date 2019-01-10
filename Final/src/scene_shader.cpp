@@ -313,62 +313,45 @@ std::string shader::SceneShader::GetLightingUniformBlockName() const {
  ******************************************************************************/
 
 void shader::SceneShader::LoadModels() {
-  // Scene
-  scene_models_["scene"] = dto::SceneModel(
-      "scene", "assets/models/nanosuit/nanosuit.obj",
+  const unsigned int flags =
       aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
-          aiProcess_Triangulate | aiProcess_GenNormals |
-          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
-          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
-      "scene", 5, gl_managers_);
+      aiProcess_Triangulate | aiProcess_GenNormals |
+      aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
+      aiProcess_OptimizeMeshes | aiProcess_FlipUVs;
+
+  // Scene
+  scene_models_["scene"] =
+      dto::SceneModel("scene", "assets/models/nanosuit/nanosuit.obj", flags,
+                      "scene", 3, gl_managers_);
   // Ground
   scene_models_["ground"] = dto::SceneModel(
-      "ground", "assets/models/volcano-02-low/volcano 02_subdiv_01.obj",
-      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
-          aiProcess_Triangulate | aiProcess_GenNormals |
-          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
-          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
+      "ground", "assets/models/volcano-02-low/volcano 02_subdiv_01.obj", flags,
       "ground", 3, gl_managers_);
   // Surrounding mountains
-  scene_models_["surround"] = dto::SceneModel(
-      "surround",
-      "assets/models/MountainsGreen0070/"
-      "tube.obj",
-      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
-          aiProcess_Triangulate | aiProcess_GenNormals |
-          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
-          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
-      "surround", 3, gl_managers_);
+  scene_models_["surround"] =
+      dto::SceneModel("surround",
+                      "assets/models/MountainsGreen0070/"
+                      "tube.obj",
+                      flags, "surround", 3, gl_managers_);
   // Industrial building
   scene_models_["industrial_building"] = dto::SceneModel(
       "industrial_building",
-      "assets/models/industrial_building_1/industrial_building_1.obj",
-      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
-          aiProcess_Triangulate | aiProcess_GenNormals |
-          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
-          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
+      "assets/models/industrial_building_1/industrial_building_1.obj", flags,
       "industrial_building", 3, gl_managers_);
   // Oil tank
-  scene_models_["oil_tank"] = dto::SceneModel(
-      "oil_tank", "assets/models/oil_tank/big_cistern.obj",
-      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
-          aiProcess_Triangulate | aiProcess_GenNormals |
-          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
-          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
-      "oil_tank", 3, gl_managers_);
+  scene_models_["oil_tank"] =
+      dto::SceneModel("oil_tank", "assets/models/oil_tank/big_cistern.obj",
+                      flags, "oil_tank", 3, gl_managers_);
   // Electric tower
-  scene_models_["tower"] = dto::SceneModel(
-      "tower", "assets/models/tower/tower.obj",
-      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
-          aiProcess_Triangulate | aiProcess_GenNormals |
-          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
-          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
-      "tower", 3, gl_managers_);
+  scene_models_["tower"] =
+      dto::SceneModel("tower", "assets/models/tower/tower.obj", flags, "tower",
+                      3, gl_managers_);
 }
 
 void shader::SceneShader::InitModels() {
-  // Scene
-  scene_models_.at("scene").SetTranslation(glm::vec3(-10.0f, 0.0f, -8.0f));
+  // Scene (Used for debugging)
+  // scene_models_.at("scene").SetTranslation(glm::vec3(-10.0f, 0.0f, -8.0f));
+  scene_models_.at("scene").SetTranslation(glm::vec3(0.0f, -10.0f, 0.0f));
   scene_models_.at("scene").SetRotation(glm::vec3(0.0f));
   scene_models_.at("scene").SetScaling(glm::vec3(0.5f, 0.35f, 0.5f));
   scene_models_.at("scene").SetLightPos(GetLightPos());
