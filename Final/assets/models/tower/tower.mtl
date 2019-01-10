@@ -14,7 +14,7 @@ newmtl tower_mat_1
 	Ke 0.0000 0.0000 0.0000
 
 newmtl tower_Default_material
-	Ns 10.0000
+	Ns 100.0000
 	Ni 1.5000
 	d 1.0000
 	Tr 0.0000
@@ -26,7 +26,7 @@ newmtl tower_Default_material
 	Ke 0.0000 0.0000 0.0000
 
 newmtl tower_mat_5
-	Ns 10.0000
+	Ns 100.0000
 	Ni 1.5000
 	d 1.0000
 	Tr 0.0000
