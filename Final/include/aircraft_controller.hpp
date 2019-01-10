@@ -21,6 +21,10 @@ class AircraftController {
 
   float GetSpeed() const;
 
+  void SetPos(const glm::vec3 &pos);
+
+  void SetDir(const glm::vec3 &dir);
+
   void SetPreferSpeed(const float prefer_speed);
 
   void SetWind(const glm::vec3 &drift_dir_wind, const float speed_wind,

@@ -89,6 +89,8 @@ shader::SkyboxShader skybox_shader;
  ******************************************************************************/
 
 // Only for the black hawk
+const glm::vec3 kInitAircraftPos = glm::vec3(10.0f, 5.0f, 0.0f);
+
 ctrl::FbxCameraController fbx_camera_ctrl(
     // Position, Rotation, Scaling
     1e-2f * glm::vec3(0.0f, -400.0f, -2300.0f),
@@ -104,7 +106,7 @@ ctrl::FbxCameraController fbx_camera_ctrl(
     glm::vec3(0.0f));
 ctrl::AircraftController aircraft_ctrl(
     // Position, Direction, Drift direction, Speed
-    glm::vec3(10.0f, 5.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.0f), 1e-2f,
+    kInitAircraftPos, glm::vec3(0.0f), glm::vec3(0.0f), 1e-2f,
     // Adjust factor
     glm::vec3(1e-4f), 1e-4f,
     // Max change
@@ -141,10 +143,10 @@ bool has_collision_anim_finished = false;
  * Rendering States
  ******************************************************************************/
 
-bool render_wireframe = false;
 bool use_aircraft_wind = false;
 bool use_camera_wind = false;
 bool use_hdr = false;
+bool render_wireframe = false;
 
 /*******************************************************************************
  * User Interface States
@@ -363,7 +365,9 @@ void ResetCollision() {
   collision_anim_elapsed_time = 0.0f;
   has_collision_anim_finished = false;
 
-  // Restore flying speed
+  // Restore flying state
+  aircraft_ctrl.SetPos(kInitAircraftPos);
+  aircraft_ctrl.SetDir(glm::vec3(0.0f));
   aircraft_ctrl.SetPreferSpeed(1e-2f);
 
   // Resume the hovering sound
@@ -493,11 +497,15 @@ void UpdateImGui() {
     ImGui::Begin("Render");
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
-    if (ImGui::CollapsingHeader("Mode")) {
-      ImGui::Checkbox("Wireframe", &render_wireframe);
+    if (ImGui::CollapsingHeader("Demo")) {
       ImGui::Checkbox("Camera Wind", &use_camera_wind);
       ImGui::Checkbox("Aircraft Wind", &use_aircraft_wind);
       ImGui::Checkbox("HDR", &use_hdr);
+    }
+
+    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("Debug")) {
+      ImGui::Checkbox("Wireframe", &render_wireframe);
     }
 
     // Update controllers
@@ -1043,7 +1051,7 @@ void GLUTTimerCallback(const int val) {
         sound_ctrl.Register2DSound(
             "altitude_warning",
             "assets/sound/helicopter-altitude-warning-sound.wav", true);
-        sound_ctrl.SetSoundVolume("altitude_warning", 0.5f);
+        sound_ctrl.SetSoundVolume("altitude_warning", 0.3f);
       }
     } else {
       sound_ctrl.SetSoundStop("altitude_warning");

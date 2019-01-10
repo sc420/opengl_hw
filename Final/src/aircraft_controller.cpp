@@ -41,6 +41,10 @@ glm::vec3 ctrl::AircraftController::GetDriftDir() const { return drift_dir_; }
 
 float ctrl::AircraftController::GetSpeed() const { return speed_; }
 
+void ctrl::AircraftController::SetPos(const glm::vec3 &pos) { pos_ = pos; }
+
+void ctrl::AircraftController::SetDir(const glm::vec3 &dir) { dir_ = dir; }
+
 void ctrl::AircraftController::SetPreferSpeed(const float prefer_speed) {
   prefer_speed_ = prefer_speed;
 }
