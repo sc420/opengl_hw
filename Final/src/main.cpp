@@ -143,6 +143,8 @@ bool has_collision_anim_finished = false;
  * Rendering States
  ******************************************************************************/
 
+bool use_gui = false;
+bool use_fbx = false;
 bool use_normal = false;
 bool use_instantiating = false;
 bool use_surrounding = false;
@@ -177,6 +179,7 @@ float last_elapsed_time = 0.0f;
  ******************************************************************************/
 
 enum MainMenuItems { kMainMidLevelSep, kMainExit };
+enum GuiMenuItems { kGuiOn, kGuiOff };
 enum TimerMenuItems { kTimerStart, kTimerStop };
 
 /*******************************************************************************
@@ -507,6 +510,7 @@ void UpdateImGui() {
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Demo")) {
+      ImGui::Checkbox("FBX", &use_fbx);
       ImGui::Checkbox("Normal", &use_normal);
       ImGui::Checkbox("Instantiating", &use_instantiating);
       ImGui::Checkbox("Surrounding", &use_surrounding);
@@ -646,11 +650,14 @@ void GLUTDisplayCallback() {
 
   skybox_shader.Draw();
   scene_shader.Draw();
-  if (!has_collided) {
-    fbx_ctrl.Draw();
-  } else {
-    if (!has_collision_anim_finished) {
-      explosion_fbx_ctrl.Draw();
+
+  if (use_fbx) {
+    if (!has_collided) {
+      fbx_ctrl.Draw();
+    } else {
+      if (!has_collision_anim_finished) {
+        explosion_fbx_ctrl.Draw();
+      }
     }
   }
 
@@ -672,7 +679,9 @@ void GLUTDisplayCallback() {
 
   // Draw ImGui on default framebuffer
   scene_shader.UseDefaultFramebuffer();
-  DrawImGui();
+  if (use_gui) {
+    DrawImGui();
+  }
 
   // Swap double buffers
   glutSwapBuffers();
@@ -1198,6 +1207,21 @@ void GLUTMainMenuCallback(const int id) {
   }
 }
 
+void GLUTGuiMenuCallback(const int id) {
+  switch (id) {
+    case GuiMenuItems::kGuiOn: {
+      use_gui = true;
+    } break;
+    case GuiMenuItems::kGuiOff: {
+      use_gui = false;
+    } break;
+    default: {
+      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
+                               "'");
+    }
+  }
+}
+
 void GLUTTimerMenuCallback(const int id) {
   switch (id) {
     case TimerMenuItems::kTimerStart: {
@@ -1237,12 +1261,19 @@ void RegisterGLUTCallbacks() {
 
 void CreateGLUTMenus() {
   const int main_menu_hdlr = glutCreateMenu(GLUTMainMenuCallback);
+  const int gui_submenu_hdlr = glutCreateMenu(GLUTGuiMenuCallback);
   const int timer_submenu_hdlr = glutCreateMenu(GLUTTimerMenuCallback);
 
   /* Main Menu */
   glutSetMenu(main_menu_hdlr);
+  glutAddSubMenu("GUI", gui_submenu_hdlr);
   glutAddSubMenu("Timer", timer_submenu_hdlr);
   glutAddMenuEntry("Exit", MainMenuItems::kMainExit);
+
+  /* GUI Submenu */
+  glutSetMenu(gui_submenu_hdlr);
+  glutAddMenuEntry("On", GuiMenuItems::kGuiOn);
+  glutAddMenuEntry("Off", GuiMenuItems::kGuiOff);
 
   /* Timer Submenu */
   glutSetMenu(timer_submenu_hdlr);
