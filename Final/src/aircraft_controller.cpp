@@ -41,6 +41,10 @@ glm::vec3 ctrl::AircraftController::GetDriftDir() const { return drift_dir_; }
 
 float ctrl::AircraftController::GetSpeed() const { return speed_; }
 
+void ctrl::AircraftController::SetPreferSpeed(const float prefer_speed) {
+  prefer_speed_ = prefer_speed;
+}
+
 void ctrl::AircraftController::SetWind(
     const glm::vec3 &drift_dir_wind, const float speed_wind,
     const glm::vec3 &drift_dir_wind_adjust_factor,

@@ -343,6 +343,9 @@ void StartCollision() {
     collision_anim_elapsed_time = 0.0f;
     has_collided = true;
 
+    // Stop the aircraft from flying
+    aircraft_ctrl.SetPreferSpeed(0.0f);
+
     // Stop all previously played sound
     sound_ctrl.SetSoundStop("helicopter_hovering");
     sound_ctrl.SetSoundStop("pull_up_alarm");
@@ -358,6 +361,9 @@ void ResetCollision() {
   has_collided = false;
   collision_anim_elapsed_time = 0.0f;
   has_collision_anim_finished = false;
+
+  // Restore flying speed
+  aircraft_ctrl.SetPreferSpeed(1e-2f);
 
   // Resume the hovering sound
   sound_ctrl.Register3DSound("helicopter_hovering",
