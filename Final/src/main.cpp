@@ -35,12 +35,15 @@ static const auto kTimerInterval = 10;
 /* Camera Shaking */
 static const auto kCameraShakingMaxWind = 0.1f;
 /* Collision Detections */
+static const auto kCollisionDistUpdateInterval = 0.5f;
 static const auto kCollisionDist = 0.3f;
+static const auto kCollisionWarningDist = 1.0f;
+
 /* Debug */
 // Shadow
 static const auto kSeeFromLight = false;
 // Camera
-static const auto kUpdateCameraFromAircraftController = false;
+static const auto kUpdateCameraFromAircraftController = true;
 // Model editing
 static const auto kEditingModelName = "tower";
 static const auto kEditingModelScalingStep = 0.01f;
@@ -124,6 +127,16 @@ std::uniform_real_distribution<float> camera_shaking_distrib(-1e-2f, 1e-2f);
 float camera_shaking_wind = 0.0f;
 
 /*******************************************************************************
+ * Collision States
+ ******************************************************************************/
+
+float cur_collision_dist = std::numeric_limits<float>::max();
+float collision_dist_update_elapsed_time = 0.0f;
+bool has_collided = false;
+float collision_anim_elapsed_time = 0.0f;
+bool has_collision_anim_finished = false;
+
+/*******************************************************************************
  * Rendering States
  ******************************************************************************/
 
@@ -141,6 +154,12 @@ enum class Modes { comparison, navigation };
 
 // Current mode
 Modes cur_mode = Modes::navigation;
+
+/*******************************************************************************
+ * Timers
+ ******************************************************************************/
+
+float last_elapsed_time = 0.0f;
 
 /*******************************************************************************
  * Menus
@@ -311,6 +330,42 @@ void InitFbx() {
 }
 
 /*******************************************************************************
+ * Collision Handlers
+ ******************************************************************************/
+
+float GetCollisionDist() {
+  return scene_shader.GetMinDistanceToModel(aircraft_ctrl.GetPos(), "ground");
+}
+
+void StartCollision() {
+  if (!has_collided) {
+    has_collision_anim_finished = false;
+    collision_anim_elapsed_time = 0.0f;
+    has_collided = true;
+
+    // Stop all previously played sound
+    sound_ctrl.SetSoundStop("helicopter_hovering");
+    sound_ctrl.SetSoundStop("pull_up_alarm");
+    sound_ctrl.SetSoundStop("altitude_warning");
+
+    // Play the explosion sound
+    sound_ctrl.Register2DSound("big_explosion",
+                               "assets/sound/big_explosion.wav");
+  }
+}
+
+void ResetCollision() {
+  has_collided = false;
+  collision_anim_elapsed_time = 0.0f;
+  has_collision_anim_finished = false;
+
+  // Resume the hovering sound
+  sound_ctrl.Register3DSound("helicopter_hovering",
+                             "assets/sound/helicopter-hovering-01.wav",
+                             glm::vec3(0.0f, 0.0f, 1.0f), true);
+}
+
+/*******************************************************************************
  * GUI Handlers
  ******************************************************************************/
 
@@ -354,16 +409,16 @@ void UpdateImGui() {
     ImGui::Begin("Debug");
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("Performance")) {
+      ImGui::Text("FPS: %.1f", io.Framerate);
+    }
+
+    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Camera")) {
       ImGui::Text("Position: (%.1f, %.1f, %.1f)", camera_pos.x, camera_pos.y,
                   camera_pos.z);
       ImGui::Text("Angles (Degree): (%.2f, %.2f, %.2f)", camera_angles.x,
                   camera_angles.y, camera_angles.z);
-    }
-
-    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
-    if (ImGui::CollapsingHeader("Performance")) {
-      ImGui::Text("FPS: %.1f", io.Framerate);
     }
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
@@ -373,22 +428,6 @@ void UpdateImGui() {
       glm::vec3 scaling;
 
       fbx_ctrl.GetModelTransform(translation, rotation, scaling);
-
-      ImGui::Text("Translation: (%.1f, %.1f, %.1f)", translation[0],
-                  translation[1], translation[2]);
-      ImGui::Text("Rotation: (%.2f, %.2f, %.2f)", rotation[0], rotation[1],
-                  rotation[2]);
-      ImGui::Text("Scaling: (%.3f, %.3f, %.3f)", scaling[0], scaling[1],
-                  scaling[2]);
-    }
-
-    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
-    if (ImGui::CollapsingHeader("FBX Explosion Model")) {
-      glm::vec3 translation;
-      glm::vec3 rotation;
-      glm::vec3 scaling;
-
-      explosion_fbx_ctrl.GetModelTransform(translation, rotation, scaling);
 
       ImGui::Text("Translation: (%.1f, %.1f, %.1f)", translation[0],
                   translation[1], translation[2]);
@@ -411,6 +450,11 @@ void UpdateImGui() {
       ImGui::Text("Drift Dir: (%.2f, %.2f, %.2f)", drift_dir[0], drift_dir[1],
                   drift_dir[2]);
       ImGui::Text("Speed: %.3f", speed);
+    }
+
+    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("Collision")) {
+      ImGui::Text("Distance: %.1f", cur_collision_dist);
     }
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
@@ -500,20 +544,6 @@ void UpdateCameraShakingWind() {
 }
 
 /*******************************************************************************
- * Collision Calculations
- ******************************************************************************/
-
-bool CheckCollisionWithGround() {
-  const float dist =
-      scene_shader.GetMinDistanceToModel(camera_trans.GetEye(), "ground");
-  std::cerr << "dist: " << dist << std::endl;
-  if (dist < kCollisionDist) {
-    std::cerr << "collision" << std::endl;
-  }
-  return dist < kCollisionDist;
-}
-
-/*******************************************************************************
  * GL States Updaters
  ******************************************************************************/
 
@@ -585,9 +615,13 @@ void GLUTDisplayCallback() {
 
   skybox_shader.Draw();
   scene_shader.Draw();
-  fbx_ctrl.Draw();
-
-  explosion_fbx_ctrl.Draw();
+  if (!has_collided) {
+    fbx_ctrl.Draw();
+  } else {
+    if (!has_collision_anim_finished) {
+      explosion_fbx_ctrl.Draw();
+    }
+  }
 
   // Restore polygon mode
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -654,6 +688,8 @@ void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
       camera_trans.ResetTrans();
       UpdateGlobalTrans();
       UpdateLighting();
+      // Reset collision state
+      ResetCollision();
     } break;
     case 27: {  // Escape
       glutLeaveMainLoop();
@@ -783,6 +819,12 @@ void GLUTTimerCallback(const int val) {
   // Get the elapsed time
   const float elapsed_time =
       static_cast<float>(ui_manager.CalcElapsedSeconds());
+
+  // Calculate elapsed time difference
+  const float elapsed_time_diff = elapsed_time - last_elapsed_time;
+
+  // Update last elapsed time
+  last_elapsed_time = elapsed_time;
 
   // Update black hawk transformation
   if (ui_manager.IsKeyDown('w')) {
@@ -980,7 +1022,33 @@ void GLUTTimerCallback(const int val) {
   aircraft_ctrl.Update();
 
   // Check collision
-  CheckCollisionWithGround();
+  collision_dist_update_elapsed_time += elapsed_time_diff;
+  if (collision_dist_update_elapsed_time > kCollisionDistUpdateInterval) {
+    cur_collision_dist = GetCollisionDist();
+    if (!has_collided && cur_collision_dist < kCollisionWarningDist) {
+      if (sound_ctrl.IsSoundFinished("pull_up_alarm")) {
+        sound_ctrl.Register2DSound("pull_up_alarm",
+                                   "assets/sound/boeing-pull-up-alarm.wav");
+      }
+      if (sound_ctrl.IsSoundFinished("altitude_warning")) {
+        sound_ctrl.Register2DSound(
+            "altitude_warning",
+            "assets/sound/helicopter-altitude-warning-sound.wav", true);
+        sound_ctrl.SetSoundVolume("altitude_warning", 0.5f);
+      }
+    } else {
+      sound_ctrl.SetSoundStop("altitude_warning");
+    }
+    if (cur_collision_dist < kCollisionDist) {
+      StartCollision();
+    }
+    collision_dist_update_elapsed_time = 0.0f;
+  }
+
+  // Update collision animation elapsed time
+  if (has_collided) {
+    collision_anim_elapsed_time += elapsed_time_diff;
+  }
 
   // Update FBX controller
   fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);
@@ -988,13 +1056,19 @@ void GLUTTimerCallback(const int val) {
   fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(), fbx_camera_ctrl.GetRot(),
                              fbx_camera_ctrl.GetScaling());
 
-  explosion_fbx_ctrl.SetTime(elapsed_time / kBlackHawkExplosionAnimDuration);
+  explosion_fbx_ctrl.SetTime(collision_anim_elapsed_time /
+                             kBlackHawkExplosionAnimDuration);
   explosion_fbx_ctrl.SetCameraTransform(glm::vec3(0.0f), glm::vec3(0.0f), 0.0f);
   explosion_fbx_ctrl.SetModelTransform(
       fbx_camera_ctrl.GetPos() + glm::vec3(20.0f, -20.0f, -140.0f),
       fbx_camera_ctrl.GetRot() +
           glm::radians(glm::vec3(-105.0f, -90.0f, 200.0f)),
       fbx_camera_ctrl.GetScaling());
+
+  // Check whether the explosion animation is finished
+  if (collision_anim_elapsed_time > kBlackHawkExplosionAnimDuration) {
+    has_collision_anim_finished = true;
+  }
 
   // Update sound controller
   sound_ctrl.Set3DSoundPosition(

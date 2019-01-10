@@ -24,6 +24,10 @@ class SoundController {
 
   void SetSoundPaused(const std::string& sound_name, const bool paused);
 
+  void SetSoundStop(const std::string& sound_name);
+
+  void SetSoundLooped(const std::string& sound_name, const bool looped);
+
   void Set3DListenerPosition(const glm::vec3& listener_pos,
                              const glm::vec3& listener_look_at);
 

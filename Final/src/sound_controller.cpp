@@ -41,6 +41,21 @@ void ctrl::SoundController::SetSoundPaused(const std::string& sound_name,
   sound->setIsPaused(paused);
 }
 
+void ctrl::SoundController::SetSoundStop(const std::string& sound_name) {
+  // Ignore non-existent sound name
+  if (name_to_sound_.count(sound_name) == 0) {
+    return;
+  }
+  irrklang::ISound* sound = GetSound(sound_name);
+  sound->stop();
+}
+
+void ctrl::SoundController::SetSoundLooped(const std::string& sound_name,
+                                           const bool looped) {
+  irrklang::ISound* sound = GetSound(sound_name);
+  sound->setIsLooped(looped);
+}
+
 void ctrl::SoundController::Set3DListenerPosition(
     const glm::vec3& listener_pos, const glm::vec3& listener_look_at) {
   engine_->setListenerPosition(GlmVecToIrrklangVec(listener_pos),
@@ -59,6 +74,10 @@ bool ctrl::SoundController::IsSoundPaused(const std::string& sound_name) {
 }
 
 bool ctrl::SoundController::IsSoundFinished(const std::string& sound_name) {
+  // Ignore non-existent sound name
+  if (name_to_sound_.count(sound_name) == 0) {
+    return true;
+  }
   irrklang::ISound* sound = GetSound(sound_name);
   return sound->isFinished();
 }
