@@ -969,17 +969,13 @@ void GLUTTimerCallback(const int val) {
   fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(), fbx_camera_ctrl.GetRot(),
                              fbx_camera_ctrl.GetScaling());
 
-  // fbx_ctrl.SetCameraTransform(camera_trans.GetEye(),
-  // camera_trans.GetAngles(),
-  //                            glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
-  // fbx_ctrl.SetModelTransform(glm::vec3(0.0f), glm::vec3(0.0f),
-  // glm::vec3(1.0f));
-
   explosion_fbx_ctrl.SetTime(elapsed_time / kBlackHawkExplosionAnimDuration);
-  explosion_fbx_ctrl.SetCameraTransform(camera_trans.GetEye(),
-                                        camera_trans.GetAngles(), 0.0f);
-  explosion_fbx_ctrl.SetModelTransform(glm::vec3(0.0f), glm::vec3(0.0f),
-                                       glm::vec3(1.0f));
+  explosion_fbx_ctrl.SetCameraTransform(glm::vec3(0.0f), glm::vec3(0.0f), 0.0f);
+  explosion_fbx_ctrl.SetModelTransform(
+      fbx_camera_ctrl.GetPos() + glm::vec3(20.0f, -20.0f, -140.0f),
+      fbx_camera_ctrl.GetRot() +
+          glm::radians(glm::vec3(-105.0f, -90.0f, 200.0f)),
+      fbx_camera_ctrl.GetScaling());
 
   // Update sound controller
   sound_ctrl.Set3DSoundPosition(
