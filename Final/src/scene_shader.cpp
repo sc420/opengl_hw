@@ -265,6 +265,15 @@ void shader::SceneShader::LoadModels() {
           aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
           aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
       "surround", 3, gl_managers_);
+  // Industrial building
+  scene_models_["industrial_building"] = dto::SceneModel(
+      "industrial_building",
+      "assets/models/industrial_building_1/industrial_building_1.obj",
+      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
+          aiProcess_Triangulate | aiProcess_GenNormals |
+          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
+          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
+      "industrial_building", 3, gl_managers_);
   // Oil tank
   scene_models_["oil_tank"] = dto::SceneModel(
       "oil_tank", "assets/models/oil_tank/big_cistern.obj",
@@ -308,13 +317,24 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("surround").SetLightColor(glm::vec3(1.0f));
   scene_models_.at("surround").SetLightIntensity(glm::vec3(0.3f, 0.0f, 0.0f));
   scene_models_.at("surround").SetUseEnvMap(false);
+  // Industrial building
+  scene_models_.at("industrial_building")
+      .SetTranslation(glm::vec3(12.8f, 0.7f, 15.8f));
+  scene_models_.at("industrial_building")
+      .SetRotation(glm::vec3(0.0f, 0.7f, 0.0f));
+  scene_models_.at("industrial_building").SetScaling(1.4e-4f * glm::vec3(1.0f));
+  scene_models_.at("industrial_building").SetLightPos(GetLightPos());
+  scene_models_.at("industrial_building").SetLightColor(glm::vec3(1.0f));
+  scene_models_.at("industrial_building")
+      .SetLightIntensity(glm::vec3(0.5f, 0.5f, 0.5f));
+  scene_models_.at("industrial_building").SetUseEnvMap(false);
   // Oil tank
   scene_models_.at("oil_tank").SetTranslation(glm::vec3(12.5f, 0.8f, 16.2f));
   scene_models_.at("oil_tank").SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
   scene_models_.at("oil_tank").SetScaling(2e-4f * glm::vec3(1.0f));
   scene_models_.at("oil_tank").SetLightPos(GetLightPos());
   scene_models_.at("oil_tank").SetLightColor(glm::vec3(1.0f));
-  scene_models_.at("oil_tank").SetLightIntensity(glm::vec3(1.0f, 1.0f, 0.0f));
+  scene_models_.at("oil_tank").SetLightIntensity(glm::vec3(0.5f, 0.5f, 0.5f));
   scene_models_.at("oil_tank").SetUseEnvMap(false);
   // Electric tower
   scene_models_.at("tower").SetTranslation(glm::vec3(13.6f, 1.8f, -3.8f));
@@ -322,7 +342,7 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("tower").SetScaling(5e-2f * glm::vec3(1.0f));
   scene_models_.at("tower").SetLightPos(GetLightPos());
   scene_models_.at("tower").SetLightColor(glm::vec3(1.0f));
-  scene_models_.at("tower").SetLightIntensity(glm::vec3(1.0f, 1.0f, 0.0f));
+  scene_models_.at("tower").SetLightIntensity(glm::vec3(0.5f, 0.5f, 0.5f));
   scene_models_.at("tower").SetUseEnvMap(false);
 
   /* Instancing */
@@ -335,12 +355,17 @@ void shader::SceneShader::InitModels() {
       glm::vec3(1e4f * -45.0f, 0.0f, 1e4f * 45.0f),
       glm::vec3(1e4f * 45.0f, 0.0f, 1e4f * -45.0f),
       glm::vec3(1e4f * 45.0f, 0.0f, 1e4f * 45.0f)});
+  scene_models_.at("oil_tank")
+      .SetInstancingTranslations(std::vector<glm::vec3>{
+          glm::vec3(0.0f), glm::vec3(0.6f, 0.27f, 0.5f) / 2e-4f,
+          glm::vec3(1.0f, 0.22f, 0.3f) / 2e-4f});
   scene_models_.at("tower").SetInstancingTranslations(std::vector<glm::vec3>{
-      glm::vec3(0.0f, -8.0f, -320.0f), glm::vec3(0.0f, 1.0f, -240.0f),
-      glm::vec3(0.0f, -11.0f, -160.0f), glm::vec3(0.0f, 0.0f, -80.0f),
-      glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 80.0f),
-      glm::vec3(0.0f, -10.0f, 160.0f), glm::vec3(0.0f, -12.0f, 240.0f),
-      glm::vec3(0.0f, -11.0f, 320.0f), glm::vec3(0.0f, -17.0f, 400.0f)});
+      glm::vec3(0.0f, -4.0f, -400.0f), glm::vec3(0.0f, -8.0f, -320.0f),
+      glm::vec3(0.0f, 1.0f, -240.0f), glm::vec3(0.0f, -11.0f, -160.0f),
+      glm::vec3(0.0f, 0.0f, -80.0f), glm::vec3(0.0f),
+      glm::vec3(0.0f, 5.0f, 80.0f), glm::vec3(0.0f, -10.0f, 160.0f),
+      glm::vec3(0.0f, -12.0f, 240.0f), glm::vec3(0.0f, -11.0f, 320.0f),
+      glm::vec3(0.0f, -17.0f, 400.0f)});
 }
 
 /*******************************************************************************

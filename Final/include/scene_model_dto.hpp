@@ -30,6 +30,12 @@ class SceneModel {
 
   glm::vec3 GetScaling() const;
 
+  glm::vec3 GetInstancingTranslation(const int instance_idx) const;
+
+  glm::vec3 GetInstancingRotation(const int instance_idx) const;
+
+  glm::vec3 GetInstancingScaling(const int instance_idx) const;
+
   /* State Setters */
 
   void SetTranslation(const glm::vec3 &translation);
@@ -43,6 +49,13 @@ class SceneModel {
   void SetInstancingRotations(const std::vector<glm::vec3> &rotations);
 
   void SetInstancingScalings(const std::vector<glm::vec3> &scalings);
+
+  void SetInstancingTranslation(const int instance_idx,
+                                const glm::vec3 &translation);
+
+  void SetInstancingRotation(const int instance_idx, const glm::vec3 &rotation);
+
+  void SetInstancingScaling(const int instance_idx, const glm::vec3 &scaling);
 
   void SetLightPos(const glm::vec3 &light_pos);
 
@@ -102,6 +115,10 @@ class SceneModel {
   /* Model Initialization */
 
   void LoadFile(const std::string &path, const unsigned int flags);
+
+  /* State Initialization */
+
+  void InitInstancingTransforms();
 
   /* GL Initialization */
 

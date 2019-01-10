@@ -38,11 +38,18 @@ static const auto kCameraShakingMaxWind = 0.1f;
 static const auto kSeeFromLight = false;
 // Camera
 static const auto kUpdateCameraFromAircraftController = false;
-// Model transformation
-static const auto kModelName = "oil_tank";
-static const auto kModelScalingStep = 0.01f;
-static const auto kModelRotationStep = 0.1f;
-static const auto kModelTranslationStep = 0.1f;
+// Model editing
+static const auto kEditingModelName = "industrial_building";
+static const auto kEditingModelScalingStep = 0.01f;
+static const auto kEditingModelRotationStep = 0.1f;
+static const auto kEditingModelTranslationStep = 0.1f;
+
+/*******************************************************************************
+ * Debugging
+ ******************************************************************************/
+
+// Model editing
+int editing_model_instance_idx = 0;
 
 /*******************************************************************************
  * Camera States
@@ -178,6 +185,7 @@ void ConfigGLSettings() {
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_MULTISAMPLE_ARB);
+  // glEnable(GL_CULL_FACE);
   glEnable(GL_BLEND);
 
   // Set blending function
@@ -384,14 +392,15 @@ void UpdateImGui() {
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     ImGui::SetNextTreeNodeOpen(true);
-    if (ImGui::CollapsingHeader("Model Transformation")) {
+    if (ImGui::CollapsingHeader("Model Editing")) {
       const dto::SceneModel &scene_model =
-          scene_shader.GetSceneModel(kModelName);
+          scene_shader.GetSceneModel(kEditingModelName);
       const glm::vec3 trans = scene_model.GetTranslation();
       const glm::vec3 rot = scene_model.GetRotation();
       const glm::vec3 scaling = scene_model.GetScaling();
 
-      ImGui::Text("Name: %s", kModelName);
+      ImGui::Text("Model: %s[%d]", kEditingModelName,
+                  editing_model_instance_idx);
       ImGui::Text("Trans: (%.2f, %.2f, %.2f)", trans[0], trans[1], trans[2]);
       ImGui::Text("Rotation: (%.3f, %.3f, %.3f)", rot[0], rot[1], rot[2]);
       ImGui::Text("Scaling: (%.5f, %.5f, %.5f)", scaling[0], scaling[1],
@@ -623,6 +632,21 @@ void GLUTKeyboardUpCallback(const unsigned char key, const int x, const int y) {
 }
 
 void GLUTSpecialCallback(const int key, const int x, const int y) {
+  switch (key) {
+    case GLUT_KEY_LEFT: {
+      const int num_instancing =
+          scene_shader.GetSceneModel(kEditingModelName).GetNumInstancing();
+      editing_model_instance_idx =
+          (editing_model_instance_idx + 1) % num_instancing;
+    } break;
+    case GLUT_KEY_RIGHT: {
+      const int num_instancing =
+          scene_shader.GetSceneModel(kEditingModelName).GetNumInstancing();
+      editing_model_instance_idx =
+          (editing_model_instance_idx + num_instancing - 1) % num_instancing;
+    } break;
+  }
+
   // Update ImGui
   ImGui_ImplFreeGLUT_SpecialFunc(key, x, y);
 }
@@ -772,75 +796,96 @@ void GLUTTimerCallback(const int val) {
 
   // Model transformation for debugging
   {
-    dto::SceneModel &scene_model = scene_shader.GetSceneModel(kModelName);
+    dto::SceneModel &scene_model =
+        scene_shader.GetSceneModel(kEditingModelName);
 
     // Scaling
     if (ui_manager.IsKeyDown('[')) {
-      scene_model.SetScaling(scene_model.GetScaling() *
-                             glm::vec3(1.0f - kModelScalingStep));
+      scene_model.SetInstancingScaling(
+          editing_model_instance_idx,
+          scene_model.GetInstancingScaling(editing_model_instance_idx) *
+              glm::vec3(1.0f - kEditingModelScalingStep));
     }
     if (ui_manager.IsKeyDown(']')) {
-      scene_model.SetScaling(scene_model.GetScaling() *
-                             glm::vec3(1.0f + kModelScalingStep));
+      scene_model.SetInstancingScaling(
+          editing_model_instance_idx,
+          scene_model.GetInstancingScaling(editing_model_instance_idx) *
+              glm::vec3(1.0f + kEditingModelScalingStep));
     }
     // Rotation
     if (ui_manager.IsKeyDown('1')) {
-      scene_model.SetRotation(scene_model.GetRotation() +
-                              kModelRotationStep *
-                                  glm::vec3(-1.0f, 0.0f, 0.0f));
+      scene_model.SetInstancingRotation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingRotation(editing_model_instance_idx) +
+              kEditingModelRotationStep * glm::vec3(-1.0f, 0.0f, 0.0f));
     }
     if (ui_manager.IsKeyDown('2')) {
-      scene_model.SetRotation(scene_model.GetRotation() +
-                              kModelRotationStep * glm::vec3(1.0f, 0.0f, 0.0f));
+      scene_model.SetInstancingRotation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingRotation(editing_model_instance_idx) +
+              kEditingModelRotationStep * glm::vec3(1.0f, 0.0f, 0.0f));
     }
     if (ui_manager.IsKeyDown('3')) {
-      scene_model.SetRotation(scene_model.GetRotation() +
-                              kModelRotationStep *
-                                  glm::vec3(0.0f, -1.0f, 0.0f));
+      scene_model.SetInstancingRotation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingRotation(editing_model_instance_idx) +
+              kEditingModelRotationStep * glm::vec3(0.0f, -1.0f, 0.0f));
     }
     if (ui_manager.IsKeyDown('4')) {
-      scene_model.SetRotation(scene_model.GetRotation() +
-                              kModelRotationStep * glm::vec3(0.0f, 1.0f, 0.0f));
+      scene_model.SetInstancingRotation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingRotation(editing_model_instance_idx) +
+              kEditingModelRotationStep * glm::vec3(0.0f, 1.0f, 0.0f));
     }
     if (ui_manager.IsKeyDown('5')) {
-      scene_model.SetRotation(scene_model.GetRotation() +
-                              kModelRotationStep *
-                                  glm::vec3(0.0f, 0.0f, -1.0f));
+      scene_model.SetInstancingRotation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingRotation(editing_model_instance_idx) +
+              kEditingModelRotationStep * glm::vec3(0.0f, 0.0f, -1.0f));
     }
     if (ui_manager.IsKeyDown('6')) {
-      scene_model.SetRotation(scene_model.GetRotation() +
-                              kModelRotationStep * glm::vec3(0.0f, 0.0f, 1.0f));
+      scene_model.SetInstancingRotation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingRotation(editing_model_instance_idx) +
+              kEditingModelRotationStep * glm::vec3(0.0f, 0.0f, 1.0f));
     }
     // Translation
     if (ui_manager.IsKeyDown('i')) {
-      scene_model.SetTranslation(scene_model.GetTranslation() +
-                                 kModelTranslationStep *
-                                     glm::vec3(0.0f, 0.0f, -1.0f));
+      editing_model_instance_idx,
+          scene_model.SetInstancingTranslation(
+              editing_model_instance_idx,
+              scene_model.GetInstancingTranslation(editing_model_instance_idx) +
+                  kEditingModelTranslationStep * glm::vec3(0.0f, 0.0f, -1.0f));
     }
     if (ui_manager.IsKeyDown('k')) {
-      scene_model.SetTranslation(scene_model.GetTranslation() +
-                                 kModelTranslationStep *
-                                     glm::vec3(0.0f, 0.0f, 1.0f));
+      scene_model.SetInstancingTranslation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingTranslation(editing_model_instance_idx) +
+              kEditingModelTranslationStep * glm::vec3(0.0f, 0.0f, 1.0f));
     }
     if (ui_manager.IsKeyDown('j')) {
-      scene_model.SetTranslation(scene_model.GetTranslation() +
-                                 kModelTranslationStep *
-                                     glm::vec3(-1.0f, 0.0f, 0.0f));
+      scene_model.SetInstancingTranslation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingTranslation(editing_model_instance_idx) +
+              kEditingModelTranslationStep * glm::vec3(-1.0f, 0.0f, 0.0f));
     }
     if (ui_manager.IsKeyDown('l')) {
-      scene_model.SetTranslation(scene_model.GetTranslation() +
-                                 kModelTranslationStep *
-                                     glm::vec3(1.0f, 0.0f, 0.0f));
+      scene_model.SetInstancingTranslation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingTranslation(editing_model_instance_idx) +
+              kEditingModelTranslationStep * glm::vec3(1.0f, 0.0f, 0.0f));
     }
     if (ui_manager.IsKeyDown('b')) {
-      scene_model.SetTranslation(scene_model.GetTranslation() +
-                                 kModelTranslationStep *
-                                     glm::vec3(0.0f, 1.0f, 0.0f));
+      scene_model.SetInstancingTranslation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingTranslation(editing_model_instance_idx) +
+              kEditingModelTranslationStep * glm::vec3(0.0f, 1.0f, 0.0f));
     }
     if (ui_manager.IsKeyDown('n')) {
-      scene_model.SetTranslation(scene_model.GetTranslation() +
-                                 kModelTranslationStep *
-                                     glm::vec3(0.0f, -1.0f, 0.0f));
+      scene_model.SetInstancingTranslation(
+          editing_model_instance_idx,
+          scene_model.GetInstancingTranslation(editing_model_instance_idx) +
+              kEditingModelTranslationStep * glm::vec3(0.0f, -1.0f, 0.0f));
     }
   }
 

@@ -34,6 +34,34 @@ glm::vec3 dto::SceneModel::GetRotation() const { return rotation_; }
 
 glm::vec3 dto::SceneModel::GetScaling() const { return scaling_; }
 
+glm::vec3 dto::SceneModel::GetInstancingTranslation(
+    const int instance_idx) const {
+  if (instancing_translations_.empty()) {
+    // Direct to model transformation
+    return GetTranslation();
+  } else {
+    return instancing_translations_[instance_idx];
+  }
+}
+
+glm::vec3 dto::SceneModel::GetInstancingRotation(const int instance_idx) const {
+  if (instancing_rotations_.empty()) {
+    // Direct to model transformation
+    return GetRotation();
+  } else {
+    return instancing_rotations_[instance_idx];
+  }
+}
+
+glm::vec3 dto::SceneModel::GetInstancingScaling(const int instance_idx) const {
+  if (instancing_scalings_.empty()) {
+    // Direct to model transformation
+    return GetScaling();
+  } else {
+    return instancing_scalings_[instance_idx];
+  }
+}
+
 /*******************************************************************************
  * State Setters
  ******************************************************************************/
@@ -63,6 +91,36 @@ void dto::SceneModel::SetInstancingRotations(
 void dto::SceneModel::SetInstancingScalings(
     const std::vector<glm::vec3> &scalings) {
   instancing_scalings_ = scalings;
+}
+
+void dto::SceneModel::SetInstancingTranslation(const int instance_idx,
+                                               const glm::vec3 &translation) {
+  if (instancing_translations_.empty()) {
+    // Direct to model transformation
+    SetTranslation(translation);
+  } else {
+    instancing_translations_[instance_idx] = translation;
+  }
+}
+
+void dto::SceneModel::SetInstancingRotation(const int instance_idx,
+                                            const glm::vec3 &rotation) {
+  if (instancing_rotations_.empty()) {
+    // Direct to model transformation
+    SetRotation(rotation);
+  } else {
+    instancing_rotations_[instance_idx] = rotation;
+  }
+}
+
+void dto::SceneModel::SetInstancingScaling(const int instance_idx,
+                                           const glm::vec3 &scaling) {
+  if (instancing_scalings_.empty()) {
+    // Direct to model transformation
+    SetScaling(scaling);
+  } else {
+    instancing_scalings_[instance_idx] = scaling;
+  }
 }
 
 void dto::SceneModel::SetLightPos(const glm::vec3 &light_pos) {
@@ -161,6 +219,16 @@ bool dto::SceneModel::GetUseEnvMap() const { return use_env_map_; }
 void dto::SceneModel::LoadFile(const std::string &path,
                                const unsigned int flags) {
   model_.LoadFile(path, flags);
+}
+
+/*******************************************************************************
+ * State Initialization (Private)
+ ******************************************************************************/
+
+void dto::SceneModel::InitInstancingTransforms() {
+  instancing_translations_ = std::vector<glm::vec3>{glm::vec3(0.0f)};
+  instancing_rotations_ = std::vector<glm::vec3>{glm::vec3(0.0f)};
+  instancing_scalings_ = std::vector<glm::vec3>{glm::vec3(1.0f)};
 }
 
 /*******************************************************************************
