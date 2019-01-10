@@ -69,7 +69,7 @@ class FbxController {
 
   void SetTime(const double ratio);
 
-  void SetCameraTransform(const glm::vec3 &eye, const glm::vec3 &dir,
+  void SetCameraTransform(const glm::vec3 &eye, const glm::vec3 &angles,
                           const glm::vec3 &up, const float &roll);
 
   void SetModelTransform(const glm::vec3 &translation,

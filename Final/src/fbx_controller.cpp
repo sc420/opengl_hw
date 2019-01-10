@@ -7,9 +7,8 @@ ctrl::FbxController::~FbxController() { delete gSceneContext; }
 void ctrl::FbxController::Initialize(const std::string& fbx_path,
                                      const glm::ivec2& window_size) {
   const bool lSupportVBO = true;
-  gSceneContext = new SceneContext(
-      "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
-      window_size.x, window_size.y, lSupportVBO);
+  gSceneContext = new SceneContext(fbx_path.c_str(), window_size.x,
+                                   window_size.y, lSupportVBO);
 
   Draw();
   ConfigSceneContext();
@@ -56,17 +55,19 @@ void ctrl::FbxController::SetTime(const double ratio) {
 }
 
 void ctrl::FbxController::SetCameraTransform(const glm::vec3& eye,
-                                             const glm::vec3& dir,
+                                             const glm::vec3& angles,
                                              const glm::vec3& up,
                                              const float& roll) {
-  const glm::vec3 reverse_eye = (-eye);
-  const glm::vec3 reverse_center = (-(eye - dir));
-  fbxsdk::FbxDouble3 fbx_position(reverse_eye[0], reverse_eye[1],
-                                  reverse_eye[2]);
-  fbxsdk::FbxDouble3 fbx_interest_position(reverse_center[0], reverse_center[1],
-                                           reverse_center[2]);
+  const glm::quat quaternion = glm::quat(angles);
+  const glm::vec4 dir =
+      glm::mat4_cast(quaternion) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
+
+  const glm::vec3 center = eye + glm::vec3(dir);
+  fbxsdk::FbxDouble3 fbx_position(eye[0], eye[1], eye[2]);
+  fbxsdk::FbxDouble3 fbx_interest_position(center[0], center[1], center[2]);
   fbxsdk::FbxDouble3 fbx_up_vector(up[0], up[1], up[2]);
   const double fbx_roll = roll;
+
   gSceneContext->SetCameraTransform(fbx_position, fbx_interest_position,
                                     fbx_up_vector, fbx_roll);
 }

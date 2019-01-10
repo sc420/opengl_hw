@@ -22,6 +22,7 @@
 
 /* FBX */
 static const auto kBlackHawkAnimDuration = 0.1f;
+static const auto kBlackHawkExplosionAnimDuration = 5.0f;
 /* User Interfaces */
 static const auto kInitWindowRelativeCenterPos = glm::vec2(0.5f, 0.5f);
 static const auto kInitWindowSize = glm::ivec2(720, 450);
@@ -107,6 +108,7 @@ ctrl::AircraftController aircraft_ctrl(
     // Bounce force
     glm::vec3(1e1f), 1.0f);
 ctrl::FbxController fbx_ctrl;
+ctrl::FbxController explosion_fbx_ctrl;
 ctrl::SoundController sound_ctrl;
 
 /*******************************************************************************
@@ -179,17 +181,17 @@ void InitGLUT(int argc, char *argv[]) {
  ******************************************************************************/
 
 void ConfigGLSettings() {
-  glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClearDepth(1.0f);
   glClearStencil(0);
   glDepthFunc(GL_LEQUAL);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_MULTISAMPLE_ARB);
   // glEnable(GL_CULL_FACE);
-  glEnable(GL_BLEND);
+  // glEnable(GL_BLEND);
 
   // Set blending function
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // Enable stencil test
   glEnable(GL_STENCIL_TEST);
@@ -301,6 +303,9 @@ void InitFbx() {
   fbx_ctrl.Initialize(
       "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
       kInitWindowSize);
+  explosion_fbx_ctrl.Initialize(
+      "assets/models/blackhawk_explosion/blackhawk-helicopter-explosion.fbx",
+      kInitWindowSize);
 }
 
 /*******************************************************************************
@@ -366,6 +371,22 @@ void UpdateImGui() {
       glm::vec3 scaling;
 
       fbx_ctrl.GetModelTransform(translation, rotation, scaling);
+
+      ImGui::Text("Translation: (%.1f, %.1f, %.1f)", translation[0],
+                  translation[1], translation[2]);
+      ImGui::Text("Rotation: (%.2f, %.2f, %.2f)", rotation[0], rotation[1],
+                  rotation[2]);
+      ImGui::Text("Scaling: (%.3f, %.3f, %.3f)", scaling[0], scaling[1],
+                  scaling[2]);
+    }
+
+    if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
+    if (ImGui::CollapsingHeader("FBX Explosion Model")) {
+      glm::vec3 translation;
+      glm::vec3 rotation;
+      glm::vec3 scaling;
+
+      explosion_fbx_ctrl.GetModelTransform(translation, rotation, scaling);
 
       ImGui::Text("Translation: (%.1f, %.1f, %.1f)", translation[0],
                   translation[1], translation[2]);
@@ -548,7 +569,9 @@ void GLUTDisplayCallback() {
 
   skybox_shader.Draw();
   scene_shader.Draw();
-  fbx_ctrl.Draw();
+  // fbx_ctrl.Draw();
+
+  explosion_fbx_ctrl.Draw();
 
   // Restore polygon mode
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -595,6 +618,7 @@ void GLUTReshapeCallback(const int width, const int height) {
   diff_shader.UpdateDiffFramebufferTextures(width, height);
   // Update FBX
   fbx_ctrl.OnReshape(width, height);
+  explosion_fbx_ctrl.OnReshape(width, height);
   // Update ImGui
   ImGui_ImplFreeGLUT_ReshapeFunc(width, height);
 }
@@ -623,6 +647,7 @@ void GLUTKeyboardCallback(const unsigned char key, const int x, const int y) {
   ui_manager.MarkKeyDown(key);
   // Update FBX
   fbx_ctrl.OnKeyboard(key);
+  explosion_fbx_ctrl.OnKeyboard(key);
   // Update ImGui
   ImGui_ImplFreeGLUT_KeyboardFunc(key, x, y);
 }
@@ -675,6 +700,7 @@ void GLUTMouseCallback(const int button, const int state, const int x,
   postproc_shader.UpdateMousePos(mouse_pos);
   // Update FBX
   fbx_ctrl.OnMouse(button, state, x, y);
+  explosion_fbx_ctrl.OnMouse(button, state, x, y);
   // Update ImGui
   ImGui_ImplFreeGLUT_MouseFunc(button, state, x, y);
 }
@@ -716,6 +742,7 @@ void GLUTMotionCallback(const int x, const int y) {
   }
   // Update FBX
   fbx_ctrl.OnMotion(x, y);
+  explosion_fbx_ctrl.OnMotion(x, y);
   // Update ImGui
   ImGui_ImplFreeGLUT_MotionFunc(x, y);
 }
@@ -938,10 +965,24 @@ void GLUTTimerCallback(const int val) {
 
   // Update FBX controller
   fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);
-  fbx_ctrl.SetCameraTransform(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
-                              glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
-  fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(), fbx_camera_ctrl.GetRot(),
-                             fbx_camera_ctrl.GetScaling());
+  // fbx_ctrl.SetCameraTransform(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
+  //                            glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+  // fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(),
+  // fbx_camera_ctrl.GetRot(),
+  //                           fbx_camera_ctrl.GetScaling());
+
+  // fbx_ctrl.SetCameraTransform(camera_trans.GetEye(),
+  // camera_trans.GetAngles(),
+  //                            glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+  // fbx_ctrl.SetModelTransform(glm::vec3(0.0f), glm::vec3(0.0f),
+  // glm::vec3(1.0f));
+
+  explosion_fbx_ctrl.SetTime(elapsed_time / kBlackHawkExplosionAnimDuration);
+  explosion_fbx_ctrl.SetCameraTransform(camera_trans.GetEye(),
+                                        camera_trans.GetAngles(),
+                                        glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+  explosion_fbx_ctrl.SetModelTransform(glm::vec3(0.0f), glm::vec3(0.0f),
+                                       glm::vec3(1.0f));
 
   // Update sound controller
   sound_ctrl.Set3DSoundPosition(
