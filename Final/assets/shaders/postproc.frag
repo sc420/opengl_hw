@@ -41,6 +41,7 @@ layout(std140) uniform PostprocInputs {
   int pass_idx;
   int scaling_idx;
   float time;
+  bool use_shaking_effect;
 }
 postproc_inputs;
 
@@ -77,6 +78,8 @@ vec4 GetTexel(const sampler2D tex, const vec2 coord) {
 }
 
 vec2 GetTextureSize(const sampler2D tex) { return textureSize(tex, 0); }
+
+vec4 GetOriginal() { return GetTexel(original_tex, vs_tex_coords); }
 
 /*******************************************************************************
  * Display Mode Handlers
@@ -216,8 +219,57 @@ vec4 CalcGaussianBlur(const sampler2D tex, const bool horizontal) {
   return clamp(sum, 0.0f, 1.0f);
 }
 
+vec4 CalcBloom() {
+  switch (postproc_inputs.pass_idx) {
+      /* The color is directly drawn to the postproc framebuffer at pass index 0
+       * by other shaders */
+    case 1: {
+      /* Draw original and HDR (Multiple scaling) */
+      if (postproc_inputs.scaling_idx == 0) {
+        fs_original_color = GetOriginal();
+      } else {
+        fs_original_color = vec4(0.0f);
+      }
+      fs_hdr_color = ColorToHdr(GetOriginal());
+    } break;
+    case 2: {
+      /* Blur HDR horizontally (Multiple scaling) */
+      if (postproc_inputs.scaling_idx == 0) {
+        fs_original_color = GetOriginal();
+      } else {
+        fs_original_color = vec4(0.0f);
+      }
+      fs_hdr_color = CalcGaussianBlur(hdr_tex, true);
+    } break;
+    case 3: {
+      /* Blur HDR vertically (Multiple scaling) */
+      if (postproc_inputs.scaling_idx == 0) {
+        fs_original_color = GetOriginal();
+      } else {
+        fs_original_color = vec4(0.0f);
+      }
+      fs_hdr_color = CalcGaussianBlur(hdr_tex, false);
+    } break;
+    case 4: {
+      /* Combine original and blurred HDR (Single pass) */
+      fs_original_color = CalcCombiningBlurredHdr();
+      fs_hdr_color = kErrorColor;
+    } break;
+    case 5: {
+      /* Draw post-processing effects (Single pass) */
+      fs_original_color = GetOriginal();
+      fs_hdr_color = kErrorColor;
+    } break;
+    default: {
+      fs_original_color = kErrorColor;
+      fs_hdr_color = kErrorColor;
+    }
+  }
+  return fs_original_color;
+}
+
 /*******************************************************************************
- * Post-processing / Special
+ * Post-processing / Shaking
  ******************************************************************************/
 
 float sat(float t) { return clamp(t, 0.0, 1.0); }
@@ -347,7 +399,7 @@ vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
 
   const vec2 iResolution = GetTextureSize(sampler);
   const float iTime = postproc_inputs.time;
-  const float Amount = 0.1f + 0.5f * abs(sin(iTime));
+  const float Amount = 0.5f;
 
   vec2 pixel = vec2(1.0) / iResolution;
   vec3 field = rgb2hsv(edge(sampler, uv, edgeSize));
@@ -515,56 +567,17 @@ vec4 CalcGammaCorrected(const vec4 color) {
  * Post-processing / Center
  ******************************************************************************/
 
-vec4 CalcOriginal() { return GetTexel(original_tex, vs_tex_coords); }
+vec4 CalcPostproc() {
+  // Check if bloom is activated
+  if (postproc_inputs.pass_idx == 0) {
+    return GetOriginal();
+  } else {
+    return CalcBloom();
+  }
+}
 
 /*******************************************************************************
  * Entry Point
  ******************************************************************************/
 
-void main() {
-  switch (postproc_inputs.pass_idx) {
-      /* The color is directly drawn to the postproc framebuffer at pass index 0
-       * by other shaders */
-    case 1: {
-      /* Draw original and HDR (Multiple scaling) */
-      if (postproc_inputs.scaling_idx == 0) {
-        fs_original_color = CalcOriginal();
-      } else {
-        fs_original_color = vec4(0.0f);
-      }
-      fs_hdr_color = ColorToHdr(CalcOriginal());
-    } break;
-    case 2: {
-      /* Blur HDR horizontally (Multiple scaling) */
-      if (postproc_inputs.scaling_idx == 0) {
-        fs_original_color = CalcOriginal();
-      } else {
-        fs_original_color = vec4(0.0f);
-      }
-      fs_hdr_color = CalcGaussianBlur(hdr_tex, true);
-    } break;
-    case 3: {
-      /* Blur HDR vertically (Multiple scaling) */
-      if (postproc_inputs.scaling_idx == 0) {
-        fs_original_color = CalcOriginal();
-      } else {
-        fs_original_color = vec4(0.0f);
-      }
-      fs_hdr_color = CalcGaussianBlur(hdr_tex, false);
-    } break;
-    case 4: {
-      /* Combine original and blurred HDR (Single pass) */
-      fs_original_color = CalcCombiningBlurredHdr();
-      fs_hdr_color = kErrorColor;
-    } break;
-    case 5: {
-      /* Draw post-processing effects (Single pass) */
-      fs_original_color = CalcOriginal();
-      fs_hdr_color = kErrorColor;
-    } break;
-    default: {
-      fs_original_color = kErrorColor;
-      fs_hdr_color = kErrorColor;
-    }
-  }
-}
+void main() { fs_original_color = CalcPostproc(); }

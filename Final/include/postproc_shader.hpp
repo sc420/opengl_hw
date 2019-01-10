@@ -39,6 +39,10 @@ class PostprocShader : public Shader {
     int pass_idx;           // 4*5=20, +4->24
     int scaling_idx;        // 4*6=24, +4->28
     float time;             // 4*7=28, +4->32
+
+    bool use_shaking_effect;  // 4*8=32, +1->33
+
+    bool pad[7];  // +7->40
   };
 
   PostprocShader();
@@ -88,6 +92,8 @@ class PostprocShader : public Shader {
   void UpdateScalingIdx(const int scaling_idx);
 
   void UpdateTime(const float time);
+
+  void UpdateUseShakingEffect(const bool use_shaking_effect);
 
   /* Name Management */
 

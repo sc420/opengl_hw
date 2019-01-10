@@ -1,8 +1,8 @@
 #include "postproc_shader.hpp"
 
 shader::PostprocShader::PostprocShader() : postproc_inputs_(PostprocInputs()) {
-  // TODO: debug
-  postproc_inputs_.effect_idx = kEffectBloomEffect;
+  // TODO: Use constructor
+  postproc_inputs_.use_shaking_effect = false;
 }
 
 /*******************************************************************************
@@ -376,6 +376,11 @@ void shader::PostprocShader::UpdateScalingIdx(const int scaling_idx) {
 
 void shader::PostprocShader::UpdateTime(const float time) {
   postproc_inputs_.time = time;
+}
+
+void shader::PostprocShader::UpdateUseShakingEffect(
+    const bool use_shaking_effect) {
+  postproc_inputs_.use_shaking_effect = use_shaking_effect;
 }
 
 /*******************************************************************************
