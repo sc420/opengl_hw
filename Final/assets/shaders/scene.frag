@@ -26,6 +26,8 @@ layout(std140) uniform ModelMaterial {
   vec4 specular_color;
   float shininess;
   bool use_env_map;
+  bool use_fog;
+  bool mix_fog_with_skybox;
 }
 model_material;
 
@@ -344,11 +346,13 @@ vec4 MixWithFogColor() {
 
   // Move the light of fog color into the hue of skybox color
   vec3 fog_color_hsv = RgbToHsv(kFogColor);
-  fog_color_hsv.z +=
-      clamp(kMixWithSkyboxRatio * (skybox_color_hsv.z - fog_color_hsv.z),
-            (-kMaxFogAdjust), kMaxFogAdjust);
-  fog_color_hsv.z *=
-      clamp(1.0f - pow(1.0f - dist, kFogDistExp), kMinFogDistAdjust, 1.0f);
+  if (model_material.mix_fog_with_skybox) {
+    fog_color_hsv.z +=
+        clamp(kMixWithSkyboxRatio * (skybox_color_hsv.z - fog_color_hsv.z),
+              (-kMaxFogAdjust), kMaxFogAdjust);
+    fog_color_hsv.z *=
+        clamp(1.0f - pow(1.0f - dist, kFogDistExp), kMinFogDistAdjust, 1.0f);
+  }
   vec4 adjusted_fog_color = vec4(HsvToRgb(fog_color_hsv), 1.0f);
 
   // Calculate fog factor
@@ -363,4 +367,10 @@ vec4 MixWithFogColor() {
  * Entry Point
  ******************************************************************************/
 
-void main() { fs_color = MixWithFogColor(); }
+void main() {
+  if (model_material.use_fog) {
+    fs_color = MixWithFogColor();
+  } else {
+    fs_color = MixWithEnvMapColor();
+  }
+}

@@ -36,7 +36,13 @@ class SceneShader : public Shader {
 
     bool use_env_map;  // 4*21=84, +1->85
 
-    bool pad[3];  // +3->88=4*22
+    bool pad_use_fog[3];  // +3->88
+    bool use_fog;         // 4*22=88, +1->89
+
+    bool pad_pad_mix_fog_with_skybox[3];  // +3->92
+    bool mix_fog_with_skybox;             // 4*23=92, +1->93
+
+    bool pad[3];  // +3->96
   };
 
   struct Lighting {
@@ -105,6 +111,10 @@ class SceneShader : public Shader {
   void UpdateSceneModel(const dto::SceneModel &scene_model);
 
   void ToggleNormalHeight(const bool toggle);
+
+  void ToggleFog(const bool toggle);
+
+  void ToggleMixFogWithSkybox(const bool toggle);
 
   /* Name Management */
 

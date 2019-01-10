@@ -143,6 +143,8 @@ bool has_collision_anim_finished = false;
  * Rendering States
  ******************************************************************************/
 
+bool use_fog = false;
+bool mix_fog_with_skybox = false;
 bool use_sound = false;
 bool last_use_sound = false;
 bool use_aircraft_wind = false;
@@ -502,6 +504,8 @@ void UpdateImGui() {
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Demo")) {
+      ImGui::Checkbox("Fog", &use_fog);
+      ImGui::Checkbox("Mix Fog with Skybox", &mix_fog_with_skybox);
       ImGui::Checkbox("Sound", &use_sound);
       ImGui::Checkbox("Camera Wind", &use_camera_wind);
       ImGui::Checkbox("Aircraft Wind", &use_aircraft_wind);
@@ -1144,7 +1148,11 @@ void GLUTTimerCallback(const int val) {
                  glm::vec3(2.0f)));
   }
 
-  // Update using normal state
+  // Update fog state
+  scene_shader.ToggleFog(use_fog);
+  scene_shader.ToggleMixFogWithSkybox(mix_fog_with_skybox);
+
+  // Update  normal state
   scene_shader.ToggleNormalHeight(use_normal);
 
   // Update camera shaking wind

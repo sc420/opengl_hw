@@ -233,6 +233,14 @@ void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
   use_normal_height = toggle;
 }
 
+void shader::SceneShader::ToggleFog(const bool toggle) {
+  model_material_.use_fog = toggle;
+}
+
+void shader::SceneShader::ToggleMixFogWithSkybox(const bool toggle) {
+  model_material_.mix_fog_with_skybox = toggle;
+}
+
 /*******************************************************************************
  * Name Management
  ******************************************************************************/
