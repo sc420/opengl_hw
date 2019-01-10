@@ -68,6 +68,8 @@ void ctrl::SoundController::Set3DSoundPosition(const std::string& sound_name,
   sound->setPosition(GlmVecToIrrklangVec(sound_pos));
 }
 
+void ctrl::SoundController::StopAllSound() { engine_->stopAllSounds(); }
+
 bool ctrl::SoundController::IsSoundPaused(const std::string& sound_name) {
   irrklang::ISound* sound = GetSound(sound_name);
   return sound->getIsPaused();

@@ -273,6 +273,9 @@ void InitSoundController() {
   sound_ctrl.Register3DSound("helicopter_hovering",
                              "assets/sound/helicopter-hovering-01.wav",
                              glm::vec3(0.0f, 0.0f, 1.0f), true);
+  sound_ctrl.Register2DSound("cockpit_interior",
+                             "assets/sound/cockpit_interior.mp3", true);
+  sound_ctrl.SetSoundVolume("cockpit_interior", 0.5f);
 }
 
 /*******************************************************************************
@@ -351,6 +354,7 @@ void StartCollision() {
 
     // Stop all previously played sound
     sound_ctrl.SetSoundStop("helicopter_hovering");
+    sound_ctrl.SetSoundStop("cockpit_interior");
     sound_ctrl.SetSoundStop("pull_up_alarm");
     sound_ctrl.SetSoundStop("altitude_warning");
 
@@ -374,10 +378,17 @@ void ResetCollision() {
   aircraft_ctrl.SetDir(glm::vec3(0.0f));
   aircraft_ctrl.SetPreferSpeed(1e-2f);
 
+  // Stop previously played sound
+  sound_ctrl.StopAllSound();
+
   // Resume the hovering sound
   sound_ctrl.Register3DSound("helicopter_hovering",
                              "assets/sound/helicopter-hovering-01.wav",
                              glm::vec3(0.0f, 0.0f, 1.0f), true);
+  // Resume cockpit interior sound
+  sound_ctrl.Register2DSound("cockpit_interior",
+                             "assets/sound/cockpit_interior.mp3", true);
+  sound_ctrl.SetSoundVolume("cockpit_interior", 0.5f);
 }
 
 /*******************************************************************************
@@ -1055,7 +1066,7 @@ void GLUTTimerCallback(const int val) {
         sound_ctrl.Register2DSound(
             "altitude_warning",
             "assets/sound/helicopter-altitude-warning-sound.wav", true);
-        sound_ctrl.SetSoundVolume("altitude_warning", 0.3f);
+        sound_ctrl.SetSoundVolume("altitude_warning", 0.2f);
       }
     } else {
       sound_ctrl.SetSoundStop("altitude_warning");
