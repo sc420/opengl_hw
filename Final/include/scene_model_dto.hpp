@@ -75,11 +75,13 @@ class SceneModel {
 
   glm::mat4 GetTrans() const;
 
-  const std::vector<glm::vec3> GetInstancingTranslations() const;
+  std::vector<glm::vec3> GetInstancingTranslations() const;
 
-  const std::vector<glm::vec3> GetInstancingRotations() const;
+  std::vector<glm::vec3> GetInstancingRotations() const;
 
-  const std::vector<glm::vec3> GetInstancingScalings() const;
+  std::vector<glm::vec3> GetInstancingScalings() const;
+
+  std::vector<glm::mat4> GetInstancingTransforms() const;
 
   size_t GetNumInstancing() const;
 

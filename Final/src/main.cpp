@@ -34,6 +34,8 @@ static const auto kCameraZoomingStep = 1.0f;
 static const auto kTimerInterval = 10;
 /* Camera Shaking */
 static const auto kCameraShakingMaxWind = 0.1f;
+/* Collision Detections */
+static const auto kCollisionDist = 0.3f;
 /* Debug */
 // Shadow
 static const auto kSeeFromLight = false;
@@ -495,6 +497,20 @@ void UpdateCameraShakingWind() {
   camera_shaking_wind += GenRand(camera_shaking_distrib).x;
   camera_shaking_wind = glm::clamp(
       camera_shaking_wind, (-kCameraShakingMaxWind), kCameraShakingMaxWind);
+}
+
+/*******************************************************************************
+ * Collision Calculations
+ ******************************************************************************/
+
+bool CheckCollisionWithGround() {
+  const float dist =
+      scene_shader.GetMinDistanceToModel(camera_trans.GetEye(), "ground");
+  std::cerr << "dist: " << dist << std::endl;
+  if (dist < kCollisionDist) {
+    std::cerr << "collision" << std::endl;
+  }
+  return dist < kCollisionDist;
 }
 
 /*******************************************************************************
@@ -962,6 +978,9 @@ void GLUTTimerCallback(const int val) {
 
   // Update aircraft controller
   aircraft_ctrl.Update();
+
+  // Check collision
+  CheckCollisionWithGround();
 
   // Update FBX controller
   fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);

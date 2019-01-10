@@ -133,6 +133,41 @@ glm::mat4 shader::SceneShader::GetLightProjection() const {
   return glm::ortho(-30.0f, 30.0f, -30.0f, 30.0f, 1e-3f, 1e3f);
 }
 
+float shader::SceneShader::GetMinDistanceToModel(
+    const glm::vec3 &pos, const std::string &scene_model_name) const {
+  const dto::SceneModel &scene_model = scene_models_.at(scene_model_name);
+  const as::Model &model = scene_model.GetModel();
+  const std::vector<as::Mesh> &meshes = model.GetMeshes();
+
+  // Get model global transformations
+  const glm::mat4 model_trans = scene_model.GetTrans();
+
+  float min_dist = std::numeric_limits<float>::max();
+
+  // Check each mesh
+  for (size_t mesh_idx = 0; mesh_idx < meshes.size(); mesh_idx++) {
+    const as::Mesh &mesh = meshes.at(mesh_idx);
+    const std::vector<as::Vertex> &vertices = mesh.GetVertices();
+
+    // Check each vertex
+    for (size_t vertex_idx = 0; vertex_idx < vertices.size(); vertex_idx++) {
+      const as::Vertex &vertex = vertices[vertex_idx];
+
+      // Check each instancing transformations
+      const std::vector<glm::mat4> instancing_transforms =
+          scene_model.GetInstancingTransforms();
+      for (const glm::mat4 &instancing_transform : instancing_transforms) {
+        const glm::vec4 trans_pos =
+            model_trans * instancing_transform * glm::vec4(vertex.pos, 1.0f);
+
+        min_dist = glm::min(min_dist, glm::distance(pos, glm::vec3(trans_pos)));
+      }
+    }
+  }
+
+  return min_dist;
+}
+
 /*******************************************************************************
  * State Updaters
  ******************************************************************************/

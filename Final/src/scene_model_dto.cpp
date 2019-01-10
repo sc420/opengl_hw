@@ -162,8 +162,7 @@ glm::mat4 dto::SceneModel::GetTrans() const {
   return GetTransformMatrix(translation_, rotation_, scaling_);
 }
 
-const std::vector<glm::vec3> dto::SceneModel::GetInstancingTranslations()
-    const {
+std::vector<glm::vec3> dto::SceneModel::GetInstancingTranslations() const {
   if (instancing_translations_.empty()) {
     return GetDefaultInstancingTransforms(glm::vec3(0.0f));
   } else {
@@ -171,7 +170,7 @@ const std::vector<glm::vec3> dto::SceneModel::GetInstancingTranslations()
   }
 }
 
-const std::vector<glm::vec3> dto::SceneModel::GetInstancingRotations() const {
+std::vector<glm::vec3> dto::SceneModel::GetInstancingRotations() const {
   if (instancing_rotations_.empty()) {
     return GetDefaultInstancingTransforms(glm::vec3(0.0f));
   } else {
@@ -179,12 +178,24 @@ const std::vector<glm::vec3> dto::SceneModel::GetInstancingRotations() const {
   }
 }
 
-const std::vector<glm::vec3> dto::SceneModel::GetInstancingScalings() const {
+std::vector<glm::vec3> dto::SceneModel::GetInstancingScalings() const {
   if (instancing_scalings_.empty()) {
     return GetDefaultInstancingTransforms(glm::vec3(1.0f));
   } else {
     return instancing_scalings_;
   }
+}
+
+std::vector<glm::mat4> dto::SceneModel::GetInstancingTransforms() const {
+  std::vector<glm::mat4> transforms;
+  const std::vector<glm::vec3> translations = GetInstancingTranslations();
+  const std::vector<glm::vec3> rotations = GetInstancingRotations();
+  const std::vector<glm::vec3> scalings = GetInstancingScalings();
+  for (size_t i = 0; i < translations.size(); i++) {
+    transforms.push_back(
+        GetTransformMatrix(translations[i], rotations[i], scalings[i]));
+  }
+  return transforms;
 }
 
 size_t dto::SceneModel::GetNumInstancing() const {

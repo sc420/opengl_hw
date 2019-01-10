@@ -91,6 +91,9 @@ class SceneShader : public Shader {
 
   glm::mat4 GetLightProjection() const;
 
+  float GetMinDistanceToModel(const glm::vec3 &pos,
+                              const std::string &scene_model_name) const;
+
   /* State Updaters */
 
   void UpdateGlobalTrans(const dto::GlobalTrans &global_trans);
