@@ -56,11 +56,12 @@ void ctrl::FbxController::SetTime(const double ratio) {
 
 void ctrl::FbxController::SetCameraTransform(const glm::vec3& eye,
                                              const glm::vec3& angles,
-                                             const glm::vec3& up,
                                              const float& roll) {
   const glm::quat quaternion = glm::quat(angles);
   const glm::vec4 dir =
       glm::mat4_cast(quaternion) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
+  const glm::vec4 up =
+      glm::mat4_cast(quaternion) * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
 
   const glm::vec3 center = eye + glm::vec3(dir);
   fbxsdk::FbxDouble3 fbx_position(eye[0], eye[1], eye[2]);

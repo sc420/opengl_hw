@@ -303,8 +303,11 @@ void InitFbx() {
   fbx_ctrl.Initialize(
       "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
       kInitWindowSize);
+  // explosion_fbx_ctrl.Initialize(
+  //    "assets/models/blackhawk_explosion/blackhawk-helicopter-explosion.fbx",
+  //    kInitWindowSize);
   explosion_fbx_ctrl.Initialize(
-      "assets/models/blackhawk_explosion/blackhawk-helicopter-explosion.fbx",
+      "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
       kInitWindowSize);
 }
 
@@ -979,8 +982,7 @@ void GLUTTimerCallback(const int val) {
 
   explosion_fbx_ctrl.SetTime(elapsed_time / kBlackHawkExplosionAnimDuration);
   explosion_fbx_ctrl.SetCameraTransform(camera_trans.GetEye(),
-                                        camera_trans.GetAngles(),
-                                        glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
+                                        camera_trans.GetAngles(), 0.0f);
   explosion_fbx_ctrl.SetModelTransform(glm::vec3(0.0f), glm::vec3(0.0f),
                                        glm::vec3(1.0f));
 
