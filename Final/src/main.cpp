@@ -1138,7 +1138,9 @@ void GLUTTimerCallback(const int val) {
   // Check whether to start or stop the sound
   if (use_sound != last_use_sound) {
     if (use_sound) {
-      g if (!has_collided) { StartInitialSound(); }
+      if (!has_collided) {
+        StartInitialSound();
+      }
     } else {
       sound_ctrl.StopAllSound();
     }
