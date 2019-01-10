@@ -148,6 +148,7 @@ bool last_use_sound = false;
 bool use_aircraft_wind = false;
 bool use_camera_wind = false;
 bool use_hdr = false;
+bool use_normal = false;
 bool render_wireframe = false;
 
 /*******************************************************************************
@@ -170,21 +171,7 @@ float last_elapsed_time = 0.0f;
  * Menus
  ******************************************************************************/
 
-enum MainMenuItems {
-  kMainMidLevelSep,
-  kMainImgAbs,
-  kMainLaplacian,
-  kMainSharpness,
-  kMainPixelation,
-  kMainAdvancedSep,
-  kMainBloomEffect,
-  kMainMagnifier,
-  kMainCool,
-  kMainSpecial,
-  kMainExit
-};
-enum ModeMenuItems { kModeComparison, kModeNavigation };
-enum NormalHeightMenuItems { kNormalHeightOn, kNormalHeightOff };
+enum MainMenuItems { kMainMidLevelSep, kMainExit };
 enum TimerMenuItems { kTimerStart, kTimerStop };
 
 /*******************************************************************************
@@ -519,6 +506,7 @@ void UpdateImGui() {
       ImGui::Checkbox("Camera Wind", &use_camera_wind);
       ImGui::Checkbox("Aircraft Wind", &use_aircraft_wind);
       ImGui::Checkbox("HDR", &use_hdr);
+      ImGui::Checkbox("Normal", &use_normal);
     }
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
@@ -1156,6 +1144,9 @@ void GLUTTimerCallback(const int val) {
                  glm::vec3(2.0f)));
   }
 
+  // Update using normal state
+  scene_shader.ToggleNormalHeight(use_normal);
+
   // Update camera shaking wind
   UpdateCameraShakingWind();
 
@@ -1174,65 +1165,8 @@ void GLUTMainMenuCallback(const int id) {
   switch (id) {
     case MainMenuItems::kMainMidLevelSep: {
     } break;
-    case MainMenuItems::kMainImgAbs: {
-      postproc_shader.UpdateEffectIdx(shader::PostprocShader::kEffectImgAbs);
-    } break;
-    case MainMenuItems::kMainLaplacian: {
-      postproc_shader.UpdateEffectIdx(shader::PostprocShader::kEffectLaplacian);
-    } break;
-    case MainMenuItems::kMainSharpness: {
-      postproc_shader.UpdateEffectIdx(shader::PostprocShader::kEffectSharpness);
-    } break;
-    case MainMenuItems::kMainPixelation: {
-      postproc_shader.UpdateEffectIdx(
-          shader::PostprocShader::kEffectPixelation);
-    } break;
-    case MainMenuItems::kMainAdvancedSep: {
-    } break;
-    case MainMenuItems::kMainBloomEffect: {
-      postproc_shader.UpdateEffectIdx(
-          shader::PostprocShader::kEffectBloomEffect);
-    } break;
-    case MainMenuItems::kMainMagnifier: {
-      postproc_shader.UpdateEffectIdx(shader::PostprocShader::kEffectMagnifier);
-    } break;
-    case MainMenuItems::kMainCool: {
-    } break;
-    case MainMenuItems::kMainSpecial: {
-      postproc_shader.UpdateEffectIdx(shader::PostprocShader::kEffectSpecial);
-    } break;
     case MainMenuItems::kMainExit: {
       glutLeaveMainLoop();
-    } break;
-    default: {
-      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
-                               "'");
-    }
-  }
-}
-
-void GLUTModeMenuCallback(const int id) {
-  switch (id) {
-    case ModeMenuItems::kModeComparison: {
-      cur_mode = Modes::comparison;
-    } break;
-    case ModeMenuItems::kModeNavigation: {
-      cur_mode = Modes::navigation;
-    } break;
-    default: {
-      throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
-                               "'");
-    }
-  }
-}
-
-void GLUTNormalHeightMenuCallback(const int id) {
-  switch (id) {
-    case NormalHeightMenuItems::kNormalHeightOn: {
-      scene_shader.ToggleNormalHeight(true);
-    } break;
-    case NormalHeightMenuItems::kNormalHeightOff: {
-      scene_shader.ToggleNormalHeight(false);
     } break;
     default: {
       throw std::runtime_error("Unrecognized menu ID '" + std::to_string(id) +
@@ -1280,37 +1214,12 @@ void RegisterGLUTCallbacks() {
 
 void CreateGLUTMenus() {
   const int main_menu_hdlr = glutCreateMenu(GLUTMainMenuCallback);
-  const int mode_submenu_hdlr = glutCreateMenu(GLUTModeMenuCallback);
-  const int normal_height_submenu_hdlr =
-      glutCreateMenu(GLUTNormalHeightMenuCallback);
   const int timer_submenu_hdlr = glutCreateMenu(GLUTTimerMenuCallback);
 
   /* Main Menu */
   glutSetMenu(main_menu_hdlr);
-  glutAddSubMenu("Mode", mode_submenu_hdlr);
-  glutAddSubMenu("Normal&Height Mapping", normal_height_submenu_hdlr);
   glutAddSubMenu("Timer", timer_submenu_hdlr);
-  glutAddMenuEntry("(Mid-level)", MainMenuItems::kMainMidLevelSep);
-  glutAddMenuEntry("1. Image Abstraction", MainMenuItems::kMainImgAbs);
-  glutAddMenuEntry("2. Laplacian Filter", MainMenuItems::kMainLaplacian);
-  glutAddMenuEntry("3. Sharpness Filter", MainMenuItems::kMainSharpness);
-  glutAddMenuEntry("4. Pixelation", MainMenuItems::kMainPixelation);
-  glutAddMenuEntry("(Advanced)", MainMenuItems::kMainAdvancedSep);
-  glutAddMenuEntry("1. Blooem Effect", MainMenuItems::kMainBloomEffect);
-  glutAddMenuEntry("2. Magnifier", MainMenuItems::kMainMagnifier);
-  glutAddMenuEntry("(Cool)", MainMenuItems::kMainCool);
-  glutAddMenuEntry("1. Special Effect", MainMenuItems::kMainSpecial);
   glutAddMenuEntry("Exit", MainMenuItems::kMainExit);
-
-  /* Mode Submenu */
-  glutSetMenu(mode_submenu_hdlr);
-  glutAddMenuEntry("Comparison", ModeMenuItems::kModeComparison);
-  glutAddMenuEntry("Navigation", ModeMenuItems::kModeNavigation);
-
-  /* Normal&Height Submenu */
-  glutSetMenu(normal_height_submenu_hdlr);
-  glutAddMenuEntry("On", NormalHeightMenuItems::kNormalHeightOn);
-  glutAddMenuEntry("Off", NormalHeightMenuItems::kNormalHeightOff);
 
   /* Timer Submenu */
   glutSetMenu(timer_submenu_hdlr);
