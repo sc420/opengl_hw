@@ -27,7 +27,7 @@ const vec4 kWhiteColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 const vec4 kBlackColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 const vec4 kRedColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 const vec4 kErrorColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);
-const float kGamma = 1.2f;
+const float kGamma = 0.95f;
 
 /*******************************************************************************
  * Uniform Blocks
@@ -45,6 +45,7 @@ layout(std140) uniform PostprocInputs {
   float effect_amount;
   bool use_shaking_effect;
   bool use_blurring_effect;
+  bool use_gamma_correct;
 }
 postproc_inputs;
 
@@ -625,4 +626,10 @@ vec4 CalcGammaCorrected(const vec4 color) {
  * Entry Point
  ******************************************************************************/
 
-void main() { fs_original_color = CalcBloom(); }
+void main() {
+  fs_original_color = CalcBloom();
+
+  if (postproc_inputs.use_gamma_correct) {
+    fs_original_color = CalcGammaCorrected(fs_original_color);
+  }
+}

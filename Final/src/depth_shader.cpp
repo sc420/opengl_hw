@@ -61,7 +61,7 @@ void shader::DepthShader::InitDepthTexture(
   texture_manager.GenTexture(tex_name);
   // Update texture
   texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, unit_name);
-  texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 2,
+  texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 3,
                                 GL_DEPTH_COMPONENT16, kDepthMapSize.x,
                                 kDepthMapSize.y);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,

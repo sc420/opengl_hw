@@ -393,6 +393,11 @@ void shader::PostprocShader::UpdateUseBlurringEffect(
   postproc_inputs_.use_blurring_effect = use_blurring_effect;
 }
 
+void shader::PostprocShader::UpdateUseGammaCorrect(
+    const bool use_gamma_correct) {
+  postproc_inputs_.use_gamma_correct = use_gamma_correct;
+}
+
 /*******************************************************************************
  * Name Management
  ******************************************************************************/

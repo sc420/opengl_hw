@@ -143,6 +143,7 @@ bool has_collision_anim_finished = false;
  * Rendering States
  ******************************************************************************/
 
+bool use_normal = false;
 bool use_instantiating = false;
 bool use_surrounding = false;
 bool use_fog = false;
@@ -152,7 +153,7 @@ bool last_use_sound = false;
 bool use_aircraft_wind = false;
 bool use_camera_wind = false;
 bool use_hdr = false;
-bool use_normal = false;
+bool use_gamma_correct = false;
 bool render_wireframe = false;
 
 /*******************************************************************************
@@ -515,6 +516,7 @@ void UpdateImGui() {
       ImGui::Checkbox("Camera Wind", &use_camera_wind);
       ImGui::Checkbox("Aircraft Wind", &use_aircraft_wind);
       ImGui::Checkbox("HDR", &use_hdr);
+      ImGui::Checkbox("Gamma Correction", &use_gamma_correct);
     }
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
@@ -1152,6 +1154,9 @@ void GLUTTimerCallback(const int val) {
                  glm::vec3(2.0f)));
   }
 
+  // Update normal state
+  scene_shader.ToggleNormalHeight(use_normal);
+
   // Update instantiating state
   scene_shader.ToggleInstantiating(use_instantiating);
 
@@ -1162,8 +1167,8 @@ void GLUTTimerCallback(const int val) {
   scene_shader.ToggleFog(use_fog);
   scene_shader.ToggleMixFogWithSkybox(mix_fog_with_skybox);
 
-  // Update  normal state
-  scene_shader.ToggleNormalHeight(use_normal);
+  // Update gamma correction state
+  postproc_shader.UpdateUseGammaCorrect(use_gamma_correct);
 
   // Update camera shaking wind
   UpdateCameraShakingWind();

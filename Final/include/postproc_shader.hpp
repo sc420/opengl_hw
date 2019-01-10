@@ -46,7 +46,10 @@ class PostprocShader : public Shader {
     bool pad_use_blur_effect[3];  // +3->40
     bool use_blurring_effect;     // 4*10=40, +1->41
 
-    bool pad[3];  // +3->44
+    bool pad_use_gamma_correct[3];  // +3->44
+    bool use_gamma_correct;         // 4*11=44, +1->45
+
+    bool pad[3];  // +3->48
   };
 
   PostprocShader();
@@ -102,6 +105,8 @@ class PostprocShader : public Shader {
   void UpdateUseShakingEffect(const bool use_shaking_effect);
 
   void UpdateUseBlurringEffect(const bool use_blurring_effect);
+
+  void UpdateUseGammaCorrect(const bool use_gamma_correct);
 
   /* Name Management */
 
