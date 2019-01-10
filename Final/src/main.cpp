@@ -145,6 +145,7 @@ bool has_collision_anim_finished = false;
 
 bool use_gui = false;
 bool use_fbx = false;
+bool use_aircraft_ctrl = false;
 bool use_normal = false;
 bool use_instantiating = false;
 bool use_surrounding = false;
@@ -511,6 +512,7 @@ void UpdateImGui() {
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Demo")) {
       ImGui::Checkbox("FBX", &use_fbx);
+      ImGui::Checkbox("Flying", &use_aircraft_ctrl);
       ImGui::Checkbox("Normal", &use_normal);
       ImGui::Checkbox("Instantiating", &use_instantiating);
       ImGui::Checkbox("Surrounding", &use_surrounding);
@@ -1039,13 +1041,15 @@ void GLUTTimerCallback(const int val) {
     scene_shader.UpdateSceneModelTrans(glm::radians(-1.0f));
   }
 
-  // Update camera eye and angles from aircraft controller
-  if (kUpdateCameraFromAircraftController) {
-    const glm::vec3 aircraft_pos = aircraft_ctrl.GetPos();
-    const glm::vec3 aircraft_dir = aircraft_ctrl.GetDir();
+  if (use_aircraft_ctrl) {
+    // Update camera eye and angles from aircraft controller
+    if (kUpdateCameraFromAircraftController) {
+      const glm::vec3 aircraft_pos = aircraft_ctrl.GetPos();
+      const glm::vec3 aircraft_dir = aircraft_ctrl.GetDir();
 
-    camera_trans.SetEye(GetCameraShaked(aircraft_pos));
-    camera_trans.SetAngles(GetCameraShaked(aircraft_dir));
+      camera_trans.SetEye(GetCameraShaked(aircraft_pos));
+      camera_trans.SetAngles(GetCameraShaked(aircraft_dir));
+    }
   }
 
   // Update camera transformation
@@ -1058,8 +1062,10 @@ void GLUTTimerCallback(const int val) {
   // Update fbx camera controller
   fbx_camera_ctrl.Update();
 
-  // Update aircraft controller
-  aircraft_ctrl.Update();
+  if (use_aircraft_ctrl) {
+    // Update aircraft controller
+    aircraft_ctrl.Update();
+  }
 
   /* Collision */
 
