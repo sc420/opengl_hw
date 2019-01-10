@@ -39,7 +39,7 @@ static const auto kSeeFromLight = false;
 // Camera
 static const auto kUpdateCameraFromAircraftController = false;
 // Model transformation
-static const auto kModelName = "tower";
+static const auto kModelName = "oil_tank";
 static const auto kModelScalingStep = 0.01f;
 static const auto kModelRotationStep = 0.1f;
 static const auto kModelTranslationStep = 0.1f;
@@ -363,7 +363,7 @@ void UpdateImGui() {
                   translation[1], translation[2]);
       ImGui::Text("Rotation: (%.2f, %.2f, %.2f)", rotation[0], rotation[1],
                   rotation[2]);
-      ImGui::Text("Scaling: (%.1f, %.1f, %.1f)", scaling[0], scaling[1],
+      ImGui::Text("Scaling: (%.3f, %.3f, %.3f)", scaling[0], scaling[1],
                   scaling[2]);
     }
 
@@ -392,9 +392,9 @@ void UpdateImGui() {
       const glm::vec3 scaling = scene_model.GetScaling();
 
       ImGui::Text("Name: %s", kModelName);
-      ImGui::Text("Trans: (%.1f, %.1f, %.1f)", trans[0], trans[1], trans[2]);
-      ImGui::Text("Rotation: (%.2f, %.2f, %.2f)", rot[0], rot[1], rot[2]);
-      ImGui::Text("Scaling: (%.2f, %.2f, %.2f)", scaling[0], scaling[1],
+      ImGui::Text("Trans: (%.2f, %.2f, %.2f)", trans[0], trans[1], trans[2]);
+      ImGui::Text("Rotation: (%.3f, %.3f, %.3f)", rot[0], rot[1], rot[2]);
+      ImGui::Text("Scaling: (%.5f, %.5f, %.5f)", scaling[0], scaling[1],
                   scaling[2]);
     }
 
@@ -776,12 +776,12 @@ void GLUTTimerCallback(const int val) {
 
     // Scaling
     if (ui_manager.IsKeyDown('[')) {
-      scene_model.SetScaling(scene_model.GetScaling() +
-                             kModelScalingStep * glm::vec3(-1.0f));
+      scene_model.SetScaling(scene_model.GetScaling() *
+                             glm::vec3(1.0f - kModelScalingStep));
     }
     if (ui_manager.IsKeyDown(']')) {
-      scene_model.SetScaling(scene_model.GetScaling() +
-                             kModelScalingStep * glm::vec3(1.0f));
+      scene_model.SetScaling(scene_model.GetScaling() *
+                             glm::vec3(1.0f + kModelScalingStep));
     }
     // Rotation
     if (ui_manager.IsKeyDown('1')) {

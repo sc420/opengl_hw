@@ -265,6 +265,14 @@ void shader::SceneShader::LoadModels() {
           aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
           aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
       "surround", 3, gl_managers_);
+  // Oil tank
+  scene_models_["oil_tank"] = dto::SceneModel(
+      "oil_tank", "assets/models/oil_tank/big_cistern.obj",
+      aiProcess_CalcTangentSpace | aiProcess_JoinIdenticalVertices |
+          aiProcess_Triangulate | aiProcess_GenNormals |
+          aiProcess_ImproveCacheLocality | aiProcess_RemoveRedundantMaterials |
+          aiProcess_OptimizeMeshes | aiProcess_FlipUVs,
+      "oil_tank", 3, gl_managers_);
   // Electric tower
   scene_models_["tower"] = dto::SceneModel(
       "tower", "assets/models/tower/tower.obj",
@@ -300,6 +308,14 @@ void shader::SceneShader::InitModels() {
   scene_models_.at("surround").SetLightColor(glm::vec3(1.0f));
   scene_models_.at("surround").SetLightIntensity(glm::vec3(0.3f, 0.0f, 0.0f));
   scene_models_.at("surround").SetUseEnvMap(false);
+  // Oil tank
+  scene_models_.at("oil_tank").SetTranslation(glm::vec3(12.5f, 0.8f, 16.2f));
+  scene_models_.at("oil_tank").SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+  scene_models_.at("oil_tank").SetScaling(2e-4f * glm::vec3(1.0f));
+  scene_models_.at("oil_tank").SetLightPos(GetLightPos());
+  scene_models_.at("oil_tank").SetLightColor(glm::vec3(1.0f));
+  scene_models_.at("oil_tank").SetLightIntensity(glm::vec3(1.0f, 1.0f, 0.0f));
+  scene_models_.at("oil_tank").SetUseEnvMap(false);
   // Electric tower
   scene_models_.at("tower").SetTranslation(glm::vec3(13.6f, 1.8f, -3.8f));
   scene_models_.at("tower").SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -319,8 +335,12 @@ void shader::SceneShader::InitModels() {
       glm::vec3(1e4f * -45.0f, 0.0f, 1e4f * 45.0f),
       glm::vec3(1e4f * 45.0f, 0.0f, 1e4f * -45.0f),
       glm::vec3(1e4f * 45.0f, 0.0f, 1e4f * 45.0f)});
-  scene_models_.at("tower").SetInstancingTranslations(
-      std::vector<glm::vec3>{glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 80.0f)});
+  scene_models_.at("tower").SetInstancingTranslations(std::vector<glm::vec3>{
+      glm::vec3(0.0f, -8.0f, -320.0f), glm::vec3(0.0f, 1.0f, -240.0f),
+      glm::vec3(0.0f, -11.0f, -160.0f), glm::vec3(0.0f, 0.0f, -80.0f),
+      glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 80.0f),
+      glm::vec3(0.0f, -10.0f, 160.0f), glm::vec3(0.0f, -12.0f, 240.0f),
+      glm::vec3(0.0f, -11.0f, 320.0f), glm::vec3(0.0f, -17.0f, 400.0f)});
 }
 
 /*******************************************************************************
