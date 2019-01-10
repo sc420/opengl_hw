@@ -158,6 +158,8 @@ bool use_aircraft_wind = false;
 bool use_camera_wind = false;
 bool use_hdr = false;
 bool use_gamma_correct = false;
+
+bool limit_window_scaling = false;
 bool render_wireframe = false;
 
 /*******************************************************************************
@@ -529,6 +531,7 @@ void UpdateImGui() {
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Debug")) {
+      ImGui::Checkbox("Quick Render", &limit_window_scaling);
       ImGui::Checkbox("Wireframe", &render_wireframe);
     }
 
@@ -630,13 +633,14 @@ void UpdateStates() {
 
 void GLUTDisplayCallback() {
   const glm::ivec2 window_size = ui_manager.GetWindowSize();
+  const glm::ivec2 actual_window_size = ui_manager.GetActualWindowSize();
 
   // Update states
   UpdateStates();
 
   // Draw the scene depth from light source on depth framebuffer
   depth_shader.UseDepthFramebuffer();
-  depth_shader.DrawFromLight(window_size);
+  depth_shader.DrawFromLight(actual_window_size);
 
   // Update wireframe rendering
   if (render_wireframe) {
@@ -663,6 +667,8 @@ void GLUTDisplayCallback() {
         explosion_fbx_ctrl.Draw();
       }
     }
+    // Restore viewport because it's touched by FBX SDK
+    glViewport(0, 0, actual_window_size.x, actual_window_size.y);
   }
 
   // Restore polygon mode
@@ -673,6 +679,8 @@ void GLUTDisplayCallback() {
     // scaling"
     // and "combining"
     postproc_shader.DrawBloom(window_size);
+    // Restore viewport because it's touched by DrawBloom
+    glViewport(0, 0, actual_window_size.x, actual_window_size.y);
   }
 
   // Draw post-processing effects on default framebuffer
@@ -692,29 +700,46 @@ void GLUTDisplayCallback() {
 }
 
 void GLUTReshapeCallback(const int width, const int height) {
-  const glm::ivec2 window_size = glm::vec2(width, height);
+  const glm::ivec2 actual_window_size = glm::vec2(width, height);
+  glm::ivec2 window_size = glm::vec2(width, height);
+
   // Limit the window size
-  if (as::LimitGLWindowSize(window_size, kMinWindowSize)) {
+  if (as::LimitGLWindowSize(actual_window_size, kMinWindowSize)) {
     // If the window size has been limited, ignore the new size
     return;
   }
+
+  // Limit texture sizes
+  if (limit_window_scaling) {
+    const int kMaxTextureWidth = 1024;
+    if (window_size.x > kMaxTextureWidth) {
+      const float ratio = (float)window_size.x / (float)window_size.y;
+      window_size.x = kMaxTextureWidth;
+      window_size.y = (int)((float)kMaxTextureWidth / ratio);
+    }
+  }
+
   // Save window size
   ui_manager.SaveWindowSize(window_size);
+  ui_manager.SaveActualWindowSize(actual_window_size);
   // Set the viewport
   glViewport(0, 0, width, height);
   // Update screen textures
-  postproc_shader.UpdatePostprocTextures(width, height);
+  postproc_shader.UpdatePostprocTextures(window_size.x, window_size.y);
   // Update screen depth renderbuffers
-  postproc_shader.UpdatePostprocRenderbuffer(width, height);
+  postproc_shader.UpdatePostprocRenderbuffer(window_size.x, window_size.y);
   // Update differential rendering stencil renderbuffers
-  diff_shader.UpdateObjDiffRenderbuffer(width, height);
+  diff_shader.UpdateObjDiffRenderbuffer(window_size.x, window_size.y);
   // Update differential rendering framebuffer textures
-  diff_shader.UpdateDiffFramebufferTextures(width, height);
+  diff_shader.UpdateDiffFramebufferTextures(window_size.x, window_size.y);
   // Update FBX
-  fbx_ctrl.OnReshape(width, height);
-  explosion_fbx_ctrl.OnReshape(width, height);
+  fbx_ctrl.OnReshape(window_size.x, window_size.y);
+  explosion_fbx_ctrl.OnReshape(window_size.x, window_size.y);
   // Update ImGui
   ImGui_ImplFreeGLUT_ReshapeFunc(width, height);
+
+  // Set the viewport
+  glViewport(0, 0, width, height);
 }
 
 /*******************************************************************************

@@ -11,7 +11,11 @@ class UiManager {
 
   void SaveWindowSize(const glm::ivec2 &window_size);
 
+  void SaveActualWindowSize(const glm::ivec2 &window_size);
+
   glm::ivec2 GetWindowSize() const;
+
+  glm::ivec2 GetActualWindowSize() const;
 
   float GetWindowAspectRatio() const;
 
@@ -60,6 +64,7 @@ class UiManager {
 
   /* Window */
   glm::ivec2 window_size_;
+  glm::ivec2 actual_window_size_;
   bool is_window_closed_;
 
   /* Keyboard */

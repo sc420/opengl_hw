@@ -20,7 +20,15 @@ void as::UiManager::SaveWindowSize(const glm::ivec2& window_size) {
   window_size_ = window_size;
 }
 
+void as::UiManager::SaveActualWindowSize(const glm::ivec2& window_size) {
+  actual_window_size_ = window_size;
+}
+
 glm::ivec2 as::UiManager::GetWindowSize() const { return window_size_; }
+
+glm::ivec2 as::UiManager::GetActualWindowSize() const {
+  return actual_window_size_;
+}
 
 float as::UiManager::GetWindowAspectRatio() const {
   return static_cast<float>(window_size_.x) /

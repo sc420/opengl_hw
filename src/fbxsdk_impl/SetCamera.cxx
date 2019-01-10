@@ -259,7 +259,6 @@ void SetCamera(FbxScene* pScene, FbxTime& pTime, FbxAnimLayer* pAnimLayer,
     // glMatrixMode(GL_MODELVIEW);
 
     glViewport(lViewPortPosX, lViewPortPosY, lViewPortSizeX, lViewPortSizeY);
-
   }
   // Get the relevant camera settings for an orthogonal view.
   else {
