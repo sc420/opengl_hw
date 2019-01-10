@@ -235,6 +235,10 @@ void shader::SceneShader::UpdateSceneModel(const dto::SceneModel &scene_model) {
                               instancing_mem_size, instancing_scalings.data());
 }
 
+void shader::SceneShader::TogglePcf(const bool toggle) {
+  model_material_.use_pcf = toggle;
+}
+
 void shader::SceneShader::ToggleInstantiating(const bool toggle) {
   use_instantiating_ = toggle;
 }

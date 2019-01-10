@@ -29,6 +29,7 @@ layout(std140) uniform ModelMaterial {
   bool use_fog;
   bool mix_fog_with_skybox;
   bool use_normal;
+  bool use_pcf;
 }
 model_material;
 
@@ -197,17 +198,22 @@ float CalcShadow() {
     return 0.0f;
   }
   // Perform PCF
-  float shadow = 0.0f;
-  const vec2 scale = 1.0f / textureSize(light_depth_map_tex, 0);
-  for (float x = -1.0f; x <= 1.0f; x++) {
-    for (float y = -1.0f; y <= 1.0f; y++) {
-      const float light_depth =
-          texture(light_depth_map_tex, proj_coords.xy + vec2(x, y) * scale).x;
-      shadow += view_depth - bias > light_depth ? 1.0f : 0.0f;
+  if (model_material.use_pcf) {
+    float shadow = 0.0f;
+    const vec2 scale = 1.0f / textureSize(light_depth_map_tex, 0);
+    for (float x = -1.0f; x <= 1.0f; x++) {
+      for (float y = -1.0f; y <= 1.0f; y++) {
+        const float light_depth =
+            texture(light_depth_map_tex, proj_coords.xy + vec2(x, y) * scale).x;
+        shadow += view_depth - bias > light_depth ? 1.0f : 0.0f;
+      }
     }
+    shadow /= 9.0f;
+    return shadow;
+  } else {
+    const float light_depth = texture(light_depth_map_tex, proj_coords.xy).x;
+    return view_depth - bias > light_depth ? 1.0f : 0.0f;
   }
-  shadow /= 9.0f;
-  return shadow;
 }
 
 /*******************************************************************************

@@ -45,7 +45,10 @@ class SceneShader : public Shader {
     bool pad_use_normal[3];  // +3->96
     bool use_normal;         // 4*24=96, +1->97
 
-    bool pad[3];  // +3->100
+    bool pad_use_pcf[3];  // +3->100
+    bool use_pcf;         //+1->101
+
+    bool pad[3];  // +3->104
   };
 
   struct Lighting {
@@ -112,6 +115,8 @@ class SceneShader : public Shader {
   void UpdateViewPos(const glm::vec3 &view_pos);
 
   void UpdateSceneModel(const dto::SceneModel &scene_model);
+
+  void TogglePcf(const bool toggle);
 
   void ToggleInstantiating(const bool toggle);
 

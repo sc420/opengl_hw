@@ -144,6 +144,7 @@ bool has_collision_anim_finished = false;
  ******************************************************************************/
 
 bool use_gui = false;
+bool use_pcf = false;
 bool use_fbx = false;
 bool use_aircraft_ctrl = false;
 bool use_normal = false;
@@ -511,6 +512,7 @@ void UpdateImGui() {
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Demo")) {
+      ImGui::Checkbox("PCF", &use_pcf);
       ImGui::Checkbox("FBX", &use_fbx);
       ImGui::Checkbox("Flying", &use_aircraft_ctrl);
       ImGui::Checkbox("Normal", &use_normal);
@@ -1168,6 +1170,9 @@ void GLUTTimerCallback(const int val) {
         glm::pow(glm::vec3(0.2f * fbx_camera_ctrl.GetPos().x, 0.0f, 0.0f),
                  glm::vec3(2.0f)));
   }
+
+  // Update PCF state
+  scene_shader.TogglePcf(use_pcf);
 
   // Update normal state
   scene_shader.ToggleNormalHeight(use_normal);
