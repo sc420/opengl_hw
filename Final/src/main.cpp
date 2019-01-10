@@ -357,6 +357,10 @@ void StartCollision() {
     // Play the explosion sound
     sound_ctrl.Register2DSound("big_explosion",
                                "assets/sound/big_explosion.wav");
+
+    // Play the sad sound
+    sound_ctrl.Register2DSound("sad_violin", "assets/sound/sad_violin.mp3");
+    sound_ctrl.SetSoundVolume("sad_violin", 0.0f);
   }
 }
 
@@ -1038,7 +1042,7 @@ void GLUTTimerCallback(const int val) {
 
   /* Collision */
 
-  // Check collision
+  // Check collision and update
   collision_dist_update_elapsed_time += elapsed_time_diff;
   if (collision_dist_update_elapsed_time > kCollisionDistUpdateInterval) {
     cur_collision_dist = GetCollisionDist();
@@ -1062,9 +1066,13 @@ void GLUTTimerCallback(const int val) {
     collision_dist_update_elapsed_time = 0.0f;
   }
 
-  // Update collision animation elapsed time
   if (has_collided) {
+    // Update collision animation elapsed time
     collision_anim_elapsed_time += elapsed_time_diff;
+    // Update sad sound volume
+    sound_ctrl.SetSoundVolume(
+        "sad_violin",
+        glm::clamp(0.2f * collision_anim_elapsed_time, 0.0f, 1.0f));
   }
 
   // Check whether the explosion animation is finished
