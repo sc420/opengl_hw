@@ -110,6 +110,8 @@ class SceneShader : public Shader {
 
   void UpdateSceneModel(const dto::SceneModel &scene_model);
 
+  void ToggleInstantiating(const bool toggle);
+
   void ToggleNormalHeight(const bool toggle);
 
   void ToggleFog(const bool toggle);
@@ -170,7 +172,8 @@ class SceneShader : public Shader {
   dto::ModelTrans model_trans_;
   ModelMaterial model_material_;
   Lighting lighting_;
-  bool use_normal_height;
+  bool use_instantiating_;
+  bool use_normal_height_;
 
   /* Model Initialization */
 

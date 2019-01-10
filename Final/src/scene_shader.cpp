@@ -6,7 +6,8 @@ shader::SceneShader::SceneShader()
       model_trans_(dto::ModelTrans()),
       model_material_(ModelMaterial()),
       lighting_(Lighting()),
-      use_normal_height(true) {}
+      use_instantiating_(true),
+      use_normal_height_(true) {}
 
 /*******************************************************************************
  * Shader Registrations
@@ -234,8 +235,12 @@ void shader::SceneShader::UpdateSceneModel(const dto::SceneModel &scene_model) {
                               instancing_mem_size, instancing_scalings.data());
 }
 
+void shader::SceneShader::ToggleInstantiating(const bool toggle) {
+  use_instantiating_ = toggle;
+}
+
 void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
-  use_normal_height = toggle;
+  use_normal_height_ = toggle;
 }
 
 void shader::SceneShader::ToggleFog(const bool toggle) {
@@ -608,7 +613,7 @@ void shader::SceneShader::UpdateModelMaterial(const as::Material &material) {
   model_material_.use_ambient_tex = material.HasAmbientTexture();
   model_material_.use_diffuse_tex = material.HasDiffuseTexture();
   model_material_.use_specular_tex = material.HasSpecularTexture();
-  if (use_normal_height) {
+  if (use_normal_height_) {
     model_material_.use_height_tex = material.HasHeightTexture();
     model_material_.use_normals_tex = material.HasNormalsTexture();
   } else {
@@ -685,7 +690,12 @@ void shader::SceneShader::DrawModel(const dto::SceneModel &scene_model) {
     }
     /* Draw Vertex Arrays */
     UseMesh(group_name, mesh_idx);
-    glDrawElementsInstanced(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT, nullptr,
-                            scene_model.GetNumInstancing());
+    if (use_instantiating_) {
+      glDrawElementsInstanced(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT,
+                              nullptr, scene_model.GetNumInstancing());
+    } else {
+      glDrawElementsInstanced(GL_TRIANGLES, idxs.size(), GL_UNSIGNED_INT,
+                              nullptr, 1);
+    }
   }
 }
