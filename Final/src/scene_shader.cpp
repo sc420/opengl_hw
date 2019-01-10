@@ -104,6 +104,11 @@ void shader::SceneShader::Draw() {
   for (const auto &pair : scene_models_) {
     const dto::SceneModel &scene_model = pair.second;
 
+    // Check whether the scene model isn't visible
+    if (!scene_model.IsVisible()) {
+      continue;
+    }
+
     // Update states
     UpdateModelTrans(scene_model);
     UpdateLighting(scene_model);

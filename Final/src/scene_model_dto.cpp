@@ -6,7 +6,8 @@ dto::SceneModel::SceneModel(const std::string &id, const std::string &path,
                             const unsigned int flags,
                             const std::string &tex_unit_group_name,
                             const GLsizei num_mipmap_levels,
-                            as::GLManagers *gl_managers) {
+                            as::GLManagers *gl_managers)
+    : use_env_map_(false), is_visible_(true) {
   id_ = id;
   LoadFile(path, flags);
   InitTextures(tex_unit_group_name, num_mipmap_levels, gl_managers);
@@ -61,6 +62,8 @@ glm::vec3 dto::SceneModel::GetInstancingScaling(const int instance_idx) const {
     return instancing_scalings_[instance_idx];
   }
 }
+
+bool dto::SceneModel::IsVisible() const { return is_visible_; }
 
 /*******************************************************************************
  * State Setters
@@ -149,6 +152,8 @@ void dto::SceneModel::SetLightColor(const glm::vec3 &light_color) {
 void dto::SceneModel::SetLightIntensity(const glm::vec3 &light_intensity) {
   light_intensity_ = light_intensity;
 }
+
+void dto::SceneModel::SetVisible(const bool visible) { is_visible_ = visible; }
 
 void dto::SceneModel::SetUseEnvMap(const bool use_env_map) {
   use_env_map_ = use_env_map;

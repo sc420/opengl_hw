@@ -143,6 +143,7 @@ bool has_collision_anim_finished = false;
  * Rendering States
  ******************************************************************************/
 
+bool use_surrounding = false;
 bool use_fog = false;
 bool mix_fog_with_skybox = false;
 bool use_sound = false;
@@ -504,6 +505,7 @@ void UpdateImGui() {
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Demo")) {
+      ImGui::Checkbox("Surrounding", &use_surrounding);
       ImGui::Checkbox("Fog", &use_fog);
       ImGui::Checkbox("Mix Fog with Skybox", &mix_fog_with_skybox);
       ImGui::Checkbox("Sound", &use_sound);
@@ -1147,6 +1149,9 @@ void GLUTTimerCallback(const int val) {
         glm::pow(glm::vec3(0.2f * fbx_camera_ctrl.GetPos().x, 0.0f, 0.0f),
                  glm::vec3(2.0f)));
   }
+
+  // Update surrounding visibility
+  scene_shader.GetSceneModel("surround").SetVisible(use_surrounding);
 
   // Update fog state
   scene_shader.ToggleFog(use_fog);

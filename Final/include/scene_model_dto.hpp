@@ -36,6 +36,8 @@ class SceneModel {
 
   glm::vec3 GetInstancingScaling(const int instance_idx) const;
 
+  bool IsVisible() const;
+
   /* State Setters */
 
   void SetTranslation(const glm::vec3 &translation);
@@ -68,6 +70,8 @@ class SceneModel {
   void SetLightColor(const glm::vec3 &light_color);
 
   void SetLightIntensity(const glm::vec3 &light_intensity);
+
+  void SetVisible(const bool visible);
 
   void SetUseEnvMap(const bool use_env_map);
 
@@ -118,6 +122,7 @@ class SceneModel {
   glm::vec3 light_intensity_;
 
   /* Material */
+  bool is_visible_;
   bool use_env_map_;
 
   /* Model Initialization */
