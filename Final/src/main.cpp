@@ -303,11 +303,8 @@ void InitFbx() {
   fbx_ctrl.Initialize(
       "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
       kInitWindowSize);
-  // explosion_fbx_ctrl.Initialize(
-  //    "assets/models/blackhawk_explosion/blackhawk-helicopter-explosion.fbx",
-  //    kInitWindowSize);
   explosion_fbx_ctrl.Initialize(
-      "assets/models/blackhawk/blackhawk-helicopter-animation.fbx",
+      "assets/models/blackhawk_explosion/blackhawk-helicopter-explosion.fbx",
       kInitWindowSize);
 }
 
@@ -572,7 +569,7 @@ void GLUTDisplayCallback() {
 
   skybox_shader.Draw();
   scene_shader.Draw();
-  // fbx_ctrl.Draw();
+  fbx_ctrl.Draw();
 
   explosion_fbx_ctrl.Draw();
 
@@ -968,11 +965,9 @@ void GLUTTimerCallback(const int val) {
 
   // Update FBX controller
   fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);
-  // fbx_ctrl.SetCameraTransform(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f),
-  //                            glm::vec3(0.0f, 1.0f, 0.0f), 0.0f);
-  // fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(),
-  // fbx_camera_ctrl.GetRot(),
-  //                           fbx_camera_ctrl.GetScaling());
+  fbx_ctrl.SetCameraTransform(glm::vec3(0.0f), glm::vec3(0.0f), 0.0f);
+  fbx_ctrl.SetModelTransform(fbx_camera_ctrl.GetPos(), fbx_camera_ctrl.GetRot(),
+                             fbx_camera_ctrl.GetScaling());
 
   // fbx_ctrl.SetCameraTransform(camera_trans.GetEye(),
   // camera_trans.GetAngles(),
