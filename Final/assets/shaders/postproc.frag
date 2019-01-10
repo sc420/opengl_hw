@@ -41,7 +41,10 @@ layout(std140) uniform PostprocInputs {
   int pass_idx;
   int scaling_idx;
   float time;
+
+  float effect_amount;
   bool use_shaking_effect;
+  bool use_blurring_effect;
 }
 postproc_inputs;
 
@@ -160,7 +163,7 @@ mat3 NormalizeKernel(const mat3 kernel) {
   }
 }
 
-vec4 ApplyKernel(const sampler2D tex, const mat3 kernel) {
+vec4 ApplyKernel(const sampler2D tex, const mat3 kernel, const float ofs_mul) {
   const vec2 window_size = GetTextureSize(tex);
   const int kHalfWidth = 1;
   const int kHalfHeight = 1;
@@ -169,7 +172,7 @@ vec4 ApplyKernel(const sampler2D tex, const mat3 kernel) {
   for (int x = -1 * kHalfWidth; x <= kHalfWidth; x++) {
     for (int y = -1 * kHalfHeight; y <= kHalfHeight; y++) {
       const float kernel_val = norm_kernel[y + kHalfHeight][x + kHalfWidth];
-      const vec2 ofs = vec2(x, y) / window_size;
+      const vec2 ofs = ofs_mul * vec2(x, y) / window_size;
       sum += kernel_val * GetTexel(tex, vs_tex_coords + ofs);
     }
   }
@@ -188,84 +191,9 @@ vec4 CalcBlur(const sampler2D tex) {
       1.0f, 1.0f, 1.0f,
       // 3rd row
       1.0f, 1.0f, 1.0f);
+  const float ofs_mul = 30.0f * postproc_inputs.effect_amount;
 
-  return ApplyKernel(tex, kKernel);
-}
-
-/*******************************************************************************
- * Post-processing / Bloom Effect
- ******************************************************************************/
-
-// Weight is generated from http://dev.theomader.com/gaussian-kernel-calculator/
-vec4 CalcGaussianBlur(const sampler2D tex, const bool horizontal) {
-  const int len = 2;
-  // Sigma = 1
-  const float weight[len] = float[](0.44198, 0.27901f);
-  const vec2 window_size = GetTextureSize(tex);
-  vec4 sum = weight[0] * GetTexel(tex, vs_tex_coords);
-  if (horizontal) {
-    for (int x = 1; x < len; x++) {
-      const vec2 ofs = vec2(x, 0.0f) / window_size;
-      sum += weight[x] * GetTexel(tex, vs_tex_coords + ofs);
-      sum += weight[x] * GetTexel(tex, vs_tex_coords - ofs);
-    }
-  } else {
-    for (int y = 1; y < len; y++) {
-      const vec2 ofs = vec2(0.0f, y) / window_size;
-      sum += weight[y] * GetTexel(tex, vs_tex_coords + ofs);
-      sum += weight[y] * GetTexel(tex, vs_tex_coords - ofs);
-    }
-  }
-  return clamp(sum, 0.0f, 1.0f);
-}
-
-vec4 CalcBloom() {
-  switch (postproc_inputs.pass_idx) {
-      /* The color is directly drawn to the postproc framebuffer at pass index 0
-       * by other shaders */
-    case 1: {
-      /* Draw original and HDR (Multiple scaling) */
-      if (postproc_inputs.scaling_idx == 0) {
-        fs_original_color = GetOriginal();
-      } else {
-        fs_original_color = vec4(0.0f);
-      }
-      fs_hdr_color = ColorToHdr(GetOriginal());
-    } break;
-    case 2: {
-      /* Blur HDR horizontally (Multiple scaling) */
-      if (postproc_inputs.scaling_idx == 0) {
-        fs_original_color = GetOriginal();
-      } else {
-        fs_original_color = vec4(0.0f);
-      }
-      fs_hdr_color = CalcGaussianBlur(hdr_tex, true);
-    } break;
-    case 3: {
-      /* Blur HDR vertically (Multiple scaling) */
-      if (postproc_inputs.scaling_idx == 0) {
-        fs_original_color = GetOriginal();
-      } else {
-        fs_original_color = vec4(0.0f);
-      }
-      fs_hdr_color = CalcGaussianBlur(hdr_tex, false);
-    } break;
-    case 4: {
-      /* Combine original and blurred HDR (Single pass) */
-      fs_original_color = CalcCombiningBlurredHdr();
-      fs_hdr_color = kErrorColor;
-    } break;
-    case 5: {
-      /* Draw post-processing effects (Single pass) */
-      fs_original_color = GetOriginal();
-      fs_hdr_color = kErrorColor;
-    } break;
-    default: {
-      fs_original_color = kErrorColor;
-      fs_hdr_color = kErrorColor;
-    }
-  }
-  return fs_original_color;
+  return ApplyKernel(tex, kKernel, ofs_mul);
 }
 
 /*******************************************************************************
@@ -399,7 +327,7 @@ vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
 
   const vec2 iResolution = GetTextureSize(sampler);
   const float iTime = postproc_inputs.time;
-  const float Amount = 0.5f;
+  const float Amount = 0.5f * postproc_inputs.effect_amount;
 
   vec2 pixel = vec2(1.0) / iResolution;
   vec3 field = rgb2hsv(edge(sampler, uv, edgeSize));
@@ -430,7 +358,7 @@ vec4 ShampainGlitch01(sampler2D sampler, vec2 fragCoord) {
   const float iTime = postproc_inputs.time;
   const vec4 iMouse = vec4(postproc_inputs.mouse_pos, 0.0f, 0.0f);
 
-  float THRESHOLD = 0.1f + abs(sin(iTime)) * 0.5f;
+  float THRESHOLD = 1.0f - 0.5f * postproc_inputs.effect_amount;
   float time_s = mod(iTime, 32.0);
 
   float glitch_threshold = 1.0 - THRESHOLD;
@@ -480,7 +408,7 @@ vec4 ShampainGlitch02(sampler2D tex, vec2 fragCoord) {
 
   float time = mod(iTime, 32.0);  // + modelmat[0].x + modelmat[0].z;
 
-  float GLITCH = 0.01f + 0.2f * abs(sin(iTime));
+  float GLITCH = 0.5f * postproc_inputs.effect_amount;
 
   // float rdist = length( (uv - vec2(0.5,0.5))*vec2(aspect, 1.0) )/1.4;
   // GLITCH *= rdist;
@@ -547,12 +475,102 @@ vec4 GlitchShaderB(sampler2D tex, vec2 fragCoord) {
   return fragColor;
 }
 
-vec4 CalcSpecial(sampler2D tex) {
+vec4 CalcShaking(sampler2D tex) {
   const vec2 window_size = GetTextureSize(tex);
   const vec2 window_tex_coords = vs_tex_coords * window_size;
   return 0.4f * ShampainGlitch01(tex, window_tex_coords) +
          0.4f * ShampainGlitch02(tex, window_tex_coords) +
          0.2f * GlitchShaderB(tex, window_tex_coords);
+}
+
+/*******************************************************************************
+ * Post-processing / Other Effects
+ ******************************************************************************/
+
+vec4 CalcOtherEffects() {
+  if (postproc_inputs.use_shaking_effect) {
+    return CalcShaking(original_tex);
+  } else if (postproc_inputs.use_blurring_effect) {
+    return CalcBlur(original_tex);
+  } else {
+    return GetOriginal();
+  }
+}
+
+/*******************************************************************************
+ * Post-processing / Bloom Effect
+ ******************************************************************************/
+
+// Weight is generated from http://dev.theomader.com/gaussian-kernel-calculator/
+vec4 CalcGaussianBlur(const sampler2D tex, const bool horizontal) {
+  const int len = 2;
+  // Sigma = 1
+  const float weight[len] = float[](0.44198, 0.27901f);
+  const vec2 window_size = GetTextureSize(tex);
+  vec4 sum = weight[0] * GetTexel(tex, vs_tex_coords);
+  if (horizontal) {
+    for (int x = 1; x < len; x++) {
+      const vec2 ofs = vec2(x, 0.0f) / window_size;
+      sum += weight[x] * GetTexel(tex, vs_tex_coords + ofs);
+      sum += weight[x] * GetTexel(tex, vs_tex_coords - ofs);
+    }
+  } else {
+    for (int y = 1; y < len; y++) {
+      const vec2 ofs = vec2(0.0f, y) / window_size;
+      sum += weight[y] * GetTexel(tex, vs_tex_coords + ofs);
+      sum += weight[y] * GetTexel(tex, vs_tex_coords - ofs);
+    }
+  }
+  return clamp(sum, 0.0f, 1.0f);
+}
+
+vec4 CalcBloom() {
+  switch (postproc_inputs.pass_idx) {
+      /* The color is directly drawn to the postproc framebuffer at pass index 0
+       * by other shaders */
+    case 1: {
+      /* Draw original and HDR (Multiple scaling) */
+      if (postproc_inputs.scaling_idx == 0) {
+        fs_original_color = GetOriginal();
+      } else {
+        fs_original_color = vec4(0.0f);
+      }
+      fs_hdr_color = ColorToHdr(GetOriginal());
+    } break;
+    case 2: {
+      /* Blur HDR horizontally (Multiple scaling) */
+      if (postproc_inputs.scaling_idx == 0) {
+        fs_original_color = GetOriginal();
+      } else {
+        fs_original_color = vec4(0.0f);
+      }
+      fs_hdr_color = CalcGaussianBlur(hdr_tex, true);
+    } break;
+    case 3: {
+      /* Blur HDR vertically (Multiple scaling) */
+      if (postproc_inputs.scaling_idx == 0) {
+        fs_original_color = GetOriginal();
+      } else {
+        fs_original_color = vec4(0.0f);
+      }
+      fs_hdr_color = CalcGaussianBlur(hdr_tex, false);
+    } break;
+    case 4: {
+      /* Combine original and blurred HDR (Single pass) */
+      fs_original_color = CalcCombiningBlurredHdr();
+      fs_hdr_color = kErrorColor;
+    } break;
+    case 5: {
+      /* Draw post-processing effects (Single pass) */
+      fs_original_color = CalcOtherEffects();
+      fs_hdr_color = kErrorColor;
+    } break;
+    default: {
+      fs_original_color = kErrorColor;
+      fs_hdr_color = kErrorColor;
+    }
+  }
+  return fs_original_color;
 }
 
 /*******************************************************************************
@@ -564,20 +582,7 @@ vec4 CalcGammaCorrected(const vec4 color) {
 }
 
 /*******************************************************************************
- * Post-processing / Center
- ******************************************************************************/
-
-vec4 CalcPostproc() {
-  // Check if bloom is activated
-  if (postproc_inputs.pass_idx == 0) {
-    return GetOriginal();
-  } else {
-    return CalcBloom();
-  }
-}
-
-/*******************************************************************************
  * Entry Point
  ******************************************************************************/
 
-void main() { fs_original_color = CalcPostproc(); }
+void main() { fs_original_color = CalcBloom(); }

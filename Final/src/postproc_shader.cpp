@@ -2,6 +2,7 @@
 
 shader::PostprocShader::PostprocShader() : postproc_inputs_(PostprocInputs()) {
   // TODO: Use constructor
+  postproc_inputs_.effect_amount = 0.0f;
   postproc_inputs_.use_shaking_effect = false;
 }
 
@@ -378,9 +379,18 @@ void shader::PostprocShader::UpdateTime(const float time) {
   postproc_inputs_.time = time;
 }
 
+void shader::PostprocShader::UpdateEffectAmount(const float amount) {
+  postproc_inputs_.effect_amount = amount;
+}
+
 void shader::PostprocShader::UpdateUseShakingEffect(
     const bool use_shaking_effect) {
   postproc_inputs_.use_shaking_effect = use_shaking_effect;
+}
+
+void shader::PostprocShader::UpdateUseBlurringEffect(
+    const bool use_blurring_effect) {
+  postproc_inputs_.use_blurring_effect = use_blurring_effect;
 }
 
 /*******************************************************************************

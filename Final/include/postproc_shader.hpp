@@ -40,9 +40,13 @@ class PostprocShader : public Shader {
     int scaling_idx;        // 4*6=24, +4->28
     float time;             // 4*7=28, +4->32
 
-    bool use_shaking_effect;  // 4*8=32, +1->33
+    float effect_amount;      // 4*8=32, +4->36
+    bool use_shaking_effect;  // 4*9=36, +1->37
 
-    bool pad[7];  // +7->40
+    bool pad_use_blur_effect[3];  // +3->40
+    bool use_blurring_effect;     // 4*10=40, +1->41
+
+    bool pad[3];  // +3->44
   };
 
   PostprocShader();
@@ -93,7 +97,11 @@ class PostprocShader : public Shader {
 
   void UpdateTime(const float time);
 
+  void UpdateEffectAmount(const float amount);
+
   void UpdateUseShakingEffect(const bool use_shaking_effect);
+
+  void UpdateUseBlurringEffect(const bool use_blurring_effect);
 
   /* Name Management */
 

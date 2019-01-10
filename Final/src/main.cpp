@@ -34,10 +34,11 @@ static const auto kCameraZoomingStep = 1.0f;
 static const auto kTimerInterval = 10;
 /* Camera Shaking */
 static const auto kCameraShakingMaxWind = 0.1f;
-/* Collision Detections */
+/* Collision */
 static const auto kCollisionDistUpdateInterval = 0.5f;
 static const auto kCollisionDist = 0.3f;
 static const auto kCollisionWarningDist = 1.0f;
+static const auto kCollisionShakingDurationRatio = 0.5f;
 
 /* Debug */
 // Shadow
@@ -1027,6 +1028,8 @@ void GLUTTimerCallback(const int val) {
   // Update aircraft controller
   aircraft_ctrl.Update();
 
+  /* Collision */
+
   // Check collision
   collision_dist_update_elapsed_time += elapsed_time_diff;
   if (collision_dist_update_elapsed_time > kCollisionDistUpdateInterval) {
@@ -1056,6 +1059,29 @@ void GLUTTimerCallback(const int val) {
     collision_anim_elapsed_time += elapsed_time_diff;
   }
 
+  // Check whether the explosion animation is finished
+  if (collision_anim_elapsed_time > kBlackHawkExplosionAnimDuration) {
+    has_collision_anim_finished = true;
+  }
+
+  // Update collision post-processing effect
+  if (has_collided) {
+    postproc_shader.UpdateEffectAmount(collision_anim_elapsed_time /
+                                       kBlackHawkExplosionAnimDuration);
+    if (collision_anim_elapsed_time <
+        kCollisionShakingDurationRatio * kBlackHawkExplosionAnimDuration) {
+      postproc_shader.UpdateUseShakingEffect(true);
+    } else {
+      postproc_shader.UpdateUseShakingEffect(false);
+      postproc_shader.UpdateUseBlurringEffect(true);
+    }
+  } else {
+    postproc_shader.UpdateUseShakingEffect(false);
+    postproc_shader.UpdateUseBlurringEffect(false);
+  }
+
+  /* FBX controllers */
+
   // Update FBX controller
   fbx_ctrl.SetTime(elapsed_time / kBlackHawkAnimDuration);
   fbx_ctrl.SetCameraTransform(glm::vec3(0.0f), glm::vec3(0.0f), 0.0f);
@@ -1071,10 +1097,7 @@ void GLUTTimerCallback(const int val) {
           glm::radians(glm::vec3(-105.0f, -90.0f, 200.0f)),
       fbx_camera_ctrl.GetScaling());
 
-  // Check whether the explosion animation is finished
-  if (collision_anim_elapsed_time > kBlackHawkExplosionAnimDuration) {
-    has_collision_anim_finished = true;
-  }
+  /* Sound controller */
 
   // Update sound controller
   sound_ctrl.Set3DSoundPosition(
