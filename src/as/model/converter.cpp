@@ -16,6 +16,10 @@ std::vector<GLubyte> as::ConvertDataChannels(const int old_num_channels,
     for (size_t c = 0; c < smallest_num_channels; c++) {
       output[new_num_channels * i + c] = data[old_num_channels * i + c];
     }
+    // Set alpha to 1
+    if (smallest_num_channels < 4 && new_num_channels == 4) {
+      output[new_num_channels * i + 3] = 255;
+    }
   }
   return output;
 }
