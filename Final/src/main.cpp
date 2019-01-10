@@ -506,6 +506,7 @@ void UpdateImGui() {
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Demo")) {
+      ImGui::Checkbox("Normal", &use_normal);
       ImGui::Checkbox("Instantiating", &use_instantiating);
       ImGui::Checkbox("Surrounding", &use_surrounding);
       ImGui::Checkbox("Fog", &use_fog);
@@ -514,7 +515,6 @@ void UpdateImGui() {
       ImGui::Checkbox("Camera Wind", &use_camera_wind);
       ImGui::Checkbox("Aircraft Wind", &use_aircraft_wind);
       ImGui::Checkbox("HDR", &use_hdr);
-      ImGui::Checkbox("Normal", &use_normal);
     }
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);

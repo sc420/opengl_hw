@@ -28,6 +28,7 @@ layout(std140) uniform ModelMaterial {
   bool use_env_map;
   bool use_fog;
   bool mix_fog_with_skybox;
+  bool use_normal;
 }
 model_material;
 
@@ -234,7 +235,12 @@ vec4 GetDiffuseColor() {
   }
   const vec3 norm = GetTangentNorm();
   const vec3 light_dir = GetTangentLightDir();
-  const float diffuse_strength = max(dot(norm, light_dir), 0.0f);
+  float diffuse_strength = max(dot(norm, light_dir), 0.0f);
+
+  if (!model_material.use_normal) {
+    diffuse_strength = 1.0f;
+  }
+
   const vec4 affecting_color =
       vec4(lighting.light_intensity.y * diffuse_strength * lighting.light_color,
            1.0f);
@@ -251,9 +257,14 @@ vec4 GetSpecularColor() {
   const vec3 norm = GetTangentNorm();
   const vec3 halfway_dir = GetTangentHalfwayDir();
   const float shininess = model_material.shininess;
-  const float energy_conservation = (8.0f + shininess) / (8.0f * kPi);
-  const float specular_strength =
-      pow(max(dot(norm, halfway_dir), 0.0f), shininess);
+  float energy_conservation = (8.0f + shininess) / (8.0f * kPi);
+  float specular_strength = pow(max(dot(norm, halfway_dir), 0.0f), shininess);
+
+  if (!model_material.use_normal) {
+    energy_conservation = 1.0f;
+    specular_strength = 1.0f;
+  }
+
   const vec4 affecting_color =
       vec4(lighting.light_intensity.z * energy_conservation *
                specular_strength * lighting.light_color,

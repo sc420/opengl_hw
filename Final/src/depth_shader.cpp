@@ -61,13 +61,13 @@ void shader::DepthShader::InitDepthTexture(
   texture_manager.GenTexture(tex_name);
   // Update texture
   texture_manager.BindTexture(tex_name, GL_TEXTURE_2D, unit_name);
-  texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 1,
+  texture_manager.InitTexture2D(tex_name, GL_TEXTURE_2D, 2,
                                 GL_DEPTH_COMPONENT16, kDepthMapSize.x,
                                 kDepthMapSize.y);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                     GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                                     GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D,
-                                     GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                                     GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
                                      GL_CLAMP_TO_BORDER);
   texture_manager.SetTextureParamInt(tex_name, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
@@ -241,7 +241,7 @@ std::string shader::DepthShader::GetModelTransUniformBlockName() const {
  * Constants (Private)
  ******************************************************************************/
 
-const glm::ivec2 shader::DepthShader::kDepthMapSize = glm::ivec2(1024, 1024);
+const glm::ivec2 shader::DepthShader::kDepthMapSize = glm::ivec2(2048, 2048);
 
 /*******************************************************************************
  * State Updaters (Private)

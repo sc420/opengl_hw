@@ -42,7 +42,10 @@ class SceneShader : public Shader {
     bool pad_pad_mix_fog_with_skybox[3];  // +3->92
     bool mix_fog_with_skybox;             // 4*23=92, +1->93
 
-    bool pad[3];  // +3->96
+    bool pad_use_normal[3];  // +3->96
+    bool use_normal;         // 4*24=96, +1->97
+
+    bool pad[3];  // +3->100
   };
 
   struct Lighting {

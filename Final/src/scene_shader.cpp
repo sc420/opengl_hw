@@ -241,6 +241,7 @@ void shader::SceneShader::ToggleInstantiating(const bool toggle) {
 
 void shader::SceneShader::ToggleNormalHeight(const bool toggle) {
   use_normal_height_ = toggle;
+  model_material_.use_normal = toggle;
 }
 
 void shader::SceneShader::ToggleFog(const bool toggle) {
