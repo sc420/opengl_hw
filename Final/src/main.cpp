@@ -1072,7 +1072,6 @@ void GLUTTimerCallback(const int val) {
         kCollisionShakingDurationRatio * kBlackHawkExplosionAnimDuration) {
       postproc_shader.UpdateUseShakingEffect(true);
     } else {
-      postproc_shader.UpdateUseShakingEffect(false);
       postproc_shader.UpdateUseBlurringEffect(true);
     }
   } else {

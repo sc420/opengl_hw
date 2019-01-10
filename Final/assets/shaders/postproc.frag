@@ -184,16 +184,38 @@ vec4 ApplyKernel(const sampler2D tex, const mat3 kernel, const float ofs_mul) {
  ******************************************************************************/
 
 vec4 CalcBlur(const sampler2D tex) {
-  const mat3 kKernel = mat3(
-      // 1st row
-      1.0f, 1.0f, 1.0f,
-      // 2nd row
-      1.0f, 1.0f, 1.0f,
-      // 3rd row
-      1.0f, 1.0f, 1.0f);
-  const float ofs_mul = 30.0f * postproc_inputs.effect_amount;
+  vec2 texOffset = 1.0f / GetTextureSize(tex);
+  const float blurSize = 5.0f * postproc_inputs.effect_amount;
+  const float sigma = 3.0f;
 
-  return ApplyKernel(tex, kKernel, ofs_mul);
+  vec2 p = vs_tex_coords;
+  float numBlurPixelsPerSide = float(blurSize / 2);
+
+  // Incremental Gaussian Coefficent Calculation (See GPU Gems 3 pp. 877 -
+  // 889)
+  vec3 incrementalGaussian;
+  incrementalGaussian.x = 1.0 / (sqrt(2.0 * kPi) * sigma);
+  incrementalGaussian.y = exp(-0.5 / (sigma * sigma));
+  incrementalGaussian.z = incrementalGaussian.y * incrementalGaussian.y;
+
+  vec4 avgValue = vec4(0.0, 0.0, 0.0, 0.0);
+  float coefficientSum = 0.0;
+
+  // Take the central sample first...
+  avgValue += GetTexel(tex, p) * incrementalGaussian.x;
+  coefficientSum += incrementalGaussian.x;
+  incrementalGaussian.xy *= incrementalGaussian.yz;
+
+  // Go through the remaining 8 vertical samples (4 on each side of the
+  // center)
+  for (float i = 1.0; i <= numBlurPixelsPerSide; i++) {
+    avgValue += GetTexel(tex, p - i * texOffset) * incrementalGaussian.x;
+    avgValue += GetTexel(tex, p + i * texOffset) * incrementalGaussian.x;
+    coefficientSum += 2.0 * incrementalGaussian.x;
+    incrementalGaussian.xy *= incrementalGaussian.yz;
+  }
+
+  return avgValue / coefficientSum;
 }
 
 /*******************************************************************************
@@ -327,7 +349,7 @@ vec3 distort(sampler2D sampler, vec2 uv, float edgeSize) {
 
   const vec2 iResolution = GetTextureSize(sampler);
   const float iTime = postproc_inputs.time;
-  const float Amount = 0.5f * postproc_inputs.effect_amount;
+  const float Amount = 0.1f + 0.2f * postproc_inputs.effect_amount;
 
   vec2 pixel = vec2(1.0) / iResolution;
   vec3 field = rgb2hsv(edge(sampler, uv, edgeSize));
@@ -358,7 +380,7 @@ vec4 ShampainGlitch01(sampler2D sampler, vec2 fragCoord) {
   const float iTime = postproc_inputs.time;
   const vec4 iMouse = vec4(postproc_inputs.mouse_pos, 0.0f, 0.0f);
 
-  float THRESHOLD = 1.0f - 0.5f * postproc_inputs.effect_amount;
+  float THRESHOLD = 0.2f + 0.2f * postproc_inputs.effect_amount;
   float time_s = mod(iTime, 32.0);
 
   float glitch_threshold = 1.0 - THRESHOLD;
@@ -408,7 +430,7 @@ vec4 ShampainGlitch02(sampler2D tex, vec2 fragCoord) {
 
   float time = mod(iTime, 32.0);  // + modelmat[0].x + modelmat[0].z;
 
-  float GLITCH = 0.5f * postproc_inputs.effect_amount;
+  float GLITCH = 0.005f + 0.02f * postproc_inputs.effect_amount;
 
   // float rdist = length( (uv - vec2(0.5,0.5))*vec2(aspect, 1.0) )/1.4;
   // GLITCH *= rdist;
@@ -479,8 +501,24 @@ vec4 CalcShaking(sampler2D tex) {
   const vec2 window_size = GetTextureSize(tex);
   const vec2 window_tex_coords = vs_tex_coords * window_size;
   return 0.4f * ShampainGlitch01(tex, window_tex_coords) +
-         0.4f * ShampainGlitch02(tex, window_tex_coords) +
-         0.2f * GlitchShaderB(tex, window_tex_coords);
+         0.2f * ShampainGlitch02(tex, window_tex_coords) +
+         0.4f * GlitchShaderB(tex, window_tex_coords);
+}
+
+/*******************************************************************************
+ * Post-processing / Blacking Out
+ ******************************************************************************/
+
+vec4 CalcMixWithGray(const vec4 color) {
+  const float gray = dot(color.rgb, vec3(0.299f, 0.587f, 0.114f));
+  const float gray_ratio =
+      clamp(postproc_inputs.effect_amount - 0.5f, 0.0f, 1.0f);
+  const float black_ratio =
+      clamp(postproc_inputs.effect_amount - 1.0f, 0.0f, 1.0f);
+
+  const vec4 mixed_with_gray =
+      gray_ratio * vec4(vec3(gray), 1.0f) + (1.0f - gray_ratio) * color;
+  return (1.0f - black_ratio) * mixed_with_gray;
 }
 
 /*******************************************************************************
@@ -489,9 +527,11 @@ vec4 CalcShaking(sampler2D tex) {
 
 vec4 CalcOtherEffects() {
   if (postproc_inputs.use_shaking_effect) {
-    return CalcShaking(original_tex);
-  } else if (postproc_inputs.use_blurring_effect) {
-    return CalcBlur(original_tex);
+    vec4 color = CalcShaking(original_tex);
+    if (postproc_inputs.use_blurring_effect) {
+      color = CalcMixWithGray(color);
+    }
+    return color;
   } else {
     return GetOriginal();
   }
