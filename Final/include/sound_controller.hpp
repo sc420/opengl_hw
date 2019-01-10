@@ -34,6 +34,8 @@ class SoundController {
   void Set3DSoundPosition(const std::string& sound_name,
                           const glm::vec3& sound_pos);
 
+  void SetAllVolume(const float volume);
+
   void StopAllSound();
 
   bool IsSoundPaused(const std::string& sound_name);

@@ -143,6 +143,8 @@ bool has_collision_anim_finished = false;
  * Rendering States
  ******************************************************************************/
 
+bool use_sound = false;
+bool last_use_sound = false;
 bool use_aircraft_wind = false;
 bool use_camera_wind = false;
 bool use_hdr = false;
@@ -269,13 +271,15 @@ void ConfigGL() {
  * Controller Initializations
  ******************************************************************************/
 
-void InitSoundController() {
-  sound_ctrl.Register3DSound("helicopter_hovering",
-                             "assets/sound/helicopter-hovering-01.wav",
-                             glm::vec3(0.0f, 0.0f, 1.0f), true);
-  sound_ctrl.Register2DSound("cockpit_interior",
-                             "assets/sound/cockpit_interior.mp3", true);
-  sound_ctrl.SetSoundVolume("cockpit_interior", 0.5f);
+void StartInitialSound() {
+  if (use_sound) {
+    sound_ctrl.Register3DSound("helicopter_hovering",
+                               "assets/sound/helicopter-hovering-01.wav",
+                               glm::vec3(0.0f, 0.0f, 1.0f), true);
+    sound_ctrl.Register2DSound("cockpit_interior",
+                               "assets/sound/cockpit_interior.mp3", true);
+    sound_ctrl.SetSoundVolume("cockpit_interior", 0.5f);
+  }
 }
 
 /*******************************************************************************
@@ -352,19 +356,21 @@ void StartCollision() {
     // Stop the aircraft from flying
     aircraft_ctrl.SetPreferSpeed(0.0f);
 
-    // Stop all previously played sound
-    sound_ctrl.SetSoundStop("helicopter_hovering");
-    sound_ctrl.SetSoundStop("cockpit_interior");
-    sound_ctrl.SetSoundStop("pull_up_alarm");
-    sound_ctrl.SetSoundStop("altitude_warning");
+    if (use_sound) {
+      // Stop all previously played sound
+      sound_ctrl.SetSoundStop("helicopter_hovering");
+      sound_ctrl.SetSoundStop("cockpit_interior");
+      sound_ctrl.SetSoundStop("pull_up_alarm");
+      sound_ctrl.SetSoundStop("altitude_warning");
 
-    // Play the explosion sound
-    sound_ctrl.Register2DSound("big_explosion",
-                               "assets/sound/big_explosion.wav");
+      // Play the explosion sound
+      sound_ctrl.Register2DSound("big_explosion",
+                                 "assets/sound/big_explosion.wav");
 
-    // Play the sad sound
-    sound_ctrl.Register2DSound("sad_violin", "assets/sound/sad_violin.mp3");
-    sound_ctrl.SetSoundVolume("sad_violin", 0.0f);
+      // Play the sad sound
+      sound_ctrl.Register2DSound("sad_violin", "assets/sound/sad_violin.mp3");
+      sound_ctrl.SetSoundVolume("sad_violin", 0.0f);
+    }
   }
 }
 
@@ -378,17 +384,13 @@ void ResetCollision() {
   aircraft_ctrl.SetDir(glm::vec3(0.0f));
   aircraft_ctrl.SetPreferSpeed(1e-2f);
 
-  // Stop previously played sound
-  sound_ctrl.StopAllSound();
+  if (use_sound) {
+    // Stop previously played sound
+    sound_ctrl.StopAllSound();
+  }
 
-  // Resume the hovering sound
-  sound_ctrl.Register3DSound("helicopter_hovering",
-                             "assets/sound/helicopter-hovering-01.wav",
-                             glm::vec3(0.0f, 0.0f, 1.0f), true);
-  // Resume cockpit interior sound
-  sound_ctrl.Register2DSound("cockpit_interior",
-                             "assets/sound/cockpit_interior.mp3", true);
-  sound_ctrl.SetSoundVolume("cockpit_interior", 0.5f);
+  // Resume initial sound
+  StartInitialSound();
 }
 
 /*******************************************************************************
@@ -506,13 +508,14 @@ void UpdateImGui() {
     ImGui::End();
   }
 
-  /* Rendering Widget */
+  /* State Control Widget */
 
   {
-    ImGui::Begin("Render");
+    ImGui::Begin("State Control");
 
     if (!has_opened) ImGui::SetNextTreeNodeOpen(true);
     if (ImGui::CollapsingHeader("Demo")) {
+      ImGui::Checkbox("Sound", &use_sound);
       ImGui::Checkbox("Camera Wind", &use_camera_wind);
       ImGui::Checkbox("Aircraft Wind", &use_aircraft_wind);
       ImGui::Checkbox("HDR", &use_hdr);
@@ -1057,20 +1060,24 @@ void GLUTTimerCallback(const int val) {
   collision_dist_update_elapsed_time += elapsed_time_diff;
   if (collision_dist_update_elapsed_time > kCollisionDistUpdateInterval) {
     cur_collision_dist = GetCollisionDist();
-    if (!has_collided && cur_collision_dist < kCollisionWarningDist) {
-      if (sound_ctrl.IsSoundFinished("pull_up_alarm")) {
-        sound_ctrl.Register2DSound("pull_up_alarm",
-                                   "assets/sound/boeing-pull-up-alarm.wav");
+
+    if (use_sound) {
+      if (!has_collided && cur_collision_dist < kCollisionWarningDist) {
+        if (sound_ctrl.IsSoundFinished("pull_up_alarm")) {
+          sound_ctrl.Register2DSound("pull_up_alarm",
+                                     "assets/sound/boeing-pull-up-alarm.wav");
+        }
+        if (sound_ctrl.IsSoundFinished("altitude_warning")) {
+          sound_ctrl.Register2DSound(
+              "altitude_warning",
+              "assets/sound/helicopter-altitude-warning-sound.wav", true);
+          sound_ctrl.SetSoundVolume("altitude_warning", 0.2f);
+        }
+      } else {
+        sound_ctrl.SetSoundStop("altitude_warning");
       }
-      if (sound_ctrl.IsSoundFinished("altitude_warning")) {
-        sound_ctrl.Register2DSound(
-            "altitude_warning",
-            "assets/sound/helicopter-altitude-warning-sound.wav", true);
-        sound_ctrl.SetSoundVolume("altitude_warning", 0.2f);
-      }
-    } else {
-      sound_ctrl.SetSoundStop("altitude_warning");
     }
+
     if (cur_collision_dist < kCollisionDist) {
       StartCollision();
     }
@@ -1080,10 +1087,13 @@ void GLUTTimerCallback(const int val) {
   if (has_collided) {
     // Update collision animation elapsed time
     collision_anim_elapsed_time += elapsed_time_diff;
-    // Update sad sound volume
-    sound_ctrl.SetSoundVolume(
-        "sad_violin",
-        glm::clamp(0.2f * collision_anim_elapsed_time, 0.0f, 1.0f));
+
+    if (use_sound) {
+      // Update sad sound volume
+      sound_ctrl.SetSoundVolume(
+          "sad_violin",
+          glm::clamp(0.2f * collision_anim_elapsed_time, 0.0f, 1.0f));
+    }
   }
 
   // Check whether the explosion animation is finished
@@ -1125,11 +1135,24 @@ void GLUTTimerCallback(const int val) {
 
   /* Sound controller */
 
+  // Check whether to start or stop the sound
+  if (use_sound != last_use_sound) {
+    if (use_sound) {
+      g if (!has_collided) { StartInitialSound(); }
+    } else {
+      sound_ctrl.StopAllSound();
+    }
+
+    last_use_sound = use_sound;
+  }
+
   // Update sound controller
-  sound_ctrl.Set3DSoundPosition(
-      "helicopter_hovering",
-      glm::pow(glm::vec3(0.2f * fbx_camera_ctrl.GetPos().x, 0.0f, 0.0f),
-               glm::vec3(2.0f)));
+  if (use_sound) {
+    sound_ctrl.Set3DSoundPosition(
+        "helicopter_hovering",
+        glm::pow(glm::vec3(0.2f * fbx_camera_ctrl.GetPos().x, 0.0f, 0.0f),
+                 glm::vec3(2.0f)));
+  }
 
   // Update camera shaking wind
   UpdateCameraShakingWind();
@@ -1315,7 +1338,7 @@ int main(int argc, char *argv[]) {
     ConfigGL();
     InitFbx();
     InitImGui();
-    InitSoundController();
+    StartInitialSound();
     RegisterGLUTCallbacks();
     CreateGLUTMenus();
     EnterGLUTLoop();
