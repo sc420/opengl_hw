@@ -512,9 +512,9 @@ vec4 CalcShaking(sampler2D tex) {
 vec4 CalcMixWithGray(const vec4 color) {
   const float gray = dot(color.rgb, vec3(0.299f, 0.587f, 0.114f));
   const float gray_ratio =
-      clamp(postproc_inputs.effect_amount - 0.5f, 0.0f, 1.0f);
+      clamp(pow(postproc_inputs.effect_amount - 0.5f, 0.4f), 0.0f, 1.0f);
   const float black_ratio =
-      clamp(postproc_inputs.effect_amount - 1.0f, 0.0f, 1.0f);
+      clamp(pow(postproc_inputs.effect_amount - 0.5f, 0.4f), 0.0f, 1.0f);
 
   const vec4 mixed_with_gray =
       gray_ratio * vec4(vec3(gray), 1.0f) + (1.0f - gray_ratio) * color;
