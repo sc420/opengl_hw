@@ -190,7 +190,7 @@ void InitGLUT(int argc, char *argv[]) {
   as::SetGLWindowInitRelativeCenterPos(kInitWindowRelativeCenterPos,
                                        kInitWindowSize);
   as::SetGLWindowInitSize(kInitWindowSize);
-  glutCreateWindow("Assignment 4");
+  glutCreateWindow("Final");
 }
 
 /*******************************************************************************
