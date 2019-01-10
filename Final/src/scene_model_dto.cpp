@@ -93,6 +93,21 @@ void dto::SceneModel::SetInstancingScalings(
   instancing_scalings_ = scalings;
 }
 
+void dto::SceneModel::SetDefaultInstancingTranslations() {
+  const glm::vec3 default_translation = glm::vec3(0.0f);
+  instancing_translations_.assign(GetNumInstancing(), default_translation);
+}
+
+void dto::SceneModel::SetDefaultInstancingRotations() {
+  const glm::vec3 default_rotation = glm::vec3(0.0f);
+  instancing_rotations_.assign(GetNumInstancing(), default_rotation);
+}
+
+void dto::SceneModel::SetDefaultInstancingScalings() {
+  const glm::vec3 default_scaling = glm::vec3(1.0f);
+  instancing_scalings_.assign(GetNumInstancing(), default_scaling);
+}
+
 void dto::SceneModel::SetInstancingTranslation(const int instance_idx,
                                                const glm::vec3 &translation) {
   if (instancing_translations_.empty()) {

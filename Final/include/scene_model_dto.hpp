@@ -50,6 +50,12 @@ class SceneModel {
 
   void SetInstancingScalings(const std::vector<glm::vec3> &scalings);
 
+  void SetDefaultInstancingTranslations();
+
+  void SetDefaultInstancingRotations();
+
+  void SetDefaultInstancingScalings();
+
   void SetInstancingTranslation(const int instance_idx,
                                 const glm::vec3 &translation);
 

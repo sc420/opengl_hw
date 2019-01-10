@@ -378,6 +378,7 @@ void shader::SceneShader::InitModels() {
 
   /* Instancing */
 
+  // Ground
   scene_models_.at("ground").SetInstancingTranslations(std::vector<glm::vec3>{
       glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 1e4f * -45.0f),
       glm::vec3(0.0f, 0.0f, 1e4f * 45.0f), glm::vec3(1e4f * -45.0f, 0.0f, 0.0f),
@@ -386,17 +387,28 @@ void shader::SceneShader::InitModels() {
       glm::vec3(1e4f * -45.0f, 0.0f, 1e4f * 45.0f),
       glm::vec3(1e4f * 45.0f, 0.0f, 1e4f * -45.0f),
       glm::vec3(1e4f * 45.0f, 0.0f, 1e4f * 45.0f)});
+  // Oil tank
   scene_models_.at("oil_tank")
       .SetInstancingTranslations(std::vector<glm::vec3>{
           glm::vec3(0.0f), glm::vec3(0.6f, 0.27f, 0.5f) / 2e-4f,
           glm::vec3(1.0f, 0.22f, 0.3f) / 2e-4f});
+  // Electric tower
   scene_models_.at("tower").SetInstancingTranslations(std::vector<glm::vec3>{
-      glm::vec3(0.0f, -4.0f, -400.0f), glm::vec3(0.0f, -8.0f, -320.0f),
-      glm::vec3(0.0f, 1.0f, -240.0f), glm::vec3(0.0f, -11.0f, -160.0f),
-      glm::vec3(0.0f, 0.0f, -80.0f), glm::vec3(0.0f),
-      glm::vec3(0.0f, 5.0f, 80.0f), glm::vec3(0.0f, -10.0f, 160.0f),
-      glm::vec3(0.0f, -12.0f, 240.0f), glm::vec3(0.0f, -11.0f, 320.0f),
-      glm::vec3(0.0f, -17.0f, 400.0f)});
+      glm::vec3(-24.1f, -5.4f, -373.4f), glm::vec3(-0.7f, -6.4f, -301.3f),
+      glm::vec3(5.1f, -6.1f, -222.2f), glm::vec3(-4.8f, -11.7f, -148.5f),
+      glm::vec3(8.0f, -10.0f, -78.7f), glm::vec3(27.8f, 1.2f, -12.5f),
+      glm::vec3(28.5f, 2.2f, 67.3f), glm::vec3(23.4f, -0.8f, 139.7f),
+      glm::vec3(13.9f, -8.3f, 211.9f), glm::vec3(12.0f, -11.8f, 285.7f),
+      glm::vec3(15.7f, -17.0f, 365.5f), glm::vec3(-7.6f, -17.2f, 439.4f),
+      glm::vec3(-58.2f, -21.3f, 486.7f)});
+  scene_models_.at("tower").SetInstancingRotations(std::vector<glm::vec3>{
+      glm::vec3(-0.08f, 0.46f, 0.0f), glm::vec3(0.04f, 0.2f, 0.0f),
+      glm::vec3(-0.03f, 0.03f, 0.11f), glm::vec3(0.14f, -0.2f, -0.13f),
+      glm::vec3(-0.23f, 0.63f, 0.09f), glm::vec3(-0.02f, 0.04f, -0.21f),
+      glm::vec3(-0.04f, -0.16f, -0.12f), glm::vec3(0.13f, 0.0f, -0.11f),
+      glm::vec3(0.05f, -0.18f, -0.12f), glm::vec3(0.07f, 0.26f, -0.04f),
+      glm::vec3(0.0f, -0.14f, 0.03f), glm::vec3(-0.01f, -0.39f, 0.03f),
+      glm::vec3(-0.25f, -1.29f, 0.04f)});
 }
 
 /*******************************************************************************
