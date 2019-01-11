@@ -62,7 +62,7 @@ layout(location = 0) in VSTex { vec2 coords; }
 vs_tex;
 
 layout(location = 1) in VSTangentLighting {
-  mat3 tang_to_world_mat;
+  mat3 tang_to_world_conv;
   vec3 pos;
   vec3 norm;
   vec3 light_pos;
@@ -123,7 +123,7 @@ vec3 GetTangentHalfwayDir() {
 
 vec3 GetViewingDir() {
   const vec3 view_dir = GetTangentViewDir();
-  return vs_tangent_lighting.tang_to_world_mat * (-view_dir);
+  return vs_tangent_lighting.tang_to_world_conv * (-view_dir);
 }
 
 /*******************************************************************************
@@ -286,7 +286,7 @@ vec4 GetEnvironmentMapColor() {
   const vec3 view_dir = GetTangentViewDir();
   const vec3 reflect_dir = reflect(-view_dir, GetTangentNorm());
   const vec3 world_reflect_dir =
-      vs_tangent_lighting.tang_to_world_mat * reflect_dir;
+      vs_tangent_lighting.tang_to_world_conv * reflect_dir;
   return texture(skybox_tex, world_reflect_dir);
 }
 
